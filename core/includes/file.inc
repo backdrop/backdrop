@@ -172,10 +172,10 @@ function file_get_stream_wrappers($filter = STREAM_WRAPPERS_ALL) {
 /**
  * Returns the stream wrapper class name for a given scheme.
  *
- * @param $scheme
+ * @param string $scheme
  *   Stream scheme.
  *
- * @return
+ * @return string
  *   Return string if a scheme has a registered handler, or FALSE.
  */
 function file_stream_wrapper_get_class($scheme) {
@@ -272,10 +272,10 @@ function file_default_scheme() {
  * - Remove trailing slashes from target
  * - Trim erroneous leading slashes from target. e.g. ":///" becomes "://".
  *
- * @param $uri
+ * @param string $uri
  *   String reference containing the URI to normalize.
  *
- * @return
+ * @return string
  *   The normalized URI.
  */
 function file_stream_wrapper_uri_normalize($uri) {
@@ -1459,14 +1459,14 @@ function file_unmanaged_delete_recursive($path) {
 /**
  * Determines total disk space used by a single user or the whole filesystem.
  *
- * @param $uid
+ * @param int|null $uid
  *   Optional. A user id, specifying NULL returns the total space used by all
  *   non-temporary files.
- * @param $status
+ * @param int $status
  *   Optional. The file status to consider. The default is to only
  *   consider files in status FILE_STATUS_PERMANENT.
  *
- * @return
+ * @return int
  *   An integer containing the number of bytes used.
  */
 function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
@@ -1849,7 +1849,7 @@ function backdrop_move_uploaded_file($filename, $uri) {
  *   indicates that the file passed validation. The functions will be called in
  *   the order specified.
  *
- * @return
+ * @return array
  *   An array containing validation error messages.
  *
  * @see hook_file_validate()
@@ -2416,10 +2416,10 @@ function file_download() {
  * for files by the module that originally provided the file. The presence of
  * returned headers indicates the current user has access to the file.
  *
- * @param $uri
+ * @param string $uri
  *   The URI for the file whose headers should be retrieved.
  *
- * @return
+ * @return array
  *   If access is allowed, headers for the file, suitable for passing to
  *   file_transfer(). If access is not allowed, an empty array will be returned.
  *
@@ -2505,7 +2505,7 @@ function file_download_access($uri) {
  *   Current depth of recursion. This parameter is only used internally and
  *   should not be passed in.
  *
- * @return
+ * @return array
  *   An associative array (keyed on the chosen key) of objects with 'uri',
  *   'filename', and 'name' members corresponding to the matching files.
  */
@@ -2564,7 +2564,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
 /**
  * Determines the maximum file upload size by querying the PHP settings.
  *
- * @return
+ * @return int
  *   A file size limit in bytes based on the PHP upload_max_filesize and
  *   post_max_size
  */
@@ -2590,20 +2590,20 @@ function file_upload_max_size() {
  *
  * @param $uri
  *   A string containing the URI, path, or filename.
- * @param $mapping
+ * @param array|null $mapping
  *   An optional map of extensions to their mimetypes, in the form:
  *    - 'mimetypes': a list of mimetypes, keyed by an identifier,
  *    - 'extensions': the mapping itself, an associative array in which
  *      the key is the extension (lowercase) and the value is the mimetype
  *      identifier. If $mapping is NULL file_mimetype_mapping() is called.
  *
- * @return
+ * @return string
  *   The internet media type registered for the extension or
  *   application/octet-stream for unknown extensions.
  *
  * @see file_default_mimetype_mapping()
  */
-function file_get_mimetype($uri, $mapping = NULL) {
+function file_get_mimetype($uri, ?array $mapping = NULL) {
   if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
     return $wrapper->getMimeType($uri, $mapping);
   }
@@ -2629,13 +2629,13 @@ function file_get_mimetype($uri, $mapping = NULL) {
  * implementation which interfaces with chmod() by default. Contrib wrappers
  * may override this behavior in their implementations as needed.
  *
- * @param $uri
+ * @param string $uri
  *   A string containing a URI file, or directory path.
- * @param $mode
+ * @param int|null $mode
  *   Integer value for the permissions. Consult PHP chmod() documentation for
  *   more information.
  *
- * @return
+ * @return bool
  *   TRUE for success, FALSE in the event of an error.
  *
  * @ingroup php_wrappers
@@ -2674,12 +2674,12 @@ function backdrop_chmod($uri, $mode = NULL) {
  * PHP's unlink() is broken on Windows, as it can fail to remove a file
  * when it has a read-only flag set.
  *
- * @param $uri
+ * @param string $uri
  *   A URI or pathname.
- * @param $context
+ * @param resource|null $context
  *   Refer to http://php.net/manual/ref.stream.php
  *
- * @return
+ * @return bool
  *   Boolean TRUE on success, or FALSE on failure.
  *
  * @see unlink()
@@ -2739,10 +2739,10 @@ function backdrop_realpath($uri) {
  *
  * Compatibility: normal paths and stream wrappers.
  *
- * @param $uri
+ * @param string $uri
  *   A URI or path.
  *
- * @return
+ * @return string
  *   A string containing the directory name.
  *
  * @see dirname()
@@ -2768,6 +2768,13 @@ function backdrop_dirname($uri) {
  *   - Is not locale-aware, and works with all UTF-8 characters. Where PHP might
  *     not process file paths with non-Latin characters unless allowed through
  *     setlocale(), this function will remove the extensions from any string.
+ *
+ * @param string $uri
+ *   URI.
+ * @param string|null $suffix
+ *   Suffix.
+ *
+ * @return string
  *
  * @see basename()
  *
@@ -2799,16 +2806,16 @@ function backdrop_basename($uri, $suffix = NULL) {
  *
  * Compatibility: normal paths and stream wrappers.
  *
- * @param $uri
+ * @param string $uri
  *   A URI or pathname.
- * @param $mode
+ * @param string|null $mode
  *   By default the Backdrop mode is used.
- * @param $recursive
+ * @param bool $recursive
  *   Default to FALSE.
- * @param $context
+ * @param resource|null $context
  *   Refer to http://php.net/manual/ref.stream.php
  *
- * @return
+ * @return bool
  *   Boolean TRUE on success, or FALSE on failure.
  *
  * @see mkdir()
@@ -2834,12 +2841,12 @@ function backdrop_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL)
  * PHP's rmdir() is broken on Windows, as it can fail to remove a directory
  * when it has a read-only flag set.
  *
- * @param $uri
+ * @param string $uri
  *   A URI or pathname.
- * @param $context
+ * @param string $context
  *   Refer to http://php.net/manual/ref.stream.php
  *
- * @return
+ * @return bool
  *   Boolean TRUE on success, or FALSE on failure.
  *
  * @see rmdir()
@@ -2867,13 +2874,13 @@ function backdrop_rmdir($uri, $context = NULL) {
  *
  * Compatibility: normal paths and stream wrappers.
  *
- * @param $directory
+ * @param string $directory
  *   The directory where the temporary filename will be created.
- * @param $prefix
+ * @param string $prefix
  *   The prefix of the generated temporary filename.
  *   Note: Windows uses only the first three characters of prefix.
  *
- * @return
+ * @return string|false
  *   The new temporary filename, or FALSE on failure.
  *
  * @see tempnam()
@@ -2901,6 +2908,8 @@ function backdrop_tempnam($directory, $prefix) {
 
 /**
  * Gets the path of system-appropriate temporary directory.
+ *
+ * @return string
  */
 function file_directory_temp() {
   $site_config = config('system.core');
@@ -2953,7 +2962,7 @@ function file_directory_temp() {
  * @param File $file
  *   A file entity.
  *
- * @return
+ * @return array
  *   An associative array of headers, as expected by file_transfer().
  */
 function file_get_content_headers(File $file) {
@@ -2969,7 +2978,7 @@ function file_get_content_headers(File $file) {
 /**
  * Normalize dot segments in a URI.
  *
- * @param $uri
+ * @param string $uri
  *   A stream, referenced as "scheme://target".
  *
  * @return string

@@ -290,26 +290,26 @@ function image_dimensions_scale(array &$dimensions, $width = NULL, $height = NUL
  *
  * The resulting image can be smaller for one or both target dimensions.
  *
- * @param $image
+ * @param object $image
  *   An image object returned by image_load().
- * @param $width
+ * @param int|null $width
  *   The target width, in pixels. If this value is NULL then the scaling will
  *   be based only on the height value.
- * @param $height
+ * @param int|null $height
  *   The target height, in pixels. If this value is NULL then the scaling will
  *   be based only on the width value.
- * @param $upscale
+ * @param bool $upscale
  *   Boolean indicating that files smaller than the dimensions will be scaled
  *   up. This generally results in a low quality image.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_dimensions_scale()
  * @see image_load()
  * @see image_scale_and_crop()
  */
-function image_scale(stdClass $image, $width = NULL, $height = NULL, $upscale = FALSE) {
+function image_scale(object $image, $width = NULL, $height = NULL, $upscale = FALSE) {
   $dimensions = $image->info;
 
   // Scale the dimensions - if they don't change then just return success.
@@ -346,24 +346,24 @@ function image_resize(stdClass $image, $width, $height) {
 /**
  * Rotates an image by the given number of degrees.
  *
- * @param $image
+ * @param object $image
  *   An image object returned by image_load().
- * @param $degrees
+ * @param int $degrees
  *   The number of (clockwise) degrees to rotate the image.
- * @param $background
+ * @param string $background
  *   An hexadecimal integer specifying the background color to use for the
  *   uncovered area of the image after the rotation. E.g. 0x000000 for black,
  *   0xff00ff for magenta, and 0xffffff for white. For images that support
  *   transparency, this will default to transparent. Otherwise it will
  *   be white.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
  * @see image_gd_rotate()
  */
-function image_rotate(stdClass $image, $degrees, $background = NULL) {
+function image_rotate(object $image, $degrees, $background = NULL) {
   // Standardize $degrees to be an integer if possible. This avoids strange
   // rounding errors when rotating multiples of 90 degrees. For example a
   // 100x100 image when rotated 90.0 (float) degrees may result in an image
@@ -482,20 +482,20 @@ function image_load($file, $toolkit = FALSE) {
 /**
  * Closes the image and saves the changes to a file.
  *
- * @param $image
+ * @param object $image
  *   An image object returned by image_load(). The object's 'info' property
  *   will be updated if the file is saved successfully.
- * @param $destination
+ * @param string $destination
  *   Destination path where the image should be saved. If it is empty the
  *   original image file will be overwritten.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
  * @see image_gd_save()
  */
-function image_save(stdClass $image, $destination = NULL) {
+function image_save(object $image, $destination = NULL) {
   if (empty($destination)) {
     $destination = $image->source;
   }

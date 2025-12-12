@@ -99,7 +99,7 @@
  * is not needed (i.e., when initially rendering the form) and is often
  * used as a menu callback.
  *
- * @param $form_id
+ * @param string $form_id
  *   The unique string identifying the desired form. If a function with that
  *   name exists, it is called to build the form array. Modules that need to
  *   generate the same form (or very similar forms) using different $form_ids
@@ -115,7 +115,7 @@
  *   hook_form_alter() and hook_form_FORM_ID_alter() as the array
  *   $form_state['build_info']['args'].
  *
- * @return
+ * @return array
  *   The form array.
  *
  * @see backdrop_build_form()
@@ -138,14 +138,14 @@ function backdrop_get_form($form_id) {
  * previous page-load. The form is then passed on for processing, validation
  * and submission if there is proper input.
  *
- * @param $form_id
+ * @param string $form_id
  *   The unique string identifying the desired form. If a function with that
  *   name exists, it is called to build the form array. Modules that need to
  *   generate the same form (or very similar forms) using different $form_ids
  *   can implement hook_forms(), which maps different $form_id values to the
  *   proper form constructor function. Examples may be found in node_forms(),
  *   and search_forms().
- * @param $form_state
+ * @param array $form_state
  *   An array which stores information about the form. This is passed as a
  *   reference so that the caller can use it to examine what in the form changed
  *   when the form submission process is complete. Furthermore, it may be used
@@ -304,7 +304,7 @@ function backdrop_get_form($form_id) {
  *   Information on how certain $form_state properties control redirection
  *   behavior after form submission may be found in backdrop_redirect_form().
  *
- * @return
+ * @return array
  *   The rendered form. This function may also perform a redirect and hence may
  *   not return at all, depending upon the $form_state flags that were set.
  *
@@ -397,6 +397,8 @@ function backdrop_build_form($form_id, &$form_state) {
 
 /**
  * Retrieves default values for the $form_state array.
+ *
+ * @return array
  */
 function form_state_defaults() {
   return array(
@@ -436,16 +438,16 @@ function form_state_defaults() {
  * common use-case during which form rebuilding occurs. See ajax_form_callback()
  * for more information about creating Ajax-enabled forms.
  *
- * @param $form_id
+ * @param string $form_id
  *   The unique string identifying the desired form. If a function
  *   with that name exists, it is called to build the form array.
  *   Modules that need to generate the same form (or very similar forms)
  *   using different $form_ids can implement hook_forms(), which maps
  *   different $form_id values to the proper form constructor function. Examples
  *   may be found in node_forms() and search_forms().
- * @param $form_state
+ * @param array $form_state
  *   A keyed array containing the current state of the form.
- * @param $old_form
+ * @param array|null $old_form
  *   (optional) A previously built $form. Used to retain the #build_id and
  *   #action properties in Ajax callbacks and similar partial form rebuilds. The
  *   only properties copied from $old_form are the ones which both exist in
@@ -454,7 +456,7 @@ function form_state_defaults() {
  *   'rebuild_info' needs to be a separate top-level property next to
  *   'build_info', since the contained data must not be cached.
  *
- * @return
+ * @return array
  *   The newly built form.
  *
  * @see backdrop_process_form()
@@ -513,7 +515,12 @@ function backdrop_rebuild_form($form_id, &$form_state, $old_form = NULL) {
 /**
  * Fetches a form from the cache.
  *
- * @return array|NULL
+ * @param string $form_build_id
+ *   The form build ID.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
+ *
+ * @return array|null
  *   The form array retrieved from cache if found. NULL otherwise.
  */
 function form_get_cache($form_build_id, &$form_state) {
@@ -560,6 +567,13 @@ function form_get_cache($form_build_id, &$form_state) {
  * The default cache_form expiration is 6 hours. On busy sites, the cache_form
  * table can become very large. A shorter cache lifetime can help to keep the
  * table's size under control.
+ *
+ * @param string $form_build_id
+ *   The form build ID.
+ * @param array $form
+ *   A keyed array containing the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
  */
 function form_set_cache($form_build_id, $form, $form_state) {
   $site_config = config('system.core');
@@ -599,6 +613,8 @@ function form_set_cache($form_build_id, $form, $form_state) {
 
 /**
  * Returns an array of $form_state keys that shouldn't be cached.
+ *
+ * @return array
  */
 function form_state_keys_no_cache() {
   return array(
@@ -641,17 +657,17 @@ function form_state_keys_no_cache() {
  * module_load_include() directly, form_load_include() makes sure the include
  * file is correctly loaded also if the form is cached.
  *
- * @param $form_state
+ * @param array $form_state
  *   The current state of the form.
- * @param $type
+ * @param string $type
  *   The include file's type (file extension).
- * @param $module
+ * @param string $module
  *   The module to which the include file belongs.
- * @param $name
+ * @param string|null $name
  *   (optional) The base file name (without the $type extension). If omitted,
  *   $module is used; i.e., resulting in "$module.$type" by default.
  *
- * @return
+ * @return string|false
  *   The filepath of the loaded include file, or FALSE if the include file was
  *   not found or has been loaded already.
  *
@@ -685,14 +701,14 @@ function form_load_include(&$form_state, $type, $module, $name = NULL) {
  * There is no return value, but you can check to see if there are errors
  * by calling form_get_errors().
  *
- * @param $form_id
+ * @param string $form_id
  *   The unique string identifying the desired form. If a function
  *   with that name exists, it is called to build the form array.
  *   Modules that need to generate the same form (or very similar forms)
  *   using different $form_ids can implement hook_forms(), which maps
  *   different $form_id values to the proper form constructor function. Examples
  *   may be found in node_forms() and search_forms().
- * @param $form_state
+ * @param array $form_state
  *   A keyed array containing the current state of the form. Most important is
  *   the $form_state['values'] collection, a tree of data used to simulate the
  *   incoming $_POST information from a user's form submission. If a key is not
@@ -730,7 +746,7 @@ function form_load_include(&$form_state, $type, $module, $name = NULL) {
  *   backdrop_form_submit('user_register_form', $form_state);
  * @endcode
  */
-function backdrop_form_submit($form_id, &$form_state) {
+function backdrop_form_submit($form_id, array &$form_state) {
   if (!isset($form_state['build_info']['args'])) {
     $args = func_get_args();
     array_shift($args);
@@ -762,13 +778,13 @@ function backdrop_form_submit($form_id, &$form_state) {
 /**
  * Retrieves the structured array that defines a given form.
  *
- * @param $form_id
+ * @param string $form_id
  *   The unique string identifying the desired form. If a function
  *   with that name exists, it is called to build the form array.
  *   Modules that need to generate the same form (or very similar forms)
  *   using different $form_ids can implement hook_forms(), which maps
  *   different $form_id values to the proper form constructor function.
- * @param $form_state
+ * @param array $form_state
  *   A keyed array containing the current state of the form, including the
  *   additional arguments to backdrop_get_form() or backdrop_form_submit() in the
  *   'args' component of the array.
@@ -875,11 +891,11 @@ function backdrop_retrieve_form($form_id, &$form_state) {
  * This function is the heart of form API. The form gets built, validated and in
  * appropriate cases, submitted and rebuilt.
  *
- * @param $form_id
+ * @param string $form_id
  *   The unique string identifying the current form.
- * @param $form
+ * @param array $form
  *   An associative array containing the structure of the form.
- * @param $form_state
+ * @param array $form_state
  *   A keyed array containing the current state of the form. This
  *   includes the current persistent storage data for the form, and
  *   any data passed along by earlier steps when displaying a
@@ -1017,12 +1033,12 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
  * Adds required elements, executes any hook_form_alter functions, and
  * optionally inserts a validation token to prevent tampering.
  *
- * @param $form_id
+ * @param string $form_id
  *   A unique string identifying the form for validation, submission,
  *   theme overrides, and hook_form_alter functions.
- * @param $form
+ * @param array $form
  *   An associative array containing the structure of the form.
- * @param $form_state
+ * @param array $form_state
  *   A keyed array containing the current state of the form. Passed
  *   in here so that hook_form_alter() calls can use it, as well.
  */
@@ -1164,10 +1180,10 @@ function _backdrop_invalid_token_set_form_error() {
 /**
  * Validates user-submitted form data in the $form_state array.
  *
- * @param $form_id
+ * @param string $form_id
  *   A unique string identifying the form for validation, submission,
  *   theme overrides, and hook_form_alter functions.
- * @param $form
+ * @param array $form
  *   An associative array containing the structure of the form, which is passed
  *   by reference. Form validation handlers are able to alter the form structure
  *   (like #process and #after_build callbacks during form building) in case of
@@ -1175,7 +1191,7 @@ function _backdrop_invalid_token_set_form_error() {
  *   is responsible for validating the values of changed form elements in
  *   $form_state['values'] to prevent form submit handlers from receiving
  *   unvalidated values.
- * @param $form_state
+ * @param array $form_state
  *   A keyed array containing the current state of the form. The current
  *   user-submitted data is stored in $form_state['values'], though
  *   form validation functions are passed an explicit copy of the
@@ -1186,7 +1202,7 @@ function _backdrop_invalid_token_set_form_error() {
  *   web service requests, or other expensive requests that should
  *   not be repeated in the submission step.
  */
-function backdrop_validate_form($form_id, &$form, &$form_state) {
+function backdrop_validate_form($form_id, array &$form, array &$form_state) {
   $validated_forms = &backdrop_static(__FUNCTION__, array());
 
   if (isset($validated_forms[$form_id]) && empty($form_state['must_validate'])) {
@@ -1307,13 +1323,13 @@ function backdrop_validate_form($form_id, &$form, &$form_state) {
  *   override any values set by $form_state['redirect']. Note that during
  *   installation, install_goto() is called in place of backdrop_goto().
  *
- * @param $form_state
+ * @param array $form_state
  *   An associative array containing the current state of the form.
  *
  * @see backdrop_process_form()
  * @see backdrop_build_form()
  */
-function backdrop_redirect_form($form_state) {
+function backdrop_redirect_form(array $form_state) {
   // Skip redirection for form submissions invoked via backdrop_form_submit().
   if (!empty($form_state['programmed'])) {
     return;
@@ -1351,9 +1367,9 @@ function backdrop_redirect_form($form_state) {
  * selected options were in the list of options given to the user. Then calls
  * user-defined validators.
  *
- * @param $elements
+ * @param array $elements
  *   An associative array containing the structure of the form.
- * @param $form_state
+ * @param array $form_state
  *   A keyed array containing the current state of the form. The current
  *   user-submitted data is stored in $form_state['values'], though
  *   form validation functions are passed an explicit copy of the
@@ -1363,11 +1379,11 @@ function backdrop_redirect_form($form_state) {
  *   This technique is useful when validation requires file parsing,
  *   web service requests, or other expensive requests that should
  *   not be repeated in the submission step.
- * @param $form_id
+ * @param string $form_id
  *   A unique string identifying the form for validation, submission,
  *   theme overrides, and hook_form_alter functions.
  */
-function _form_validate(&$elements, &$form_state, $form_id = NULL) {
+function _form_validate(array &$elements, array &$form_state, $form_id = NULL) {
   // Also used in the installer, pre-database setup.
   $t = get_t();
 
