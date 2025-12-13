@@ -3606,7 +3606,7 @@ function form_process_actions($element, &$form_state) {
       $first_button = $key;
     }
     // Record the primary button if found.
-    if (isset($button['#attributes']['class']) && in_array('button-primary', $button['#attributes']['class'])  && in_array('button-danger', $button['#attributes']['class'])) {
+    if (isset($button['#attributes']['class']) && (in_array('button-primary', $button['#attributes']['class']) || in_array('button-danger', $button['#attributes']['class']))) {
       $primary_set = TRUE;
     }
     // Add the secondary button class otherwise.
