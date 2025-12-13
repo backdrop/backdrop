@@ -919,17 +919,17 @@ class Layout {
 
     // Always rebuild additional_paths contexts to prevent stale contexts on
     // the layout settings form.
-    foreach ($this->contexts as $key => $ap) {
-      if (substr($key, 0, 3) === 'ap_') {
-        unset($this->contexts[$key]);
-      }
-    }
+    // foreach ($this->contexts as $key => $ap) {
+      // if (substr($key, 0, 3) === 'ap_') {
+        // unset($this->contexts[$key]);
+      // }
+    // }
     if ($this->additional_paths) {
       foreach ($this->additional_paths as $additional_path) {
         $additional_paths_context = layout_context_required_by_path($additional_path);
         if ($additional_paths_context) {
           $additional_paths_context = reset($additional_paths_context);
-          $this->contexts['ap_' . $additional_path] = $additional_paths_context;
+          $this->contexts += array('ap_' . $additional_path => $additional_paths_context);
         }
       }
     }
