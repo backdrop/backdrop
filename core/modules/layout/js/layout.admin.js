@@ -53,7 +53,6 @@ Backdrop.behaviors.layoutConfigure = {
     if ($form.length && Backdrop.ajax) {
       var ajax = Backdrop.ajax['edit-path-update'];
       var updateContexts = function() {
-        console.log('update triggered');
         // Cancel existing AJAX requests and start a new one.
         for (var n = 0; n < ajax.currentRequests.length; n++) {
           ajax.currentRequests[n].abort();

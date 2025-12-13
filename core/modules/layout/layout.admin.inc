@@ -502,9 +502,9 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   foreach ($form_state['additional_paths'] as $i => $additional_path) {
     $form['additional_paths_wrapper']['additional_paths_container'.$i] = array(
       '#type' => 'container',
-        '#attributes' => array(
-          'class' => array('container-inline', 'fieldset-no-legend')
-        ),
+      '#attributes' => array(
+        'class' => array('container-inline', 'fieldset-no-legend')
+      ),
     );
     $form['additional_paths_wrapper']['additional_paths_container'.$i]['additional_path'] = array(
       '#title' => '',
@@ -975,83 +975,16 @@ function layout_settings_form_validate(&$form, &$form_state) {
     }
   }
 
-
-  // $form_state['additional_paths'] = $form_state['values']['additional_paths'];
   if ($form_state['clicked_button']['#value'] == t('Remove')) {
     $key = $form_state['clicked_button']['#attributes']['data-layout-additional-path-remove'];
     unset($form_state['additional_paths'][$key]);
   }
 
-  $layout->additional_paths = array();
   if (isset($form_state['values']['additional_paths'])) {
-    $num_placeholders = count(_layout_placeholder_positions($path));
-    //$additional_paths = explode("\n", $form_state['values']['additional_paths']);
     foreach ($form_state['values']['additional_paths'] as $key => $additional_path){
-      ///$additional_path = trim($additional_path);
+      $additional_path = trim($additional_path);
       if (!empty($additional_path)) {
-        $layout_provides_path = layout_provides_path($additional_path);
-        $router_item = menu_get_item($additional_path);
-        $router_item_path = $router_item ? (string) $router_item['path'] : '';
-        $num_additional_placeholders = count(_layout_placeholder_positions($additional_path));
-        $alias = NULL;
-        // if (strpos($additional_path, '%') === FALSE) {
-          // $alias = db_query('SELECT * FROM {url_alias} WHERE alias = :path', array(':path' => $additional_path))->fetchObject();
-        // }
-        switch (TRUE) {
-          case ($num_placeholders != $num_additional_placeholders):
-/*
-            // For example, it cannot have "node/%" nor "node".
-            // doctodo change the error element to the wrapper.
-            form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
-              array(
-                '%path' => $additional_path,
-                '%primary_path' => $path,
-              )
-            ));
-            break;
-          case (!empty($alias)):
-            // E.g. "about" is an alias of "node/2".
-            form_set_error('additional_paths', t('Additional path %path is currently assigned to be an alias for "@alias" and cannot be used.',
-              array(
-                '%path' => $additional_path,
-                '@alias' => $alias->source,
-              )
-            ));
-            break;
-          case ($layout_provides_path === TRUE):
-            // E.g. "home" is the primary path of the default Home layout and
-            // cannot be used in the additional paths.
-            form_set_error('additional_paths', t('Additional path %path is already used as the primary path of another layout.',
-              array(
-                '%path' => $additional_path,
-              )
-            ));
-            break;
-          case ($router_item_path !== $additional_path && strpos($router_item_path, '%') !== FALSE):
-            // E.g. "node/2" cannot be used since it requires a context.
-            form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path. It requires a context in the primary path.',
-              array(
-                '%path' => $additional_path,
-              )
-            ));
-            break;
- */          
-/*           case (!$router_item_path && strpos($additional_path, '%') === FALSE):
-            // E.g. Only allow "pages/2" if the router item exists. But allow
-            // "node/%/edit" to pass.
-            form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path. It does not exist in the system.',
-              array(
-                '%path' => $additional_path,
-              )
-            ));
-            break;
-          case (_layout_set_message_on_path_error($form, 'additional_paths', $additional_path)):
-            break;
- */
-          default:
-            $form_state['additional_paths'][$key] = $additional_path;
-            break;
-        }
+        $form_state['additional_paths'][$key] = $additional_path;
       }
     }
   }
