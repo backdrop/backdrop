@@ -523,22 +523,17 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       '#name' => 'additional_path_remove'.$i,
       '#value' => t('Remove'),
       '#validate' => array(
-        // doctodo
         'layout_settings_form_validate',
       ),
       '#attributes' => array(
         'data-layout-additional-path-remove' => $i,
       ),
       '#ajax' => array(
-        // doctodo
         'callback' => 'layout_settings_form_add_additional_paths_ajax',
-        // 'wrapper' => 'layout-additional-paths-wrapper',
       ),
       '#submit' => array(
-        // doctodo
         'layout_settings_form_additional_path_remove',
         'layout_settings_form_update_layout',
-        // 'layout_settings_form_add_additional_paths',
       ),
     );
   }
@@ -551,12 +546,10 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#attributes' => array('class' => array('layout-link-button', 'layout-additional-paths-add')),
     '#validate' => array(),
     '#submit' => array(
-      // doctodo
       'layout_settings_form_update_layout',
       'layout_settings_form_add_additional_paths',
     ),
     '#ajax' => array(
-      // doctodo
       'callback' => 'layout_settings_form_add_additional_paths_ajax',
       'wrapper' => 'layout-additional-paths-wrapper',
     ),
@@ -566,16 +559,13 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#type' => 'submit',
     '#value' => t('Check path'),
     '#validate' => array(
-      // doctodo
       'layout_settings_form_validate',
     ),
     '#submit' => array(
-      // doctodo
       'layout_settings_form_update_layout',
       'layout_settings_form_path_rebuild',
     ),
     '#ajax' => array(
-      // doctodo
       'callback' => 'layout_settings_form_path_ajax',
       'disable' => FALSE,
       'progress' => 'none',
