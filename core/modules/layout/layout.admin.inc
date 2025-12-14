@@ -419,69 +419,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // toggleable placeholder examples.
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
   $is_new = isset($layout->is_new) && $layout->is_new;
-  $has_placeholder = strpos((string) $path, '%') !== FALSE;
-  if (empty($path)) {
-    $path_matches_text = t('Please enter a path.');
-  }
-  else {
-    if (_layout_menu_router_path_exists($path)) {
-      if ($has_placeholder) {
-        if ($is_new) {
-          $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
-        }
-        else {
-          $path_matches_text = t('This layout overrides the default layout for existing page(s) whose paths match this pattern.');
-        }
-      }
-      else {
-        if ($is_new) {
-          $path_matches_text = t('This layout will override the default layout for an existing page whose path matches this pattern.');
-        }
-        else {
-          $path_matches_text = t('This layout overrides the default layout for an existing page whose path matches this pattern.');
-        }
-      }
-    }
-    else {
-      if ($has_placeholder) {
-        if ($is_new) {
-          $path_matches_text = t('This path will create pages whose paths match this pattern.');
-        }
-        else {
-          $path_matches_text = t('This path provides pages whose paths match this pattern.');
-        }
-      }
-      else {
-        if ($is_new) {
-          $path_matches_text = t('This path will create a page at this path.');
-        }
-        else {
-          $path_matches_text = t('This path provides a page at this path.');
-        }
-      }
-    }
-  }
-  $form['path_matches_text'] = array(
-    '#type' => 'value',
-    '#value' => $path_matches_text,
-  );
-  $path_matches = array(
-    '#type' => 'container',
-    '#access' => !$layout->isDefault(),
-    '#attributes' => array(
-      'id' => array('layout-path-matches'),
-    ),
-    'path_matches_text' => array('#markup' => $path_matches_text),
-  );
-  $path_matches_description = backdrop_render($path_matches);
-  $toggle = ' <a class="layout-placeholder-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
-  $description_items = array(
-    t('Content: <code>node/%</code>'),
-    t('User accounts: <code>user/%</code>'),
-    t('Taxonomy terms: <code>taxonomy/term/%</code>'),
-    t('Comments: <code>comment/%</code>'),
-  );
-  $description_list = '<div class="layout-placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $description_items)) . '</div>';
+  $form_state['is_new'] = $is_new;
   $form['path'] = array(
     '#title' => t('Path'),
     '#field_prefix' => url('', array('absolute' => TRUE)),
@@ -489,7 +427,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
-    '#description' => $path_matches_description . t('Use the percent symbol ("%") to indicate a placeholder in the path.') . $toggle . $description_list,
+    '#suffix' => "<div id='layout-path-description'>" . _layout_path_matches_description($path, $is_new) . '</div>',
   );
   $form['additional_paths_wrapper'] = array(
     '#type' => 'container',
@@ -500,11 +438,13 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     $form_state['additional_paths'] = $layout->additional_paths;
   }
   foreach ($form_state['additional_paths'] as $i => $additional_path) {
+    $description = _layout_path_matches_description($additional_path, $is_new);
     $form['additional_paths_wrapper']['additional_paths_container'.$i] = array(
       '#type' => 'container',
       '#attributes' => array(
-        'class' => array('container-inline', 'fieldset-no-legend')
+        'class' => array('container-inline'),
       ),
+      '#suffix' => "<div class='layout-path-description' id='layout-path-description-$i'>" . $description . '</div>',
     );
     $form['additional_paths_wrapper']['additional_paths_container'.$i]['additional_path'] = array(
       '#title' => '',
@@ -527,6 +467,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       ),
       '#attributes' => array(
         'data-layout-additional-path-remove' => $i,
+        'class' => array('layout-additional-path-remove')
       ),
       '#ajax' => array(
         'callback' => 'layout_settings_form_add_additional_paths_ajax',
@@ -553,6 +494,20 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       'callback' => 'layout_settings_form_add_additional_paths_ajax',
       'wrapper' => 'layout-additional-paths-wrapper',
     ),
+  );
+
+  $toggle = ' <a class="layout-placeholder-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
+  $description_items = array(
+    t('Content: <code>node/%</code>'),
+    t('User accounts: <code>user/%</code>'),
+    t('Taxonomy terms: <code>taxonomy/term/%</code>'),
+    t('Comments: <code>comment/%</code>'),
+  );
+  $description_list = '<div class="layout-placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $description_items)) . '</div>';
+
+  $form['path_description_text'] = array(
+    '#type' => 'item',
+    '#description' => t('Use the percent symbol ("%") to indicate a placeholder in the path.') . $toggle . $description_list,
   );
 
   $form['path_update'] = array(
@@ -908,6 +863,62 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 }
 
 /**
+ * Returns description text for path entry fields, with dynamic information
+ * about the entered path and toggleable placeholder examples.
+ */
+function _layout_path_matches_description($path, $is_new) {
+  $has_placeholder = strpos((string) $path, '%') !== FALSE;
+  if (empty($path)) {
+    $path_matches_text = t('Please enter a path.');
+  }
+  else {
+    if (_layout_menu_router_path_exists($path)) {
+      if ($has_placeholder) {
+        if ($is_new) {
+          $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
+        }
+        else {
+          $path_matches_text = t('This layout overrides the default layout for existing page(s) whose paths match this pattern.');
+        }
+      }
+      else {
+        if ($is_new) {
+          $path_matches_text = t('This layout will override the default layout for an existing page whose path matches this pattern.');
+        }
+        else {
+          $path_matches_text = t('This layout overrides the default layout for an existing page whose path matches this pattern.');
+        }
+      }
+    }
+    else {
+      if ($has_placeholder) {
+        if ($is_new) {
+          $path_matches_text = t('This path will create pages whose paths match this pattern.');
+        }
+        else {
+          $path_matches_text = t('This path provides pages whose paths match this pattern.');
+        }
+      }
+      else {
+        if ($is_new) {
+          $path_matches_text = t('This path will create a page at this path.');
+        }
+        else {
+          $path_matches_text = t('This path provides a page at this path.');
+        }
+      }
+    }
+  }
+  $form['path_matches_text'] = array(
+    '#markup' => $path_matches_text,
+    '#prefix' => '<div class="description">',
+    '#suffix' => '</div>',
+  );
+
+  return backdrop_render($form);
+}
+
+/**
  * Helper function to determine whether a layout path is an existing menu router
  * path.
  */
@@ -1032,10 +1043,17 @@ function layout_settings_form_path_rebuild($form, &$form_state) {
  * Returns updated contexts and information about path matching.
  */
 function layout_settings_form_path_ajax($form, &$form_state) {
+  $is_new = $form_state['is_new'];
   $commands[] = ajax_command_remove('.l-messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
-  $commands[] = ajax_command_html('#layout-path-matches', $form['path_matches_text']['#value']);
+  $commands[] = ajax_command_html('#layout-path-description', _layout_path_matches_description($form['path']['#value'], $is_new));
   $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
+
+  foreach ($form_state['additional_paths'] as $i => $additional_path) {
+    $description = _layout_path_matches_description($additional_path, $is_new);
+   $commands[] = ajax_command_html("#layout-path-description-$i", $description);
+  }
+
   return array(
     '#type' => 'ajax',
     '#commands' => $commands,
