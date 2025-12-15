@@ -707,6 +707,7 @@ function ajax_process_form(array $element, &$form_state) {
  * @param array $element
  *   An associative array containing the properties of the element.
  *   Properties used:
+ *   @code
  *   - #ajax['event']
  *   - #ajax['prevent']
  *   - #ajax['disable']
@@ -715,6 +716,7 @@ function ajax_process_form(array $element, &$form_state) {
  *   - #ajax['wrapper']
  *   - #ajax['parameters']
  *   - #ajax['effect']
+ *   @endcode
  *
  * @return array
  *   The processed element with the necessary JavaScript attached to it.

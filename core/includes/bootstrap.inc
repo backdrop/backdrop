@@ -1073,7 +1073,7 @@ function backdrop_settings_initialize() {
  *   The filename of the item if it is to be set explicitly rather
  *   than by consulting the database.
  *
- * @return string
+ * @return string|null|false
  *   The filename of the requested item or NULL if the item is not found.
  */
 function backdrop_get_filename($type, $name, $filename = NULL) {
@@ -1197,6 +1197,7 @@ function variable_initialize($conf = array()) {
       // Another request is building the variable cache.
       // Wait, then re-run this function.
       lock_wait($name);
+      // phpcs:ignore
       return variable_initialize($conf);
     }
     else {
@@ -1493,7 +1494,7 @@ function backup_get_backup_directory() {
  *   FALSE, only cache entries within the maximum cache lifetime will be
  *   returned.
  *
- * @return object|null
+ * @return stdClass|null
  *   The cache object, if the page was found in the cache, NULL otherwise.
  */
 function backdrop_page_get_cache($check_only = FALSE, $return_stale = FALSE) {
@@ -1647,9 +1648,10 @@ function backdrop_add_http_header($name, $value, $append = FALSE) {
  *   An HTTP header name. If omitted, all headers are returned as name/value
  *   pairs. If an array value is FALSE, the header has been unset.
  *
- * @return string|false|null
- *   A string containing the header value, or FALSE if the header has been set,
- *   or NULL if the header has not been set.
+ * @return array|string|false|null
+ *   A string containing the header value. If name is omitted, all headers are
+ *   returned as name/value pairs. NULL if the header name has not been set, or
+ *   FALSE if the header has been set.
  */
 function backdrop_get_http_header($name = NULL) {
   $headers = &backdrop_static('backdrop_http_headers', array());
@@ -1808,10 +1810,10 @@ function backdrop_set_length_headers($content_length) {
  * and the conditions match those currently in the cache, a 304 Not Modified
  * response is sent.
  *
- * @param object $cache
+ * @param stdClass $cache
  *   A cache entry object to be used in the response.
  */
-function backdrop_serve_page_from_cache(object $cache) {
+function backdrop_serve_page_from_cache(stdClass $cache) {
   $page_content = $cache->data['body'];
 
   // Negotiate whether to use compression.
@@ -2478,7 +2480,7 @@ function watchdog($type, $message, ?array $variables = array(), $severity = WATC
  * backdrop_set_message(t('An error occurred and processing did not complete.'), 'error');
  * @endcode
  *
- * @param string|null $message
+ * @param string|int|null $message
  *   (optional) The translated message to be displayed to the user. For
  *   consistency with other messages, it should begin with a capital letter and
  *   end with a period.
@@ -2538,11 +2540,13 @@ function backdrop_set_message($message = NULL, $type = 'status', $repeat = TRUE)
  * @param string|null $type
  *   (optional) Limit the messages returned by type. Defaults to NULL, meaning
  *   all types. These values are supported:
+ *   phpcs:disable
  *   - NULL
  *   - 'status'
  *   - 'warning'
  *   - 'error'
  *   - 'info'
+ *   phpcs:enable
  * @param bool $clear_queue
  *   (optional) If this is TRUE, the queue will be cleared of messages of the
  *   type specified in the $type parameter. Otherwise the queue will be left
@@ -3369,6 +3373,7 @@ function _backdrop_bootstrap_variables() {
 
   // Load variables from the database, but do not overwrite variables set in
   // settings.php.
+  // phpcs:ignore
   $conf = variable_initialize(isset($conf) ? $conf : array());
 }
 
@@ -3461,10 +3466,10 @@ function _backdrop_bootstrap_sanitize_request() {
  *
  * @param array $input
  *   The input data array from a request to be sanitized.
- * @param array $allowlist
+ * @param string[] $allowlist
  *   Allowed list of input keys that are considered acceptable.
  *
- * @return array
+ * @return string[]
  *   The list of any input keys have been filtered out, if any.
  */
 function _backdrop_bootstrap_sanitize_input(array &$input, array $allowlist = array()) {
@@ -3717,7 +3722,7 @@ function language_multilingual() {
  *   (optional) Whether the option_list labels should use the native name
  *   instead of the English language name. Only applies if $option_list is TRUE.
  *
- * @return (object|string)[]
+ * @return (stdClass|string)[]
  *   An associative array of languages, keyed by the language code.
  *
  * @since 1.18.2 Added $native_names parameter.
@@ -3805,7 +3810,7 @@ function language_list($only_enabled = FALSE, $option_list = FALSE, $native_name
  * @param string $langcode
  *   The language code.
  *
- * @return object|false
+ * @return stdClass|false
  *   A fully-populated language object or FALSE.
  */
 function language_load($langcode) {
@@ -3837,7 +3842,7 @@ function language_name($langcode) {
 /**
  * Returns the default language used on the site.
  *
- * @return object
+ * @return stdClass
  *   A language object.
  */
 function language_default() {
@@ -4065,7 +4070,7 @@ function ip_address() {
  * @param bool $rebuild
  *   If true, the schema will be rebuilt instead of retrieved from the cache.
  *
- * @return array
+ * @return array|false
  *   The schema definition of the requested table.
  */
 function backdrop_get_schema($table = NULL, $rebuild = FALSE) {

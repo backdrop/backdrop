@@ -16,7 +16,7 @@
 /**
  * Loads a batch from the database.
  *
- * @param int $id
+ * @param string $id
  *   The ID of the batch to load. When a progressive batch is being processed,
  *   the relevant ID is found in $_REQUEST['id'].
  *
