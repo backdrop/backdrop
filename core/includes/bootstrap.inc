@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.31.x-dev');
+define('BACKDROP_VERSION', '1.33.x-dev');
 
 /**
  * Core API compatibility.
@@ -1016,8 +1016,8 @@ function backdrop_settings_initialize() {
     // Otherwise use $base_url as session name, without the protocol
     // to use the same session identifiers across HTTP and HTTPS.
     list( , $session_name) = explode('://', $base_url, 2);
-    // HTTP_HOST can be modified by a visitor, but we already sanitized it
-    // in backdrop_settings_initialize().
+    // HTTP_HOST can be modified by a visitor, but we already sanitized it in
+    // backdrop_environment_initialize().
     if (!empty($_SERVER['HTTP_HOST'])) {
       $cookie_domain = $_SERVER['HTTP_HOST'];
       // Strip leading periods, www., and port numbers from cookie domain.
@@ -3123,9 +3123,13 @@ function _backdrop_bootstrap_configuration() {
     install_goto('core/install.php');
   }
 
-  // Untrusted host names, throw an exception for the end-user.
+  // Untrusted host names, return 400 Bad Request to the end-user.
   if (!defined('MAINTENANCE_MODE') && !backdrop_check_trusted_hosts($_SERVER['HTTP_HOST'])) {
-    throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
+    http_response_code(400);
+    print format_string('HTTP Host "@hostname" is not included in the "trusted_host_patterns" setting of this site.', array(
+      '@hostname' => $_SERVER['HTTP_HOST'],
+    ));
+    exit;
   }
 
   // Bootstrap the database if it is needed but not yet available.
@@ -4261,19 +4265,20 @@ function backdrop_autoload($class) {
  * }
  * @endcode
  *
- * @param $name
+ * @param string|null $name
  *   Globally unique name for the variable. For a function with only one static,
  *   variable, the function name (e.g. via the PHP magic __FUNCTION__ constant)
  *   is recommended. For a function with multiple static variables add a
  *   distinguishing suffix to the function name for each one.
- * @param $default_value
+ *   Note that NULL is for internal use in backdrop_static_reset() only.
+ * @param mixed $default_value
  *   Optional default value.
- * @param $reset
+ * @param bool $reset
  *   TRUE to reset one or all variables(s). This parameter is only used
  *   internally and shouldn't be passed in; use backdrop_static_reset() instead.
  *   (This function's return value should not be used when TRUE is passed in.)
  *
- * @return
+ * @return mixed
  *   Returns a variable by reference.
  *
  * @see backdrop_static_reset()
@@ -4281,7 +4286,8 @@ function backdrop_autoload($class) {
 function &backdrop_static($name, $default_value = NULL, $reset = FALSE) {
   static $data = array(), $default = array();
   // First check if dealing with a previously defined static variable.
-  if (isset($data[$name]) || array_key_exists($name, $data)) {
+  // If the key is set in $data, it's also set in $default.
+  if ($name && array_key_exists($name, $data)) {
     // Non-NULL $name and both $data[$name] and $default[$name] statics exist.
     if ($reset) {
       // Reset pre-existing static variable to its default value.

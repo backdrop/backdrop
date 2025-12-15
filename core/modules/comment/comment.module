@@ -98,6 +98,7 @@ function comment_entity_info() {
       'entity keys' => array(
         'id' => 'cid',
         'bundle' => 'node_type',
+        'label' => 'subject',
       ),
       'bundles' => array(),
       'view modes' => array(
@@ -786,6 +787,7 @@ function comment_node_page_additions(Node $node) {
 
   // Append comment form if needed.
   if (Comment::createAccess() && $node->comment == COMMENT_NODE_OPEN && ($node_type->settings['comment_form_location'] == COMMENT_FORM_BELOW)) {
+    /** @var Comment $comment */
     $comment = entity_create('comment', array('nid' => $node->nid));
     $additions['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
   }

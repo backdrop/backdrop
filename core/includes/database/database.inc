@@ -1633,6 +1633,13 @@ abstract class Database {
       // By default, we want the active connection, set in setActiveConnection.
       $key = self::$activeKey;
     }
+    // This problem is caused by Query::__wakeup(), which calls
+    // Database::getConnection() with params, but at that point both are NULL.
+    if ($target === NULL) {
+      // Avoid using NULL as array key below, but it should probably get fixed
+      // in class Query instead.
+      $target = 'default';
+    }
     // If the requested target does not exist, or if it is ignored, we fall back
     // to the default target. The target is typically either "default" or
     // "replica", indicating to use a replica SQL server if one is available. If

@@ -142,6 +142,7 @@ function user_entity_info() {
       'entity keys' => array(
         'id' => 'uid',
       ),
+      'label callback' => 'user_format_name',
       'bundles' => array(
         'user' => array(
           'label' => t('User account'),
@@ -865,10 +866,11 @@ function user_account_form(&$form, &$form_state) {
       '#password_strength' => TRUE,
     );
     // To skip the current password field, the user must have logged in via a
-    // one-time link and have the token in the URL. Store this in $form_state
-    // so it persists even on subsequent Ajax requests.
+    // one-time link and have the token in the URL. Store this in $form_state,
+    // so it persists even on subsequent AJAX requests.
     if (!isset($form_state['user_pass_reset'])) {
-      $form_state['user_pass_reset'] = isset($_SESSION['pass_reset_' . $account->uid]) && isset($_GET['pass-reset-token']) && ($_GET['pass-reset-token'] == $_SESSION['pass_reset_' . $account->uid]);
+      $session_key = 'pass_reset_' . $account->uid;
+      $form_state['user_pass_reset'] = isset($_SESSION[$session_key]) && isset($_GET['pass-reset-token']) && hash_equals($_SESSION[$session_key], $_GET['pass-reset-token']);
     }
     $protected_values = array();
     $current_pass_description = '';
@@ -3118,6 +3120,7 @@ function user_build_filter_query(SelectQuery $query) {
     // the authenticated role. If so, then all users would be listed, and we can
     // skip adding it to the filter query.
     if ($key == 'permission') {
+      /** @var User $account */
       $account = entity_create('user', array());
       $account->uid = 'user_filter';
       $account->roles = array(BACKDROP_AUTHENTICATED_ROLE);

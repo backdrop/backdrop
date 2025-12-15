@@ -69,6 +69,7 @@ function node_add($type) {
   global $user;
 
   $types = node_type_get_types();
+  /** @var Node $node */
   $node = entity_create('node', array(
     'uid' => $user->uid,
     'name' => (isset($user->name) ? $user->name : ''),
@@ -274,7 +275,7 @@ function node_form($form, &$form_state, Node $node) {
         backdrop_get_path('module', 'node') . '/js/node.js',
         array(
           'type' => 'setting',
-          'data' => array('anonymous' => $config->get('anonymous')),
+          'data' => array('anonymous' => $config->getTranslated('anonymous')),
         ),
       ),
     ),
@@ -600,8 +601,10 @@ function node_preview($node_tempstore_id, $node_type) {
 
   // Set status to true so we don't get the 'unpublished' CSS.
   $node->status = TRUE;
+  // It is null for newly created, but we need it as array key.
+  $nid = (string) $node->nid;
 
-  _field_invoke_multiple('load', 'node', array($node->nid => $node));
+  _field_invoke_multiple('load', 'node', array($nid => $node));
   // Load the author's name when needed.
   if (isset($node->name)) {
     // The use of isset() is mandatory in the context of user IDs, because

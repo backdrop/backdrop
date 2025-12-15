@@ -71,8 +71,17 @@ Backdrop.views.ajaxView = function(settings) {
   this.settings = settings;
 
   // Add the ajax to exposed forms.
-  this.$exposed_form = $('form#views-exposed-form-'+ settings.view_name.replace(/_/g, '-') + '-' + settings.view_display_id.replace(/_/g, '-'));
-  this.$exposed_form.once(jQuery.proxy(this.attachExposedFormAjax, this));
+  let formSelector;
+  if (settings.exposed_form_in_block) {
+    formSelector = 'form#views-exposed-form-'+ settings.view_name.replace(/_/g, '-') + '-' + settings.view_display_id.replace(/_/g, '-');
+  }
+  else {
+    // If the exposed form is child of the view, the dom id is more reliable,
+    // especially if dynamically embedded multiple times per page.
+    formSelector = '.view-dom-id-' + settings.view_dom_id + ' form.views-exposed-form';
+  }
+  this.$exposed_form = $(formSelector);
+  this.$exposed_form.once('views-exposed-form', jQuery.proxy(this.attachExposedFormAjax, this));
 
   // Add the ajax to pagers.
   this.$view

@@ -232,7 +232,7 @@ function filter_config_info() {
 /**
  * Implements hook_config_data_validate().
  */
-function filter_config_data_validate(Config $config, array $config_info) {
+function filter_config_data_validate(Config $config, ?array $config_info) {
   if (strpos($config->getName(), 'filter.format.') === 0) {
     $filters = $config->get('filters');
     $all_filter_info = filter_get_filters();
@@ -316,6 +316,13 @@ function filter_format_build_format($format) {
   }
   $all_filter_info = filter_get_filters();
   foreach ($format->filters as $name => $filter) {
+    if (!array_key_exists($name, $all_filter_info)) {
+      // Remove filters that don't exist anymore, for example from uninstalled
+      // modules, so they don't get saved again.
+      unset($format->filters[$name]);
+      continue;
+    }
+
     $filter_info = $all_filter_info[$name];
 
     // Ensure the $filter variable is an object. In Drupal 7, it was an array on
@@ -803,7 +810,7 @@ function filter_formats($account = NULL, $include_disabled = FALSE) {
           $filter_format->filters[$filter_name] = (object) $filter;
         }
         // Populate defaults for the editor associated with this format.
-        if (isset($all_editor_info[$filter_format->editor]['default settings'])) {
+        if (!empty($filter_format->editor) && isset($all_editor_info[$filter_format->editor]['default settings'])) {
           $filter_format->editor_settings += $all_editor_info[$filter_format->editor]['default settings'];
         }
 
@@ -816,6 +823,7 @@ function filter_formats($account = NULL, $include_disabled = FALSE) {
 
   // Build a list of enabled formats based on the full list.
   if (!isset($formats['enabled'])) {
+    $formats['enabled'] = array();
     foreach ($formats['all'] as $format) {
       if ($format->status) {
         $formats['enabled'][$format->format] = $format;

@@ -150,13 +150,6 @@ class User extends Entity implements UserInterface {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return user_format_name($this);
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {

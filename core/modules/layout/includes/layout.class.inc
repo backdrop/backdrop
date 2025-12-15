@@ -38,7 +38,7 @@ class Layout {
    * The layout path must match the provided menu item path. Set and get this
    * variable's value with Layout::getPath() and Layout::setPath().
    *
-   * @var string
+   * @var string|null
    */
   private $path;
 
@@ -688,7 +688,7 @@ class Layout {
   /**
    * Return a layout's path based on its assigned menu item.
    *
-   * @return string
+   * @return string|null
    */
   function getPath() {
     if ($this->menu_item) {
@@ -798,7 +798,7 @@ class Layout {
    */
   function getContexts($include_types = LayoutContext::USAGE_TYPE_ALL) {
     $contexts_cache = &backdrop_static(__METHOD__, array());
-    if (isset($contexts_cache[$this->name])) {
+    if ($this->name && isset($contexts_cache[$this->name])) {
       return $this->getContextsByType($contexts_cache[$this->name], $include_types);
     }
 
@@ -847,7 +847,9 @@ class Layout {
       ));
     }
 
-    $contexts_cache[$this->name] = $this->contexts;
+    // When creating or cloning, the name is null.
+    $name_key = $this->name ?? '';
+    $contexts_cache[$name_key] = $this->contexts;
 
     return $this->getContextsByType($this->contexts, $include_types);
   }
