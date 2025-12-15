@@ -742,8 +742,11 @@ function date_format_interval(?BackdropDateTime $date, $granularity = 2, $displa
 
   $interval = REQUEST_TIME - $date->format('U');
   if ($interval > 0) {
-    return $display_ago ? t('!time ago', array('!time' => format_interval($interval, $granularity))) :
-      t('!time', array('!time' => format_interval($interval, $granularity)));
+    return $display_ago ? t('!time ago', array(
+      '!time' => format_interval($interval, $granularity),
+    )) : t('!time', array(
+      '!time' => format_interval($interval, $granularity),
+    ));
   }
   else {
     return format_interval(abs($interval), $granularity);
@@ -1581,6 +1584,7 @@ function date_is_all_day($string1, $string2, $granularity = 'second', $increment
       $min_match = $time1 == '00:00:00'
         || ($hour1 == 0 && $min1 == 0 && $sec1 == 0);
       $max_match = $time2 == '00:00:00'
+      // phpcs:ignore
         || ($hour2 == 23 && in_array($min2, array($max_minutes, 59)) && in_array($sec2, array($max_seconds, 59)))
         || ($hour1 == 0 && $hour2 == 0 && $min1 == 0 && $min2 == 0 && $sec1 == 0 && $sec2 == 0);
       break;

@@ -1168,6 +1168,7 @@ function drupal_valid_token($token, $value = '', $skip_anonymous = FALSE) {
  * @see backdrop_page_set_cache()
  */
 function drupal_page_set_cache() {
+  // phpcs:ignore
   return backdrop_page_set_cache();
 }
 
@@ -2236,8 +2237,10 @@ function drupal_path_alias_whitelist_rebuild($source = NULL) {
  */
 function drupal_path_alias_allowlist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
+  // phpcs:disable
   // cspell:disable-next-line
   return drupal_path_alias_whitelist_rebuild();
+  // phpcs:enable
 }
 
 /**

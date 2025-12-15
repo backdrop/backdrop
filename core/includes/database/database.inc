@@ -2210,6 +2210,7 @@ interface DatabaseStatementInterface extends Traversable {
    *   If $mode is PDO::FETCH_CLASS, the optional arguments to pass to the
    *   constructor.
    */
+  // phpcs:ignore
   // public function setFetchMode($mode, $a1 = NULL, $a2 = array());
 
   /**
@@ -2229,6 +2230,7 @@ interface DatabaseStatementInterface extends Traversable {
    * @return mixed
    *   A result, formatted according to $mode.
    */
+  // phpcs:ignore
   // public function fetch($mode = NULL, $cursor_orientation = NULL, $cursor_offset = NULL);
 
   /**
@@ -2248,6 +2250,7 @@ interface DatabaseStatementInterface extends Traversable {
    * The object will be of the class specified by
    * DatabaseStatementInterface::setFetchMode() or stdClass if not specified.
    */
+  // phpcs:ignore
   // public function fetchObject();
 
   /**
@@ -2275,6 +2278,7 @@ interface DatabaseStatementInterface extends Traversable {
    * @return array
    *   An array of results.
    */
+  // phpcs:ignore
   // function fetchAll($mode = NULL, $column_index = NULL, array $constructor_arguments);
 
   /**
