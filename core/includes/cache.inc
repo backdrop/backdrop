@@ -501,7 +501,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
    * Checks that items are either permanent or did not expire, and unserializes
    * data as appropriate.
    *
-   * @param array|object $cache
+   * @param array|stdClass $cache
    *   An item loaded from BackdropCacheInterface::get() or
    *   BackdropCacheInterface::getMultiple().
    *

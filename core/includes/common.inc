@@ -954,7 +954,7 @@ function backdrop_access_denied() {
  *     code is set to the HTTP_REQUEST_TIMEOUT constant.
  *   - context: A context resource created with stream_context_create().
  *
- * @return object
+ * @return stdClass
  *   An object that can have one or more of the following components:
  *   - request: A string containing the request body that was sent.
  *   - code: An integer containing the response status code, or the error code
@@ -1390,7 +1390,10 @@ function _backdrop_parse_response_status($response) {
  *   TRUE if a proxy should be used for this host.
  */
 function _backdrop_http_use_proxy($host) {
-  $proxy_exceptions = settings_get('proxy_exceptions', array('localhost', '127.0.0.1'));
+  $proxy_exceptions = settings_get('proxy_exceptions', array(
+    'localhost',
+    '127.0.0.1',
+  ));
   return !in_array(strtolower($host), $proxy_exceptions, TRUE);
 }
 
@@ -1802,7 +1805,10 @@ function backdrop_strip_dangerous_protocols($uri) {
   static $allowed_protocols;
 
   if (!isset($allowed_protocols)) {
-    $allowed_protocols = array_flip(settings_get('filter_allowed_protocols', array('ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp', 'rtsp', 'sftp', 'ssh', 'tel', 'telnet', 'webcal')));
+    $allowed_protocols = array_flip(settings_get('filter_allowed_protocols', array(
+      'ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp',
+      'rtsp', 'sftp', 'ssh', 'tel', 'telnet', 'webcal',
+    )));
   }
 
   // Iteratively remove any invalid protocol found.
@@ -1865,7 +1871,17 @@ function check_url($uri) {
  * @return string
  */
 function filter_xss_admin($string) {
-  return filter_xss($string, array('a', 'abbr', 'acronym', 'address', 'article', 'aside', 'b', 'bdi', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'dd', 'del', 'details', 'dfn', 'div', 'dl', 'dt', 'em', 'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'i', 'img', 'ins', 'kbd', 'li', 'mark', 'menu', 'meter', 'nav', 'ol', 'output', 'p', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'section', 'small', 'span', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'time', 'tr', 'tt', 'u', 'ul', 'var', 'wbr'));
+  return filter_xss($string, array(
+    'a', 'abbr', 'acronym', 'address', 'article', 'aside', 'b', 'bdi', 'bdo',
+    'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup',
+    'command', 'dd', 'del', 'details', 'dfn', 'div', 'dl', 'dt', 'em',
+    'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'header', 'hgroup', 'hr', 'i', 'img', 'ins', 'kbd', 'li', 'mark', 'menu',
+    'meter', 'nav', 'ol', 'output', 'p', 'pre', 'progress', 'q', 'rp', 'rt',
+    'ruby', 's', 'samp', 'section', 'small', 'span', 'strong', 'sub', 'summary',
+    'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'time', 'tr', 'tt',
+    'u', 'ul', 'var', 'wbr',
+  ));
 }
 
 /**
@@ -6416,7 +6432,7 @@ function backdrop_page_set_cache() {
  * @param string $page_content
  *   The page content (HTML) that should be entered into a cache entry.
  *
- * @return object|false
+ * @return stdClass|false
  *   A cache entry ready to be written to the cache backend. If the page is not
  *   cacheable, FALSE will be returned.
  *
@@ -6485,10 +6501,10 @@ function backdrop_page_create_cache($page_content) {
 /**
  * Save a page cache entry to the cache.
  *
- * @param object $cache
+ * @param stdClass $cache
  *   A cache entry object to be written to the cache backend.
  */
-function backdrop_page_save_cache(object $cache) {
+function backdrop_page_save_cache(stdClass $cache) {
   if ($cache->data['body']) {
     cache('page')->set($cache->cid, $cache->data, $cache->expire);
   }
@@ -9157,6 +9173,7 @@ function _backdrop_flush_css_js() {
  */
 function debug($data, $label = NULL, $print_r = FALSE) {
   // Print $data contents to string.
+  // phpcs:ignore
   $string = check_plain($print_r ? print_r($data, TRUE) : var_export($data, TRUE));
 
   // Display values with pre-formatting to increase readability.
