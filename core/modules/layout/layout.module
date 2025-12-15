@@ -2527,7 +2527,8 @@ function layout_layout_template_info($flexible_template_type = 'flexible') {
       'flexible' => TRUE,
       'type' => 'layout',
       'path' => 'templates',
-      'preview' => 'flexible_template.png',
+      'preview' => $flexible_template->preview ?? 'flexible_template.png',
+      'is_full_page' => $flexible_template->is_full_page ?? TRUE,
       'libraries' => array('bootstrap4-gs'),
     );
 

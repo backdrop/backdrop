@@ -377,8 +377,8 @@ function layout_preprocess_layout(&$variables) {
 
   // Build HTML for displaying flexible templates.
   if (isset($variables['layout_template_info']['template']) && (!empty($variables['layout_template_info']['flexible']))) {
-    $variables['is_full_page'] = $variables['layout_template_info']['is_full_page'] ?? TRUE;
-    $flexible_template_type = (!empty($variables['layout_template_info']['layout_template_type']) && $variables['layout_template_info']['layout_template_type'] != 'layout') ? $variables['layout_template_info']['layout_template_type'] : 'flexible';
+    $variables['is_full_page'] = $variables['layout']->is_full_page ?? TRUE;
+    $flexible_template_type = (!empty($variables['layout']->layout_template_type) && $variables['layout']->layout_template_type != 'layout') ? $variables['layout']->layout_template_type : 'flexible';
     _layout_check_template_type($flexible_template_type);
     if (is_a($variables['renderer'], 'LayoutRendererFlexible')) {
       $variables['flexible_editor'] = TRUE;
