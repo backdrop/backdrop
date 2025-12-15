@@ -208,8 +208,8 @@ class BackdropDateTime extends DateTime {
    * In order to set a timezone for a datetime that doesn't have such
    * granularity, merge() it with one that does.
    *
-   * @param DateTimeZone $timezone
-   *   A timezone object.
+   * @param mixed $timezone
+   *   A timezone object. As of PHP 8.0: DateTimeZone.
    * @param bool $force
    *   Whether or not to skip a date with no time. Defaults to FALSE.
    *
@@ -217,7 +217,7 @@ class BackdropDateTime extends DateTime {
    *   This object with the timezone updated.
    */
   #[\ReturnTypeWillChange]
-  public function setTimezone(DateTimeZone $timezone, $force = FALSE) {
+  public function setTimezone($timezone, $force = FALSE) {
     if (!$this->hasTime() || !$this->hasGranularity('timezone') || $force) {
       // This has no time or timezone granularity, so timezone doesn't mean
       // much. We set the timezone using the method, which will change the
