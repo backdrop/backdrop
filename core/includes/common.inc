@@ -1608,7 +1608,7 @@ function valid_number_step($value, $step, $offset = 0.0) {
  * @param string|null $identifier
  *   Optional identifier (defaults to the current user's IP address).
  */
-function flood_register_event($name, int $window = 3600, $identifier = NULL) {
+function flood_register_event($name, $window = 3600, $identifier = NULL) {
   if (!isset($identifier)) {
     $identifier = ip_address();
   }
@@ -1661,7 +1661,7 @@ function flood_clear_event($name, $identifier = NULL) {
  *   TRUE if the user is allowed to proceed. FALSE if they have exceeded the
  *   threshold and should not be allowed to proceed.
  */
-function flood_is_allowed($name, $threshold, int $window = 3600, $identifier = NULL) {
+function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL) {
   if (!isset($identifier)) {
     $identifier = ip_address();
   }
@@ -1725,7 +1725,7 @@ function tempstore_get($collection, $name) {
  * @param int $expire
  *   The UNIX timestamp at which this value can be deleted.
  */
-function tempstore_set($collection, $name, $value, int $expire) {
+function tempstore_set($collection, $name, $value, $expire) {
   tempstore_clear($collection, $name);
   db_insert('tempstore')
     ->fields(array(
@@ -2382,7 +2382,7 @@ function format_rss_item($title, $link, $description, array $args = array()) {
  * @return string
  *   A string of XML representing the elements passed in.
  */
-function format_xml_elements(array $array, int $indentation_level = 0) {
+function format_xml_elements(array $array, $indentation_level = 0) {
   $output = '';
 
   // Indent two spaces per level.
@@ -2476,7 +2476,7 @@ function format_xml_elements(array $array, int $indentation_level = 0) {
  * @see t()
  * @see format_string()
  */
-function format_plural(int $count, $singular, $plural, array $args = array(), array $options = array()) {
+function format_plural($count, $singular, $plural, array $args = array(), array $options = array()) {
   $args['@count'] = $count;
   if ($count == 1) {
     return t($singular, $args, $options);
@@ -2540,7 +2540,7 @@ function parse_size($size) {
  * @return string
  *   A translated string representation of the size.
  */
-function format_size(int $size, $langcode = NULL) {
+function format_size($size, $langcode = NULL) {
   if ($size < BACKDROP_KILOBYTE) {
     return format_plural($size, '1 byte', '@count bytes', array(), array('langcode' => $langcode));
   }
@@ -2583,7 +2583,7 @@ function format_size(int $size, $langcode = NULL) {
  * @return string
  *   A translated string representation of the interval.
  */
-function format_interval(int $interval, int $granularity = 2, $langcode = NULL) {
+function format_interval($interval, $granularity = 2, $langcode = NULL) {
   $units = array(
     '1 year|@count years' => 31536000,
     '1 month|@count months' => 2592000,
@@ -2637,7 +2637,7 @@ function format_interval(int $interval, int $granularity = 2, $langcode = NULL) 
  * @return string
  *   A translated date string in the requested format.
  */
-function format_date(int $timestamp, $date_format_name = 'medium', $pattern = '', $timezone = NULL, $langcode = NULL) {
+function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $timezone = NULL, $langcode = NULL) {
   // Use the advanced backdrop_static() pattern, since this is called very
   // often.
   static $backdrop_static_fast;
@@ -3495,7 +3495,7 @@ function backdrop_map_assoc(array $array, $function = NULL) {
  *
  * @ingroup php_wrappers
  */
-function backdrop_set_time_limit(int $time_limit) {
+function backdrop_set_time_limit($time_limit) {
   if (function_exists('set_time_limit')) {
     $current = ini_get('max_execution_time');
     // Do not set time limit if it is currently unlimited.
@@ -5405,7 +5405,7 @@ function backdrop_aggregate_js(array &$js_groups) {
  * @see backdrop_add_icon()
  * @see backdrop_render()
  */
-function backdrop_process_attached(array $elements, int $group = JS_DEFAULT, $dependency_check = FALSE, ?bool $every_page = NULL) {
+function backdrop_process_attached(array $elements, $group = JS_DEFAULT, $dependency_check = FALSE, ?bool $every_page = NULL) {
   // Add defaults to the special attached structures that should be processed
   // differently.
   $elements['#attached'] += array(
@@ -5907,7 +5907,7 @@ function backdrop_add_icons(array $icon_names) {
  * @see block-admin-display-form.tpl.php
  * @see theme_menu_overview_form()
  */
-function backdrop_add_tabledrag($table_id, $action, $relationship, $group, $subgroup = NULL, $source = NULL, $hidden = TRUE, int $limit = 0) {
+function backdrop_add_tabledrag($table_id, $action, $relationship, $group, $subgroup = NULL, $source = NULL, $hidden = TRUE, $limit = 0) {
   $js_added = &backdrop_static(__FUNCTION__, FALSE);
   if (!$js_added) {
     // Add the table drag JavaScript to the page before the module JavaScript
@@ -6637,7 +6637,7 @@ function backdrop_cron_run() {
  *   - 'filename': File name.
  *   - 'name': Name of file without the extension.
  */
-function backdrop_system_listing($mask, $directory, $key = 'name', int $min_depth = 1) {
+function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 1) {
   $config = conf_path();
   $files = array();
 
@@ -7052,13 +7052,13 @@ function backdrop_render_page($page) {
  * once to backdrop_render(), every use beyond the first will return an empty
  * string.
  *
- * @param array|null $elements
+ * @param array|string|null $elements
  *   The structured array describing the data to be rendered.
  *
  * @return string
  *   The rendered HTML.
  */
-function backdrop_render(?array &$elements) {
+function backdrop_render(&$elements) {
   // Early-return nothing if user does not have access.
   if (empty($elements) || (isset($elements['#access']) && !$elements['#access'])) {
     return '';
@@ -7432,7 +7432,7 @@ function backdrop_render_collect_attached(array $elements, $return = FALSE) {
  *   - #pre_render: $function with a _pre_render suffix.
  *   - #cache: An associative array prepared for backdrop_render_cache_set().
  */
-function backdrop_render_cache_by_query(SelectQuery $query, $function, int $expire = CACHE_TEMPORARY, $granularity = NULL) {
+function backdrop_render_cache_by_query(SelectQuery $query, $function, $expire = CACHE_TEMPORARY, $granularity = NULL) {
   $cache_keys = array_merge(array($function), backdrop_render_cid_parts($granularity));
   $query->preExecute();
   $cache_keys[] = hash('sha256', serialize(array(
@@ -7606,7 +7606,7 @@ function element_info_property($type, $property_name, $default = NULL) {
  *
  * @since 1.9.0 The $dir parameter was added.
  */
-function backdrop_sort(array &$array, array $keys = array('weight'), int $dir = SORT_ASC) {
+function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT_ASC) {
   // Don't sort empty arrays.
   if (empty($array)) {
     return;
