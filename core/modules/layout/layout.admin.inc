@@ -1051,7 +1051,7 @@ function layout_settings_form_path_ajax($form, &$form_state) {
 
   foreach ($form_state['additional_paths'] as $i => $additional_path) {
     $description = _layout_path_matches_description($additional_path, $is_new);
-   $commands[] = ajax_command_html("#layout-path-description-$i", $description);
+    $commands[] = ajax_command_html("#layout-path-description-$i", $description);
   }
 
   return array(

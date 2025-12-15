@@ -735,6 +735,7 @@ class Layout {
    * Set a layout path.
    */
   function setAdditionalMenuItems($path) {
+    $item_exists = FALSE;
     if (empty($this->additional_menu_items)) {
       $item_exists = FALSE;
     }
@@ -765,7 +766,7 @@ class Layout {
         }
       }
       else {
-        if ($this->additional_menu_items[$path]) {
+        if (isset($this->additional_menu_items[$path])) {
           $this->additional_menu_items[$path]->delete();
           unset($this->additional_menu_items[$path]);
         }
