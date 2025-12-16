@@ -1379,22 +1379,23 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
   );
 
   // Add a link to preview the page.
-  $link_path = $layout->getPath();
-  // A null path returns the site root.
-  // See https://github.com/backdrop/backdrop-issues/issues/4383
-  if (!is_null($link_path) && backdrop_valid_path($link_path)) {
-    $form['top']['#theme_wrappers'] = array('container');
-    $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
+  $link_paths = array_merge(array($layout->getPath()), array_values($layout->additional_paths));
+  $form['top']['#theme_wrappers'] = array('container');
+  $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
 
-    $form['top']['button'] = array(
-      '#type' => 'dropbutton',
-    );
-    $form['top']['button']['#links'] = array(
-      array(
-        'title' => t('View page'),
-        'href' => $link_path,
-      ),
-    );
+  $form['top']['button'] = array(
+    '#type' => 'dropbutton',
+  );
+  $form['top']['button']['#links'] = array();
+  foreach ($link_paths as $link_path){
+    // A null path returns the site root.
+    // See https://github.com/backdrop/backdrop-issues/issues/4383
+    if (!is_null($link_path) && backdrop_valid_path($link_path)) {
+        $form['top']['button']['#links'][] = array(
+          'title' => t('View page: !page', array('!page' => $link_path)),
+          'href' => $link_path,
+        );
+    }
   }
 
   $form['content'] = array('#tree' => TRUE);
