@@ -969,12 +969,6 @@ function layout_settings_form_validate(&$form, &$form_state) {
   foreach ($contexts as $context) {
     $context_plugins[] = $context->plugin;
   }
-  foreach ($layout->conditions as $key => $condition) {
-    $required_contexts = $condition->getRequiredContexts();
-    if (array_diff($required_contexts, $context_plugins)) {
-      form_error($form['conditions']['active'][$key], t('The condition \'!condition\' does not have the required contexts at this path. Remove the condition to save the layout.', array('!condition' => $condition->summary())));
-    }
-  }
 
   if ($form_state['clicked_button']['#value'] == t('Remove')) {
     $key = $form_state['clicked_button']['#attributes']['data-layout-additional-path-remove'];
@@ -986,7 +980,18 @@ function layout_settings_form_validate(&$form, &$form_state) {
       $additional_path = trim($additional_path);
       if (!empty($additional_path)) {
         $form_state['additional_paths'][$key] = $additional_path;
+        $contexts_from_additional_paths = layout_context_required_by_path($additional_path);
+        foreach ($contexts_from_additional_paths as $contexts_from_additional_path) {
+          $context_plugins[] = $contexts_from_additional_path->plugin;
+        }
       }
+    }
+  }
+
+  foreach ($layout->conditions as $key => $condition) {
+    $required_contexts = $condition->getRequiredContexts();
+    if (array_diff($required_contexts, $context_plugins)) {
+      form_error($form['conditions']['active'][$key], t('The condition \'!condition\' does not have the required contexts at this path. Remove the condition to save the layout.', array('!condition' => $condition->summary())));
     }
   }
 }
