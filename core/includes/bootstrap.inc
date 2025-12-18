@@ -2540,13 +2540,11 @@ function backdrop_set_message($message = NULL, $type = 'status', $repeat = TRUE)
  * @param string|null $type
  *   (optional) Limit the messages returned by type. Defaults to NULL, meaning
  *   all types. These values are supported:
- *   phpcs:disable
  *   - NULL
  *   - 'status'
  *   - 'warning'
  *   - 'error'
- *   - 'info'
- *   phpcs:enable
+ *   - 'info'.
  * @param bool $clear_queue
  *   (optional) If this is TRUE, the queue will be cleared of messages of the
  *   type specified in the $type parameter. Otherwise the queue will be left
