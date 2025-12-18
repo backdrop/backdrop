@@ -3683,6 +3683,21 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
   }
 
+  /**
+   * Basic tests to ensure custom layout types are functioning.
+   */
+  public function testCustomLayoutType() {
+    // Load a page from layout_test.module that provides a custom layout with a
+    // block inserted.
+    // @see layout_test_custom_layout_type_test_page()
+    $this->backdropGet('custom-layout-type-test-page');
+    $this->assertText('This is a simple text block to test custom layout types.', 'Custom layout type inside of page content loaded correctly.');
+
+    // Ensure custom layout types do not show up in the core layout template
+    // listing.
+    $this->backdropGet('admin/structure/layouts/settings');
+    $this->assertNoText('Custom Layout Type Test', 'Custom layout type not shown on core layout template listing.');
+  }
 }
 
 /**
@@ -3799,21 +3814,5 @@ class LayoutDeletionTest extends BackdropWebTestCase {
     $this->backdropGet($deletion_path);
     $this->assertText(format_string('This layout creates a page at @path that is used as the default 404 (not found) page of the site.', array('@path' => $layout_url)));
     config_set('system.core', 'site_404', '');
-  }
-
-  /**
-   * Basic tests to ensure custom layout types are functioning.
-   */
-  public function testCustomLayoutType() {
-    // Load a page from layout_test.module that provides a custom layout with a
-    // block inserted.
-    // @see layout_test_custom_layout_type_test_page()
-    $this->backdropGet('custom-layout-type-test-page');
-    $this->assertText('This is a simple text block to test custom layout types.', 'Custom layout type inside of page content loaded correctly.');
-
-    // Ensure custom layout types do not show up in the core layout template
-    // listing.
-    $this->backdropGet('admin/structure/layouts/settings');
-    $this->assertNoText('Custom Layout Type Test', 'Custom layout type not shown on core layout template listing.');
   }
 }

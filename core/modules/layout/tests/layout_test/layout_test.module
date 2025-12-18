@@ -177,6 +177,33 @@ function layout_test_config_info() {
 }
 
 /**
+ * Implements hook_theme_registry_alter().
+ *
+ * Ensure the flexible layout template is registered, whether or not it is
+ * being used in core layouts.
+ */
+function layout_test_theme_registry_alter(&$theme_registry) {
+  if (!isset($theme_registry['layout__flexible'])) {
+    $theme_registry['layout__flexible'] = array(
+      'variables' => array(
+        'content' => NULL,
+        'settings' => NULL,
+        'layout' => NULL,
+        'layout_template_info' => NULL,
+        'renderer' => NULL,
+        'attributes' => array(),
+        'admin' => FALSE,
+      ),
+      'template' => 'layout--flexible',
+      'path' => backdrop_get_path('module', 'layout') . '/templates',
+      'theme path' => backdrop_get_path('module', 'layout') . '/templates',
+      'type' => 'module',
+      'base hook' => 'layout',
+    );
+  }
+}
+
+/**
  * Implements hook_layout_presave().
  */
 function layout_test_layout_presave($layout) {
