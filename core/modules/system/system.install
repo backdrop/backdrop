@@ -28,17 +28,20 @@ function system_requirements($phase) {
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
-      // If a version has been specified, append it to the profile.
-      $profile .= !empty($info['version']) ? '-' . $info['version'] : '';
-      $requirements['install_profile'] = array(
-        'title' => $t('Install profile'),
-        'value' => $t('%profile_name (%profile)', array(
-          '%profile_name' => $info['name'],
-          '%profile' => $profile,
-        )),
-        'severity' => REQUIREMENT_INFO,
-        'weight' => -9,
-      );
+      // Profiles might not ship with modules.
+      if (!empty($info)) {
+        // If a version has been specified, append it to the profile.
+        $profile .= !empty($info['version']) ? '-' . $info['version'] : '';
+        $requirements['install_profile'] = array(
+          'title' => $t('Install profile'),
+          'value' => $t('%profile_name (%profile)', array(
+            '%profile_name' => $info['name'],
+            '%profile' => $profile,
+          )),
+          'severity' => REQUIREMENT_INFO,
+          'weight' => -9,
+        );
+      }
     }
 
     // Report the configuration storage being used.
