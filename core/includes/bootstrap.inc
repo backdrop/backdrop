@@ -1959,7 +1959,7 @@ function bootstrap_hooks() {
  * @param string $field
  *   The attribute of $obj whose value should be unserialized.
  */
-function backdrop_unpack(object $obj, $field = 'data') {
+function backdrop_unpack($obj, $field = 'data') {
   if ($obj->$field && $data = unserialize($obj->$field)) {
     foreach ($data as $key => $value) {
       if (!empty($key) && !isset($obj->$key)) {
