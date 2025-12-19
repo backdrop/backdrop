@@ -2,7 +2,6 @@
   "_config_name": "layout.custom_test.default",
   "name": "default",
   "title": "Custom Layout Type Test",
-  "module": "layout_test",
   "description": "A simple custom layout template in its simplest form.",
   "layout_template_type": "custom_test",
   "is_full_page": false,
