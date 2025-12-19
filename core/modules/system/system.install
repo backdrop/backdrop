@@ -495,7 +495,7 @@ function system_requirements($phase) {
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
           // Add the module with the latest schema to a list.
-          $modules_update_required[] = $module . ' (' . $current_schema . ' 🠆 ' . $latest_schema . ')';
+          $modules_update_required[] = $module . ' (' . $current_schema . ' → ' . $latest_schema . ')';
         }
       }
     }
