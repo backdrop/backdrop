@@ -3136,6 +3136,7 @@ function theme_radio(array $variables) {
  * Expand a password_confirm field into two text boxes.
  *
  * @param array $element
+ *   An associative array containing the structure of the current element.
  *
  * @return array
  */
@@ -3174,8 +3175,10 @@ function form_process_password_confirm(array $element) {
  * Validates a password_confirm element.
  *
  * @param array $element
+ *   An associative array containing the structure of the current element.
  *
  * @param array $element_state
+ *   A keyed array containing the current state of the element.
  *
  * @return array
  */
@@ -3234,6 +3237,7 @@ function theme_date(array $variables) {
  * Expands a date element into year, month, and day select elements.
  *
  * @param array $element
+ *   An associative array containing the structure of the current element.
  *
  * @return array
  */
@@ -3294,6 +3298,7 @@ function form_process_date(array $element) {
  * Validates the date type to prevent invalid dates (e.g., February 30, 2006).
  *
  * @param array $element
+ *   An associative array containing the structure of the current element.
  */
 function date_validate(array $element) {
   if (!checkdate($element['#value']['month'], $element['#value']['day'], $element['#value']['year'])) {
@@ -3307,6 +3312,7 @@ function date_validate(array $element) {
  * Callback for backdrop_map_assoc() within form_process_date().
  *
  * @param int $month
+ *   The number of the month.
  *
  * @return string
  *   The month name.
@@ -3333,6 +3339,7 @@ function map_month($month) {
  * Returns html5 markup for a date input form element.
  *
  * @param array $variables
+ *   An associative array containing the date form element.
  *
  * @return string
  *   The rendered HTML output.
@@ -3359,6 +3366,7 @@ function theme_html_date(array $variables) {
  * Returns html5 markup for a time input form element.
  *
  * @param array $variables
+ *   An associative array containing the time form element.
  *
  * @return string
  *   The rendered HTML output.
@@ -3392,6 +3400,7 @@ function theme_html_time(array $variables) {
  * Returns html5 markup for a combined date and time form element.
  *
  * @param array $variables
+ *   An associative array containing the date and time form element.
  *
  * @return string
  *   The rendered HTML output.
@@ -3413,6 +3422,7 @@ function theme_html_datetime(array $variables) {
  * Combine html_date and html_time form elements.
  *
  * @param array $element
+ *   An associative array containing the structure of the current element.
  *
  * @return array
  */
@@ -3458,8 +3468,9 @@ function form_process_html_datetime(array $element) {
  * Validate a date string.
  *
  * @param array $element
- *
+ *   An associative array containing the structure of the current element.
  * @param array $form_state
+ *   A keyed array containing the current state of the form.
  */
 function html_date_validate(array $element, array &$form_state) {
   $date = $element['#value'];
@@ -3482,12 +3493,14 @@ function html_date_validate(array $element, array &$form_state) {
  * Element value callback for html_date and html_time elements.
  *
  * @param array $element
+ *   An associative array containing the structure of the current element.
  *
  * @param mixed $input
+ *   An array of date and time.
  *
- * @return mixed
+ * @return array
  */
-function html_date_or_time_value_callback(array $element, $input = FALSE, &$form_state = array()) {
+function html_date_or_time_value_callback(array $element, $input = FALSE, array &$form_state = array()) {
   $return = '';
   if ($input !== FALSE) {
     $return = $input;
@@ -3511,8 +3524,9 @@ function html_date_or_time_value_callback(array $element, $input = FALSE, &$form
  * Validate a time string.
  *
  * @param array $element
- *
+ *   An associative array containing the structure of the current element.
  * @param array $form_state
+ *   A keyed array containing the current state of the form.
  */
 function html_time_validate(array $element, array &$form_state) {
   $time = $element['#value'];
@@ -3540,8 +3554,9 @@ function html_time_validate(array $element, array &$form_state) {
  * Validate a combined date and time array.
  *
  * @param array $element
- *
+ *   An associative array containing the structure of the current element.
  * @param array $form_state
+ *   A keyed array containing the current state of the form.
  */
 function html_datetime_validate(array $element, array &$form_state) {
   // Validation of parts actually happens in child fields.
@@ -3562,6 +3577,7 @@ function html_datetime_validate(array $element, array &$form_state) {
  * Sets the value for a weight element, with zero as a default.
  *
  * @param array $form
+ *   An associative array containing the structure of the form
  */
 function weight_value(array &$form) {
   if (isset($form['#default_value'])) {
@@ -3576,6 +3592,7 @@ function weight_value(array &$form) {
  * Expands a radios element into individual radio elements.
  *
  * @param array $element
+ *   An associative array containing the structure of the current element.
  *
  * @return array
  */
@@ -3648,6 +3665,7 @@ function theme_checkbox(array $variables) {
  * This is used as a pre render function for checkboxes and radios.
  *
  * @param array $element
+ *   An associative array containing the structure of the current element.
  *
  * @return array
  */
@@ -3691,8 +3709,9 @@ function form_pre_render_conditional_form_element(array $element) {
  * Sets the #checked property of a checkbox element.
  *
  * @param array $element
- *
+ *   An associative array containing the structure of the current element.
  * @param array $form_state
+ *   A keyed array containing the current state of the form.
  *
  * @return array
  */
@@ -3724,6 +3743,7 @@ function form_process_checkbox(array $element, array $form_state) {
  * Processes a checkboxes form element.
  *
  * @param array $element
+ *   An associative array containing the structure of the current element.
  *
  * @return array
  */
@@ -4682,8 +4702,9 @@ function theme_email(array $variables) {
  * Note that #maxlength and #required is validated by _form_validate() already.
  *
  * @param array $element
- *
+ *   An associative array containing the structure of the current element.
  * @param array $form_state
+ *   A keyed array containing the current state of the form.
  */
 function form_validate_email(array &$element, array &$form_state) {
   $value = trim($element['#value']);
@@ -4823,8 +4844,9 @@ function theme_url(array $variables) {
  * Note that #maxlength and #required is validated by _form_validate() already.
  *
  * @param array $element
- *
+ *   An associative array containing the structure of the current element.
  * @param array $form_state
+ *   A keyed array containing the current state of the form.
  */
 function form_validate_url(array &$element, array &$form_state) {
   $value = trim($element['#value']);
@@ -4839,8 +4861,9 @@ function form_validate_url(array &$element, array &$form_state) {
  * Form element validation handler for #type 'color'.
  *
  * @param array $element
- *
+ *   An associative array containing the structure of the current element.
  * @param array $form_state
+ *   A keyed array containing the current state of the form.
  */
 function form_validate_color(array &$element, array &$form_state) {
   $value = trim($element['#value']);
@@ -4915,8 +4938,9 @@ function theme_number(array $variables) {
  * Note that #required is validated by _form_validate() already.
  *
  * @param array $element
- *
+ *   An associative array containing the structure of the current element.
  * @param array $form_state
+ *   A keyed array containing the current state of the form.
  */
 function form_validate_number(array &$element, array &$form_state) {
   $value = $element['#value'];
@@ -5107,6 +5131,7 @@ function theme_password(array $variables) {
  * Expands a weight element into a select element.
  *
  * @param array $element
+ *   An associative array containing the structure of the current element.
  *
  * @return array
  */
