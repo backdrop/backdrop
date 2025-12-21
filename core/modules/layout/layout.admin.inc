@@ -932,6 +932,17 @@ function _layout_menu_router_path_exists($path) {
   return !empty($path_matches);
 }
 
+function _layout_placeholder_positions($path) {
+  $path_parts = explode('/', $path);
+  $placeholder_positions = array();
+  for ($i = 0; $i < count($path_parts); $i++) {
+    if ($path_parts[$i] == '%') {
+      $placeholder_positions[] = $i;
+    }
+  }
+  return $placeholder_positions;
+}
+
 /**
  * Validates layout_settings_form(), ensuring a valid path.
  */
@@ -979,7 +990,112 @@ function layout_settings_form_validate(&$form, &$form_state) {
     foreach ($form_state['values']['additional_paths'] as $key => $additional_path){
       $additional_path = trim($additional_path);
       if (!empty($additional_path)) {
+        $num_additional_placeholders = count(_layout_placeholder_positions($additional_path));
+        $alias = NULL;
+        // Validation for if the primary path has placeholders.
+        if (strpos($path, '%') !== FALSE) {
+          // We check string length so we don't throw an error on each
+          // keystroke since this function runs on keyup when typing paths.
+          $path_length = strlen($path);
+          $additional_path_length = strlen($additional_path);
+
+          // Additional paths must have the same contexts as the main paths.
+          if ($additional_path_length <= $path_length) {
+            if (strpos($additional_path, '%') === FALSE && strpos($path, $additional_path) === FALSE) {
+              form_set_error('additional_paths', t('Additional path %path must match primary path %primary_path since the primary path has placeholders (%).',
+                array(
+                  '%path' => $additional_path,
+                  '%primary_path' => $path,
+                )
+              ));
+            }
+          }
+          else {
+            $path_parts = explode('%', $path);
+            $additional_path_parts = explode('%', $additional_path);
+            if ($path_parts[0] != $additional_path_parts[0]) {
+              form_set_error('additional_paths', t('Additional path %path must match primary path %primary_path since the primary path has placeholders (%).',
+                array(
+                  '%path' => $additional_path,
+                  '%primary_path' => $path,
+                )
+              ));
+            }
+          }
+        }
+        if (strpos($additional_path, '%') === FALSE) {
+          $alias = db_query('SELECT * FROM {url_alias} WHERE alias = :path', array(':path' => $additional_path))->fetchObject();
+          if (!empty($alias)) {
+            // E.g. "about" is an alias of "node/2".
+            form_set_error('additional_paths', t('Additional path %path is currently assigned to be an alias for "@alias" and cannot be used.',
+              array(
+                '%path' => $additional_path,
+                '@alias' => $alias->source,
+              )
+            ));
+          }
+        }
+
+        $layout_provides_path = layout_provides_path($additional_path);
+        $this_layout_provides_path = in_array($additional_path, $form_state['values']['additional_paths']);
+        // E.g. "home" is the primary path of the default Home layout and
+        // cannot be used in the additional paths. But allow if this is one of 
+        // the other additional paths on this same layout.
+        if ($layout_provides_path === TRUE && !$this_layout_provides_path) {
+          form_set_error('additional_paths', t('Additional path %path is already used as the primary path of another layout.',
+            array(
+              '%path' => $additional_path,
+            )
+          ));
+        }
+
+        $router_item = menu_get_item($additional_path);
+        $router_item_path = $router_item ? (string) $router_item['path'] : '';
+        if ($router_item_path !== $additional_path && strpos($router_item_path, '%') !== FALSE) {
+          $additional_path_path_context = layout_context_required_by_path($additional_path);
+          $additional_path_context = reset($additional_path_path_context);
+          if ($additional_path_context && !is_a($additional_path_context, 'LayoutStringContext')) {
+            // E.g. "node/2" cannot be used since it requires a context.
+            form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path. It requires a context in the primary path.',
+              array(
+                '%path' => $additional_path,
+              )
+            ));
+          }
+        };
+
+        switch (TRUE) {
+/*           case ($num_placeholders != $num_additional_placeholders):
+            // For example, it cannot have "node/%" nor "node".
+            form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
+              array(
+                '%path' => $additional_path,
+                '%primary_path' => $path,
+              )
+            ));
+            break;
+ */
+          //case (!$router_item_path && strpos($additional_path, '%') === FALSE):
+/*             // E.g. Only allow "pages/2" if the router item exists. But allow
+            // "node/%/edit" to pass.
+            form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path. It does not exist in the system.',
+              array(
+                '%path' => $additional_path,
+              )
+            ));
+            break;
+ */
+          case (_layout_set_message_on_path_error($form, 'additional_paths', $additional_path)):
+            break;
+          default:
+            // $layout->additional_paths[] = $additional_path;
+            break;
+        }
+
+        // If no errors, save the additional path.
         $form_state['additional_paths'][$key] = $additional_path;
+
+        // @todo: may not need this. Only if subcontexts like node/%/etc/% allowed.
         $contexts_from_additional_paths = layout_context_required_by_path($additional_path);
         foreach ($contexts_from_additional_paths as $contexts_from_additional_path) {
           $context_plugins[] = $contexts_from_additional_path->plugin;
