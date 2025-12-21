@@ -3179,7 +3179,7 @@ function form_process_password_confirm(array $element) {
  *
  * @return array
  */
-function password_confirm_validate(array $element, &$element_state) {
+function password_confirm_validate(array $element, array &$element_state) {
   $pass1 = trim($element['pass1']['#value']);
   $pass2 = trim($element['pass2']['#value']);
   if (strlen($pass1) > 0 || strlen($pass2) > 0) {
@@ -3696,7 +3696,7 @@ function form_pre_render_conditional_form_element(array $element) {
  *
  * @return array
  */
-function form_process_checkbox(array $element, $form_state) {
+function form_process_checkbox(array $element, array $form_state) {
   $value = $element['#value'];
   $return_value = $element['#return_value'];
   // On form submission, the #value of an available and enabled checked
@@ -4826,7 +4826,7 @@ function theme_url(array $variables) {
  *
  * @param array $form_state
  */
-function form_validate_url(array &$element, &$form_state) {
+function form_validate_url(array &$element, array &$form_state) {
   $value = trim($element['#value']);
   form_set_value($element, $value, $form_state);
 
@@ -4842,7 +4842,7 @@ function form_validate_url(array &$element, &$form_state) {
  *
  * @param array $form_state
  */
-function form_validate_color(array &$element, &$form_state) {
+function form_validate_color(array &$element, array &$form_state) {
   $value = trim($element['#value']);
 
   // Default to black if no value is given.
@@ -4918,7 +4918,7 @@ function theme_number(array $variables) {
  *
  * @param array $form_state
  */
-function form_validate_number(array &$element, &$form_state) {
+function form_validate_number(array &$element, array &$form_state) {
   $value = $element['#value'];
   if ($value === '') {
     return;
@@ -5009,7 +5009,8 @@ function theme_range(array $variables) {
  *   - element: An associative array containing the properties of the element.
  *     Properties used: #action, #method, #attributes, #children.
  *
- * @param string
+ * @return string
+ *   The rendered HTML output.
  *
  * @ingroup themeable
  */
