@@ -101,7 +101,7 @@ define('FILE_STATUS_PERMANENT', 1);
  *   $remote_stream_wrappers = array_diff_key(file_get_stream_wrappers(STREAM_WRAPPERS_ALL), file_get_stream_wrappers(STREAM_WRAPPERS_LOCAL));
  * @endcode
  *
- * @param $filter
+ * @param int $filter
  *   (Optional) Filters out all types except those with an on bit for each on
  *   bit in $filter. For example, if $filter is STREAM_WRAPPERS_WRITE_VISIBLE,
  *   which is equal to (STREAM_WRAPPERS_READ | STREAM_WRAPPERS_WRITE |
@@ -109,12 +109,13 @@ define('FILE_STATUS_PERMANENT', 1);
  *   bits set are returned. Defaults to STREAM_WRAPPERS_ALL, which returns all
  *   registered stream wrappers.
  *
- * @return
+ * @return array
  *   An array keyed by scheme, with values containing an array of information
  *   about the stream wrapper, as returned by hook_stream_wrappers(). If $filter
- *   is omitted or set to STREAM_WRAPPERS_ALL, the entire Backdrop stream wrapper
- *   registry is returned. Otherwise only the stream wrappers whose 'type'
- *   bitmask has an on bit for each bit specified in $filter are returned.
+ *   is omitted or set to STREAM_WRAPPERS_ALL, the entire Backdrop stream
+ *   wrapper registry is returned. Otherwise only the stream wrappers whose
+ *   'type' bitmask has an on bit for each bit specified in $filter are
+ *   returned.
  *
  * @see hook_stream_wrappers()
  * @see hook_stream_wrappers_alter()
@@ -175,7 +176,7 @@ function file_get_stream_wrappers($filter = STREAM_WRAPPERS_ALL) {
  * @param string $scheme
  *   Stream scheme.
  *
- * @return string
+ * @return string|false
  *   Return string if a scheme has a registered handler, or FALSE.
  */
 function file_stream_wrapper_get_class($scheme) {
@@ -186,10 +187,10 @@ function file_stream_wrapper_get_class($scheme) {
 /**
  * Returns the scheme of a URI (e.g. a stream).
  *
- * @param $uri
+ * @param string $uri
  *   A stream, referenced as "scheme://target".
  *
- * @return
+ * @return string|false
  *   A string containing the name of the scheme, or FALSE if none. For example,
  *   the URI "public://example.txt" would return "public".
  *
@@ -207,10 +208,10 @@ function file_uri_scheme($uri) {
  * and that it is callable. This is useful if you want to confirm a valid
  * scheme without creating a new instance of the registered handler.
  *
- * @param $scheme
+ * @param string $scheme
  *   A URI scheme, a stream is referenced as "scheme://target".
  *
- * @return
+ * @return bool
  *   Returns TRUE if the string is the name of a validated stream,
  *   or FALSE if the scheme does not have a registered handler.
  */
@@ -229,10 +230,10 @@ function file_stream_wrapper_valid_scheme($scheme) {
 /**
  * Returns the part of a URI after the schema.
  *
- * @param $uri
+ * @param string $uri
  *   A stream, referenced as "scheme://target".
  *
- * @return
+ * @return string|false
  *   A string containing the target (path), or FALSE if none.
  *   For example, the URI "public://sample/test.txt" would return
  *   "sample/test.txt".
@@ -249,14 +250,15 @@ function file_uri_target($uri) {
 /**
  * Gets the default file stream implementation.
  *
- * @return
+ * @return string
  *   'public', 'private' or any other file scheme defined as the default.
  */
 function file_default_scheme() {
   try {
     $scheme = config_get('system.core', 'file_default_scheme');
   }
-  catch (ConfigException $e) {}
+  catch (ConfigException $e) {
+  }
   if (empty($scheme)) {
     $scheme = 'public';
   }
@@ -300,10 +302,10 @@ function file_stream_wrapper_uri_normalize($uri) {
  * The scheme determines the stream wrapper class that should be
  * used by consulting the stream wrapper registry.
  *
- * @param $uri
+ * @param string $uri
  *   A stream, referenced as "scheme://target".
  *
- * @return BackdropStreamWrapperInterface
+ * @return BackdropStreamWrapperInterface|false
  *   Returns a new stream wrapper object appropriate for the given URI or FALSE
  *   if no registered handler could be found. For example, a URI of
  *   "private://example.txt" would return a new private stream wrapper object
@@ -338,10 +340,10 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
  * Note: the instance URI will be initialized to "scheme://" so that you can
  * make the customary method calls as if you had retrieved an instance by URI.
  *
- * @param $scheme
+ * @param string $scheme
  *   If the stream was "public://target", "public" would be the scheme.
  *
- * @return BackdropLocalStreamWrapper|BackdropStreamWrapperInterface|FALSE
+ * @return BackdropLocalStreamWrapper|BackdropStreamWrapperInterface|false
  *   Returns a new stream wrapper object appropriate for the given $scheme.
  *   For example, for the public scheme a stream wrapper object
  *   (BackdropPublicStreamWrapper).
@@ -372,11 +374,11 @@ function file_stream_wrapper_get_instance_by_scheme($scheme) {
  * - "shipped files", i.e. those outside of the files directory, which ship as
  *   part of Backdrop core or contributed modules or themes.
  *
- * @param $uri
+ * @param string $uri
  *   The URI to a file for which we need an external URL, or the path to a
  *   shipped file.
  *
- * @return
+ * @return string|false
  *   A string containing a URL that may be used to access the file.
  *   If the provided string already contains a preceding 'http', 'https', or
  *   '/', nothing is done and the same string is returned. If a stream wrapper
@@ -430,15 +432,15 @@ function file_create_url($uri) {
  * Directories need to have execute permissions to be considered a directory by
  * FTP servers, etc.
  *
- * @param $directory
+ * @param string $directory
  *   A string reference containing the name of a directory path or URI. A
  *   trailing slash will be trimmed from a path.
- * @param $options
+ * @param int $options
  *   A bitmask to indicate if the directory should be created if it does
  *   not exist (FILE_CREATE_DIRECTORY) or made writable if it is read-only
  *   (FILE_MODIFY_PERMISSIONS).
  *
- * @return
+ * @return bool
  *   TRUE if the directory exists (or was created) and is writable. FALSE
  *   otherwise.
  */
@@ -489,12 +491,12 @@ function file_ensure_htaccess() {
 /**
  * Creates a .htaccess file in the given directory.
  *
- * @param $directory
+ * @param string $directory
  *   The directory.
- * @param $private
+ * @param bool $private
  *   FALSE indicates that $directory should be an open and public directory.
  *   The default is TRUE which indicates a private and protected directory.
- * @param $force_overwrite
+ * @param bool $force_overwrite
  *   Set to TRUE to attempt to overwrite the existing .htaccess file if one is
  *   already present. Defaults to FALSE.
  */
@@ -505,7 +507,7 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
   else {
     $directory = rtrim($directory, '/\\');
   }
-  $htaccess_path =  $directory . '/.htaccess';
+  $htaccess_path = $directory . '/.htaccess';
 
   if (file_exists($htaccess_path) && !$force_overwrite) {
     // Short circuit if the .htaccess file already exists.
@@ -519,7 +521,10 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
     backdrop_chmod($htaccess_path, 0444);
   }
   else {
-    $variables = array('%directory' => $directory, '!htaccess' => '<br />' . nl2br(check_plain($htaccess_lines)));
+    $variables = array(
+      '%directory' => $directory,
+      '!htaccess' => '<br />' . nl2br(check_plain($htaccess_lines)),
+    );
     watchdog('security', "Security warning: Couldn't write .htaccess file. Please create a .htaccess file in your %directory directory which contains the following lines: <code>!htaccess</code>", $variables, WATCHDOG_ERROR);
   }
 }
@@ -530,12 +535,12 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
  * This .htaccess code block is replicated in files/.htaccess. If you update
  * this code block then make sure you also update files/.htaccess.
  *
- * @param $private
+ * @param bool $private
  *   (Optional) Set to FALSE to return the .htaccess lines for an open and
  *   public directory. The default is TRUE, which returns the .htaccess lines
  *   for a private and protected directory.
  *
- * @return
+ * @return string
  *   A string representing the desired contents of the .htaccess file.
  *
  * @see file_save_htaccess()
@@ -587,9 +592,9 @@ EOF;
 /**
  * Loads file entities from the database.
  *
- * @param $fids
+ * @param array $fids
  *   An array of file IDs.
- * @param $conditions
+ * @param array $conditions
  *   (deprecated) An associative array of conditions on the {file_managed}
  *   table, where the keys are the database fields and the values are the
  *   values those fields must have. Instead, it is preferable to use
@@ -604,17 +609,17 @@ EOF;
  * @see entity_load()
  * @see EntityFieldQuery
  */
-function file_load_multiple($fids = array(), $conditions = array()) {
+function file_load_multiple(array $fids = array(), array $conditions = array()) {
   return entity_load('file', $fids, $conditions);
 }
 
 /**
  * Loads a single file entity from the database.
  *
- * @param $fid
+ * @param int $fid
  *   A file ID.
  *
- * @return File
+ * @return File|false
  *   A file entity or FALSE if the file was not found.
  *
  * @see hook_file_load()
@@ -645,10 +650,10 @@ function file_save(File $file) {
 /**
  * Determines where a file is used.
  *
- * @param $file
+ * @param File $file
  *   A file entity.
  *
- * @return
+ * @return array
  *   A nested array with usage data. The first level is keyed by module name,
  *   the second by object type and the third by the object id. The value
  *   of the third level contains the usage count.
@@ -681,13 +686,13 @@ function file_usage_list(File $file) {
  *
  * @param File $file
  *   A file entity.
- * @param $module
+ * @param string $module
  *   The name of the module using the file.
- * @param $type
+ * @param string $type
  *   The type of the object that contains the referenced file.
- * @param $id
+ * @param int $id
  *   The unique, numeric ID of the object containing the referenced file.
- * @param $count
+ * @param int $count
  *   (optional) The number of references to add to the object. Defaults to 1.
  *
  * @see file_usage_list()
@@ -717,15 +722,15 @@ function file_usage_add(File $file, $module, $type, $id, $count = 1) {
  *
  * @param File $file
  *   A file entity.
- * @param $module
+ * @param string $module
  *   The name of the module using the file.
- * @param $type
+ * @param string|null $type
  *   (optional) The type of the object that contains the referenced file. May
  *   be omitted if all module references to a file are being deleted.
- * @param $id
+ * @param int|null $id
  *   (optional) The unique, numeric ID of the object containing the referenced
  *   file. May be omitted if all module references to a file are being deleted.
- * @param $count
+ * @param int $count
  *   (optional) The number of references to delete from the object. Defaults to
  *   1. 0 may be specified to delete all references to the file within a
  *   specific object.
@@ -789,10 +794,10 @@ function file_usage_delete(File $file, $module, $type = NULL, $id = NULL, $count
  *
  * @param File $source
  *   A file entity.
- * @param $destination
+ * @param string $destination
  *   A string containing the destination that $source should be copied to.
  *   This must be a stream wrapper URI.
- * @param $replace
+ * @param int $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE - Replace the existing file. If a managed file with
  *       the destination name exists then its database entry will be updated. If
@@ -801,7 +806,7 @@ function file_usage_delete(File $file, $module, $type = NULL, $id = NULL, $count
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return File|false
  *   File object if the copy is successful, or FALSE in the event of an error.
  *
  * @see file_unmanaged_copy()
@@ -810,10 +815,17 @@ function file_usage_delete(File $file, $module, $type = NULL, $id = NULL, $count
 function file_copy(File $source, $destination = NULL, $replace = FILE_EXISTS_RENAME) {
   if (!file_valid_uri($destination)) {
     if (($realpath = backdrop_realpath($source->uri)) !== FALSE) {
-      watchdog('file', 'File %file (%realpath) could not be copied because the destination %destination is invalid. This is often caused by improper use of file_copy() or a missing stream wrapper.', array('%file' => $source->uri, '%realpath' => $realpath, '%destination' => $destination));
+      watchdog('file', 'File %file (%realpath) could not be copied because the destination %destination is invalid. This is often caused by improper use of file_copy() or a missing stream wrapper.', array(
+        '%file' => $source->uri,
+        '%realpath' => $realpath,
+        '%destination' => $destination,
+      ));
     }
     else {
-      watchdog('file', 'File %file could not be copied because the destination %destination is invalid. This is often caused by improper use of file_copy() or a missing stream wrapper.', array('%file' => $source->uri, '%destination' => $destination));
+      watchdog('file', 'File %file could not be copied because the destination %destination is invalid. This is often caused by improper use of file_copy() or a missing stream wrapper.', array(
+        '%file' => $source->uri,
+        '%destination' => $destination,
+      ));
     }
     backdrop_set_message(t('The specified file %file could not be copied because the destination is invalid. More information is available in the system log.', array('%file' => $source->uri)), 'error');
     return FALSE;
@@ -856,10 +868,10 @@ function file_copy(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
  * 'public', 'private', 'temporary', or an extension provided with
  * hook_stream_wrappers().
  *
- * @param $uri
+ * @param string $uri
  *   The URI to be tested.
  *
- * @return
+ * @return bool
  *   TRUE if the URI is allowed.
  */
 function file_valid_uri($uri) {
@@ -883,20 +895,20 @@ function file_valid_uri($uri) {
  *   $replace parameter. FILE_EXISTS_REPLACE will error out. FILE_EXISTS_RENAME
  *   will rename the file until the $destination is unique.
  *
- * @param $source
+ * @param string $source
  *   A string specifying the filepath or URI of the source file.
- * @param $destination
+ * @param string|null $destination
  *   A URI containing the destination that $source should be copied to. The
  *   URI may be a bare filepath (without a scheme). If this value is omitted,
  *   Backdrop's default files scheme will be used, usually "public://".
- * @param $replace
+ * @param int $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE - Replace the existing file.
  *   - FILE_EXISTS_RENAME - Append _{incrementing number} until the filename is
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return string|false
  *   The path to the new file, or FALSE in the event of an error.
  *
  * @see file_copy()
@@ -911,7 +923,10 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
   $real_destination = ($real_destination = backdrop_realpath($destination)) ? $real_destination : $destination;
   // Perform the copy operation.
   if (!@copy($real_source, $real_destination)) {
-    watchdog('file', 'The specified file %file could not be copied to %destination.', array('%file' => $source, '%destination' => $destination), WATCHDOG_ERROR);
+    watchdog('file', 'The specified file %file could not be copied to %destination.', array(
+      '%file' => $source,
+      '%destination' => $destination,
+    ), WATCHDOG_ERROR);
     return FALSE;
   }
   // Set the permissions on the new file.
@@ -929,21 +944,21 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
  * - If file already exists in $destination either the call will error out,
  *   replace the file or rename the file based on the $replace parameter.
  *
- * @param $source
+ * @param string $source
  *   A string specifying the filepath or URI of the source file.
- * @param $destination
+ * @param string|null $destination
  *   A URI containing the destination that $source should be moved/copied to.
  *   The URI may be a bare filepath (without a scheme) and in that case the
  *   default scheme (file://) will be used. If this value is omitted, Backdrop's
  *   default files scheme will be used, usually "public://".
- * @param $replace
+ * @param int $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE - Replace the existing file.
  *   - FILE_EXISTS_RENAME - Append _{incrementing number} until the filename is
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return bool
  *   TRUE, or FALSE in the event of an error.
  *
  * @see file_unmanaged_copy()
@@ -957,7 +972,10 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
     // @todo Replace backdrop_set_message() calls with exceptions instead.
     backdrop_set_message(t('The specified file %file could not be moved/copied because no file by that name exists. Please check that you supplied the correct filename.', array('%file' => $original_source)), 'error');
     if (($realpath = backdrop_realpath($original_source)) !== FALSE) {
-      watchdog('file', 'File %file (%realpath) could not be copied because it does not exist.', array('%file' => $original_source, '%realpath' => $realpath));
+      watchdog('file', 'File %file (%realpath) could not be copied because it does not exist.', array(
+        '%file' => $original_source,
+        '%realpath' => $realpath,
+      ));
     }
     else {
       watchdog('file', 'File %file could not be moved/copied because it does not exist.', array('%file' => $original_source));
@@ -980,7 +998,10 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
     $dirname = backdrop_dirname($destination);
     if (!file_prepare_directory($dirname)) {
       // The destination is not valid.
-      watchdog('file', 'File %file could not be moved/copied because the destination directory %destination is not configured correctly.', array('%file' => $original_source, '%destination' => $dirname));
+      watchdog('file', 'File %file could not be moved/copied because the destination directory %destination is not configured correctly.', array(
+        '%file' => $original_source,
+        '%destination' => $dirname,
+      ));
       backdrop_set_message(t('The specified file %file could not be moved/copied because the destination directory is not properly configured. This may be caused by a problem with file or directory permissions. More information is available in the system log.', array('%file' => $original_source)), 'error');
       return FALSE;
     }
@@ -1019,6 +1040,11 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
 
 /**
  * Constructs a URI to Backdrop's default files location given a relative path.
+ *
+ * @param string $path
+ *   The relative path of the default files location.
+ *
+ * @return string
  */
 function file_build_uri($path) {
   $uri = file_default_scheme() . '://' . $path;
@@ -1028,16 +1054,16 @@ function file_build_uri($path) {
 /**
  * Determines the destination path for a file.
  *
- * @param $destination
+ * @param string $destination
  *   A string specifying the desired final URI or filepath.
- * @param $replace
+ * @param int $replace
  *   Replace behavior when the destination file already exists.
  *   - FILE_EXISTS_REPLACE - Replace the existing file.
  *   - FILE_EXISTS_RENAME - Append _{incrementing number} until the filename is
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return string|false
  *   The destination filepath, or FALSE if the file already exists
  *   and FILE_EXISTS_ERROR is specified.
  *
@@ -1079,10 +1105,10 @@ function file_destination($destination, $replace) {
  *
  * @param File $source
  *   A file entity.
- * @param $destination
+ * @param string $destination
  *   A string containing the destination that $source should be moved to.
  *   This must be a stream wrapper URI.
- * @param $replace
+ * @param int $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE - Replace the existing file. If a managed file with
  *       the destination name exists then its database entry will be updated and
@@ -1102,10 +1128,17 @@ function file_destination($destination, $replace) {
 function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_RENAME) {
   if (!file_valid_uri($destination)) {
     if (($realpath = backdrop_realpath($source->uri)) !== FALSE) {
-      watchdog('file', 'File %file (%realpath) could not be moved because the destination %destination is invalid. This may be caused by improper use of file_move() or a missing stream wrapper.', array('%file' => $source->uri, '%realpath' => $realpath, '%destination' => $destination));
+      watchdog('file', 'File %file (%realpath) could not be moved because the destination %destination is invalid. This may be caused by improper use of file_move() or a missing stream wrapper.', array(
+        '%file' => $source->uri,
+        '%realpath' => $realpath,
+        '%destination' => $destination,
+      ));
     }
     else {
-      watchdog('file', 'File %file could not be moved because the destination %destination is invalid. This may be caused by improper use of file_move() or a missing stream wrapper.', array('%file' => $source->uri, '%destination' => $destination));
+      watchdog('file', 'File %file could not be moved because the destination %destination is invalid. This may be caused by improper use of file_move() or a missing stream wrapper.', array(
+        '%file' => $source->uri,
+        '%destination' => $destination,
+      ));
     }
     backdrop_set_message(t('The specified file %file could not be moved because the destination is invalid. More information is available in the system log.', array('%file' => $source->uri)), 'error');
     return FALSE;
@@ -1156,21 +1189,21 @@ function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
  * - If file already exists in $destination either the call will error out,
  *   replace the file or rename the file based on the $replace parameter.
  *
- * @param $source
+ * @param string $source
  *   A string specifying the filepath or URI of the source file.
- * @param $destination
+ * @param string $destination
  *   A URI containing the destination that $source should be moved to. The
  *   URI may be a bare filepath (without a scheme) and in that case the default
  *   scheme (file://) will be used. If this value is omitted, Backdrop's default
  *   files scheme will be used, usually "public://".
- * @param $replace
+ * @param int $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE - Replace the existing file.
  *   - FILE_EXISTS_RENAME - Append _{incrementing number} until the filename is
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return string|false
  *   The path to the new file, or FALSE in the event of an error.
  *
  * @see file_move()
@@ -1191,7 +1224,10 @@ function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXIST
     // renames across schemes that are not local, or where rename() has not been
     // implemented.
     if (!@copy($real_source, $real_destination) || !@unlink($real_source)) {
-      watchdog('file', 'The specified file %file could not be moved to %destination.', array('%file' => $source, '%destination' => $destination), WATCHDOG_ERROR);
+      watchdog('file', 'The specified file %file could not be moved to %destination.', array(
+        '%file' => $source,
+        '%destination' => $destination,
+      ), WATCHDOG_ERROR);
       return FALSE;
     }
   }
@@ -1221,24 +1257,25 @@ function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXIST
  * 'allow_insecure_uploads'. If 'allow_insecure_uploads' evaluates to TRUE, no
  * alterations will be made, if it evaluates to FALSE, the filename is 'munged'.
  *
- * @param $filename
+ * @param string $filename
  *   File name to modify.
- * @param $extensions
+ * @param string $extensions
  *   A space-separated list of extensions that should not be altered. Note that
  *   extensions that are unsafe will be altered regardless of this parameter.
- * @param $alerts
+ * @param bool $alerts
  *   If TRUE, backdrop_set_message() will be called to display a message if the
  *   file name was changed.
  *
- * @return
+ * @return string
  *   The potentially modified $filename.
  */
 function file_munge_filename($filename, $extensions, $alerts = TRUE) {
   $original = $filename;
 
-  // Allow potentially insecure uploads for very savvy users and admin
+  // Allow potentially insecure uploads for very savvy users and admin.
   if (!settings_get('allow_insecure_uploads', 0)) {
-    // Remove any null bytes. See http://php.net/manual/security.filesystem.nullbytes.php
+    // Remove any null bytes.
+    // See http://php.net/manual/security.filesystem.nullbytes.php.
     $filename = str_replace(chr(0), '', $filename);
 
     $allowlist = array_unique(explode(' ', strtolower(trim($extensions))));
@@ -1274,10 +1311,10 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
 /**
  * Undoes the effect of file_munge_filename().
  *
- * @param $filename
+ * @param string $filename
  *   String with the filename to be unmunged.
  *
- * @return
+ * @return string
  *   An unmunged filename string.
  */
 function file_unmunge_filename($filename) {
@@ -1290,12 +1327,12 @@ function file_unmunge_filename($filename) {
  * If a file with the specified name already exists, an alternative will be
  * used.
  *
- * @param $basename
- *   String filename
- * @param $directory
+ * @param string $basename
+ *   String filename.
+ * @param string $directory
  *   String containing the directory or parent URI.
  *
- * @return
+ * @return string
  *   File path consisting of $directory and a unique filename based off
  *   of $basename.
  *
@@ -1313,7 +1350,7 @@ function file_create_filename($basename, $directory) {
   }
 
   if (substr(PHP_OS, 0, 3) == 'WIN') {
-    // These characters are not allowed in Windows filenames
+    // These characters are not allowed in Windows filenames.
     $basename = str_replace(array(':', '*', '?', '"', '<', '>', '|'), '_', $basename);
   }
 
@@ -1341,7 +1378,7 @@ function file_create_filename($basename, $directory) {
 
     $counter = 0;
     do {
-      $destination = $directory . $separator . $name . '_' . $counter++ . $ext;
+      $destination = $directory . $separator . $name . '_' . ($counter++) . $ext;
     } while (file_exists($destination));
   }
 
@@ -1355,7 +1392,7 @@ function file_create_filename($basename, $directory) {
  * file usages instead. That will automatically mark the file as temporary and
  * remove it during cleanup.
  *
- * @param $fid
+ * @param int $fid
  *   The file id.
  *
  * @see file_unmanaged_delete()
@@ -1372,8 +1409,8 @@ function file_delete($fid) {
  * file usages instead. That will automatically mark the file as temporary and
  * remove it during cleanup.
  *
- * @param $fid
- *   The file ID.
+ * @param array $fids
+ *   Array of file IDs.
  *
  * @see file_unmanaged_delete()
  * @see file_usage_list()
@@ -1388,10 +1425,10 @@ function file_delete_multiple(array $fids) {
  * This function should be used when the file to be deleted does not have an
  * entry recorded in the files table.
  *
- * @param $path
+ * @param string $path
  *   A string containing a file path or (streamwrapper) URI.
  *
- * @return
+ * @return bool
  *   TRUE for success or path does not exist, or FALSE in the event of an
  *   error.
  *
@@ -1430,10 +1467,10 @@ function file_unmanaged_delete($path) {
  *
  * Note that this only deletes visible files with write permission.
  *
- * @param $path
+ * @param string $path
  *   A string containing either an URI or a file or directory path.
  *
- * @return
+ * @return bool
  *   TRUE for success or if path does not exist, FALSE in the event of an
  *   error.
  *
@@ -1486,10 +1523,10 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  * Temporary files are periodically cleaned. Use file_usage_add() to register
  * the usage of the file which will automatically mark it as permanent.
  *
- * @param $form_field_name
+ * @param string $form_field_name
  *   A string that is the associative array key of the upload form element in
  *   the form array.
- * @param $validators
+ * @param array $validators
  *   An optional, associative array of callback functions used to validate the
  *   file. See file_validate() for a full discussion of the array format.
  *   If no extension validator is provided, it will default to a limited safe
@@ -1498,11 +1535,11 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *   explicitly set the 'file_validate_extensions' validator to an empty array
  *   (Beware: this is not safe and should only be allowed for trusted users, if
  *   at all).
- * @param $destination
+ * @param string $destination
  *   A string containing the URI that the file should be copied to. This must
  *   be a stream wrapper URI. If this value is omitted, Backdrop's temporary
  *   files scheme will be used ("temporary://").
- * @param $replace
+ * @param int $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE: Replace the existing file.
  *   - FILE_EXISTS_RENAME: Append _{incrementing number} until the filename is
@@ -1727,7 +1764,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       continue;
     }
 
-    // Move uploaded files from PHP's upload_tmp_dir to Drupal's temporary
+    // Move uploaded files from PHP's upload_tmp_dir to Backdrop's temporary
     // directory. This overcomes open_basedir restrictions for future file
     // operations.
     $file->uri = $file->destination;
@@ -1804,12 +1841,12 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
  *
  * Compatibility: normal paths and stream wrappers.
  *
- * @param $filename
+ * @param string $filename
  *   The filename of the uploaded file.
- * @param $uri
+ * @param string $uri
  *   A string containing the destination URI of the file.
  *
- * @return
+ * @return bool
  *   TRUE on success, or FALSE on failure.
  *
  * @see move_uploaded_file()
@@ -1841,7 +1878,7 @@ function backdrop_move_uploaded_file($filename, $uri) {
  *
  * @param File $file
  *   A file entity.
- * @param $validators
+ * @param array $validators
  *   An optional, associative array of callback functions used to validate the
  *   file. The keys are function names and the values arrays of callback
  *   parameters which will be passed in after the file entity. The
@@ -1854,7 +1891,7 @@ function backdrop_move_uploaded_file($filename, $uri) {
  *
  * @see hook_file_validate()
  */
-function file_validate(File $file, $validators = array()) {
+function file_validate(File $file, array $validators = array()) {
   // Call the validation functions specified by this function's caller.
   $errors = array();
   foreach ($validators as $function => $args) {
@@ -1886,8 +1923,8 @@ function file_validate(File $file, $validators = array()) {
  * @param File $file
  *   A file entity.
  *
- * @return
- *   An array. If the file name is too long, it will contain an error message.
+ * @return array
+ *   If the file name is too long, it will contain an error message.
  */
 function file_validate_name_length(File $file) {
   $errors = array();
@@ -1906,12 +1943,11 @@ function file_validate_name_length(File $file) {
  *
  * @param File $file
  *   A file entity.
- * @param $extensions
+ * @param string $extensions
  *   A string with a space separated list of allowed extensions.
  *
- * @return
- *   An array. If the file extension is not allowed, it will contain an error
- *   message.
+ * @return array
+ *   If the file extension is not allowed, it will contain an error message.
  *
  * @see hook_file_validate()
  */
@@ -1930,15 +1966,15 @@ function file_validate_extensions(File $file, $extensions) {
  *
  * @param File $file
  *   A file entity.
- * @param $file_limit
+ * @param int $file_limit
  *   An integer specifying the maximum file size in bytes. Zero indicates that
  *   no limit should be enforced.
- * @param $user_limit
+ * @param int $user_limit
  *   An integer specifying the maximum number of bytes the user is allowed.
  *   Zero indicates that no limit should be enforced.
  *
- * @return
- *   An array. If the file size exceeds limits, it will contain an error
+ * @return array
+ *   If the file size exceeds limits, it will contain an error
  *   message.
  *
  * @see hook_file_validate()
@@ -1949,12 +1985,18 @@ function file_validate_size(File $file, $file_limit = 0, $user_limit = 0) {
   $errors = array();
 
   if ($file_limit && $file->filesize > $file_limit) {
-    $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', array('%filesize' => format_size($file->filesize), '%maxsize' => format_size($file_limit)));
+    $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', array(
+      '%filesize' => format_size($file->filesize),
+      '%maxsize' => format_size($file_limit),
+    ));
   }
 
   // Save a query by only calling file_space_used() when a limit is provided.
   if ($user_limit && (file_space_used($user->uid) + $file->filesize) > $user_limit) {
-      $errors[] = t('The file is %filesize which would exceed your disk quota of %quota.', array('%filesize' => format_size($file->filesize), '%quota' => format_size($user_limit)));
+      $errors[] = t('The file is %filesize which would exceed your disk quota of %quota.', array(
+        '%filesize' => format_size($file->filesize),
+        '%quota' => format_size($user_limit),
+      ));
   }
 
   return $errors;
@@ -1966,8 +2008,8 @@ function file_validate_size(File $file, $file_limit = 0, $user_limit = 0) {
  * @param File $file
  *   A file entity.
  *
- * @return
- *   An array. If the file is not an image, it will contain an error message.
+ * @return array
+ *   If the file is not an image, it will contain an error message.
  *
  * @see hook_file_validate()
  */
@@ -1991,17 +2033,17 @@ function file_validate_is_image(File $file) {
  *
  * @param File $file
  *   A file entity. This function may resize the file affecting its size.
- * @param $maximum_dimensions
+ * @param string|int $maximum_dimensions
  *   An optional string in the form WIDTHxHEIGHT e.g. '640x480' or '85x85'. If
  *   an image toolkit is installed the image will be resized down to these
  *   dimensions. A value of 0 indicates no restriction on size, so resizing
  *   will be attempted.
- * @param $minimum_dimensions
+ * @param string|int $minimum_dimensions
  *   An optional string in the form WIDTHxHEIGHT. This will check that the
  *   image meets a minimum size. A value of 0 indicates no restriction.
  *
- * @return
- *   An array. If the file is an image and did not meet the requirements, it
+ * @return array
+ *   If the file is an image and did not meet the requirements, it
  *   will contain an error message.
  *
  * @see hook_file_validate()
@@ -2061,11 +2103,12 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
  *
  * @param File $file
  *   A file entity.
- * @param $orientation
- *   A flag indicating that EXIF data should be checked and image rotated if necessary.
+ * @param int $orientation
+ *   A flag indicating that EXIF data should be checked and image rotated if
+ *   necessary.
  *
- * @return
- *   An array. If the file is an image and did not meet the requirements, it
+ * @return array
+ *   If the file is an image and did not meet the requirements, it
  *   will contain an error message.
  *
  * @see hook_file_validate()
@@ -2244,13 +2287,13 @@ function file_unsafe_directories() {
 /**
  * Saves a file to the specified destination and creates a database entry.
  *
- * @param $data
+ * @param string $data
  *   A string containing the contents of the file.
- * @param $destination
+ * @param string $destination
  *   A string containing the destination URI. This must be a stream wrapper URI.
  *   If no value is provided, a randomized name will be generated and the file
  *   will be saved using Backdrop's default files scheme, usually "public://".
- * @param $replace
+ * @param int $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE - Replace the existing file. If a managed file with
  *       the destination name exists then its database entry will be updated. If
@@ -2259,7 +2302,7 @@ function file_unsafe_directories() {
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return File
+ * @return File|false
  *   A file entity, or FALSE on error.
  *
  * @see file_unmanaged_save_data()
@@ -2312,21 +2355,21 @@ function file_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAM
  * saved to the {file_managed} table and none of the file_* hooks will be
  * called.
  *
- * @param $data
+ * @param string $data
  *   A string containing the contents of the file.
- * @param $destination
+ * @param string $destination
  *   A string containing the destination location. This must be a stream wrapper
  *   URI. If no value is provided, a randomized name will be generated and the
  *   file will be saved using Backdrop's default files scheme, usually
  *   "public://".
- * @param $replace
+ * @param int $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE - Replace the existing file.
  *   - FILE_EXISTS_RENAME - Append _{incrementing number} until the filename is
  *                          unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return string|false
  *   A string with the path of the resulting file, or FALSE on error.
  *
  * @see file_save_data()
@@ -2348,12 +2391,12 @@ function file_unmanaged_save_data($data, $destination = NULL, $replace = FILE_EX
  *
  * Pipes a file through Backdrop to the client.
  *
- * @param $uri
+ * @param string $uri
  *   String specifying the file URI to transfer.
- * @param $headers
+ * @param array $headers
  *   An array of HTTP headers to send along with file.
  */
-function file_transfer($uri, $headers) {
+function file_transfer($uri, array $headers) {
   if (ob_get_level()) {
     ob_end_clean();
   }
@@ -2460,10 +2503,10 @@ function file_download_headers($uri) {
  * used to determine access directly, so that access checks will not be run
  * twice.
  *
- * @param $uri
+ * @param string $uri
  *   The URI for the file whose access should be retrieved.
  *
- * @return
+ * @return bool
  *   Boolean TRUE if access is allowed. FALSE if access is not allowed.
  *
  * @see file_download_headers()
@@ -2480,11 +2523,11 @@ function file_download_access($uri) {
  * prevents hidden files and directories (such as SVN working directories)
  * from being scanned.
  *
- * @param $dir
+ * @param string $dir
  *   The base directory or URI to scan, without trailing slash.
- * @param $mask
+ * @param string $mask
  *   The preg_match() regular expression of the files to find.
- * @param $options
+ * @param array $options
  *   An associative array of additional options, with the following elements:
  *   - 'nomask': The preg_match() regular expression of the files to ignore.
  *     Defaults to '/^(\..*)|(CVS)$/'. This default ignores all hidden files
@@ -2501,7 +2544,7 @@ function file_download_access($uri) {
  *     to 0.
  *   - 'max_depth': Maximum depth of directories to return files from. Defaults
  *     to 30.
- * @param $depth
+ * @param int $depth
  *   Current depth of recursion. This parameter is only used internally and
  *   should not be passed in.
  *
@@ -2509,7 +2552,7 @@ function file_download_access($uri) {
  *   An associative array (keyed on the chosen key) of objects with 'uri',
  *   'filename', and 'name' members corresponding to the matching files.
  */
-function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
+function file_scan_directory($dir, $mask, array $options = array(), $depth = 0) {
   // By default, do not check for files in common special-purpose directories.
   $ignore_directories = array(
     'node_modules',
@@ -2588,7 +2631,7 @@ function file_upload_max_size() {
 /**
  * Determines an Internet Media Type or MIME type from a filename.
  *
- * @param $uri
+ * @param string $uri
  *   A string containing the URI, path, or filename.
  * @param array|null $mapping
  *   An optional map of extensions to their mimetypes, in the form:
@@ -2677,7 +2720,7 @@ function backdrop_chmod($uri, $mode = NULL) {
  * @param string $uri
  *   A URI or pathname.
  * @param resource|null $context
- *   Refer to http://php.net/manual/ref.stream.php
+ *   Refer to http://php.net/manual/ref.stream.php.
  *
  * @return bool
  *   Boolean TRUE on success, or FALSE on failure.
@@ -2721,8 +2764,8 @@ function backdrop_unlink($uri, $context = NULL) {
  */
 function backdrop_realpath($uri) {
   // If this URI is a stream, pass it off to the appropriate stream wrapper.
-  // Otherwise, attempt PHP's realpath. This allows use of backdrop_realpath even
-  // for unmanaged files outside of the stream wrapper interface.
+  // Otherwise, attempt PHP's realpath. This allows use of backdrop_realpath
+  // even for unmanaged files outside of the stream wrapper interface.
   if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
     return $wrapper->realpath();
   }
@@ -2813,7 +2856,7 @@ function backdrop_basename($uri, $suffix = NULL) {
  * @param bool $recursive
  *   Default to FALSE.
  * @param resource|null $context
- *   Refer to http://php.net/manual/ref.stream.php
+ *   Refer to http://php.net/manual/ref.stream.php.
  *
  * @return bool
  *   Boolean TRUE on success, or FALSE on failure.
@@ -2844,7 +2887,7 @@ function backdrop_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL)
  * @param string $uri
  *   A URI or pathname.
  * @param string $context
- *   Refer to http://php.net/manual/ref.stream.php
+ *   Refer to http://php.net/manual/ref.stream.php.
  *
  * @return bool
  *   Boolean TRUE on success, or FALSE on failure.

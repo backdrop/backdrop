@@ -2517,11 +2517,11 @@ function form_type_checkbox_value(array $element, $input = FALSE) {
  *
  * @param array $element
  *   The form element whose value is being populated.
- * @param mixed $input
+ * @param array|null|false $input
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
- * @return mixed
+ * @return array
  *   The data that will appear in the $element_state['values'] collection
  *   for this element. Return nothing to use the default.
  */
@@ -2637,7 +2637,7 @@ function form_type_tableselect_value(array $element, $input = FALSE) {
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
- * @return mixed
+ * @return array
  *   The data that will appear in the $element_state['values'] collection
  *   for this element. Return nothing to use the default.
  */
@@ -2694,7 +2694,7 @@ function form_type_select_value(array $element, $input = FALSE) {
  *
  * @param array $element
  *   The form element whose value is being populated.
- * @param mixed $input
+ * @param string|null|false $input
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
@@ -2715,7 +2715,7 @@ function form_type_textarea_value(array $element, $input = FALSE) {
  *
  * @param array $element
  *   The form element whose value is being populated.
- * @param mixed $input
+ * @param string|null|false $input
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
@@ -3577,7 +3577,7 @@ function html_datetime_validate(array $element, array &$form_state) {
  * Sets the value for a weight element, with zero as a default.
  *
  * @param array $form
- *   An associative array containing the structure of the form
+ *   An associative array containing the structure of the form.
  */
 function weight_value(array &$form) {
   if (isset($form['#default_value'])) {
