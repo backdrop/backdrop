@@ -1,10 +1,17 @@
 <?php
+/**
+ * @file
+ * Base class for FTP implementations.
+ */
 
 /**
- * Base class for FTP implementations.
+ * Abstract class for FileTransfer via FTP.
  */
 abstract class FileTransferFTP extends FileTransfer {
 
+  /**
+   * {@inheritdoc}
+   */
   public function __construct($jail, $username, $password, $hostname, $port) {
     $this->username = $username;
     $this->password = $password;
@@ -22,7 +29,7 @@ abstract class FileTransferFTP extends FileTransfer {
    *
    * @throws FileTransferException
    */
-  static function factory($jail, $settings) {
+  static public function factory($jail, $settings) {
     $username = empty($settings['username']) ? '' : $settings['username'];
     $password = empty($settings['password']) ? '' : $settings['password'];
     $hostname = empty($settings['advanced']['hostname']) ? 'localhost' : $settings['advanced']['hostname'];
@@ -48,8 +55,14 @@ abstract class FileTransferFTP extends FileTransfer {
   }
 }
 
+/**
+ * Extension for file transfer by FTP.
+ */
 class FileTransferFTPExtension extends FileTransferFTP implements FileTransferChmodInterface {
 
+  /**
+   * {@inheritdoc}
+   */
   public function connect() {
     $this->connection = ftp_connect($this->hostname, $this->port);
 
@@ -61,18 +74,30 @@ class FileTransferFTPExtension extends FileTransferFTP implements FileTransferCh
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function copyFileJailed($source, $destination) {
-    if (!@ftp_put($this->connection,  $destination, $source, FTP_BINARY)) {
-      throw new FileTransferException("Cannot move @source to @destination", NULL, array("@source" => $source, "@destination" => $destination));
+    if (!@ftp_put($this->connection, $destination, $source, FTP_BINARY)) {
+      throw new FileTransferException("Cannot move @source to @destination", NULL, array(
+        "@source" => $source,
+        "@destination" => $destination,
+      ));
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function createDirectoryJailed($directory) {
     if (!ftp_mkdir($this->connection, $directory)) {
       throw new FileTransferException("Cannot create directory @directory", NULL, array("@directory" => $directory));
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function removeDirectoryJailed($directory) {
     $pwd = ftp_pwd($this->connection);
     if (!ftp_chdir($this->connection, $directory)) {
@@ -100,12 +125,18 @@ class FileTransferFTPExtension extends FileTransferFTP implements FileTransferCh
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function removeFileJailed($destination) {
     if (!ftp_delete($this->connection, $destination)) {
       throw new FileTransferException("Unable to remove to file @file", NULL, array('@file' => $destination));
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function isDirectory($path) {
     $result = FALSE;
     $curr = ftp_pwd($this->connection);
@@ -116,11 +147,17 @@ class FileTransferFTPExtension extends FileTransferFTP implements FileTransferCh
     return $result;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function isFile($path) {
     return ftp_size($this->connection, $path) != -1;
   }
 
-  function chmodJailed($path, $mode, $recursive) {
+  /**
+   * {@inheritdoc}
+   */
+  public function chmodJailed($path, $mode, $recursive) {
     if (!ftp_chmod($this->connection, $mode, $path)) {
       throw new FileTransferException("Unable to set permissions on %file", NULL, array('%file' => $path));
     }
@@ -138,7 +175,17 @@ class FileTransferFTPExtension extends FileTransferFTP implements FileTransferCh
 }
 
 if (!function_exists('ftp_chmod')) {
-  function ftp_chmod($ftp_stream, $mode, $filename) {
+  /**
+   * @param \FTP\Connection $ftp_stream
+   *   The link identifier of the FTP connection.
+   * @param string $mode
+   *   The FTP mode.
+   * @param string $filename
+   *   Filename.
+   *
+   * @return bool
+   */
+  function ftp_chmod(\FTP\Connection $ftp_stream, $mode, $filename) {
     return ftp_site($ftp_stream, sprintf('CHMOD %o %s', $mode, $filename));
   }
 }

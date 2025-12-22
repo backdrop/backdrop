@@ -1,6 +1,10 @@
 <?php
 /**
  * @file
+ * FileTransfer class
+ */
+
+/**
  * Base FileTransfer class.
  *
  * Classes extending this class perform file operations on directories not
@@ -72,7 +76,7 @@ abstract class FileTransfer {
    *   be restricted to. This prevents the FileTransfer classes from being
    *   able to touch other parts of the filesystem.
    */
-  function __construct($jail) {
+  public function __construct($jail) {
     $this->jail = $jail;
   }
 
@@ -96,16 +100,16 @@ abstract class FileTransfer {
    *
    * @throws FileTransferException
    */
-  static function factory($jail, $settings) {
+  static public function factory($jail, array $settings) {
     throw new FileTransferException('FileTransfer::factory() static method not overridden by FileTransfer subclass.');
   }
 
   /**
    * Implementation of the magic __get() method.
    *
-   * If the connection isn't set to anything, this will call the connect() method
-   * and set it to and return the result; afterwards, the connection will be
-   * returned directly without using this method.
+   * If the connection isn't set to anything, this will call the connect()
+   * method and set it to and return the result; afterwards, the connection will
+   * be returned directly without using this method.
    *
    * @param string $name
    *   The name of the variable to return.
@@ -113,7 +117,7 @@ abstract class FileTransfer {
    * @return string|bool
    *   The variable specified in $name.
    */
-  function __get($name) {
+  public function __get($name) {
     if ($name == 'connection') {
       $this->connect();
       return $this->connectionHandle;
@@ -182,9 +186,9 @@ abstract class FileTransfer {
   /**
    * Copies a directory.
    *
-   * @param $source
+   * @param string $source
    *   The source path.
-   * @param $destination
+   * @param string $destination
    *   The destination path.
    */
   final public function copyDirectory($source, $destination) {
@@ -221,7 +225,7 @@ abstract class FileTransfer {
   /**
    * Creates a directory.
    *
-   * @param $directory
+   * @param string $directory
    *   The directory to be created.
    */
   public final function createDirectory($directory) {
@@ -233,7 +237,7 @@ abstract class FileTransfer {
   /**
    * Removes a directory.
    *
-   * @param $directory
+   * @param string $directory
    *   The directory to be removed.
    */
   public final function removeDirectory($directory) {
@@ -245,9 +249,9 @@ abstract class FileTransfer {
   /**
    * Copies a file.
    *
-   * @param $source
+   * @param string $source
    *   The source file.
-   * @param $destination
+   * @param string $destination
    *   The destination file.
    */
   public final function copyFile($source, $destination) {
@@ -260,7 +264,7 @@ abstract class FileTransfer {
   /**
    * Removes a file.
    *
-   * @param $destination
+   * @param string $destination
    *   The destination file to be removed.
    */
   public final function removeFile($destination) {
@@ -272,7 +276,7 @@ abstract class FileTransfer {
   /**
    * Checks that the path is inside the jail and throws an exception if not.
    *
-   * @param $path
+   * @param string $path
    *   A path to check against the jail.
    *
    * @throws FileTransferException
@@ -282,20 +286,23 @@ abstract class FileTransfer {
     $full_path = backdrop_realpath(substr($this->chroot . $path, 0, strlen($full_jail)));
     $full_path = $this->fixRemotePath($full_path, FALSE);
     if ($full_jail !== $full_path) {
-      throw new FileTransferException('@directory is outside of the @jail', NULL, array('@directory' => $path, '@jail' => $this->jail));
+      throw new FileTransferException('@directory is outside of the @jail', NULL, array(
+        '@directory' => $path,
+        '@jail' => $this->jail,
+      ));
     }
   }
 
   /**
    * Returns a modified path suitable for passing to the server.
    *
-   * If a path is a windows path, makes it POSIX compliant by removing the drive letter.
-   * If $this->chroot has a value, it is stripped from the path to allow for
-   * chroot'd filetransfer systems.
+   * If a path is a windows path, makes it POSIX compliant by removing the drive
+   * letter. If $this->chroot has a value, it is stripped from the path to allow
+   * for chroot'd filetransfer systems.
    *
-   * @param $path
+   * @param string $path
    *   The path to modify.
-   * @param $strip_chroot
+   * @param string $strip_chroot
    *   Whether to remove the path in $this->chroot.
    *
    * @return string
@@ -314,12 +321,14 @@ abstract class FileTransfer {
   }
 
   /**
-  * Changes backslashes to slashes, also removes a trailing slash.
-  *
-  * @param string $path
-  * @return string
-  */
-  function sanitizePath($path) {
+   * Changes backslashes to slashes, also removes a trailing slash.
+   *
+   * @param string $path
+   *   The path to sanitize.
+   *
+   * @return string
+   */
+  public function sanitizePath($path) {
     $path = str_replace('\\', '/', $path); // Windows path sanitization.
     if (substr($path, -1) == '/') {
       $path = substr($path, 0, -1);
@@ -332,9 +341,9 @@ abstract class FileTransfer {
    *
    * We need a separate method to make the $destination is in the jail.
    *
-   * @param $source
+   * @param string $source
    *   The source path.
-   * @param $destination
+   * @param string $destination
    *   The destination path.
    */
   protected function copyDirectoryJailed($source, $destination) {
@@ -358,7 +367,7 @@ abstract class FileTransfer {
   /**
    * Creates a directory.
    *
-   * @param $directory
+   * @param string $directory
    *   The directory to be created.
    */
   abstract protected function createDirectoryJailed($directory);
@@ -366,7 +375,7 @@ abstract class FileTransfer {
   /**
    * Removes a directory.
    *
-   * @param $directory
+   * @param string $directory
    *   The directory to be removed.
    */
   abstract protected function removeDirectoryJailed($directory);
@@ -374,9 +383,9 @@ abstract class FileTransfer {
   /**
    * Copies a file.
    *
-   * @param $source
+   * @param string $source
    *   The source file.
-   * @param $destination
+   * @param string $destination
    *   The destination file.
    */
   abstract protected function copyFileJailed($source, $destination);
@@ -384,7 +393,7 @@ abstract class FileTransfer {
   /**
    * Removes a file.
    *
-   * @param $destination
+   * @param string $destination
    *   The destination file to be removed.
    */
   abstract protected function removeFileJailed($destination);
@@ -392,20 +401,20 @@ abstract class FileTransfer {
   /**
    * Checks if a particular path is a directory
    *
-   * @param $path
-   *   The path to check
+   * @param string $path
+   *   The path to check.
    *
-   * @return boolean
+   * @return bool
    */
   abstract public function isDirectory($path);
 
   /**
    * Checks if a particular path is a file (not a directory).
    *
-   * @param $path
-   *   The path to check
+   * @param string $path
+   *   The path to check.
    *
-   * @return boolean
+   * @return bool
    */
   abstract public function isFile($path);
 
@@ -415,10 +424,10 @@ abstract class FileTransfer {
    * It does this by moving up the tree until it finds itself. If successful,
    * it will return the chroot, otherwise FALSE.
    *
-   * @return
+   * @return string|false
    *   The chroot path for this connection or FALSE.
    */
-  function findChroot() {
+  public function findChroot() {
     // If the file exists as is, there is no chroot.
     $path = __FILE__;
     $path = $this->fixRemotePath($path, FALSE);
@@ -443,9 +452,8 @@ abstract class FileTransfer {
 
   /**
    * Sets the chroot and changes the jail to match the correct path scheme
-   *
    */
-  function setChroot() {
+  public function setChroot() {
     $this->chroot = $this->findChroot();
     $this->jail = $this->fixRemotePath($this->jail);
   }
@@ -492,12 +500,15 @@ abstract class FileTransfer {
 }
 
 /**
- * FileTransferException class.
+ * FileTransfer Exception
  */
 class FileTransferException extends Exception {
   public $arguments;
 
-  function __construct($message, $code = 0, $arguments = array()) {
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct($message, $code = 0, array $arguments = array()) {
     parent::__construct($message, (int) $code);
     $this->arguments = $arguments;
   }
@@ -519,7 +530,7 @@ interface FileTransferChmodInterface {
    * @param boolean $recursive
    *   Pass TRUE to recursively chmod the entire directory specified in $path.
    */
-  function chmodJailed($path, $mode, $recursive);
+  public function chmodJailed($path, $mode, $recursive);
 }
 
 /**
@@ -537,27 +548,36 @@ class SkipDotsRecursiveDirectoryIterator extends RecursiveDirectoryIterator {
   /**
    * Constructs a SkipDotsRecursiveDirectoryIterator
    *
-   * @param $path
+   * @param string $path
    *   The path of the directory to be iterated over.
    */
-  function __construct($path) {
+  public function __construct($path) {
     watchdog_deprecated_function('filetransfer', __METHOD__);
     parent::__construct($path);
     $this->skipdots();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   #[\ReturnTypeWillChange]
-  function rewind() {
+  public function rewind() {
     parent::rewind();
     $this->skipdots();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   #[\ReturnTypeWillChange]
-  function next() {
+  public function next() {
     parent::next();
     $this->skipdots();
   }
 
+  /**
+   * If the item begins with a dot, skip it.
+   */
   protected function skipdots() {
     while ($this->isDot()) {
       parent::next();

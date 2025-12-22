@@ -5,32 +5,50 @@
  */
 class FileTransferLocal extends FileTransfer implements FileTransferChmodInterface {
 
+  /**
+   * {@inheritdoc}
+   */
   public function connect() {
-    // No-op
+    // No-op.
   }
 
-  static function factory($jail, $settings) {
+  /**
+   * {@inheritdoc}
+   */
+  static public function factory($jail, $settings) {
     return new FileTransferLocal($jail);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function copyFileJailed($source, $destination) {
     if (@!copy($source, $destination)) {
-      throw new FileTransferException('Cannot copy %source to %destination.', NULL, array('%source' => $source, '%destination' => $destination));
+      throw new FileTransferException('Cannot copy %source to %destination.', NULL, array(
+        '%source' => $source,
+        '%destination' => $destination,
+      ));
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function createDirectoryJailed($directory) {
     if (!is_dir($directory) && @!mkdir($directory, 0777, TRUE)) {
       throw new FileTransferException('Cannot create directory %directory.', NULL, array('%directory' => $directory));
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function removeDirectoryJailed($directory) {
     if (!is_dir($directory)) {
       // Programmer error assertion, not something we expect users to see.
       throw new FileTransferException('removeDirectoryJailed() called with a path (%directory) that is not a directory.', NULL, array('%directory' => $directory));
     }
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory,  FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST) as $filename => $file) {
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST) as $filename => $file) {
       if ($file->isDir()) {
         if (@!backdrop_rmdir($filename)) {
           throw new FileTransferException('Cannot remove directory %directory.', NULL, array('%directory' => $filename));
@@ -47,20 +65,32 @@ class FileTransferLocal extends FileTransfer implements FileTransferChmodInterfa
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function removeFileJailed($file) {
     if (@!backdrop_unlink($file)) {
       throw new FileTransferException('Cannot remove file %file.', NULL, array('%file' => $file));
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function isDirectory($path) {
     return is_dir($path);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function isFile($path) {
     return is_file($path);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function chmodJailed($path, $mode, $recursive) {
     if ($recursive && is_dir($path)) {
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $filename => $file) {
