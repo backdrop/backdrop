@@ -2703,7 +2703,11 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
           ->execute()
           ->fetchAssoc();
         $comment = new Comment($comment_array);
-        $args = array('%node_language' => $node_langcode, '%comment_language' => $comment->langcode(), '%langcode' => $langcode);
+        $args = array(
+          '%node_language' => $node_langcode,
+          '%comment_language' => $comment->langcode(),
+          '%langcode' => $langcode
+        );
         $this->assertEqual($comment->langcode(), $langcode, format_string('The comment posted with content language %langcode and belonging to the node with language %node_language has language %comment_language', $args));
       }
     }
