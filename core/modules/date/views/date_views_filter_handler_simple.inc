@@ -358,8 +358,8 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
       ) as $type => $prop) {
         $form['value'] += $this->date_parts_form($form_state, $type, $source, $which, $value2, $identifier, $prop, $this->element_number);
       }
-     }
- 
+    }
+
     $this->element_number++;
 
     // Add some extra validation for the select widget to be sure that
@@ -452,8 +452,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         $input_class = "$prefix-$element_no-choose-input-type";
         $default_select_date_value = !empty($this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$prefix]) ? $this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$prefix] : $default_date;
         $relative_value = !empty($this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$relative_value_key]) ? $this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$relative_value_key] : $this->options[$relative_value_key];
-        $default_select_date_type = !empty($this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$input_type_key])
-          ? $this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$input_type_key] : 'date';
+        $default_select_date_type = !empty($this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$input_type_key]) ? $this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$input_type_key] : 'date';
       }
       else {
         $input_class = "$prefix-choose-input-type";
