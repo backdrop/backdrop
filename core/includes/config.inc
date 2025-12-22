@@ -999,7 +999,7 @@ class Config {
    *
    * This cache can substantially reduce reads from disk by allowing multiple
    * calls to config() or config_get() to read from an in-memory cache that is
-   * is populated once per request.
+   * populated once per request.
    *
    * Any config that is read more than once per request should be cached in some
    * way. Some more advanced concepts like Views, Fields, or Content Types
