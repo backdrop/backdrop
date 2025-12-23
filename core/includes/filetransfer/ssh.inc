@@ -35,7 +35,7 @@ class FileTransferSSH extends FileTransfer implements FileTransferChmodInterface
   /**
    * {@inheritdoc}
    */
-  public static function factory($jail, $settings) {
+  public static function factory($jail, array $settings) {
     $username = empty($settings['username']) ? '' : $settings['username'];
     $password = empty($settings['password']) ? '' : $settings['password'];
     $hostname = empty($settings['advanced']['hostname']) ? 'localhost' : $settings['advanced']['hostname'];

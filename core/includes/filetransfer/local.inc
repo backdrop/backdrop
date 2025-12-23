@@ -15,7 +15,7 @@ class FileTransferLocal extends FileTransfer implements FileTransferChmodInterfa
   /**
    * {@inheritdoc}
    */
-  public static function factory($jail, $settings) {
+  public static function factory($jail, array $settings) {
     return new FileTransferLocal($jail);
   }
 
