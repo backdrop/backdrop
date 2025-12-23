@@ -100,7 +100,7 @@ abstract class FileTransfer {
    *
    * @throws FileTransferException
    */
-  static public function factory($jail, array $settings) {
+  public static function factory($jail, array $settings) {
     throw new FileTransferException('FileTransfer::factory() static method not overridden by FileTransfer subclass.');
   }
 
