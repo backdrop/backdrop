@@ -306,7 +306,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   /**
    * Base implementation of getMimeType().
    */
-  static function getMimeType($uri, $mapping = NULL) {
+  public static function getMimeType($uri, $mapping = NULL) {
     if (!isset($mapping)) {
       // The default file map, defined in file.mimetypes.inc is quite big.
       // We only load it when necessary.
