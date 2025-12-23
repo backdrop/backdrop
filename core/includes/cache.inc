@@ -52,7 +52,7 @@ function cache($bin = 'cache') {
  *   "update", "views", and "views_data". Bin names may include the prefix of
  *   "cache_", but it is stripped out before execution.
  *
- * @return array|object|false
+ * @return stClass|false
  *   The cache or FALSE on failure.
  */
 function cache_get($cid, $bin = 'cache') {
@@ -256,7 +256,7 @@ interface BackdropCacheInterface {
    * @param string $cid
    *   The cache ID of the data to retrieve.
    *
-   * @return array|object|false
+   * @return stClass|false
    *   The cache or FALSE on failure.
    */
   public function get($cid);
@@ -505,7 +505,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
    *   An item loaded from BackdropCacheInterface::get() or
    *   BackdropCacheInterface::getMultiple().
    *
-   * @return object|false
+   * @return stClass|false
    *   The item with data unserialized as appropriate or FALSE if there is no
    *   valid item to load.
    */

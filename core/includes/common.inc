@@ -221,7 +221,7 @@ function backdrop_set_breadcrumb(?array $breadcrumb = NULL) {
 /**
  * Gets the breadcrumb trail for the current page.
  *
- * @return array|string[]
+ * @return array
  */
 function backdrop_get_breadcrumb() {
   $breadcrumb = backdrop_set_breadcrumb();
@@ -834,7 +834,7 @@ function backdrop_goto_deprecated($path = '', array $options = array(), $http_re
  * This function ends the request; use it instead of a return in your menu
  * callback.
  *
- * @param string $path
+ * @param string|null $path
  *   (optional) A Backdrop path or a full URL, which will be passed to url() to
  *   compute the redirect for the URL.
  * @param array $options
@@ -1701,7 +1701,7 @@ function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL)
  * @param string $name
  *   The name of the object being stored. Must be less than 128 characters.
  *
- * @return string|false|null
+ * @return mixed
  *   The data that was stored.
  */
 function tempstore_get($collection, $name) {
@@ -2017,18 +2017,8 @@ function filter_xss_attributes(array $attributes) {
  */
 function _filter_xss_allowed_tags() {
   return array(
-    'a',
-    'em',
-    'strong',
-    'cite',
-    'blockquote',
-    'code',
-    'ul',
-    'ol',
-    'li',
-    'dl',
-    'dt',
-    'dd',
+    'a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol',
+    'li', 'dl', 'dt', 'dd',
   );
 }
 
@@ -2704,8 +2694,8 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
   $pattern = preg_replace(array(
     '/\\\\\\\\/',
     '/(?<!\\\\)([AaeDlMTF])/'),
-    array("\xEF\\\\\\\\\xFF", "\xEF\\\\\$1\$1\xFF",
-    ), $pattern);
+    array("\xEF\\\\\\\\\xFF", "\xEF\\\\\$1\$1\xFF"),
+    $pattern);
 
   // Call date_format().
   $formatted_date_time = date_format($date_time, $pattern);
@@ -5731,7 +5721,7 @@ function backdrop_add_library($module, $name, ?bool $every_page = NULL) {
  *   (optional) The name of a registered library to retrieve. By default, all
  *   libraries registered by $module are returned.
  *
- * @return array
+ * @return array|false
  *   The definition of the requested library, if $name was passed and it exists,
  *   or FALSE if it does not exist. If no $name was passed, an associative array
  *   of libraries registered by $module is returned (which may be empty).
@@ -6069,7 +6059,7 @@ function backdrop_json_encode($var, $pretty_print = FALSE) {
  * @param string $var
  *   The JSON string.
  *
- * @return array
+ * @return mixed
  *
  * @see backdrop_json_encode()
  * @ingroup php_wrappers
@@ -7216,7 +7206,7 @@ function backdrop_render_children(array &$element, ?array $children_keys = NULL)
  * element is shown with show() before rendering, so it will always be rendered
  * even if hide() had been previously used on it.
  *
- * @param array|string|null $element
+ * @param array|string $element
  *   The element to be rendered.
  *
  * @return string
@@ -9191,7 +9181,7 @@ function debug($data, $label = NULL, $print_r = FALSE) {
  *   formats include:
  *   - 'module'
  *   - 'project:module'
- *   - 'project:module (>=version, version)'
+ *   - 'project:module (>=version, version)'.
  *
  * @return array
  *   An associative array with three keys:
