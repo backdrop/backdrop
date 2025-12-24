@@ -30,6 +30,12 @@ function layout_list_page() {
     if ($path && !in_array($path, $layout_paths)) {
       $layout_paths[] = $path;
     }
+    foreach ($layout->additional_paths as $additional_path) {
+      if ($additional_path && !in_array($additional_path, $layout_paths)) {
+        $layout_paths[] = $additional_path;
+        $path_groups[$additional_path][$layout->name] = $layout;
+      }
+    }
   }
 
   // Put admin layouts at the bottom of the list.
