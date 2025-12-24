@@ -617,6 +617,14 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
         else {
           $str_path = $layout->getPath();
         }
+        // Additional paths might add path context that match the default path
+        // context. Remove duplicates by type and position.
+        static $duplicate_contexts = array();
+        if (isset($duplicate_contexts[$layout_context->plugin . ':' . $layout_context->position])) {
+          continue;
+        }
+        $duplicate_contexts[$layout_context->plugin . ':' . $layout_context->position] = TRUE;
+
         $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
           '#markup' => $layout_context->getAdminSummary($str_path),
         );
@@ -996,12 +1004,12 @@ function layout_settings_form_validate(&$form, &$form_state) {
         if (strpos($path, '%') !== FALSE) {
           // We check string length so we don't throw an error on each
           // keystroke since this function runs on keyup when typing paths.
-          $path_length = strlen($path);
-          $additional_path_length = strlen($additional_path);
 
           // Additional paths must have the same contexts as the main paths.
-          if ($additional_path_length <= $path_length) {
-            if (strpos($additional_path, '%') === FALSE && strpos($path, $additional_path) === FALSE) {
+          $path_parts = explode('%', $path);
+          $additional_path_parts = explode('%', $additional_path);
+          if (!isset($additional_path_parts[1])) {
+            if (strpos($path, $additional_path) === FALSE) {
               form_set_error('additional_paths', t('Additional path %path must match primary path %primary_path since the primary path has placeholders (%).',
                 array(
                   '%path' => $additional_path,
@@ -1010,16 +1018,34 @@ function layout_settings_form_validate(&$form, &$form_state) {
               ));
             }
           }
-          else {
-            $path_parts = explode('%', $path);
-            $additional_path_parts = explode('%', $additional_path);
-            if ($path_parts[0] != $additional_path_parts[0]) {
-              form_set_error('additional_paths', t('Additional path %path must match primary path %primary_path since the primary path has placeholders (%).',
-                array(
-                  '%path' => $additional_path,
-                  '%primary_path' => $path,
-                )
-              ));
+        }
+        else {
+          if (strpos($additional_path, '%')) {
+            form_set_error('additional_paths', t('Additional path %path must match primary path %primary_path since the primary path has no placeholders (%).',
+              array(
+                '%path' => $additional_path,
+                '%primary_path' => $path,
+              )
+            ));
+          }
+
+          // An additional path like node/5 shouldnt be allowed if there is not
+          // a context-generating path as primary. But anypath/5 would be fine
+          // as a layout-provided path.
+          $all_info = _layout_get_all_info('layout_context');
+          $split_additional_path = preg_split('/\/[0-9_]+/', $additional_path);
+          $cleaned_additional_path = $split_additional_path[0];
+          foreach ($all_info as $context_info) {
+            foreach ($context_info['menu paths'] as $context_path) {
+              $cleaned_path = preg_replace('/%[a-z0-9_]+/', '%', $context_path);
+              if ($cleaned_path == $cleaned_additional_path . '/%') {
+                form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path. It requires a context in the primary path.',
+                  array(
+                    '%path' => $additional_path,
+                  )
+                ));
+                break 2;
+              }
             }
           }
         }
@@ -1049,9 +1075,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
           ));
         }
 
-        $router_item = menu_get_item($additional_path);
-        $router_item_path = $router_item ? (string) $router_item['path'] : '';
-        if ($router_item_path !== $additional_path && strpos($router_item_path, '%') !== FALSE) {
+/*         if ($router_item_path !== $additional_path && strpos($router_item_path, '%') !== FALSE && strpos($path, '%') === FALSE) {
           $additional_path_path_context = layout_context_required_by_path($additional_path);
           $additional_path_context = reset($additional_path_path_context);
           if ($additional_path_context && !is_a($additional_path_context, 'LayoutStringContext')) {
@@ -1063,7 +1087,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
             ));
           }
         };
-
+ */
         switch (TRUE) {
 /*           case ($num_placeholders != $num_additional_placeholders):
             // For example, it cannot have "node/%" nor "node".
