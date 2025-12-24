@@ -141,3 +141,15 @@
 .view .progress-disabled {
   float: none;
 }
+
+/* Bulk form select all pages */
+.bf-table-select-all-markup {
+  display: none;
+} 
+
+.bf-views-table-row-select-all {
+  display: none;
+}
+.bf-views-table-row-select-all td {
+  text-align: center;
+}
