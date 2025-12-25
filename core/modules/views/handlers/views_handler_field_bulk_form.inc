@@ -164,7 +164,10 @@ class views_handler_field_bulk_form extends views_handler_field {
         }
         $form['bd_select_all_markup'] = array(
           '#type' => 'markup',
-          '#markup' => theme('bulk_operations_select_all', array('view' => $this->view, 'enable_select_all_pages' => $enable_select_all_pages)),
+          '#markup' => theme('bulk_operations_select_all', array(
+            'view' => $this->view,
+            'enable_select_all_pages' => $enable_select_all_pages,
+          )),
         );
       }
     }

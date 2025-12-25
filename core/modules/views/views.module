@@ -177,8 +177,8 @@ function views_theme($existing, $type, $theme, $path) {
   );
 
   $hooks['bulk_operations_select_all'] = $base + array(
-      'variables' => array('view' => NULL, 'enable_select_all_pages' => TRUE),
-      'file' => 'views.theme.inc',
+    'variables' => array('view' => NULL, 'enable_select_all_pages' => TRUE),
+    'file' => 'views.theme.inc',
   );
 
   // Add theme suggestions which are part of modules.
