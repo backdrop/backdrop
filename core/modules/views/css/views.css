@@ -153,3 +153,17 @@
 .bf-views-table-row-select-all td {
   text-align: center;
 }
+
+/* Generic bulk form "select all" for non-tables */
+.bf-fieldset-select-all {
+  text-align: left;
+  width: 30%;
+  padding: 0.6em 0;
+}
+.bf-fieldset-select-all .form-item {
+  margin-bottom: 0;
+}
+.bf-fieldset-select-all div {
+  padding: 0;
+  margin: 0;
+}

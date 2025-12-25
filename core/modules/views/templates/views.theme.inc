@@ -1234,6 +1234,91 @@ function theme_views_container($variables) {
 }
 
 /**
+ * Default theme function for the Bulk Operations select all rows in view.
+ */
+function theme_bulk_operations_select_all(&$variables) {
+  $view = $variables['view'];
+  $enable_select_all_pages = $variables['enable_select_all_pages'];
+  $build_array = array();
+  // Theming for table plugin.
+  if ($view->style_plugin instanceof views_plugin_style_table && empty($view->style_plugin->options['grouping'])) {
+    if (!$enable_select_all_pages) {
+      return '';
+    }
+    // backdrop_add_js(backdrop_get_path('module', 'views') . '/js/bulk_form.js');
+    // Provide hidden markup that will be shown as needed on the first row
+    // of the table.
+    $this_page_count = format_plural(count($view->result), '1 row', '@count rows');
+    $this_page = t('Selected <strong>!row_count</strong> in this page.', array('!row_count' => $this_page_count));
+    $all_pages_count = format_plural($view->total_rows, '1 row', '@count rows');
+    $all_pages = t('Selected <strong>!row_count</strong> in this view.', array('!row_count' => $all_pages_count));
+    // $form['#attached']['js'][] = backdrop_get_path('module', 'views') . '/js/bulk_form.js';
+    $build_array['bf_select_all_pages_wrapper'] = array(
+      '#type' => 'container',
+      '#tree' => FALSE,
+      '#attributes' => array(
+        'class' => array(
+          'bf-table-select-all-markup'
+        ),
+      ),
+    );
+    $build_array['bf_select_all_pages_wrapper']['bf_select_all_pages'] = array(
+      '#type' => 'button',
+      '#attributes' => array(
+        'class' => array(
+          'bf-table-select-all-pages',
+        ),
+      ),
+      '#value' => t('Select all !row_count in this view.', array('!row_count' => $all_pages_count)),
+      '#prefix' => '<span class="bf-table-this-page">' . $this_page . ' &nbsp;',
+      '#suffix' => '</span>',
+    );
+    $build_array['bf_select_all_pages_wrapper']['bf_select_this_page'] = array(
+      '#type' => 'button',
+      '#attributes' => array(
+        'class' => array(
+          'bf-table-select-this-page',
+        ),
+      ),
+      '#value' => t('Select only !row_count in this page.', array('!row_count' => $this_page_count)),
+      '#prefix' => '<span class="bf-table-all-pages" style="display: none">' . $all_pages . ' &nbsp;',
+      '#suffix' => '</span>',
+    );
+  }
+  else {
+    $build_array['bf-select_all'] = array(
+      '#type' => 'fieldset',
+      '#attributes' => array(
+        'class' => array(
+          'bf-fieldset-select-all',
+          'bf-select-all-markup'
+        ),
+      ),
+    );
+    $build_array['bf-select_all']['this_page'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Select all items on this page'),
+      '#default_value' => '',
+      '#attributes' => array('class' => array('bf-select-this-page')),
+    );
+
+    if ($enable_select_all_pages) {
+      $build_array['bf-select_all']['or'] = array(
+        '#type' => 'markup',
+        '#markup' => '<em>' . t('OR') . '</em>',
+      );
+      $build_array['bf-select_all']['all_pages'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Select all items on all pages'),
+        '#default_value' => '',
+        '#attributes' => array('class' => array('bf-select-all-pages')),
+      );
+    }
+  }
+
+  return backdrop_render($build_array);
+}
+/**
  * @defgroup views_templates Views template files
  * @{
  * All views templates can be overridden with a variety of names, using

@@ -145,59 +145,26 @@ class views_handler_field_bulk_form extends views_handler_field {
         '#value' => t('Execute'),
       );
       $form['header'][$this->options['id']]['actions'] = $actions;
-      // If the the enable_select_all_pages option is checked and the view has
-      // results, add the form element and markup to select all pages.
-      if ($this->options['enable_select_all_pages'] && !empty($this->view->result)) {
-        // Only allow this for table displays (since this handler does not
-        // provide a "select all" checkbox for other display types), and only
-        // if row grouping is not enabled.
-        if (!($this->view->style_plugin instanceof views_plugin_style_table) || !empty($view->style_plugin->options['grouping'])) {
-          return;
-        }
+
+      // If the the the view has results, add the form element and markup to
+      // select all.
+      if (!empty($this->view->result)) {
+        $form['#attached']['js'][] = backdrop_get_path('module', 'views') . '/js/bulk_form.js';
         // Set by JS to indicate that all rows on all pages are selected.
         $form['bf_select_all_pages_flag'] = array(
           '#type' => 'hidden',
           '#attributes' => array('class' => 'bf-select-all-pages-flag'),
           '#default_value' => FALSE,
         );
-        // Provide hidden markup that will be shown as needed on the first row
-        // of the table.
-        // TODO: eventually we may use a theming function for this.
-        $this_page_count = format_plural(count($this->view->result), '1 row', '@count rows');
-        $this_page = t('Selected <strong>!row_count</strong> in this page.', array('!row_count' => $this_page_count));
-        $all_pages_count = format_plural($this->view->total_rows, '1 row', '@count rows');
-        $all_pages = t('Selected <strong>!row_count</strong> in this view.', array('!row_count' => $all_pages_count));
-        $form['#attached']['js'][] = backdrop_get_path('module', 'views') . '/js/bulk_form.js';
-        $form['bf_select_all_pages_wrapper'] = array(
-          '#type' => 'container',
-          '#tree' => FALSE,
-          '#attributes' => array(
-            'class' => array(
-              'bf-table-select-all-markup'
-            ),
-          ),
-        );
-        $form['bf_select_all_pages_wrapper']['bf_select_all_pages'] = array(
-          '#type' => 'button',
-          '#attributes' => array(
-            'class' => array(
-              'bf-table-select-all-pages',
-            ),
-          ),
-          '#value' => t('Select all !row_count in this view.', array('!row_count' => $all_pages_count)),
-          '#prefix' => '<span class="bf-table-this-page">' . $this_page . ' &nbsp;',
-          '#suffix' => '</span>',
-        );
-        $form['bf_select_all_pages_wrapper']['bf_select_this_page'] = array(
-          '#type' => 'button',
-          '#attributes' => array(
-            'class' => array(
-              'bf-table-select-this-page',
-            ),
-          ),
-          '#value' => t('Select only !row_count in this page.', array('!row_count' => $this_page_count)),
-          '#prefix' => '<span class="bf-table-all-pages" style="display: none">' . $all_pages . ' &nbsp;',
-          '#suffix' => '</span>',
+        $enable_select_all_pages = FALSE;
+        // If the view is paginated, and "select all items on all pages" is
+        // enabled, tell that to the theme function.
+        if ($this->options['enable_select_all_pages'] && isset($this->view->total_rows) && count($this->view->result) != $this->view->total_rows) {
+          $enable_select_all_pages = TRUE;
+        }
+        $form['bd_select_all_markup'] = array(
+          '#type' => 'markup',
+          '#markup' => theme('bulk_operations_select_all', array('view' => $this->view, 'enable_select_all_pages' => $enable_select_all_pages)),
         );
       }
     }

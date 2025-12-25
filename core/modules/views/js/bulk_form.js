@@ -66,8 +66,39 @@ Backdrop.bf.tableSelectThisPage = function(form) {
 }
 
 Backdrop.bf.initGenericBehaviors = function(form) {
+  // Show the "select all" fieldset for non-tables.
+  $('.bf-select-all-markup', form).show();
+
+  // Listener for the non-table page-wise "select all" checkbox. 
+  $('.bf-select-this-page', form).on('click', function() {
+    // Check or uncheck all checkbox within this page.
+    $('input:checkbox[name^="bulk_form"]', form).prop('checked', this.checked);
+    // Uncheck the "select all items in all pages" checkbox.
+    $('.bf-select-all-pages', form).prop('checked', false);
+
+    // Toggle the "select all" checkbox in grouped tables (if any).
+    $('.bf-table-select-all', form).prop('checked', this.checked);
+  });
+
+  // Listener for the non-table "select all in all pages" checkbox. 
+  $('.bf-select-all-pages', form).on('click', function() {
+    $('input:checkbox[name^="bulk_form"]', form).prop('checked', this.checked);
+    // Uncheck the "select all" checkbox.
+    $('.bf-select-this-page', form).prop('checked', false);
+
+    // Toggle the "select all" checkbox in grouped tables (if any).
+    $('.bf-table-select-all', form).prop('checked', this.checked);
+
+    // Modify the value of the hidden form field.
+    $('.bf-select-all-pages-flag', form).val(this.checked);
+  });
+
   $('input:checkbox[name^="bulk_form"]', form).on('click', function() {
+    // If a checkbox was deselected, uncheck any "select all" checkboxes.
     if (!this.checked) {
+      // Uncheck the select all checkboxes for non-tables.
+      $('.bf-select-this-page', form).prop('checked', false);
+      $('.bf-select-all-pages', form).prop('checked', false);
       // Modify the value of the hidden form field.
       $('.bf-select-all-pages-flag', form).val('0')
 
