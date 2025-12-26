@@ -2156,7 +2156,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function curlClose() {
     if (isset($this->curlHandle)) {
-      curl_close($this->curlHandle);
+      if (version_compare(PHP_VERSION, '8.0') < 0) {
+        curl_close($this->curlHandle);
+      }
       unset($this->curlHandle);
     }
   }

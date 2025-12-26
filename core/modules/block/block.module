@@ -268,7 +268,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#default_value' => $edit['delta'],
     '#maxlength' => 128,
     '#machine_name' => array(
-      'exists' => 'block_custom_block_load',
+      'exists' => '_block_custom_block_name_exists',
       'source' => array('info'),
     ),
     '#description' => t('A unique machine-readable name for this Block. It must only contain lowercase letters, numbers, and underscores.'),
@@ -347,6 +347,24 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
   }
 
   return $form;
+}
+
+/**
+ * Render API callback: Checks if a custom block machine name is taken.
+ *
+ * @param string $value
+ *   The machine name.
+ *
+ * @return bool|null
+ *   Whether or not the custom block machine name is taken, or null if $value is
+ *   empty.
+ *
+ * @since 1.32.1 Function added.
+ */
+function _block_custom_block_name_exists($value) {
+  if (!empty($value)) {
+    return (bool) block_custom_block_load($value);
+  }
 }
 
 /**

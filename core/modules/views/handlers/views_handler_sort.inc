@@ -57,8 +57,8 @@ class views_handler_sort extends views_handler {
       default:
         return t('asc');
         break;
-      case 'DESC';
-      case 'desc';
+      case 'DESC':
+      case 'desc':
         return t('desc');
         break;
     }
