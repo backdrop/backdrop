@@ -146,16 +146,16 @@ function backdrop_get_schema_versions($module) {
 /**
  * Returns the currently installed schema version for a module.
  *
- * @param $module
+ * @param string|null $module
  *   A module name.
- * @param $reset
+ * @param bool $reset
  *   Set to TRUE after modifying the system table.
- * @param $array
+ * @param bool $array
  *   Set to TRUE if you want to get information about all modules in the
  *   system.
- * @return
+ * @return int|array
  *   The currently installed schema version, or SCHEMA_UNINSTALLED if the
- *   module is not installed.
+ *   module is not installed. Or an array of all module version info.
  */
 function backdrop_get_installed_schema_version($module, $reset = FALSE, $array = FALSE) {
   static $versions = array();
@@ -176,7 +176,7 @@ function backdrop_get_installed_schema_version($module, $reset = FALSE, $array =
     return $versions;
   }
   else {
-    return isset($versions[$module]) ? $versions[$module] : SCHEMA_UNINSTALLED;
+    return ($module && isset($versions[$module])) ? $versions[$module] : SCHEMA_UNINSTALLED;
   }
 }
 

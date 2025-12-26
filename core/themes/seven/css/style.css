@@ -562,13 +562,16 @@ th.active a {
 [dir="rtl"] table th.active a {
   padding: 0 0 0 25px;
 }
-th.active img {
+th.active .tablesort {
   position: absolute;
-  top: 3px;
-  right: 3px; /* LTR */
+  color: #ffffff;
+  height: 1.6em;
+  width: 1.6em;
+  top: 0;
+  right: 0; /* LTR */
 }
-[dir="rtl"] th.active img {
-  left: 3px;
+[dir="rtl"] th.active .tablesort {
+  left: 0;
   right: auto;
 }
 td {
