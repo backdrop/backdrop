@@ -2008,7 +2008,7 @@ function views_ui_clone_form_submit($form, &$form_state) {
   $new_view->name = $form_state['values']['name'];
   $new_view->human_name = $form_state['values']['label'];
   $new_view->save();
-  backdrop_set_message(t('The view %old_name as been cloned into %new_name.', array('%old_name' => $form_state['view']->get_human_name(), '%new_name' => $new_view->get_human_name())));
+  backdrop_set_message(t('The view %old_name has been cloned into %new_name.', array('%old_name' => $form_state['view']->get_human_name(), '%new_name' => $new_view->get_human_name())));
   $form_state['redirect'] = 'admin/structure/views/view/' . $new_view->name;
 }
 
