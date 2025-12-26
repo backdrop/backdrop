@@ -41,7 +41,7 @@ class views_plugin_pager extends views_plugin {
    * most pagers will not need to override this method.
    */
   function get_items_per_page() {
-    return isset($this->options['items_per_page']) ? $this->options['items_per_page'] : 0;
+    return isset($this->options['items_per_page']) ? (int) $this->options['items_per_page'] : 0;
   }
 
   /**
@@ -50,7 +50,7 @@ class views_plugin_pager extends views_plugin {
    * This is mostly used for things that will override the value.
    */
   function set_items_per_page($items) {
-    $this->options['items_per_page'] = $items;
+    $this->options['items_per_page'] = (int) $items;
   }
 
   /**
@@ -60,14 +60,14 @@ class views_plugin_pager extends views_plugin {
    * so few pagers will need to override this method.
    */
   function get_offset() {
-    return isset($this->options['offset']) ? $this->options['offset'] : 0;
+    return isset($this->options['offset']) ? (int) $this->options['offset'] : 0;
   }
 
   /**
    * Set the page offset, or how many items to skip.
    */
   function set_offset($offset) {
-    $this->options['offset'] = $offset;
+    $this->options['offset'] = (int) $offset;
   }
 
   /**
