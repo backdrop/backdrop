@@ -1489,7 +1489,10 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
     }
 
     // Store the tokens for the row so we can reference them later if necessary.
-    $this->view->style_plugin->render_tokens[$this->view->row_index] = $tokens;
+    // Skip over formulas for which the row_index is null.
+    if ($row_index = $this->view->row_index) {
+      $this->view->style_plugin->render_tokens[$row_index] = $tokens;
+    }
     $this->last_tokens = $tokens;
 
     return $tokens;

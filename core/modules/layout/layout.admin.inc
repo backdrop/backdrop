@@ -19,12 +19,13 @@ function layout_list_page() {
   $admin_path_groups = array();
   foreach ($layouts as $layout) {
     $path = $layout->getPath();
+    $path_key = (string) $path;
     // Admin layouts are to be added to the bottom of the list.
     if (path_is_admin($path)) {
-      $admin_path_groups[$path][$layout->name] = $layout;
+      $admin_path_groups[$path_key][$layout->name] = $layout;
     }
     else {
-      $path_groups[$path][$layout->name] = $layout;
+      $path_groups[$path_key][$layout->name] = $layout;
     }
     // Build a list of all layout paths to check callbacks for.
     if ($path && !in_array($path, $layout_paths)) {
@@ -2021,6 +2022,8 @@ function layout_condition_add_form($form, &$form_state, ?Layout $layout = NULL, 
   $form_state['block'] = $block;
   $form_state['menu_item'] = $menu_item;
   $form_state['condition_id'] = $condition_id;
+  // It could be null, but we still need it as array key for newly created.
+  $condition_id_key = (string) $condition_id;
 
   // Condition position may be a zero-value. Use a clear variable for checking
   // the add vs. configure existing status.
@@ -2044,7 +2047,7 @@ function layout_condition_add_form($form, &$form_state, ?Layout $layout = NULL, 
       $form['#title'] = t('Configure visibility condition');
     }
     $help = t('Restrict access to all layouts at this path.');
-    $handler = isset($menu_item->conditions[$condition_id]) ? $menu_item->conditions[$condition_id] : NULL;
+    $handler = isset($menu_item->conditions[$condition_id_key]) ? $menu_item->conditions[$condition_id_key] : NULL;
   }
   elseif (isset($block)) {
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
@@ -2055,7 +2058,7 @@ function layout_condition_add_form($form, &$form_state, ?Layout $layout = NULL, 
       $form['#title'] = t('Configure visibility condition for "!title" block', array('!title' => $block->getAdminTitle()));
     }
     $help = t('Limit the situations in which this block will be shown.');
-    $handler = isset($block->conditions[$condition_id]) ? $block->conditions[$condition_id] : NULL;
+    $handler = isset($block->conditions[$condition_id_key]) ? $block->conditions[$condition_id_key] : NULL;
   }
   else {
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
@@ -2066,7 +2069,7 @@ function layout_condition_add_form($form, &$form_state, ?Layout $layout = NULL, 
       $form['#title'] = t('Configure visibility condition for "@title" layout', array('@title' => $layout->title));
     }
     $help = t('Limit the situations in which this layout will apply.');
-    $handler = isset($layout->conditions[$condition_id]) ? $layout->conditions[$condition_id] : NULL;
+    $handler = isset($layout->conditions[$condition_id_key]) ? $layout->conditions[$condition_id_key] : NULL;
   }
   $form['help'] = array(
     '#type' => 'help',
