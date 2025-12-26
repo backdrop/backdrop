@@ -442,6 +442,9 @@ function theme_views_ui_view_preview_section($variables) {
   . '<div class="preview-section">'. $variables['content'] . '</div>';
 }
 
+/**
+ * Returns the HTML for the tab settings in the Views UI.
+ */
 function template_preprocess_views_ui_display_tab_setting(&$variables) {
   static $zebra = 0;
   $variables['zebra'] = ($zebra % 2 === 0 ? 'odd' : 'even');
