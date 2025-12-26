@@ -73,6 +73,11 @@ function image_get_toolkit() {
   if (!isset($toolkit)) {
     $toolkits = image_get_available_toolkits();
     $toolkit = config_get('system.core', 'image_toolkit');
+    // Fallback if no toolkit has been set, especially when upgrading.
+    // @see https://github.com/backdrop/backdrop-issues/issues/7011
+    if (!$toolkit) {
+      $toolkit = 'gd';
+    }
     if (!isset($toolkits[$toolkit]) || !function_exists('image_' . $toolkit . '_load')) {
       // The selected toolkit isn't available so return the first one found. If
       // none are available this will return FALSE.
