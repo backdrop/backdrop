@@ -8,7 +8,7 @@
 /**
  * Performs a depth-first search and sort on a directed acyclic graph.
  *
- * @param $graph
+ * @param array $graph
  *   A three dimensional associated array, with the first keys being the names
  *   of the vertices, these can be strings or numbers. The second key is
  *   'edges' and the third one are again vertices, each such key representing
@@ -30,7 +30,7 @@
  *     $graph[3]['reverse_paths'][1] = 1;
  *   @endcode
  *
- * @return
+ * @return array
  *   The passed-in $graph with more secondary keys filled in:
  *   - 'paths': Contains a list of vertices than can be reached on a path from
  *     this vertex.
@@ -43,7 +43,7 @@
  *
  * @see _backdrop_depth_first_search()
  */
-function backdrop_depth_first_search(&$graph) {
+function backdrop_depth_first_search(array &$graph) {
   $state = array(
     // The order of last visit of the depth first search. This is the reverse
     // of the topological order if the graph is acyclic.
@@ -73,15 +73,15 @@ function backdrop_depth_first_search(&$graph) {
 /**
  * Performs a depth-first search on a graph.
  *
- * @param $graph
+ * @param array $graph
  *   A three dimensional associated graph array.
- * @param $state
+ * @param array $state
  *   An associative array. The key 'last_visit_order' stores a list of the
  *   vertices visited. The key components stores list of vertices belonging
  *   to the same the component.
- * @param $start
+ * @param string $start
  *   An arbitrary vertex where we started traversing the graph.
- * @param $component
+ * @param string|null $component
  *   The component of the last vertex.
  *
  * @see backdrop_depth_first_search()

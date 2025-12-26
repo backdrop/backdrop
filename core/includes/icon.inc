@@ -84,7 +84,7 @@ function icon($icon_name, array $options = array()) {
  *   or a module without allowing a theme to override it. Useful in situations
  *   where an icon is used across multiple themes (like in the admin bar).
  *
- * @return string|NULL
+ * @return string|null
  *   The path to an icon, relative to the Backdrop installation root, with the
  *   file extension (usually .svg). Or NULL if an icon is not found.
  *
