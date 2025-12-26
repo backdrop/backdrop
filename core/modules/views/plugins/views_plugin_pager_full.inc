@@ -249,7 +249,7 @@ class views_plugin_pager_full extends views_plugin_pager {
   function query() {
     if ($this->items_per_page_exposed() && !empty($_GET['items_per_page'])) {
       if (is_numeric($_GET['items_per_page']) && $_GET['items_per_page'] > 0) {
-        $this->options['items_per_page'] = $_GET['items_per_page'];
+        $this->options['items_per_page'] = (int) $_GET['items_per_page'];
       }
       elseif ($_GET['items_per_page'] == 'All' && $this->options['expose']['items_per_page_options_all']) {
         $this->options['items_per_page'] = 0;
@@ -257,16 +257,15 @@ class views_plugin_pager_full extends views_plugin_pager {
     }
     if ($this->offset_exposed()) {
       if (isset($_GET['offset']) && $_GET['offset'] >= 0) {
-        $this->options['offset'] = $_GET['offset'];
+        $this->options['offset'] = (int) $_GET['offset'];
       }
     }
 
-    $limit = $this->options['items_per_page'];
-    $offset = $this->current_page * $this->options['items_per_page'] + $this->options['offset'];
+    $limit = $this->get_items_per_page();
+    $offset = $this->current_page * $limit + $this->get_offset();
     if (!empty($this->options['total_pages'])) {
       if ($this->current_page >= $this->options['total_pages']) {
-        $limit = $this->options['items_per_page'];
-        $offset = $this->options['total_pages'] * $this->options['items_per_page'];
+        $offset = $this->options['total_pages'] * $limit;
       }
     }
 

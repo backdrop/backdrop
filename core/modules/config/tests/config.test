@@ -162,6 +162,57 @@ class ConfigurationTest extends BackdropWebTestCase {
   }
 
   /**
+   * Tests the in-memory cache used by configuration.
+   */
+  public function testConfigStaticCache() {
+    // Populate a sample configuration file.
+    $original_data = array(
+      'favorite_animal' => 'cats',
+    );
+    $config = config('config.test');
+    $config->setData($original_data);
+    $config->save();
+
+    // Check the default case of not using static caching.
+    $this->assertEqual($config->isStatic(), FALSE, 'Configuration is by default not statically cached.');
+
+    $static_cache = &backdrop_static('config');
+    $this->assertFalse(array_key_exists('config.test', $static_cache['active']), 'Static cache is empty by default after reading configuration.');
+
+    // Enable static caching and check the in-cache memory is used.
+    $config->setStatic();
+    $config->save();
+
+    $config = config('config.test');
+
+    $this->assertEqual($config->isStatic(), TRUE, 'Configuration is statically cached after setting static flag.');
+    $this->assertNotNull($static_cache['active']['config.test'], 'Static cache is not empty after reading configuration that has the static flag set.');
+
+    // Note the _config_name key is specifically removed when reading. But other
+    // _config_* keys should be the first items in the stored data.
+    $expected_static_data = array(
+      '_config_static' => TRUE,
+      'favorite_animal' => 'cats',
+    );
+    $actual_static_data = $static_cache['active']['config.test']->getData();
+    $this->assertIdentical($expected_static_data, $actual_static_data, 'Static cache is set to the expected exact values after reading from disk.');
+
+    /** @noinspection PhpArrayIndexImmediatelyRewrittenInspection */
+    $static_cache['active']['config.test']->set('favorite_animal', 'bunnies');
+    $config = config('config.test');
+    $this->assertEqual($config->get('favorite_animal'), 'bunnies', 'Static cache is used when reading configuration.');
+
+    // Disable static caching and check it is no longer used.
+    $config->setStatic(FALSE);
+    $config->save();
+
+    $config = config('config.test');
+    $this->assertFalse(array_key_exists('config.test', $static_cache['active']), 'Static cache is empty after removing static flag.');
+    $this->assertEqual($config->get('favorite_animal'), 'bunnies', 'Original value is read from disk when static flag removed.');
+    $this->assertNull($config->get('_config_static'), 'Config static flag entire removed when using setStatic(FALSE).');
+  }
+
+  /**
    * Tests that config directories are protected by .htaccess files.
    */
   public function testConfigHtaccess() {

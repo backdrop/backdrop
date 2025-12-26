@@ -841,7 +841,7 @@ class views_plugin_display extends views_plugin {
    */
   function get_plugin($type = 'style', $name = NULL) {
     static $cache = array();
-    if (!isset($cache[$type][$name])) {
+    if (!isset($name) || !isset($cache[$type][$name])) {
       switch ($type) {
         case 'style':
         case 'row':
@@ -1339,7 +1339,7 @@ class views_plugin_display extends views_plugin {
 
     if ($this->uses_link_display()) {
       $display_id = $this->get_link_display();
-      $link_display = empty($this->view->display[$display_id]) ? t('None') : check_plain($this->view->display[$display_id]->display_title);
+      $link_display = !$display_id || empty($this->view->display[$display_id]) ? t('None') : check_plain($this->view->display[$display_id]->display_title);
       $link_display =  $this->get_option('link_display') == 'custom_url' ? t('Custom URL') : $link_display;
       $options['link_display'] = array(
         'category' => 'other',

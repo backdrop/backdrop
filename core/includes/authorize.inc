@@ -85,7 +85,11 @@ function authorize_filetransfer_form($form, &$form_state) {
     $form['connection_settings']['authorize_filetransfer_default']['#options'][$name] = $backend['title'];
     $form['connection_settings'][$name] = array(
       '#type' => 'container',
-      '#attributes' => array('class' => array("filetransfer-$name", 'filetransfer', 'form-wrapper')),
+      '#attributes' => array('class' => array(
+        "filetransfer-$name",
+        'filetransfer',
+        'form-wrapper',
+      )),
       '#states' => array(
         'visible' => array(
           'select[name="connection_settings[authorize_filetransfer_default]"]' => array('value' => $name),
@@ -129,10 +133,10 @@ function authorize_filetransfer_form($form, &$form_state) {
 /**
  * Generates the Form API array for a given connection backend's settings.
  *
- * @param $backend
+ * @param string $backend
  *   The name of the backend (e.g. 'ftp', 'ssh', etc).
  *
- * @return
+ * @return array
  *   Form API array of connection settings for the given backend.
  *
  * @see hook_filetransfer_backends()
@@ -161,14 +165,14 @@ function _authorize_filetransfer_connection_settings($backend) {
  * Therefore, to properly add defaults, we need to walk through all the
  * children form elements and process those defaults recursively.
  *
- * @param $element
+ * @param array $element
  *   Reference to the Form API form element we're operating on.
- * @param $key
+ * @param string|null $key
  *   The key for our current form element, if any.
  * @param array $defaults
  *   The default settings for the file transfer backend we're operating on.
  */
-function _authorize_filetransfer_connection_settings_set_defaults(&$element, $key, array $defaults) {
+function _authorize_filetransfer_connection_settings_set_defaults(array &$element, $key, array $defaults) {
   // If we're operating on a form element which isn't a fieldset, and we have
   // a default setting saved, stash it in #default_value.
   if (!empty($key) && isset($defaults[$key]) && isset($element['#type']) && $element['#type'] != 'fieldset') {
@@ -180,8 +184,14 @@ function _authorize_filetransfer_connection_settings_set_defaults(&$element, $ke
   // there's a subarray of settings for the form key we're currently
   // processing, pass in that subarray to the recursive call. Otherwise, just
   // pass on the whole $defaults array.
+  if ($key && isset($defaults[$key]) && is_array($defaults[$key])) {
+    $default_settings = $defaults[$key];
+  }
+  else {
+    $default_settings = $defaults;
+  }
   foreach (element_children($element) as $child_key) {
-    _authorize_filetransfer_connection_settings_set_defaults($element[$child_key], $child_key, ((isset($defaults[$key]) && is_array($defaults[$key])) ? $defaults[$key] : $defaults));
+    _authorize_filetransfer_connection_settings_set_defaults($element[$child_key], $child_key, $default_settings);
   }
 }
 
@@ -283,10 +293,10 @@ function authorize_filetransfer_form_submit($form, &$form_state) {
 /**
  * Runs the operation specified in $_SESSION['authorize_operation'].
  *
- * @param $filetransfer
+ * @param FileTransfer $filetransfer
  *   The FileTransfer object to use for running the operation.
  */
-function authorize_run_operation($filetransfer) {
+function authorize_run_operation(FileTransfer $filetransfer) {
   $operation = $_SESSION['authorize_operation'];
   unset($_SESSION['authorize_operation']);
 
@@ -310,7 +320,7 @@ function authorize_run_operation($filetransfer) {
  *   An instantiated FileTransfer object for the requested method and settings,
  *   or FALSE if there was an error finding or instantiating it.
  */
-function authorize_get_filetransfer($backend, $settings = array()) {
+function authorize_get_filetransfer($backend, array $settings = array()) {
   $filetransfer = FALSE;
   if (!empty($_SESSION['authorize_filetransfer_info'][$backend])) {
     $backend_info = $_SESSION['authorize_filetransfer_info'][$backend];
