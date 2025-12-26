@@ -2134,6 +2134,11 @@ function _filter_xss_attributes($attributes) {
           if ($skip_protocol_filtering) {
             $value = $match[1];
           }
+          // Filter the class attribute using a function already built
+          // for that purpose.
+          elseif ($attrname == 'class') {
+            $thisval = backdrop_clean_css_identifier($match[1]);
+          }
           // Strip bad protocols from all other attributes, e.g. href, src.
           else {
             $value = filter_xss_bad_protocol($match[1]);
@@ -4430,19 +4435,23 @@ function backdrop_delete_file_if_stale($uri) {
  * @return
  *   The cleaned identifier.
  */
-function backdrop_clean_css_identifier($identifier, $filter = array(' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '')) {
+function backdrop_clean_css_identifier($identifier, $filter = array(' ' => '-', '_' => '-', '[' => '-', ']' => '')) {
   // By default, we filter using Backdrop's coding standards.
   $identifier = strtr($identifier, $filter);
 
   // Valid characters in a CSS identifier are:
   // - the hyphen (U+002D)
+  // - the period (U+002E)
+  // - the slash (U+002F)
   // - a-z (U+0030 - U+0039)
+  // - the colon (U+003A)
+  // - the @ sign (U+0040)
   // - A-Z (U+0041 - U+005A)
   // - the underscore (U+005F)
   // - 0-9 (U+0061 - U+007A)
   // - ISO 10646 characters U+00A1 and higher
   // We strip out any character not in the above list.
-  $identifier = preg_replace('/[^\x{002D}\x{0030}-\x{0039}\x{0041}-\x{005A}\x{005F}\x{0061}-\x{007A}\x{00A1}-\x{FFFF}]/u', '', $identifier);
+  $identifier = preg_replace('/[^\x{002D}-\x{003A}\x{0040}-\x{005A}\x{005F}\x{0061}-\x{007A}\x{00A1}-\x{FFFF}]/u', '', $identifier);
 
   // Identifiers cannot start with a digit, two hyphens, or a hyphen followed by a digit.
   $identifier = preg_replace(array('/^[0-9]/', '/^(-[0-9])|^(--)/'), array('_', '__') , $identifier);
