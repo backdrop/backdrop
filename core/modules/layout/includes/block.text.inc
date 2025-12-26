@@ -117,7 +117,7 @@ class BlockText extends Block {
         '#maxlength' => 64,
         '#machine_name' => array(
           'source' => array('admin_label', 'admin_label'),
-          'exists' => 'block_custom_block_load',
+          'exists' => '_block_custom_block_name_exists',
         ),
         '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
         '#weight' => 3,
