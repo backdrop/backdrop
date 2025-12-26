@@ -1245,73 +1245,87 @@ function theme_bulk_operations_select_all(&$variables) {
     if (!$enable_select_all_pages) {
       return '';
     }
-    // backdrop_add_js(backdrop_get_path('module', 'views') . '/js/bulk_form.js');
     // Provide hidden markup that will be shown as needed on the first row
     // of the table.
     $this_page_count = format_plural(count($view->result), '1 row', '@count rows');
     $this_page = t('Selected <strong>!row_count</strong> in this page.', array('!row_count' => $this_page_count));
     $all_pages_count = format_plural($view->total_rows, '1 row', '@count rows');
     $all_pages = t('Selected <strong>!row_count</strong> in this view.', array('!row_count' => $all_pages_count));
-    // $form['#attached']['js'][] = backdrop_get_path('module', 'views') . '/js/bulk_form.js';
-    $build_array['bf_select_all_pages_wrapper'] = array(
+    $build_array['bulk_form_select_all_pages_wrapper'] = array(
       '#type' => 'container',
       '#tree' => FALSE,
       '#attributes' => array(
         'class' => array(
-          'bf-table-select-all-markup'
+          'bulk-form-table-select-all-markup'
         ),
       ),
     );
-    $build_array['bf_select_all_pages_wrapper']['bf_select_all_pages'] = array(
+    $build_array['bulk_form_select_all_pages_wrapper']['bulk_form_select_all_pages'] = array(
       '#type' => 'button',
       '#attributes' => array(
         'class' => array(
-          'bf-table-select-all-pages',
+          'bulk-form-table-select-all-pages',
         ),
       ),
       '#value' => t('Select all !row_count in this view.', array('!row_count' => $all_pages_count)),
-      '#prefix' => '<span class="bf-table-this-page">' . $this_page . ' &nbsp;',
+      '#prefix' => '<span class="bulk-form-table-this-page">' . $this_page . ' &nbsp;',
       '#suffix' => '</span>',
     );
-    $build_array['bf_select_all_pages_wrapper']['bf_select_this_page'] = array(
+    $build_array['bulk_form_select_all_pages_wrapper']['bulk_form_select_this_page'] = array(
       '#type' => 'button',
       '#attributes' => array(
         'class' => array(
-          'bf-table-select-this-page',
+          'bulk-form-table-select-this-page',
         ),
       ),
       '#value' => t('Select only !row_count in this page.', array('!row_count' => $this_page_count)),
-      '#prefix' => '<span class="bf-table-all-pages" style="display: none">' . $all_pages . ' &nbsp;',
+      '#prefix' => '<span class="bulk-form-table-all-pages" style="display: none">' . $all_pages . ' &nbsp;',
       '#suffix' => '</span>',
     );
   }
   else {
-    $build_array['bf-select_all'] = array(
+    $this_page_count = format_plural(count($view->result), '1 item', '@count items');
+    $all_pages_count = format_plural($view->total_rows, '1 item', '@count items');
+    $build_array['bulk_form_select_all'] = array(
       '#type' => 'fieldset',
       '#attributes' => array(
         'class' => array(
-          'bf-fieldset-select-all',
-          'bf-select-all-markup'
+          'bulk-form-fieldset-select-all',
+          'bulk-form-select-all-markup'
         ),
       ),
     );
-    $build_array['bf-select_all']['this_page'] = array(
+    $build_array['bulk_form_select_all']['this_page'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Select all items on this page'),
+      '#title' => t('Select !this_page_count on this page', array('!this_page_count' => $this_page_count)),
       '#default_value' => '',
-      '#attributes' => array('class' => array('bf-select-this-page')),
+      '#attributes' => array(
+        'class' => array(
+          'bulk-form-select-this-page',
+        ),
+      ),
+      // Since this build array is not form-processed, we suply a unique id so
+      // that the label contains a "for" attribute, making it clickable.
+      '#id' => backdrop_html_id('bulk-form-select-this-page'),
     );
 
     if ($enable_select_all_pages) {
-      $build_array['bf-select_all']['or'] = array(
+      $build_array['bulk_form_select_all']['or'] = array(
         '#type' => 'markup',
-        '#markup' => '<em>' . t('OR') . '</em>',
+        '#markup' => '<em>' . t('or') . '</em>',
       );
-      $build_array['bf-select_all']['all_pages'] = array(
+      $build_array['bulk_form_select_all']['all_pages'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Select all items on all pages'),
+        '#title' => t('Select !all_pages_count on all pages', array('!all_pages_count' => $all_pages_count)),
         '#default_value' => '',
-        '#attributes' => array('class' => array('bf-select-all-pages')),
+        '#attributes' => array(
+          'class' => array(
+            'bulk-form-select-all-pages',
+          ),
+        ),
+        // Since this build array is not form-processed, we suply a unique id so
+        // that the label contains a "for" attribute, making it clickable.
+        '#id' => backdrop_html_id('bulk-form-select-all-pages'),
       );
     }
   }

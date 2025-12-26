@@ -1,31 +1,31 @@
 (function ($) {
 
-Backdrop.behaviors.bf = {
+Backdrop.behaviors.bulk_form = {
   attach: function(context) {
     $('.views-form', context).each(function() {
-      Backdrop.bf.initTableBehaviors(this);
-      Backdrop.bf.initGenericBehaviors(this);
+      Backdrop.bulk_form.initTableBehaviors(this);
+      Backdrop.bulk_form.initGenericBehaviors(this);
     });
   }
 }
 
-Backdrop.bf = Backdrop.bf || {};
-Backdrop.bf.initTableBehaviors = function(form) {
+Backdrop.bulk_form = Backdrop.bulk_form || {};
+Backdrop.bulk_form.initTableBehaviors = function(form) {
   // If the table is not grouped, "Select all on this page / all pages"
   // markup gets inserted below the table header.
-  var selectAllMarkup = $('.bf-table-select-all-markup', form);
+  var selectAllMarkup = $('.bulk-form-table-select-all-markup', form);
   if (selectAllMarkup.length) {
-    $('.views-table > tbody', form).prepend('<tr class="bf-views-table-row-select-all even">></tr>');
+    $('.views-table > tbody', form).prepend('<tr class="bulk-form-views-table-row-select-all even">></tr>');
     var colspan = $('table th', form).length;
     // Add the select all pages markup as the first row spanning all columns.
-    $('.bf-views-table-row-select-all', form).html('<td colspan="' + colspan + '">' + selectAllMarkup.html() + '</td>');
+    $('.bulk-form-views-table-row-select-all', form).html('<td colspan="' + colspan + '">' + selectAllMarkup.html() + '</td>');
 
-    $('.bf-table-select-all-pages', form).on('click', function() {
-      Backdrop.bf.tableSelectAllPages(form);
+    $('.bulk-form-table-select-all-pages', form).on('click', function() {
+      Backdrop.bulk_form.tableSelectAllPages(form);
       return false;
     });
-    $('.bf-table-select-this-page', form).on('click', function() {
-      Backdrop.bf.tableSelectThisPage(form);
+    $('.bulk-form-table-select-this-page', form).on('click', function() {
+      Backdrop.bulk_form.tableSelectThisPage(form);
       return false;
     });
   }
@@ -36,12 +36,12 @@ Backdrop.bf.initTableBehaviors = function(form) {
 
     // Toggle the visibility of the "select all" row (if any).
     if (this.checked) {
-      $('.bf-views-table-row-select-all', table).show();
+      $('.bulk-form-views-table-row-select-all', table).show();
     }
     else {
-      $('.bf-views-table-row-select-all', table).hide();
+      $('.bulk-form-views-table-row-select-all', table).hide();
       // Disable "select all across pages".
-      Backdrop.bf.tableSelectThisPage(form);
+      Backdrop.bulk_form.tableSelectThisPage(form);
     }
   });
 }
@@ -49,66 +49,66 @@ Backdrop.bf.initTableBehaviors = function(form) {
 /**
  * Prepares the select all across pages functionality.
  */
-Backdrop.bf.tableSelectAllPages = function(form) {
-  $('.bf-table-this-page', form).hide();
-  $('.bf-table-all-pages', form).show();
+Backdrop.bulk_form.tableSelectAllPages = function(form) {
+  $('.bulk-form-table-this-page', form).hide();
+  $('.bulk-form-table-all-pages', form).show();
   // Modify the value of the hidden form flag field.
-  $('.bf-select-all-pages-flag', form).val('1');
+  $('.bulk-form-select-all-pages-flag', form).val('1');
 }
 /**
  * Prepares the select all on this page functionality.
  */
-Backdrop.bf.tableSelectThisPage = function(form) {
-  $('.bf-table-all-pages', form).hide();
-  $('.bf-table-this-page', form).show();
+Backdrop.bulk_form.tableSelectThisPage = function(form) {
+  $('.bulk-form-table-all-pages', form).hide();
+  $('.bulk-form-table-this-page', form).show();
   // Modify the value of the hidden form field.
-  $('.bf-select-all-pages-flag', form).val('0');
+  $('.bulk-form-select-all-pages-flag', form).val('0');
 }
 
-Backdrop.bf.initGenericBehaviors = function(form) {
+Backdrop.bulk_form.initGenericBehaviors = function(form) {
   // Show the "select all" fieldset for non-tables.
-  $('.bf-select-all-markup', form).show();
+  $('.bulk-form-select-all-markup', form).show();
 
   // Listener for the non-table page-wise "select all" checkbox. 
-  $('.bf-select-this-page', form).on('click', function() {
+  $('.bulk-form-select-this-page', form).on('click', function() {
     // Check or uncheck all checkbox within this page.
     $('input:checkbox[name^="bulk_form"]', form).prop('checked', this.checked);
     // Uncheck the "select all items in all pages" checkbox.
-    $('.bf-select-all-pages', form).prop('checked', false);
+    $('.bulk-form-select-all-pages', form).prop('checked', false);
 
     // Toggle the "select all" checkbox in grouped tables (if any).
-    $('.bf-table-select-all', form).prop('checked', this.checked);
+    $('.bulk-form-table-select-all', form).prop('checked', this.checked);
   });
 
   // Listener for the non-table "select all in all pages" checkbox. 
-  $('.bf-select-all-pages', form).on('click', function() {
+  $('.bulk-form-select-all-pages', form).on('click', function() {
     $('input:checkbox[name^="bulk_form"]', form).prop('checked', this.checked);
     // Uncheck the "select all" checkbox.
-    $('.bf-select-this-page', form).prop('checked', false);
+    $('.bulk-form-select-this-page', form).prop('checked', false);
 
     // Toggle the "select all" checkbox in grouped tables (if any).
-    $('.bf-table-select-all', form).prop('checked', this.checked);
+    $('.bulk-form-table-select-all', form).prop('checked', this.checked);
 
     // Modify the value of the hidden form field.
-    $('.bf-select-all-pages-flag', form).val(this.checked);
+    $('.bulk-form-select-all-pages-flag', form).val(this.checked);
   });
 
   $('input:checkbox[name^="bulk_form"]', form).on('click', function() {
     // If a checkbox was deselected, uncheck any "select all" checkboxes.
     if (!this.checked) {
       // Uncheck the select all checkboxes for non-tables.
-      $('.bf-select-this-page', form).prop('checked', false);
-      $('.bf-select-all-pages', form).prop('checked', false);
+      $('.bulk-form-select-this-page', form).prop('checked', false);
+      $('.bulk-form-select-all-pages', form).prop('checked', false);
       // Modify the value of the hidden form field.
-      $('.bf-select-all-pages-flag', form).val('0')
+      $('.bulk-form-select-all-pages-flag', form).val('0')
 
       var table = $(this).closest('table')[0];
       if (table) {
         // If there's a "select all" row, hide it.
-        if ($('.bf-table-select-this-page', table).length) {
-          $('.bf-views-table-row-select-all', table).hide();
+        if ($('.bulk-form-table-select-this-page', table).length) {
+          $('.bulk-form-views-table-row-select-all', table).hide();
           // Disable "select all across pages".
-          Backdrop.bf.tableSelectThisPage(form);
+          Backdrop.bulk_form.tableSelectThisPage(form);
         }
       }
     }

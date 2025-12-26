@@ -146,14 +146,13 @@ class views_handler_field_bulk_form extends views_handler_field {
       );
       $form['header'][$this->options['id']]['actions'] = $actions;
 
-      // If the the the view has results, add the form element and markup to
-      // select all.
+      // If the view has results, add the form element and markup to select all.
       if (!empty($this->view->result)) {
         $form['#attached']['js'][] = backdrop_get_path('module', 'views') . '/js/bulk_form.js';
         // Set by JS to indicate that all rows on all pages are selected.
-        $form['bf_select_all_pages_flag'] = array(
+        $form['bulk_form_select_all_pages_flag'] = array(
           '#type' => 'hidden',
-          '#attributes' => array('class' => 'bf-select-all-pages-flag'),
+          '#attributes' => array('class' => 'bulk-form-select-all-pages-flag'),
           '#default_value' => FALSE,
         );
         $enable_select_all_pages = FALSE;
@@ -189,7 +188,7 @@ class views_handler_field_bulk_form extends views_handler_field {
 
       // If the flag to select all results in all pages is true, retrieve all
       // entity IDs.
-      if ($form_state['values']['bf_select_all_pages_flag'] && ($this->view->query->pager->has_more_records() || $this->view->query->pager->get_current_page() > 0)) {
+      if ($form_state['values']['bulk_form_select_all_pages_flag'] && ($this->view->query->pager->has_more_records() || $this->view->query->pager->get_current_page() > 0)) {
         // We need to build a new view with the same parameters, but without a
         // pager.
         $new_view = views_get_view($this->view->name);

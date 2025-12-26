@@ -143,27 +143,26 @@
 }
 
 /* Bulk form select all pages */
-.bf-table-select-all-markup {
+.bulk-form-table-select-all-markup {
   display: none;
 } 
 
-.bf-views-table-row-select-all {
+.bulk-form-views-table-row-select-all {
   display: none;
 }
-.bf-views-table-row-select-all td {
+.bulk-form-views-table-row-select-all td {
   text-align: center;
 }
 
 /* Generic bulk form "select all" for non-tables */
-.bf-fieldset-select-all {
+.bulk-form-fieldset-select-all {
   text-align: left;
-  width: 30%;
   padding: 0.6em 0;
 }
-.bf-fieldset-select-all .form-item {
+.bulk-form-fieldset-select-all .form-item {
   margin-bottom: 0;
 }
-.bf-fieldset-select-all div {
+.bulk-form-fieldset-select-all div {
   padding: 0;
   margin: 0;
 }
