@@ -91,6 +91,7 @@ deconstructor
 dependee
 dependees
 derf
+devel
 devmajor
 devminor
 diffutils
@@ -139,6 +140,7 @@ fieldsql
 fileapi
 filefield
 filelisting
+filetransfer
 fileurl
 filterlabel
 firstcolumn
