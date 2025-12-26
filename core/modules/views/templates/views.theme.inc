@@ -1323,7 +1323,7 @@ function theme_bulk_operations_select_all(&$variables) {
             'bulk-form-select-all-pages',
           ),
         ),
-        // Since this build array is not form-processed, we suply a unique id so
+        // Since this build array is not form-processed, we supply a unique id so
         // that the label contains a "for" attribute, making it clickable.
         '#id' => backdrop_html_id('bulk-form-select-all-pages'),
       );
