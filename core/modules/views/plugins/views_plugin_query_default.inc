@@ -435,7 +435,7 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function queue_table($table, $relationship = NULL, $join = NULL, $alias = NULL) {
     // If the alias is set, make sure it doesn't already exist.
-    if (isset($this->table_queue[$alias])) {
+    if ($alias && isset($this->table_queue[$alias])) {
       return $alias;
     }
 
@@ -458,7 +458,7 @@ class views_plugin_query_default extends views_plugin_query {
 
     // Check this again to make sure we don't blow up existing aliases for already
     // adjusted joins.
-    if (isset($this->table_queue[$alias])) {
+    if ($alias && isset($this->table_queue[$alias])) {
       return $alias;
     }
 
@@ -814,7 +814,10 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     // Keep track of all aliases used.
-    $this->field_aliases[$table][$field] = $alias;
+    // A formula can't have an alias, only tables can.
+    if ($table) {
+      $this->field_aliases[$table][$field] = $alias;
+    }
 
     return $alias;
   }

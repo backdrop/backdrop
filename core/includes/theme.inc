@@ -2390,12 +2390,24 @@ function theme_table(array $variables) {
  *     show.
  */
 function theme_tablesort_indicator($variables) {
-  if ($variables['style'] == "asc") {
-    return theme('image', array('path' => 'core/misc/arrow-asc.png', 'width' => 13, 'height' => 13, 'alt' => t('sort ascending'), 'title' => t('sort ascending')));
+  if ($variables['style'] == 'asc') {
+    $icon = 'caret-down-fill';
+    $alt = t('sort ascending');
   }
   else {
-    return theme('image', array('path' => 'core/misc/arrow-desc.png', 'width' => 13, 'height' => 13, 'alt' => t('sort descending'), 'title' => t('sort descending')));
+    $icon = 'caret-up-fill';
+    $alt = t('sort descending');
   }
+
+  $options = array(
+    'alt' => $alt,
+    'attributes' => array(
+      'width' => 15,
+      'height' => 15,
+    ),
+  );
+
+  return icon($icon, $options);
 }
 
 /**
