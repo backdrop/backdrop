@@ -7702,7 +7702,7 @@ function element_property($key) {
  * @return array
  */
 function element_properties(array $element) {
-  return array_filter(array_keys((array) $element), 'element_property');
+  return array_filter(array_keys($element), 'element_property');
 }
 
 /**
@@ -7884,7 +7884,7 @@ function element_set_attributes(array &$element, array $map) {
  * @see backdrop_array_set_nested_value()
  * @see backdrop_array_unset_nested_value()
  */
-function &backdrop_array_get_nested_value(array &$array, array $parents, ?bool &$key_exists = NULL) {
+function &backdrop_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) {
   $ref = &$array;
   foreach ($parents as $parent) {
     if (is_array($ref) && array_key_exists($parent, $ref)) {
@@ -8070,7 +8070,7 @@ function backdrop_array_set_nested_value(array &$array, array $parents, $value, 
  * @see backdrop_array_set_nested_value()
  * @see backdrop_array_get_nested_value()
  */
-function backdrop_array_unset_nested_value(array &$array, array $parents, ?bool &$key_existed = NULL) {
+function backdrop_array_unset_nested_value(array &$array, array $parents, &$key_existed = NULL) {
   $unset_key = array_pop($parents);
   $ref = &backdrop_array_get_nested_value($array, $parents, $key_existed);
   if ($key_existed && is_array($ref) && array_key_exists($unset_key, $ref)) {
