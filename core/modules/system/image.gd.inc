@@ -88,7 +88,9 @@ function image_gd_resize(stdClass $image, $width, $height, $background = NULL) {
     return FALSE;
   }
 
-  imagedestroy($image->resource);
+  if (version_compare(PHP_VERSION, '8.0') < 0) {
+    imagedestroy($image->resource);
+  }
   // Update image object.
   $image->resource = $res;
   $image->info['width'] = $width;
@@ -136,8 +138,10 @@ function image_gd_rotate(stdClass $image, $degrees, $background = NULL) {
   }
 
   if ($rotated_resource = imagerotate($image->resource, 360 - $degrees, $background)) {
-    // Free up the previous image resource.
-    imagedestroy($image->resource);
+    if (version_compare(PHP_VERSION, '8.0') < 0) {
+      // Free up the previous image resource.
+      imagedestroy($image->resource);
+    }
     // Assign the new image resource.
     $image->resource = $rotated_resource;
   }
@@ -200,8 +204,10 @@ function image_gd_crop(stdClass $image, $x, $y, $width, $height, $background = N
     return FALSE;
   }
 
-  // Destroy the original image and return the modified image.
-  imagedestroy($image->resource);
+  if (version_compare(PHP_VERSION, '8.0') < 0) {
+    // Destroy the original image and return the modified image.
+    imagedestroy($image->resource);
+  }
   $image->resource = $res;
   $image->info['width'] = $width;
   $image->info['height'] = $height;

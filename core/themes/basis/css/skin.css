@@ -1172,7 +1172,6 @@ ul.secondary li a:active {
   background-color: #e9eebc;
 }
 div.messages.status:before {
-  /* background-image: url(../../../misc/message-32-ok.png); */
   background-color: #cfde56;
 }
 
@@ -1182,7 +1181,6 @@ div.messages.status:before {
   background-color: #faf5c9;
 }
 div.messages.warning:before {
-  /* background-image: url(../../../misc/message-32-warning.png); */
   background-color: #fce400;
 }
 
@@ -1192,7 +1190,6 @@ div.messages.warning:before {
   background-color: #f9edec;
 }
 div.messages.error:before {
-  /* background-image: url(../../../misc/message-32-error.png); */
   background-color: #f00;
 }
 
@@ -1202,23 +1199,5 @@ div.messages.error:before {
   background-color: #bdf;
 }
 div.messages.info:before {
-  /* background-image: url(../../../misc/message-32-info.png); */
   background-color: #0074bd;
-}
-
-/**
- * SVG overrides for status messages
- * Using linear-gradient so the style only applies to browsers that can render
- * SVGs.
- */
-div.status:before {
-  /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg); */
-}
-
-div.warning:before {
-  /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg); */
-}
-
-div.error:before {
-  /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
 }
