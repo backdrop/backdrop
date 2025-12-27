@@ -34,6 +34,7 @@
   margin: 0;
   table-layout: fixed;
   width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .tree-grid .token-name {
@@ -42,7 +43,6 @@
 
 .tree-grid .token-raw {
   width: 30%;
-  overflow-wrap: anywhere;
 }
 
 .tree-grid .token-description {
