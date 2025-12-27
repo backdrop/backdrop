@@ -741,7 +741,7 @@ class Layout {
     }
     else {
       foreach ($this->additional_menu_items as $item) {
-        if ($item->path !== $path) {
+        if ($item->path === $path) {
           $item_exists = TRUE;
         }
       }
