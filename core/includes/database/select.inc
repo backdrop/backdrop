@@ -1218,14 +1218,14 @@ class SelectQuery extends Query implements SelectQueryInterface {
    * {@inheritdoc}
    */
   public function hasAllTags(...$tags) {
-    return !(boolean) array_diff($tags, array_keys($this->alterTags));
+    return !(bool) array_diff($tags, array_keys($this->alterTags));
   }
 
   /**
    * {@inheritdoc}
    */
   public function hasAnyTag(...$tags) {
-    return (boolean) array_intersect($tags, array_keys($this->alterTags));
+    return (bool) array_intersect($tags, array_keys($this->alterTags));
   }
 
   /**
