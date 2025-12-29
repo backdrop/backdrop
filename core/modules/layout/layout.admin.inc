@@ -953,17 +953,6 @@ function _layout_menu_router_path_exists($path) {
   return !empty($path_matches);
 }
 
-function _layout_placeholder_positions($path) {
-  $path_parts = explode('/', $path);
-  $placeholder_positions = array();
-  for ($i = 0; $i < count($path_parts); $i++) {
-    if ($path_parts[$i] == '%') {
-      $placeholder_positions[] = $i;
-    }
-  }
-  return $placeholder_positions;
-}
-
 /**
  * Validates layout_settings_form(), ensuring a valid path.
  */
@@ -1020,6 +1009,9 @@ function layout_settings_form_validate(&$form, &$form_state) {
           // Additional paths must have the same contexts as the main paths.
           $path_parts = explode('%', $path);
           $additional_path_parts = explode('%', $additional_path);
+          $count_path_parts = count($path_parts);
+          $count_additional_path_parts = count($additional_path_parts);
+
           if (!isset($additional_path_parts[1])) {
             if (strpos($path, $additional_path) === FALSE) {
               form_set_error('additional_paths_wrapper', t('Additional path %path must match primary path %primary_path since the primary path has placeholders (%).',
@@ -1031,6 +1023,29 @@ function layout_settings_form_validate(&$form, &$form_state) {
             }
           }
           else {
+            // Path parts must match up to the last wildcard, otherwise we cannot
+            // be sure about context positions.
+            if (abs($count_additional_path_parts - $count_path_parts) > 1) {
+              form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
+                array(
+                  '%path' => $additional_path,
+                  '%primary_path' => $path,
+                )
+              ));
+            }
+            elseif ($count_additional_path_parts !== $count_path_parts) {
+              foreach($path_parts as $i => $path_part) {
+                if (isset($additional_path_parts[$i]) && $additional_path_parts[$i] !== $path_parts[$i]) {
+                  form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
+                    array(
+                      '%path' => $additional_path,
+                      '%primary_path' => $path,
+                    )
+                  ));
+                  break;
+                }
+              }
+            }
             if ($path_parts[0] != $additional_path_parts[0]) {
               form_set_error('additional_paths_wrapper', t('Additional path %path must match primary path %primary_path since the primary path has placeholders (%).',
                 array(

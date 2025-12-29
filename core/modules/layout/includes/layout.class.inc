@@ -918,17 +918,6 @@ class Layout {
       }
     }
 
-    // Load contexts from additional paths.
-    if ($this->additional_paths) {
-      foreach ($this->additional_paths as $additional_path) {
-        $additional_paths_context = layout_context_required_by_path($additional_path);
-        if ($additional_paths_context) {
-          $additional_paths_context = reset($additional_paths_context);
-          $this->contexts += array('ap_' . $additional_path => $additional_paths_context);
-        }
-      }
-    }
-
     // Load contexts from relationships.
     if ($include_types & LayoutContext::USAGE_TYPE_RELATIONSHIP) {
       $this->contexts += $this->getContextsFromRelationships();
