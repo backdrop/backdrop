@@ -608,7 +608,7 @@ function date_timezone_abbr($refresh = FALSE) {
  * Translates formatted date results, unlike PHP function date_format().
  * Should only be used for display, not input, because it can't be parsed.
  *
- * @param BackdropDateTime $date
+ * @param BackdropDateTime|null $date
  *   A date object.
  * @param string $type
  *   (optional) The date format to use. Can be 'small', 'medium' or 'large' for
