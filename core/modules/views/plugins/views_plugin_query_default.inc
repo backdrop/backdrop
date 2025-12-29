@@ -93,7 +93,7 @@ class views_plugin_query_default extends views_plugin_query {
    var $field_aliases = array();
 
    /**
-    * Query tags which will be passed over to the dbtng query object.
+    * Query tags which will be passed over to the query object.
     */
    var $tags = array();
 
@@ -435,7 +435,7 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function queue_table($table, $relationship = NULL, $join = NULL, $alias = NULL) {
     // If the alias is set, make sure it doesn't already exist.
-    if (isset($this->table_queue[$alias])) {
+    if ($alias && isset($this->table_queue[$alias])) {
       return $alias;
     }
 
@@ -458,7 +458,7 @@ class views_plugin_query_default extends views_plugin_query {
 
     // Check this again to make sure we don't blow up existing aliases for already
     // adjusted joins.
-    if (isset($this->table_queue[$alias])) {
+    if ($alias && isset($this->table_queue[$alias])) {
       return $alias;
     }
 
@@ -814,7 +814,10 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     // Keep track of all aliases used.
-    $this->field_aliases[$table][$field] = $alias;
+    // A formula can't have an alias, only tables can.
+    if ($table) {
+      $this->field_aliases[$table][$field] = $alias;
+    }
 
     return $alias;
   }
@@ -885,7 +888,7 @@ class views_plugin_query_default extends views_plugin_query {
    *
    * The caller is responsible for ensuring that all fields are fully qualified
    * (TABLE.FIELD) and that the table already exists in the query. Internally,
-   * the dbtng method "where" is used.
+   * the database "where" method is used.
    *
    * @param $group
    *   The WHERE group to add these to; groups are used to create AND/OR
@@ -895,8 +898,10 @@ class views_plugin_query_default extends views_plugin_query {
    *   The snippet to check. This can be either a column or a complex expression
    *   like "UPPER(table.field) = 'value'".
    * @param $args
-   *   An associative array of arguments.
+   *   An associative array of arguments. Placeholders must be unique when
+   *   using this method multiple times on a single query.
    *
+   * @see https://www.php.net/manual/en/pdo.prepare.php
    * @see QueryConditionInterface::where()
    */
   function add_where_expression($group, $snippet, $args = array()) {
@@ -923,7 +928,7 @@ class views_plugin_query_default extends views_plugin_query {
    *
    * The caller is responsible for ensuring that all fields are fully qualified
    * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist in the query.
-   * Internally the dbtng method "havingCondition" is used.
+   * Internally the database "havingCondition" method is used.
    *
    * @param $group
    *   The HAVING group to add these to; groups are used to create AND/OR
@@ -965,8 +970,8 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Add a complex HAVING clause to the query.
    * The caller is responsible for ensuring that all fields are fully qualified
-   * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist in the query.
-   * Internally the dbtng method "having" is used.
+   * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist
+   * in the query. Internally the database "having" method is used.
    *
    * @param $group
    *   The HAVING group to add these to; groups are used to create AND/OR
@@ -976,9 +981,11 @@ class views_plugin_query_default extends views_plugin_query {
    *   The snippet to check. This can be either a column or
    *   a complex expression like "COUNT(table.field) > 3"
    * @param $args
-   *   An associative array of arguments.
+   *   An associative array of arguments. Placeholders must be unique when
+   *   using this method multiple times on a single query.
    *
-   * @see QueryConditionInterface::having()
+   * @see https://www.php.net/manual/en/pdo.prepare.php
+   * @see QueryConditionInterface::where()
    */
   function add_having_expression($group, $snippet, $args = array()) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
@@ -1124,9 +1131,10 @@ class views_plugin_query_default extends views_plugin_query {
       if (!empty($info['conditions'])) {
         $sub_group = $info['type'] == 'OR' ? db_or() : db_and();
         foreach ($info['conditions'] as $key => $clause) {
-          // DBTNG doesn't support to add the same subquery twice to the main
-          // query and the count query, so clone the subquery to have two instances
-          // of the same object. - http://drupal.org/node/1112854
+          // The database layer doesn't support adding the same subquery twice
+          // to the main query and the count query, so clone the subquery to
+          // have two instances of the same object.
+          // See http://drupal.org/node/1112854
           if (is_object($clause['value']) && $clause['value'] instanceof SelectQuery) {
             $clause['value'] = clone $clause['value'];
           }
@@ -1232,11 +1240,11 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
-   * Generate a query and a countquery from all of the information supplied
+   * Generate a query and a countQuery from all of the information supplied
    * to the object.
    *
    * @param $get_count
-   *   Provide a countquery if this is true, otherwise provide a normal query.
+   *   Provide a countQuery if this is true, otherwise provide a normal query.
    */
   function query($get_count = FALSE) {
     // Check query distinct value.
@@ -1613,7 +1621,8 @@ class views_plugin_query_default extends views_plugin_query {
     }
     $entity_type = $table_data['table']['entity type'];
     $info = entity_get_info($entity_type);
-    $id_alias = $this->get_field_alias($base_table_alias, $info['entity keys']['id']);
+    $is_revision = !empty($table_data['table']['revision']);
+    $id_alias = $this->get_field_alias($base_table_alias, $info['entity keys'][$is_revision ? 'revision' : 'id']);
 
     // Assemble the ids of the entities to load.
     $ids = array();
@@ -1623,12 +1632,33 @@ class views_plugin_query_default extends views_plugin_query {
       }
     }
 
-    $entities = entity_load($entity_type, $ids);
-    // Re-key the array by row-index.
-    $result = array();
-    foreach ($ids as $key => $id) {
-      $result[$key] = isset($entities[$id]) ? $entities[$id] : FALSE;
+    if (!$is_revision) {
+      $entities = entity_load($entity_type, $ids);
+
+      // Re-key the array by row-index.
+      $result = array();
+      foreach ($ids as $key => $id) {
+        $result[$key] = isset($entities[$id]) ? $entities[$id] : FALSE;
+      }
     }
+    else {
+      // There's no way in core to load revisions in bulk.
+      $result = array();
+      foreach ($ids as $key => $id) {
+        // @todo: Switch this to entity_revision_load() if that function gets
+        // into core.
+        // See: https://github.com/backdrop/backdrop-issues/issues/3777
+        $entity_info = entity_get_info($entity_type);
+        if (!empty($entity_info['entity keys']['revision'])) {
+          $entity_revisions = entity_load_multiple($entity_type, FALSE, array($entity_info['entity keys']['revision'] => $id));
+          $result[$key] = reset($entity_revisions);
+        }
+        else {
+          $result[$key] = FALSE;
+        }
+      }
+    }
+
     return array($entity_type, $result);
   }
 }

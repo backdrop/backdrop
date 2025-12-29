@@ -520,7 +520,7 @@ function config_get_statuses() {
         try {
           $active_config = $active_storage->read($filename);
           $staging_config = $staging_storage->read($filename);
-          if ($active_config != $staging_config) {
+          if ($active_config !== $staging_config) {
             $config_statuses[$filename] = 'update';
           }
         }

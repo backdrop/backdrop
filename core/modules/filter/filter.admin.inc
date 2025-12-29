@@ -95,7 +95,7 @@ function filter_admin_overview($form) {
       $roles_markup = $roles ? implode(', ', $roles) : t('No roles may use this format');
     }
     $form['formats'][$id]['editor'] = array(
-      '#markup' => isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
+      '#markup' => $format->editor && isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
     );
     $form['formats'][$id]['roles'] = array(
       '#markup' => $roles_markup,
@@ -195,8 +195,8 @@ function filter_admin_format_page($format = NULL) {
  * @ingroup forms
  */
 function filter_admin_format_form($form, &$form_state, $format) {
-  // Use a format stored in tempstore if available.
-  if ($stored_format = filter_get_format_tempstore($format->format)) {
+  // Use a format stored in tempstore if available, unless creating a new one.
+  if (!isset($format->is_new) && $stored_format = filter_get_format_tempstore($format->format)) {
     filter_admin_set_message($stored_format);
     $format = $stored_format;
   }
@@ -204,6 +204,13 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $editors = filter_get_editors();
   if (isset($form_state['editor_info'])) {
     $editor_info = $form_state['editor_info'];
+
+    // If the editor changed, update the format settings accordingly.
+    $current_editor = $form_state['values']['editor'];
+    if ($format->editor != $current_editor && isset($editors[$current_editor])) {
+      $format->editor = $current_editor;
+      $format->editor_settings = array();
+    }
   }
   else {
     $editor_info = ($format->editor && isset($editors[$format->editor])) ? $editors[$format->editor] : NULL;
@@ -254,7 +261,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
   }
 
   // Associate an editor with this format.
-  $editor_info = $form_state['editor_info'];
   if ($editor_info) {
     // Load the associated editor callbacks file, if any.
     if (!empty($editor_info['file'])) {
@@ -354,7 +360,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
         'name' => $name,
         'status' => 0,
         'weight' => $filter_info['weight'],
-        'settings' => isset($filter_info['default settings']) ? $filter_info['default settings'] : array(),
+        'settings' => $filter_info['default settings'],
       );
     }
   }
@@ -682,6 +688,8 @@ function filter_admin_format_form_submit($form, &$form_state) {
 
   // Add the submitted form values to the text format, and save it.
   $format = $form_state['format'];
+  // Whether we need this, depends on the tempstore triggered by AJAX or not.
+  $filters_original = $form_state['format']->filters;
   // Save allowed HTML tags from the hidden field in the event JS modified them.
   $allowed_html = $form_state['values']['allowed_html'];
   unset($form_state['values']['allowed_html']);
@@ -693,6 +701,16 @@ function filter_admin_format_form_submit($form, &$form_state) {
   if ($stored_format = filter_get_format_tempstore($format->format)) {
     foreach ($stored_format->filters as $name => $filter) {
       $format->filters[$name]['settings'] = $filter->settings;
+    }
+  }
+  // We have no tempstore, if none of the extended configure forms has been
+  // opened. So we fall back to the existing filter settings. They haven't been
+  // changed then.
+  else {
+    foreach ($filters_original as $name => $value) {
+      if (!empty($value->settings) && $name != 'filter_html') {
+        $format->filters[$name]['settings'] = $value->settings;
+      }
     }
   }
   // Set allowed html, parked in a variable previously.
@@ -919,6 +937,49 @@ function filter_editor_image_upload_settings_form($format) {
   return $form;
 }
 
+/**
+ * Subform constructor to configure the text editor's inline image styles.
+ *
+ * Each text editor implementation using the Filter dialog can use this form to
+ * configure image styles for inline images instead of free resizing.
+ *
+ * @param object $format
+ *   The filter format object.
+ *
+ * @return array
+ *   Subform items or empty array if not applicable.
+ */
+function filter_editor_image_styles_settings_form($format) {
+  $form = array();
+  if (!module_exists('image')) {
+    return $form;
+  }
+  $settings = isset($format->editor_settings['image_styles']) ? $format->editor_settings['image_styles'] : array();
+  $settings += array(
+    'status' => FALSE,
+    'list' => array(),
+  );
+  $form['status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable image styles'),
+    '#default_value' => $settings['status'],
+  );
+  $style_options = array('' => t('None (original image)'));
+  $style_options += image_style_options(FALSE);
+  $form['list'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Available image styles'),
+    '#options' => $style_options,
+    '#default_value' => $settings['list'],
+    '#states' => array(
+      'visible' => array(
+        ':input[name="editor_settings[image_styles][status]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  return $form;
+}
 
 /**
  * Subform constructor to configure the text editor's file upload settings.

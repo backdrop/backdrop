@@ -523,6 +523,14 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
 
       // Record the fact that it was enabled.
       $modules_enabled[] = $module;
+
+      // Update the status of the module in the system.extensions config.
+      $config = config('system.extensions');
+      $modules_in_config = $config->get('modules') != NULL ? $config->get('modules') : array();
+      $modules_in_config[$module] = TRUE;
+      $config->set('modules', $modules_in_config);
+      $config->save();
+
       watchdog('system', '%module module enabled.', array('%module' => $module), WATCHDOG_INFO);
     }
   }
@@ -608,6 +616,14 @@ function module_disable($module_list, $disable_dependents = TRUE) {
         ->condition('name', $module)
         ->execute();
       $invoke_modules[] = $module;
+
+      // Update the status of the module in the system.extensions config.
+      $config = config('system.extensions');
+      $modules_in_config = $config->get('modules') != NULL ? $config->get('modules') : array();
+      $modules_in_config[$module] = FALSE;
+      $config->set('modules', $modules_in_config);
+      $config->save();
+
       watchdog('system', '%module module disabled.', array('%module' => $module), WATCHDOG_INFO);
     }
   }
@@ -1009,6 +1025,8 @@ function backdrop_merged_modules() {
     'options_element', // Backdrop 1.12.0.
     'field_formatter_settings', // Backdrop 1.13.0.
     'imagecache_token', // Backdrop 1.17.0.
+    'fast_token_browser', // Backdrop 1.30.0.
+    'book_cache', // Backdrop 1.32.0.
   );
 }
 
@@ -1049,7 +1067,7 @@ function backdrop_required_modules() {
  *     'unalterable' => $unalterable,
  *     'foo' => 'bar',
  *   );
- *   backdrop_alter('mymodule_data', $alterable1, $alterable2, $context);
+ *   backdrop_alter('my_module_data', $alterable1, $alterable2, $context);
  * @endcode
  *
  * Note that objects are always passed by reference in PHP5. If it is absolutely
@@ -1059,7 +1077,7 @@ function backdrop_required_modules() {
  *   $context = array(
  *     'unalterable_object' => clone $object,
  *   );
- *   backdrop_alter('mymodule_data', $data, $context);
+ *   backdrop_alter('my_module_data', $data, $context);
  * @endcode
  *
  * @param $type
@@ -1176,6 +1194,9 @@ function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$c
     if (isset($theme)) {
       $theme_keys = array();
       foreach ($base_theme_info as $base) {
+        if (empty($base)) {
+          continue;
+        }
         $theme_keys[] = $base->name;
       }
       $theme_keys[] = $theme;

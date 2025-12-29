@@ -1,0 +1,7 @@
+name = "Icon API test"
+description = "Support module for Icon API testing."
+package = Testing
+version = BACKDROP_VERSION
+type = module
+backdrop = 1.x
+hidden = TRUE

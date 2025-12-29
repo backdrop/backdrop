@@ -267,6 +267,8 @@ function _field_invoke_multiple($op, $entity_type, $entities, &$a = NULL, &$b = 
   foreach ($entities as $entity) {
     // Determine the list of instances to iterate on.
     list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+    // It is null for newly created, but we need it as array key.
+    $id = (string) $id;
     $instances = _field_invoke_get_instances($entity_type, $bundle, $options);
 
     foreach ($instances as $instance) {
@@ -764,7 +766,7 @@ function field_attach_validate($entity_type, $entity, $options = array()) {
  * There are two levels of validation for fields in forms: widget
  * validation, and field validation.
  * - Widget validation steps are specific to a given widget's own form
- *   structure and UI metaphors. They are executed through FAPI's
+ *   structure and UI metaphors. They are executed through Form API's
  *   #element_validate property during normal form validation.
  * - Field validation steps are common to a given field type, independently of
  *   the specific widget being used in a given form. They are defined in the

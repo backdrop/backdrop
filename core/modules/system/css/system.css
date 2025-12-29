@@ -129,9 +129,6 @@ a.tabledrag-handle .handle {
   padding: 0.42em 0.5em; /* LTR */
   width: 13px;
   box-sizing: content-box;
-  -moz-box-sizing: content-box;
-  -webkit-box-sizing: content-box;
-  -o-box-sizing: content-box;
 }
 [dir="rtl"] a.tabledrag-handle .handle {
   margin: -0.4em 0.5em;

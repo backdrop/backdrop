@@ -240,7 +240,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
             '#type' => 'weight',
             '#title' => t('Weight for row @number', array('@number' => $delta + 1)),
             '#title_display' => 'invisible',
-             // Note: this 'delta' is the FAPI 'weight' element's property.
+             // Note: this 'delta' is the Form API 'weight' element's property.
             '#delta' => $max,
             '#default_value' => isset($items[$delta]['_weight']) ? $items[$delta]['_weight'] : $delta,
             '#weight' => 100,

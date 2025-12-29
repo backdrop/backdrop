@@ -85,6 +85,11 @@ function system_theme() {
     ) + $base,
     'status_report' => array(
       'render element' => 'requirements',
+      'attached' => array(
+        'js' => array(
+          backdrop_get_path('module', 'system') . '/js/status.js' => array(),
+        ),
+      ),
     ) + $base,
     'admin_page' => array(
       'variables' => array('blocks' => NULL),
@@ -121,24 +126,23 @@ function system_theme() {
     ) + $base,
     'token_tree' => array(
       'variables' => array(
+        'text' => t('Browse available tokens.'),
         'token_types' => array(),
         'global_types' => TRUE,
+        'dialog' => FALSE,
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-        'recursion_limit' => 3,
-        'dialog' => FALSE,
       ),
     ) + $base,
     'token_tree_link' => array(
       'variables' => array(
-        'text' => NULL,
-        'options' => array(),
+        'text' => t('Browse available tokens.'),
         'token_types' => array(),
         'global_types' => TRUE,
+        'dialog' => TRUE,
+        'options' => array(),
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-        'recursion_limit' => 3,
-        'dialog' => TRUE,
       ),
     ) + $base,
     'label_machine_name' => array(
@@ -154,7 +158,7 @@ function system_theme() {
  * Implements hook_permission().
  */
 function system_permission() {
-  return array(
+  $permissions = array(
     'administer modules' => array(
       'title' => t('Administer modules'),
     ),
@@ -169,8 +173,20 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
-      'warning' => t('Run database updates for Backdrop projects.'),
+      'warning' => t('Allows running site updates (update.php) for Backdrop projects.'),
     ),
+  );
+  // If backups are not configured, do not show related permission.
+  if (backup_get_backup_directory()) {
+    $permissions += array(
+      'restore site backups' => array(
+        'title' => t('Restore site backups'),
+        'restrict access' => TRUE,
+        'warning' => t('Allows restoring the configuration and database from backups (restore.php).'),
+      ),
+    );
+  }
+  $permissions += array(
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
     ),
@@ -189,6 +205,8 @@ function system_permission() {
       'description' => t('Provides access to manually flush caches.'),
     ),
   );
+
+  return $permissions;
 }
 
 /**
@@ -397,12 +415,14 @@ function system_element_info() {
     '#cols' => 60,
     '#rows' => 5,
     '#resizable' => 'vertical',
+    '#description_display' => 'before',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
   );
   $types['radios'] = array(
     '#input' => TRUE,
+    '#description_display' => 'before',
     '#process' => array('form_process_radios'),
     '#theme_wrappers' => array('container__radios'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
@@ -417,6 +437,7 @@ function system_element_info() {
   );
   $types['checkboxes'] = array(
     '#input' => TRUE,
+    '#description_display' => 'before',
     '#process' => array('form_process_checkboxes'),
     '#theme_wrappers' => array('container__checkboxes'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
@@ -516,6 +537,7 @@ function system_element_info() {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#value' => NULL,
+    '#description_display' => 'before',
     '#process' => array('form_process_fieldset', 'ajax_process_form'),
     '#pre_render' => array('form_pre_render_fieldset'),
     '#theme_wrappers' => array('fieldset'),
@@ -638,6 +660,7 @@ function system_menu() {
   // Menu items that are basically just menu blocks.
   $items['admin/structure'] = array(
     'title' => 'Structure',
+    'icon' => 'stack-fill',
     'description' => 'Administer blocks, content types, menus, etc.',
     'weight' => -2,
     'page callback' => 'system_admin_menu_block_page',
@@ -647,6 +670,7 @@ function system_menu() {
   // Appearance.
   $items['admin/appearance'] = array(
     'title' => 'Appearance',
+    'icon' => 'palette-fill',
     'description' => 'Select and configure themes.',
     'page callback' => 'system_themes_page',
     'access arguments' => array('administer themes'),
@@ -701,6 +725,7 @@ function system_menu() {
   // Modules.
   $items['admin/modules'] = array(
     'title' => 'Functionality',
+    'icon' => 'puzzle-piece-fill',
     'description' => 'Install or uninstall modules.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_modules'),
@@ -735,6 +760,7 @@ function system_menu() {
   // Configuration.
   $items['admin/config'] = array(
     'title' => 'Configuration',
+    'icon' => 'gear-fill',
     'description' => 'Administer settings.',
     'page callback' => 'system_admin_config_page',
     'access arguments' => array('access administration pages'),
@@ -742,6 +768,7 @@ function system_menu() {
   );
   $items['admin/config/administration'] = array(
     'title' => 'Administration',
+    'icon' => 'gear',
     'description' => 'Administration tools.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -750,6 +777,7 @@ function system_menu() {
   // Media settings.
   $items['admin/config/media'] = array(
     'title' => 'Media',
+    'icon' => 'image',
     'description' => 'Media tools.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -787,6 +815,7 @@ function system_menu() {
   // Service settings.
   $items['admin/config/services'] = array(
     'title' => 'Web services',
+    'icon' => 'rss',
     'description' => 'Tools related to web services.',
     'weight' => 0,
     'page callback' => 'system_admin_menu_block_page',
@@ -805,6 +834,7 @@ function system_menu() {
   // Development settings.
   $items['admin/config/development'] = array(
     'title' => 'Development',
+    'icon' => 'wrench',
     'description' => 'Development tools.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -860,6 +890,7 @@ function system_menu() {
   // Regional and date settings.
   $items['admin/config/regional'] = array(
     'title' => 'Regional and language',
+    'icon' => 'globe',
     'description' => 'Regional settings, localization and translation.',
     'weight' => -5,
     'page callback' => 'system_admin_menu_block_page',
@@ -925,6 +956,7 @@ function system_menu() {
   // Search settings.
   $items['admin/config/search'] = array(
     'title' => 'Search',
+    'icon' => 'magnifying-glass',
     'description' => 'Local site search settings.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -935,6 +967,7 @@ function system_menu() {
   // System settings.
   $items['admin/config/system'] = array(
     'title' => 'System',
+    'icon' => 'hard-drives',
     'description' => 'General system related configuration.',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -963,6 +996,7 @@ function system_menu() {
   // URL handling.
   $items['admin/config/urls'] = array(
     'title' => 'URL handling',
+    'icon' => 'link',
     'description' => 'Settings related to URLs including URL aliases and URL redirects.',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -1011,6 +1045,7 @@ function system_menu() {
   // Additional categories
   $items['admin/config/content'] = array(
     'title' => 'Content authoring',
+    'icon' => 'note-pencil',
     'description' => 'Settings related to formatting and authoring content.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1018,6 +1053,7 @@ function system_menu() {
   );
   $items['admin/config/metadata'] = array(
     'title' => 'Metadata',
+    'icon' => 'code',
     'description' => 'Settings related to meta tags, and other data commonly used by search engines.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1025,6 +1061,7 @@ function system_menu() {
   );
   $items['admin/config/user-interface'] = array(
     'title' => 'User interface',
+    'icon' => 'app-window',
     'description' => 'Tools that enhance the user interface.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1032,6 +1069,7 @@ function system_menu() {
   );
   $items['admin/config/workflow'] = array(
     'title' => 'Workflow',
+    'icon' => 'path',
     'description' => 'Settings related to editorial workflow.',
     'weight' => 5,
     'page callback' => 'system_admin_menu_block_page',
@@ -1042,6 +1080,7 @@ function system_menu() {
   // Reports.
   $items['admin/reports'] = array(
     'title' => 'Reports',
+    'icon' => 'info-fill',
     'description' => 'View reports, updates, and errors.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access site reports'),
@@ -1052,8 +1091,16 @@ function system_menu() {
     'title' => 'Status report',
     'description' => "Get a status report about your site's operation and any detected problems.",
     'page callback' => 'system_status',
-    'weight' => -60,
     'access arguments' => array('access site reports'),
+    'weight' => -60,
+    'file' => 'system.admin.inc',
+  );
+  $items['admin/reports/debug'] = array(
+    'title' => 'Debug information',
+    'description' => 'Get information about the site that can help with support requests and debugging.',
+    'page callback' => 'system_debug_info',
+    'access arguments' => array('access site reports'),
+    'weight' => -50,
     'file' => 'system.admin.inc',
   );
   $items['admin/reports/status/run-cron'] = array(
@@ -1080,13 +1127,23 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
 
-  // Token paths.
+  // AJAX endpoint for the assembled token tree.
   $items['token/tree'] = array(
     'page callback' => 'system_token_output',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'system.pages.inc',
     'theme callback' => 'ajax_base_page_theme',
+  );
+
+  // AJAX endpoint for retrieving a token.
+  $items['token-browser/token/%'] = array(
+    'page callback' => 'system_token_browser',
+    'page arguments' => array(2),
+    'delivery callback' => 'system_token_browser_output',
+    'access callback' => 'system_token_browser_access',
+    'file' => 'system.pages.inc',
+    'type' => MENU_CALLBACK,
   );
 
   // Machine names transliteration.
@@ -1213,6 +1270,15 @@ function system_library_info() {
       array('system', 'jquery'),
       array('system', 'backdrop.ajax'),
       array('system', 'backdrop.dialog'),
+    ),
+  );
+
+  // Backdrop's icon API library.
+  $libraries['backdrop.icons'] = array(
+    'title' => 'Backdrop icons',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/icons.js' => array('group' => JS_LIBRARY, 'weight' => -18),
     ),
   );
 
@@ -1425,20 +1491,6 @@ function system_library_info() {
     ),
   );
 
-  // HTML5 Shiv.
-  $libraries['html5shiv'] = array(
-    'title' => 'html5shiv',
-    'website' => 'http://code.google.com/p/html5shiv/',
-    'version' => '3.7.3',
-    'js' => array(
-      'core/misc/html5.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -21,
-        'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE),
-      ),
-    ),
-  );
-
   // SmartMenus.
   $libraries['smartmenus'] = array(
     'title' => 'SmartMenus',
@@ -1487,17 +1539,17 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.13.2',
+    'version' => '1.14.0',
     'js' => array(
+      'core/misc/jquery-ui-compat.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
       'core/misc/ui/jquery.ui.data.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
       'core/misc/ui/jquery.ui.disable-selection.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.form.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
@@ -1533,23 +1585,11 @@ function system_library_info() {
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
-      'core/misc/ui/jquery.ui.ie.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
       'core/misc/ui/jquery.ui.keycode.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
       'core/misc/ui/jquery.ui.plugin.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.safe-blur.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
@@ -2076,7 +2116,7 @@ function system_library_info() {
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
     'website' => 'https://github.com/RWAP/jquery-ui-touch-punch/',
-    'version' => '1.0.9',
+    'version' => '1.1.5',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
     ),
@@ -2099,6 +2139,9 @@ function system_library_info() {
     'dependencies' => array(
       array('system', 'jquery.treetable'),
       array('system', 'backdrop.ajax'),
+    ),
+    'icons' => array(
+      'caret-down',
     ),
   );
 
@@ -2444,9 +2487,11 @@ function system_init() {
   // can be re-enabled.
 
   // @todo remove this backwards-compatible session variable wrapper in 2.0.
+  // cspell:disable
   if (isset($_SESSION['ignore_slave_server'])) {
     $_SESSION['ignore_replica_server'] = $_SESSION['ignore_slave_server'];
     unset($_SESSION['ignore_slave_server']);
+    // cspell:enable
   }
 
   if (isset($_SESSION['ignore_replica_server'])) {
@@ -2961,9 +3006,9 @@ function system_get_info($type, $name = NULL) {
     $type = 'module_enabled';
   }
   $list = system_list($type);
-  foreach ($list as $shortname => $item) {
+  foreach ($list as $short_name => $item) {
     if (!empty($item->status)) {
-      $info[$shortname] = $item->info;
+      $info[$short_name] = $item->info;
     }
   }
   if (isset($name)) {
@@ -3296,6 +3341,77 @@ function system_themes_disabled($theme_list) {
       $config = config($theme_name . '.settings');
       if (!$config->isNew()) {
         $config->delete();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_config_update_validate().
+ */
+function system_config_update_validate(Config $staging_config, Config $active_config, $all_changes) {
+  $config_name = $staging_config->getName();
+  if ($config_name === 'system.extensions') {
+    foreach (array('modules', 'themes') as $extension_type) {
+      $staging_list = array_filter($staging_config->get($extension_type));
+      $current_list = array_filter($active_config->get($extension_type));
+      $removed_list = array_keys(array_diff_key($current_list, $staging_list));
+      if ($removed_list) {
+        if ($extension_type === 'modules') {
+          $error = format_plural(count($removed_list),
+            'The module "@module_list" cannot be disabled on config import.',
+            'Modules (@module_list) cannot be disabled on config import.',
+            array(
+              '@module_list' => implode(', ', $removed_list),
+            )
+          );
+          $error .= ' ' . t('Try disabling and uninstalling from the <a href="!url">modules administration page</a>.', array('!url' => url('admin/modules')));
+        }
+        else {
+          $error = format_plural(count($removed_list),
+            'The theme "@theme_list" cannot be disabled on config import.',
+            'Themes (@theme_list) cannot be disabled on config import.',
+            array(
+              '@theme_list' => implode(', ', $removed_list),
+            )
+          );
+          $error .= ' ' . t('Try disabling from the <a href="!url">themes administration page</a>.', array('!url' => url('admin/appearance')));
+        }
+        throw new ConfigValidateException($error);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_config_delete_validate().
+ */
+function system_config_delete_validate(Config $active_config, $all_changes) {
+  $config_name = $active_config->getName();
+  if ($config_name === 'system.extensions') {
+    throw new ConfigValidateException(t('The @config configuration is required and cannot be deleted. Check that it was not accidentally removed.', array('@config' => $config_name)));
+  }
+}
+
+/**
+ * Implements hook_config_update().
+ */
+function system_config_update(Config $staging_config, Config $active_config) {
+  $config_name = $staging_config->getName();
+
+  // Enable modules and themes on config update. Note that the disabling and
+  // uninstalling of extensions is not supported through config. They must be
+  // disabled through the UI.
+  if ($config_name === 'system.extensions') {
+    foreach (array('modules', 'themes') as $extension_type) {
+      $staging_list = array_filter($staging_config->get($extension_type));
+      $current_list = array_filter($active_config->get($extension_type));
+      $added_list = array_keys(array_diff_key($staging_list, $current_list));
+      if ($extension_type === 'modules') {
+        module_enable($added_list);
+      }
+      else {
+        theme_enable($added_list);
       }
     }
   }
@@ -3641,7 +3757,7 @@ function system_jump_menu_submit($form, &$form_state) {
   }
 
   // If the path we are redirecting to starts with the base path (for example,
-  // "/somepath/node/1"), we need to strip the base path off before passing it
+  // "/some_path/node/1"), we need to strip the base path off before passing it
   // to $form_state['redirect'].
   $base_path = base_path();
   if (strpos($redirect, $base_path) === 0) {
@@ -3842,14 +3958,17 @@ function system_mail($key, &$message, $params) {
  *   If evaluates true, prepend an empty time zone option to the array.
  */
 function system_time_zones($blank = NULL) {
-  $zonelist = timezone_identifiers_list();
+  $zone_list = timezone_identifiers_list();
   $zones = $blank ? array('' => t('- None selected -')) : array();
-  foreach ($zonelist as $zone) {
+  foreach ($zone_list as $zone) {
     // Because many time zones exist in PHP only for backward compatibility
     // reasons and should not be used, the list is filtered by a regular
     // expression.
     if (preg_match('!^((Africa|America|Antarctica|Arctic|Asia|Atlantic|Australia|Europe|Indian|Pacific)/|UTC$)!', $zone)) {
-      $zones[$zone] = t('@zone: @date', array('@zone' => t(str_replace('_', ' ', $zone)), '@date' => format_date(REQUEST_TIME, 'custom', config_get('system.date', 'formats.long.pattern.php') . ' O', $zone)));
+      $zones[$zone] = t('@zone: @date', array(
+        '@zone' => t(str_replace('_', ' ', $zone)),
+        '@date' => format_date(REQUEST_TIME, 'custom', config_get('system.date', 'formats.long.pattern') . ' O', $zone),
+      ));
     }
   }
   // Sort the translated time zones alphabetically.
@@ -3886,7 +4005,7 @@ function system_check_http_request() {
 /**
  * Menu callback; Retrieve a JSON object containing a suggested time zone name.
  */
-function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_time = NULL) {
+function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_time = -1) {
   // An abbreviation of "0" passed in the callback arguments should be
   // interpreted as the empty string.
   $abbreviation = $abbreviation ? $abbreviation : '';
@@ -4139,21 +4258,29 @@ function system_autoload_info() {
  * Implements hook_config_info().
  */
 function system_config_info() {
-  $prefixes['system.core'] = array(
-    'label' => t('System core settings'),
-    'group' => t('Configuration'),
-  );
   $prefixes['system.authorize'] = array(
     'label' => t('System authorize'),
+    'group' => t('System configuration'),
+  );
+  $prefixes['system.core'] = array(
+    'label' => t('Core settings'),
+    'group' => t('System configuration'),
+  );
+  $prefixes['system.backup'] = array(
+    'label' => t('System backup'),
     'group' => t('Configuration'),
   );
   $prefixes['system.date'] = array(
     'label' => t('System date'),
-    'group' => t('Configuration'),
+    'group' => t('System configuration'),
+  );
+  $prefixes['system.extensions'] = array(
+    'label' => t('Enabled extensions (modules/themes)'),
+    'group' => t('System configuration'),
   );
   $prefixes['system.mail'] = array(
     'label' => t('Mail systems'),
-    'group' => t('Configuration'),
+    'group' => t('System configuration'),
   );
 
   // Register config files for all active themes.
@@ -4191,14 +4318,14 @@ function system_system_info_alter(&$info, $file, $type) {
  * Menu callback; Returns the standard "Page not found" error page.
  */
 function system_404() {
-  return t('The requested page "@path" could not be found.', array('@path' => request_uri()));
+  return '<p>' . t('The requested page "@path" could not be found.', array('@path' => request_uri())) . '</p>';
 }
 
 /**
  * Menu callback; Returns the standard "Page not found" error page.
  */
 function system_403() {
-  return t('You are not authorized to access this page.');
+  return '<p>' . t('You are not authorized to access this page.') . '</p>';
 }
 
 /**
@@ -4502,18 +4629,18 @@ function system_file_download($uri) {
  * submit function saves all the data in the form.
  *
  * If $form['#config'] is present in the form, the values will be saved to the
- * named settings file (e.g., mymodule.settings). If sub-elements or groups of
+ * named settings file (e.g., my_module.settings). If sub-elements or groups of
  * sub-elements have their own '#config' keys, then values of those elements and
  * their children will be saved to that settings file.
  *
  * For example, consider the form:
  *
  * @code
- * $primary_config = config('mymodule.settings');
- * $secondary_config = config('mymodule.second');
- * $tertiary_config = config('mymodule.third');
+ * $primary_config = config('my_module.settings');
+ * $secondary_config = config('my_module.second');
+ * $tertiary_config = config('my_module.third');
  * $form = array(
- *   '#config' => 'mymodule.settings',
+ *   '#config' => 'my_module.settings',
  *   'first_setting' => array(
  *     '#type' => 'textfield',
  *     '#title' => t('First Setting'),
@@ -4524,7 +4651,7 @@ function system_file_download($uri) {
  *   'bonus_fieldset' => array(
  *     '#type' => 'fieldset',
  *     '#title' => t('Secondary Settings'),
- *     '#config' => 'mymodule.second',
+ *     '#config' => 'my_module.second',
  *
  *     'bonus_one' => array( ... ),
  *     'bonus_two' => array( ... ),
@@ -4532,22 +4659,23 @@ function system_file_download($uri) {
  *     'bonus_three' => array(
  *       '#type' => 'textfield',
  *       '#default_value' => $tertiary_config->get('bonus_three'),
- *       '#config' => 'mymodule.third',
+ *       '#config' => 'my_module.third',
  *     ),
  *   ),
  * );
  * @endcode
  *
- * The top-level '#config' is "mymodule.settings". The values of 'first_setting'
- * and 'second_setting' will both be saved to "mymodule.settings".
+ * The top-level '#config' is "my_module.settings". The values of
+ * 'first_setting' and 'second_setting' will both be saved to
+ * "my_module.settings".
  *
- * The 'bonus_fieldset' has its own '#config' setting, "mymodule.second", which
+ * The 'bonus_fieldset' has its own '#config' setting, "my_module.second", which
  * overrides the top-level '#config' setting, so 'bonus_one' and 'bonus_two'
- * will be saved to "mymodule.second".
+ * will be saved to "my_module.second".
  *
- * The 'bonus_three' has its own '#config' setting, "mymodule.third", which
+ * The 'bonus_three' has its own '#config' setting, "my_module.third", which
  * overrides the one from the fieldset. The value of 'bonus_three' will be
- * saved to the "mymodule.third".
+ * saved to the "my_module.third".
  *
  * Modules that implement hook_form_alter() can use the '#config' settings to
  * save their data to their own settings file by setting the '#config' parameter
@@ -4593,9 +4721,6 @@ function system_settings_form($form) {
 /**
  * Form submission handler for system_settings_form().
  *
- * If you want node type configure style handling of your checkboxes,
- * add an array_filter value to your form.
- *
  * @since 1.6.0 Restored and made compatible with configuration management.
  */
 function system_settings_form_submit($form, &$form_state) {
@@ -4614,6 +4739,9 @@ function system_settings_form_submit($form, &$form_state) {
       return;
     }
 
+    // For compatibility with Drupal 7, if $form['array_filter'] is set, pass
+    // the form state values to array_filter(). This will remove any empty
+    // values.
     foreach ($form_state['values'] as $key => $value) {
       if (is_array($value) && isset($form_state['values']['array_filter'])) {
         $value = array_keys(array_filter($value));

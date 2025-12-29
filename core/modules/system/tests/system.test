@@ -74,6 +74,76 @@ class ModuleTestCase extends WatchdogTestCase {
   }
 
   /**
+   * Assert that the default config provided by a module is active.
+   *
+   * @param $module
+   *   The name of the module.
+   */
+  function assertModuleConfigExists($module) {
+    $config_exists = TRUE;
+    $config_names = config_get_default_config_names($module);
+    if (empty($config_names)) {
+      return $this->assert(TRUE, format_string('The @module module does not provide any config.', array('@module' => $module)));
+    }
+
+    foreach ($config_names as $config_name) {
+      if (config($config_name)->isNew()) {
+        $config_exists = FALSE;
+        break;
+      }
+    }
+
+    return $this->assertTrue($config_exists, format_string('All of the config defined by the @module module exists.', array('@module' => $module)));
+  }
+
+  /**
+   * Assert that the default config provided by a module is removed.
+   *
+   * @param $module
+   *   The name of the module.
+   */
+  function assertModuleConfigDoesNotExist($module) {
+    $config_exists = TRUE;
+    $config_names = config_get_default_config_names($module);
+    if (empty($config_names)) {
+      return $this->assert(TRUE, format_string('The @module module does not provide any config.', array('@module' => $module)));
+    }
+
+    foreach ($config_names as $config_name) {
+      if (config($config_name)->isNew()) {
+        $config_exists = FALSE;
+        break;
+      }
+    }
+
+    return $this->assertFalse($config_exists, format_string('None of the config defined by the @module module exists.', array('@module' => $module)));
+  }
+
+  /**
+   * Assert the module has a particular state in the system.extensions config.
+   *
+   * @param string $module
+   *   The name of the module.
+   * @param string $state
+   *   One of the following: "enabled", "disabled", or "uninstalled".
+   */
+  function assertModuleSystemExtensionsConfig($module, $state) {
+    $config = config('system.extensions');
+    $config_state = $config->get('modules.' . $module);
+    switch ($state) {
+      case 'enabled':
+        $this->assertTrue($config_state, format_string('The @module module is enabled (TRUE) in the system.extensions config.'));
+        break;
+      case 'disabled':
+        $this->assertFalse($config_state, format_string('The @module module is disabled (FALSE) in the system.extensions config.'));
+        break;
+      case 'uninstalled':
+        $this->assertNull($config_state, format_string('The @module module is uninstalled (not present at all) in the system.extensions config.'));
+        break;
+    }
+  }
+
+  /**
    * Assert the list of modules are enabled or disabled.
    *
    * @param $modules
@@ -182,6 +252,8 @@ class EnableDisableTestCase extends ModuleTestCase {
         foreach ($modules_to_enable as $module_to_enable) {
           $this->assertModules(array($module_to_enable), FALSE);
           $this->assertModuleTablesDoNotExist($module_to_enable);
+          $this->assertModuleConfigDoesNotExist($module_to_enable);
+          $this->assertModuleSystemExtensionsConfig($module_to_enable, 'uninstalled');
         }
 
         // Install and enable the module.
@@ -204,6 +276,8 @@ class EnableDisableTestCase extends ModuleTestCase {
           $this->assertText(t('hook_modules_enabled fired for @module', array('@module' => $module_to_enable)));
           $this->assertModules(array($module_to_enable), TRUE);
           $this->assertModuleTablesExist($module_to_enable);
+          $this->assertModuleConfigExists($module_to_enable);
+          $this->assertModuleSystemExtensionsConfig($module_to_enable, 'enabled');
           $this->assertLogMessage('system', "%module module installed.", array('%module' => $module_to_enable), WATCHDOG_INFO);
           $this->assertLogMessage('system', "%module module enabled.", array('%module' => $module_to_enable), WATCHDOG_INFO);
         }
@@ -282,8 +356,10 @@ class EnableDisableTestCase extends ModuleTestCase {
     $this->assertText(t('hook_modules_disabled fired for @module', array('@module' => $module->name)));
     $this->assertLogMessage('system', "%module module disabled.", array('%module' => $module->name), WATCHDOG_INFO);
 
-    //  Check that the module's database tables still exist.
+    //  Check that the module's database tables and config still exist.
     $this->assertModuleTablesExist($module->name);
+    $this->assertModuleConfigExists($module->name);
+    $this->assertModuleSystemExtensionsConfig($module->name, 'disabled');
 
     // Uninstall the module.
     $edit = array();
@@ -302,8 +378,10 @@ class EnableDisableTestCase extends ModuleTestCase {
       $this->assertLogMessage('system', "%module module uninstalled.", array('%module' => $module->name), WATCHDOG_INFO);
     }
 
-    // Check that the module's database tables no longer exist.
+    // Check that the module's database tables and config no longer exist.
     $this->assertModuleTablesDoNotExist($module->name);
+    $this->assertModuleConfigDoesNotExist($module->name);
+    $this->assertModuleSystemExtensionsConfig($module->name, 'uninstalled');
   }
 }
 
@@ -1246,7 +1324,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     $this->assertRaw('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.', 'Maintenance confirmation message shown.');
 
     $path = config_get('system.core', 'site_frontpage');
-    $admin_message = format_string('The site is currently in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance', array('query' => array('destination' => $path)))));
+    $admin_message = format_string('The site is currently in <a href="@url">maintenance mode</a>', array('@url' => url('admin/config/development/maintenance')));
     $user_message = 'The site is currently in maintenance mode.';
     $offline_message = format_string('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
 
@@ -1329,8 +1407,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     // Log in with temporary login link.
     $pass = user_password();
     $pass_edit = array(
-      'pass[pass1]' => $pass,
-      'pass[pass2]' => $pass,
+      'pass' => $pass,
     );
     $this->backdropPost($path, $pass_edit, 'Save password & log in');
     $this->assertText($user_message);
@@ -1863,14 +1940,15 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
 
     // Ensure config file exists.
     $config_before = config('basis.settings');
-
     $this->assertFalse($config_before->isNew(), 'Basis config file exists.');
+    $this->assertTrue(config_get('system.extensions', 'themes.basis'));
 
     theme_disable(array('basis'));
 
     // Check that config file no longer exists.
     $config_after = config('basis.settings');
     $this->assertTrue($config_after->isNew(), 'Basis config file does not exist.');
+    $this->assertNull(config_get('system.extensions', 'themes.basis'));
 
     // Test that the theme-specific settings form appears and has correct
     // values pulled from a config file, without a settings array in the info
@@ -2205,6 +2283,9 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $this->clickLink('try again');
     $this->assertNoText('This is a requirements warning provided by the update_script_test module.');
     $this->backdropPost(NULL, array(), t('Continue'));
+    if (backup_get_backup_directory()) {
+      $this->clickLink(t('Skip backup'));
+    }
     $this->backdropPost(NULL, array(), t('Apply pending updates'));
     $this->assertText(t('The update_script_test_update_1000() update was executed successfully.'), t('End of update process was reached.'));
     // Confirm that all caches were cleared.
@@ -2279,6 +2360,9 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     // Click through update.php with 'administer software updates' permission.
     $this->backdropLogin($this->update_user);
     $this->backdropPost($this->update_url, array(), t('Continue'), array('external' => TRUE));
+    if (backup_get_backup_directory()) {
+      $this->clickLink(t('Skip backup'));
+    }
     $this->backdropPost(NULL, array(), t('Apply pending updates'));
     $this->assertText('Updates were attempted.');
     $this->assertLink('site');
@@ -2293,6 +2377,9 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $admin_user = $this->backdropCreateUser(array('administer software updates', 'access administration pages', 'access site reports'));
     $this->backdropLogin($admin_user);
     $this->backdropPost($this->update_url, array(), t('Continue'), array('external' => TRUE));
+    if (backup_get_backup_directory()) {
+      $this->clickLink(t('Skip backup'));
+    }
     $this->backdropPost(NULL, array(), t('Apply pending updates'));
     $this->assertText('Updates were attempted.');
     $this->assertLink('logged');
@@ -2341,12 +2428,14 @@ class RetrieveFileTestCase extends BackdropWebTestCase {
   function testFileRetrieving() {
     // Test 404 handling by trying to fetch a randomly named file.
     backdrop_mkdir($sourcedir = 'public://' . $this->randomName());
+    // cspell:disable-next-line
     $filename = 'Файл для тестирования ' . $this->randomName();
     $url = file_create_url($sourcedir . '/' . $filename);
     $retrieved_file = system_retrieve_file($url);
     $this->assertFalse($retrieved_file, 'Non-existent file not fetched.');
 
-    // Actually create that file, download it via HTTP and test the returned path.
+    // Actually create that file, download it via HTTP and test the returned
+    // path.
     file_put_contents($sourcedir . '/' . $filename, 'testing');
     $retrieved_file = system_retrieve_file($url);
 
@@ -2507,6 +2596,61 @@ class SystemAdminTestCase extends BackdropWebTestCase {
         $this->assertNoLinkByHref("admin/config/people/permissions#module-locale");
       }
     }
+  }
+}
+
+/**
+ * Tests administrative overview pages.
+ */
+class DebugReportTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    // Create an administrator user.
+    $this->admin_user = $this->backdropCreateUser(array('access site reports'));
+    $this->backdropLogin($this->admin_user);
+
+    // Set an admin theme.
+    theme_enable(array('seven'));
+    config_set('system.core', 'admin_theme', 'seven');
+  }
+
+  /**
+   * Tests the "admin/reports/debug" page.
+   */
+  public function testDebugReportPage() {
+    $this->backdropGet('admin/reports/debug');
+    $this->assertResponse(200);
+    $element = $this->xpath('//textarea[@id="debug-info-wrapper"]');
+    $debug_contents = (string) $element[0];
+
+    $tab_size = 29;
+
+    // Check core version.
+    $core_string = str_pad('Backdrop CMS:', $tab_size) . BACKDROP_VERSION;
+    $this->assertTrue(strpos($debug_contents, $core_string) === 0, 'Backdrop core version found in debug report.');
+
+    // Install profile.
+    $core_string = str_pad('Installation profile:', $tab_size) . 'testing';
+    $this->assertTrue(strpos($debug_contents, $core_string), 'Install profile found in debug report.');
+
+    // Check current theme.
+    $theme_string = str_pad('Default theme:', $tab_size) . 'Stark';
+    $this->assertTrue(strpos($debug_contents, $theme_string), 'Current theme found in debug report.');
+
+    // Check an enabled module.
+    $theme_string = str_pad('node', $tab_size) . BACKDROP_VERSION;
+    $this->assertTrue(strpos($debug_contents, $theme_string), 'Enabled module "node" found.');
   }
 }
 

@@ -203,7 +203,7 @@ function text_field_load($entity_type, $entities, $field, $instances, $langcode,
     foreach ($items[$id] as $delta => $item) {
       // Only process items with a cacheable format, the rest will be handled
       // by formatters if needed.
-      if (empty($instances[$id]['settings']['text_processing']) || filter_format_allowcache($item['format'])) {
+      if (empty($instances[$id]['settings']['text_processing']) || ($item['format'] && filter_format_allowcache($item['format']))) {
         $items[$id][$delta]['safe_value'] = isset($item['value']) ? _text_sanitize($instances[$id], $langcode, $item, 'value') : '';
         if ($field['type'] == 'text_with_summary') {
           $items[$id][$delta]['safe_summary'] = isset($item['summary']) ? _text_sanitize($instances[$id], $langcode, $item, 'summary') : '';
@@ -218,9 +218,9 @@ function text_field_load($entity_type, $entities, $field, $instances, $langcode,
  */
 function text_field_is_empty($item, $field) {
   if (!isset($item['value']) || $item['value'] === '') {
-    if (isset($item['format']) && $item['format'] !== '') {
-      // If this text field has a text format setting,
-      // save it regardless of empty value to keep the format.
+    if (isset($item['format']) && $item['format'] !== '' && $item['format'] != filter_default_format()) {
+      // If this text field has a text format setting, save it regardless of
+      // empty value to keep the format. Unless it's the default format.
       return FALSE;
     }
     elseif (!isset($item['summary']) || $item['summary'] === '') {
@@ -380,7 +380,7 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
  *  The sanitized string.
  */
 function _text_sanitize($instance, $langcode, $item, $column) {
-  // If the value uses a cacheable text format, text_field_load() precomputes
+  // If the value uses a cacheable text format, text_field_load() pre-computes
   // the sanitized string.
   if (isset($item["safe_$column"])) {
     return $item["safe_$column"];
@@ -427,7 +427,11 @@ function text_summary($text, $format_id = NULL, $size = 600) {
     return substr($text, 0, $delimiter);
   }
 
-  $format = filter_format_load($format_id);
+  // Only attempt to load a format, if $format_id is not NULL, anyway.
+  $format = FALSE;
+  if ($format_id) {
+    $format = filter_format_load($format_id);
+  }
 
   // If we have a short body, the entire body is the summary.
   if (backdrop_strlen($text) <= $size) {
@@ -462,8 +466,8 @@ function text_summary($text, $format_id = NULL, $size = 600) {
   // If no complete paragraph then treat line breaks as paragraphs.
   $line_breaks = array('<br />' => 6, '<br>' => 4);
   // Newline only indicates a line break if line break converter
-  // filter is present.
-  if (isset($format->filters['filter_autop'])) {
+  // filter is enabled.
+  if ($format && isset($format->filters['filter_autop']) && $format->filters['filter_autop']->status) {
     $line_breaks["\n"] = 1;
   }
   $break_points[] = $line_breaks;
@@ -493,6 +497,9 @@ function text_summary($text, $format_id = NULL, $size = 600) {
       break;
     }
   }
+
+  // Trim opening tag fragment like previous versions of libxml did.
+  $summary = rtrim($summary, '<');
 
   // Clean up any invalid HTML.
   if (function_exists('_filter_htmlcorrector')) {

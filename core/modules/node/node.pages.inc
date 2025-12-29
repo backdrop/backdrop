@@ -69,6 +69,7 @@ function node_add($type) {
   global $user;
 
   $types = node_type_get_types();
+  /** @var Node $node */
   $node = entity_create('node', array(
     'uid' => $user->uid,
     'name' => (isset($user->name) ? $user->name : ''),
@@ -274,7 +275,7 @@ function node_form($form, &$form_state, Node $node) {
         backdrop_get_path('module', 'node') . '/js/node.js',
         array(
           'type' => 'setting',
-          'data' => array('anonymous' => $config->get('anonymous')),
+          'data' => array('anonymous' => $config->getTranslated('anonymous')),
         ),
       ),
     ),
@@ -376,7 +377,7 @@ function node_form($form, &$form_state, Node $node) {
       ),
       '#states' => array(
         'visible' => array(
-         ':input[name="status"]' => array('value' => NODE_SCHEDULED),
+          ':input[name="status"]' => array('value' => NODE_SCHEDULED),
         ),
       ),
     );
@@ -587,7 +588,8 @@ function node_form_submit($form, &$form_state) {
  *
  * @see node_form_preview()
  *
- * @since 1.11.0
+ * @since 1.0.6 Function removed (see: https://github.com/backdrop/backdrop-issues/issues/218).
+ * @since 1.11.0 Function re-added (see: https://github.com/backdrop/backdrop-issues/issues/3062).
  */
 function node_preview($node_tempstore_id, $node_type) {
   // The tempstore object may have expired or an invalid ID submitted. Use the
@@ -599,8 +601,10 @@ function node_preview($node_tempstore_id, $node_type) {
 
   // Set status to true so we don't get the 'unpublished' CSS.
   $node->status = TRUE;
+  // It is null for newly created, but we need it as array key.
+  $nid = (string) $node->nid;
 
-  _field_invoke_multiple('load', 'node', array($node->nid => $node));
+  _field_invoke_multiple('load', 'node', array($nid => $node));
   // Load the author's name when needed.
   if (isset($node->name)) {
     // The use of isset() is mandatory in the context of user IDs, because
@@ -641,6 +645,7 @@ function node_preview($node_tempstore_id, $node_type) {
   $form = backdrop_get_form('node_preview_banner_form', $node, $node_tempstore_id);
   $build['preview_form_select']['view-mode'] = $form;
   $build['preview'] = node_view($node, $view_mode);
+  $build['#theme'] = 'node_preview';
   return $build;
 }
 
@@ -1082,7 +1087,7 @@ function node_autocomplete($string = '') {
  * Since the user chose a unique node, we must now use the same one in our
  * submit handler, which means we need to look in the string for the nid.
  *
- * @param $string
+ * @param string $string
  *   The string to validate.
  * @return $nid
  *   A node ID if matched, or NULL if no match.

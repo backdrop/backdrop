@@ -55,14 +55,15 @@ function hook_config_info() {
  *
  * @param Config $config
  *   The configuration object for the settings about to be saved.
- * @param array $config_info
+ * @param array|NULL $config_info
  *   The information about the configuration being imported, as provided by
- *   hook_config_info().
+ *   hook_config_info(). This information may not be available if creating a
+ *   config for a module that is not yet enabled.
  *
  * @throws ConfigValidateException
  */
-function hook_config_data_validate(Config $config, array $config_info) {
-  if ($config->getName() === 'mymodule.settings') {
+function hook_config_data_validate(Config $config, ?array $config_info) {
+  if ($config->getName() === 'my_module.settings') {
     if (!module_exists($config->get('module'))) {
       throw new ConfigValidateException(t('The configuration "@file" could not be imported because the module "@module" is not enabled.', array('@file' => $config->getName(), '@module' => $config->get('module'))));
     }
@@ -86,8 +87,8 @@ function hook_config_data_validate(Config $config, array $config_info) {
  *
  * @throws ConfigValidateException
  */
-function hook_config_create_validate(Config $staging_config, $all_changes) {
-  if ($staging_config->getName() === 'mymodule.settings') {
+function hook_config_create_validate(Config $staging_config, ?array $all_changes) {
+  if ($staging_config->getName() === 'my_module.settings') {
     // Ensure that the name key is no longer than 64 characters.
     if (strlen($staging_config->get('name')) > 64) {
       throw new ConfigValidateException(t('The configuration "@file" must have a "name" attribute less than 64 characters.', array('@file' => $staging_config->getName())));
@@ -114,8 +115,8 @@ function hook_config_create_validate(Config $staging_config, $all_changes) {
  *
  * @throws ConfigValidateException
  */
-function hook_config_update_validate(Config $staging_config, Config $active_config, $all_changes) {
-  if ($staging_config->getName() === 'mymodule.settings') {
+function hook_config_update_validate(Config $staging_config, Config $active_config, ?array $all_changes) {
+  if ($staging_config->getName() === 'my_module.settings') {
     // Ensure that the name key is no longer than 64 characters.
     if (strlen($staging_config->get('name')) > 64) {
       throw new ConfigValidateException(t('The configuration "@file" must have a "name" attribute less than 64 characters.', array('@file' => $staging_config->getName())));
@@ -140,21 +141,25 @@ function hook_config_update_validate(Config $staging_config, Config $active_conf
  *
  * @throws ConfigValidateException
  */
-function hook_config_delete_validate(Config $active_config, $all_changes) {
+function hook_config_delete_validate(Config $active_config, ?array $all_changes) {
   if (strpos($active_config->getName(), 'image.style') === 0) {
     // Check if another configuration depends on this configuration.
-    if (!isset($all_changes['mymodule.settings']) || $all_changes['mymodule.settings'] !== 'delete') {
-      $my_config = config('mymodule.settings');
+    if (!isset($all_changes['my_module.settings']) || $all_changes['my_module.settings'] !== 'delete') {
+      $my_config = config('my_module.settings');
       $image_style_name = $active_config->get('name');
       if ($my_config->get('image_style') === $image_style_name) {
-        throw new ConfigValidateException(t('The configuration "@file" cannot be deleted because the image style "@style" is in use by "@mymodule".', array('@file' => $active_config->getName(), '@style' => $image_style_name, '@mymodule' => $my_config->getName())));
+        throw new ConfigValidateException(t('The configuration "@file" cannot be deleted because the image style "@style" is in use by "@my_module".', array(
+          '@file' => $active_config->getName(),
+          '@style' => $image_style_name,
+          '@my_module' => $my_config->getName(),
+        )));
       }
     }
   }
 }
 
 /**
- * Respond to or modify configuration creation.
+ * Respond to configuration creation.
  *
  * @param Config $staging_config
  *   The configuration object for the settings about to be saved. This object
@@ -169,12 +174,12 @@ function hook_config_create(Config $staging_config) {
 }
 
 /**
- * Respond to or modify configuration creation.
+ * Respond to configuration updates.
  *
  * @param Config $staging_config
- *   The configuration object for the settings about to be saved. This object
- *   is always passed by reference and may be modified to adjust the settings
- *   that are saved.
+ *   The configuration object for the settings about to be saved. This object is
+ *   always passed by reference and may be modified to adjust the settings that
+ *   are saved.
  * @param Config $active_config
  *   The configuration object for the settings being replaced.
  */
@@ -199,7 +204,7 @@ function hook_config_update(Config $staging_config, Config $active_config) {
 function hook_config_delete(Config $active_config) {
   if (strpos($active_config->getName(), 'image.style') === 0) {
     $image_style_name = $active_config->get('name');
-    config('mymodule.image_style_addons.' . $image_style_name)->delete();
+    config('my_module.image_style_addons.' . $image_style_name)->delete();
   }
 }
 

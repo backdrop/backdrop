@@ -106,8 +106,14 @@ function _vocabulary_get_operations($vocabulary) {
       'title' => t('Manage displays'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/display',
       'weight' => 10,
-      );
-    }
+    );
+  }
+  if (user_access('administer layouts')) {
+    $links['taxonomy_layouts'] = array(
+      'title' => t('Manage layout'),
+      'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/layouts',
+    );
+  }
   if (module_exists('config') && user_access('synchronize configuration')) {
     $links['export'] = array(
       'title' => t('Export'),
@@ -135,7 +141,7 @@ function _vocabulary_get_operations($vocabulary) {
  * @see taxonomy_form_vocabulary_submit()
  * @see taxonomy_form_vocabulary_validate()
  */
-function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocabulary = NULL) {
+function taxonomy_form_vocabulary($form, &$form_state, ?TaxonomyVocabulary $vocabulary = NULL) {
   // During initial form build, add the entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
@@ -493,10 +499,10 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
     // Do not let a term start the page that is not at the root.
     if (isset($term->depth) && ($term->depth > 0) && !isset($back_step)) {
       $back_step = 0;
-      while ($pterm = prev($tree)) {
+      while ($previous_term = prev($tree)) {
         $before_entries--;
         $back_step++;
-        if ($pterm->depth == 0) {
+        if ($previous_term->depth == 0) {
           prev($tree);
           continue 2; // Jump back to the start of the root level parent.
        }
@@ -794,7 +800,7 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
  * @see taxonomy_form_term_validate()
  * @see taxonomy_form_term_submit()
  */
-function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, TaxonomyVocabulary $vocabulary = NULL) {
+function taxonomy_form_term($form, &$form_state, ?TaxonomyTerm $term = NULL, ?TaxonomyVocabulary $vocabulary = NULL) {
   // Load the vocabulary from the term, if not already provided.
   if (!isset($vocabulary) && isset($term->vocabulary)) {
     $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
@@ -806,6 +812,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   if (!isset($form_state['term'])) {
     // Create a new TaxonomyTerm entity for the add form.
     if (!isset($term)) {
+      /** @var TaxonomyTerm $term */
       $term = entity_create('taxonomy_term', array(
         'vocabulary' => $vocabulary->machine_name,
       ));

@@ -98,6 +98,7 @@ function comment_entity_info() {
       'entity keys' => array(
         'id' => 'cid',
         'bundle' => 'node_type',
+        'label' => 'subject',
       ),
       'bundles' => array(),
       'view modes' => array(
@@ -418,10 +419,14 @@ function comment_permission() {
     'administer comment settings' => array(
       'title' => t('Administer comment settings'),
       'description' => t('Configure comment settings per content type.'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows changing comment settings for each content type, and disabling comments.'),
     ),
     'administer comments' => array(
       'title' => t('Administer comments'),
       'description' => t('Edit, delete, unpublish, etc. comments at <em>/admin/content/comment</em>.'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows deleting/updating any comment, even those posted by other people.'),
     ),
     'access comments' => array(
       'title' => t('View comments'),
@@ -430,7 +435,8 @@ function comment_permission() {
       'title' => t('Post comments'),
     ),
     'skip comment approval' => array(
-      'title' => t('Skip comment approval'),
+      'title' => t('Skip comment approval: Comments will be immediately visible to everyone'),
+      'warning' => t('Because spam and offensive comments are common, this permission should only be granted to those who are trusted, or on a site with additional spam protection measures in place.'),
     ),
     'edit own comments' => array(
       'title' => t('Edit own comments'),
@@ -781,6 +787,7 @@ function comment_node_page_additions(Node $node) {
 
   // Append comment form if needed.
   if (Comment::createAccess() && $node->comment == COMMENT_NODE_OPEN && ($node_type->settings['comment_form_location'] == COMMENT_FORM_BELOW)) {
+    /** @var Comment $comment */
     $comment = entity_create('comment', array('nid' => $node->nid));
     $additions['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
   }
@@ -884,8 +891,10 @@ function comment_get_thread(Node $node, $mode, $comments_per_page) {
     // See comment above. Analysis reveals that this doesn't cost too
     // much. It scales much much better than having the whole comment
     // structure.
+    // cspell:disable
     $query->addExpression('SUBSTRING(c.thread, 1, (LENGTH(c.thread) - 1))', 'torder');
     $query->orderBy('torder', 'ASC');
+    // cspell:enable
   }
 
   $query->setCountQuery($count_query);
@@ -1496,7 +1505,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  *   - update
  *   - delete
  *   - approve
- * @param Comment $comment
+ * @param Comment|null $comment
  *   (optional) The comment object, or NULL when using 'create' op.
  *
  * @return bool
@@ -1505,7 +1514,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  * @since 1.13.0 The "create" $op option was added.
  * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
  */
-function comment_access($op, Comment $comment = NULL) {
+function comment_access($op, ?Comment $comment = NULL) {
   if ($op == 'edit') {
     // Normalize 'edit' operation to 'update'.
     $op = 'update';

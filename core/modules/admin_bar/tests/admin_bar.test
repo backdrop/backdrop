@@ -12,7 +12,6 @@ class AdminBarWebTestCase extends BackdropWebTestCase {
 
   protected $basePermissions = array(
     'system' => 'access administration pages',
-    'config' => 'administer site configuration',
     'admin_bar' => 'access administration bar',
     'node' => 'access content',
   );
@@ -42,7 +41,7 @@ class AdminBarWebTestCase extends BackdropWebTestCase {
    * @return
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
-  protected function assertElementByXPath($xpath, array $arguments = array(), $message, $group = 'Other') {
+  protected function assertElementByXPath($xpath, array $arguments, $message, $group = 'Other') {
     $elements = $this->xpath($xpath, $arguments);
     return $this->assertTrue(!empty($elements[0]), $message, $group);
   }
@@ -63,7 +62,7 @@ class AdminBarWebTestCase extends BackdropWebTestCase {
    * @return
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
-  protected function assertNoElementByXPath($xpath, array $arguments = array(), $message, $group = 'Other') {
+  protected function assertNoElementByXPath($xpath, array $arguments, $message, $group = 'Other') {
     $elements = $this->xpath($xpath, $arguments);
     return $this->assertTrue(empty($elements), $message, $group);
   }
@@ -75,15 +74,7 @@ class AdminBarWebTestCase extends BackdropWebTestCase {
    *   A list of menu link titles to assert in the menu.
    */
   protected function assertLinkTrailByTitle(array $trail) {
-    $xpath = array();
-    $args = array();
-    $message = '';
-    foreach ($trail as $i => $title) {
-      $xpath[] = '/li/a[text()=:title' . $i . ']';
-      $args[':title' . $i] = $title;
-      $message .= ($i ? ' » ' : '') . check_plain($title);
-    }
-    $xpath = '//div[@id="admin-bar"]/div/ul/li/ul' . implode('/parent::li/ul', $xpath);
+    list($xpath, $args, $message) = $this->_getXpathLinkTrailByTitle($trail);
     $this->assertElementByXPath($xpath, $args, $message . ' link found.');
   }
 
@@ -94,16 +85,36 @@ class AdminBarWebTestCase extends BackdropWebTestCase {
    *   A list of menu link titles to assert in the menu.
    */
   protected function assertNoLinkTrailByTitle(array $trail) {
+    list($xpath, $args, $message) = $this->_getXpathLinkTrailByTitle($trail);
+    $this->assertNoElementByXPath($xpath, $args, $message . ' link not found.');
+  }
+
+  /**
+   * Shared logic for assertLinkTrailByTitle() and assertNoLinkTrailByTitle().
+   *
+   * @param array $trail
+   *    A list of menu link titles to assert in the menu.
+   *
+   * @return array
+   *   Unindexed array with the following:
+   *   - The xpath selector for the link.
+   *   - The arguments to pass to the xpath selector.
+   *   - The link trail represented as text.
+   */
+  private function _getXpathLinkTrailByTitle(array $trail) {
     $xpath = array();
     $args = array();
     $message = '';
-    foreach ($trail as $i => $title) {
-      $xpath[] = '/li/a[text()=:title' . $i . ']';
-      $args[':title' . $i] = $title;
-      $message .= ($i ? ' » ' : '') . check_plain($title);
+    foreach ($trail as $i => $link_text) {
+      $xpath[] = '/li/a/span[text()=:text' . $i . ']';
+      $args[':text' . $i] = $link_text;
+      $message .= ($i ? ' » ' : '') . check_plain($link_text);
     }
-    $xpath = '//div[@id="admin-bar"]/div/ul' . implode('/parent::li/ul', $xpath);
-    $this->assertNoElementByXPath($xpath, $args, $message . ' link not found.');
+    return array(
+      '//div[@id="admin-bar"]/div/ul/li/ul' . implode('/ancestor::li/ul', $xpath),
+      $args,
+      $message,
+    );
   }
 }
 
@@ -199,15 +210,15 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
     $roles = array_diff($admin_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     $role_name = reset($roles);
 
-    // Verify that Configuration does not appear.
-    $this->assertNoLinkTrailByTitle(array(t('Configuration')));
+    // Verify that Configuration sub-items do not appear.
+    $this->assertNoLinkTrailByTitle(array(t('Configuration'), t('System')));
     // Grant the 'administer site configuration' permission to ourselves.
     $edit = array(
       $role_name . '[administer site configuration]' => TRUE,
     );
     $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
-    // Verify that Configuration appears.
-    $this->assertLinkTrailByTitle(array(t('Configuration')));
+    // Verify that System Configuration appears.
+    $this->assertLinkTrailByTitle(array(t('Configuration'), t('System')));
 
     // Verify that Structure » Content types does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure'), t('Content types')));
@@ -293,9 +304,9 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
       'admin/structure/types/manage/special' => 'Cool & Special',
     );
     foreach ($links as $path => $title) {
-      $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
+      $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]//*[contains(text(), :text)]', array(
         ':path' => $path,
-        ':title' => $title,
+        ':text' => $title,
       ), "Structure » Content types » $title link found.");
     }
 
@@ -305,9 +316,9 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
       'node/add/special' => 'Cool & Special',
     );
     foreach ($links as $path => $title) {
-      $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
+      $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]//*[contains(text(), :text)]', array(
         ':path' => $path,
-        ':title' => $title,
+        ':text' => $title,
       ), "Add content » $title link found.");
     }
 
@@ -323,13 +334,13 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
     $this->backdropPost('admin/structure/types/manage/special/delete', array(), t('Delete'));
     $this->backdropGet('js/admin_bar/cache/' . $hash);
 
-    $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
+    $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]//*[contains(text(), :text)]', array(
       ':path' => 'node/add/post',
-      ':title' => 'Post',
+      ':text' => 'Post',
     ), "Add content » Post link found after moving Add Content into a different menu.");
-    $this->assertNoElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
+    $this->assertNoElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]//*[contains(text(), :text)]', array(
       ':path' => 'node/add/special',
-      ':title' => 'Cool & Special',
+      ':text' => 'Cool & Special',
     ), "Add content » Cool & Special link no longer present after deleting the content type.");
   }
 
@@ -337,7 +348,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
    * Tests Add content links.
    */
   function testNodeAdd() {
-    $type = $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
 
     // Verify that "Add content" does not appear for unprivileged users.
     $permissions = $this->basePermissions + array();
@@ -443,7 +454,7 @@ class AdminBarCustomizedTestCase extends AdminBarWebTestCase {
     $type = $this->backdropCreateContentType();
     $node = $this->backdropCreateNode(array('type' => $type->type));
     $text = $this->randomName();
-    $xpath = $this->buildXPathQuery('//div[@id=:id]//a[contains(text(), :text)]', array(
+    $xpath = $this->buildXPathQuery('//div[@id=:id]//span[contains(@class, "admin-bar-link-text") and contains(text(), :text)]', array(
       ':id' => 'admin-bar',
       ':text' => $text,
     ));
@@ -496,7 +507,7 @@ class AdminBarCustomizedTestCase extends AdminBarWebTestCase {
     $cid = 'admin_bar:' . $this->admin_user->uid . ':' . session_id() . ':en';
     $hash = admin_bar_cache_get($cid);
     $this->backdropGet('js/admin_bar/cache/' . $hash);
-    $elements = $this->xpath('//div[@id=:id]//a[@href=:href and contains(text(), :text)]', array(
+    $elements = $this->xpath('//div[@id=:id]//a[@href=:href]//*[contains(text(), :text)]', array(
       ':id' => 'admin-bar',
       ':href' => $edit['link_path'],
       ':text' => $edit['link_title'],

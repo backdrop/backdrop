@@ -90,12 +90,21 @@ function seven_admin_block_content($variables) {
  */
 function seven_tablesort_indicator($variables) {
   $style = $variables['style'];
-  $theme_path = backdrop_get_path('theme', 'seven');
   if ($style == 'asc') {
-    return theme('image', array('path' => $theme_path . '/images/sort-amount-up--white--64.png', 'alt' => t('sort ascending'), 'width' => 16, 'height' => 16, 'title' => t('sort ascending')));
+    return icon('seven-sort-down', array(
+      'alt' => t('sort ascending'),
+      'attributes' => array(
+        'class' => array('tablesort tablesort-asc'),
+      ),
+    ));
   }
   else {
-    return theme('image', array('path' => $theme_path . '/images/sort-amount-down-alt--white--64.png', 'alt' => t('sort descending'), 'width' => 16, 'height' => 16, 'title' => t('sort descending')));
+    return icon('seven-sort-up', array(
+      'alt' => t('sort descending'),
+      'attributes' => array(
+        'class' => array('tablesort tablesort-desc'),
+      ),
+    ));
   }
 }
 

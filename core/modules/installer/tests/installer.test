@@ -7,9 +7,10 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
   protected $privileged_user;
 
   public function setUp() {
-    parent::setUp('installer', 'update', 'installer_test');  // Enable any modules required for the test
+    // Enable any modules required for the test.
+    parent::setUp('installer', 'update', 'installer_test');
 
-    // Set the default server variable
+    // Set the default server variable.
     $server_url = url('installer_test', array('absolute' => TRUE));
     config_set('installer.settings', 'installer_server', array(
       'url' => $server_url,
@@ -38,7 +39,7 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
   }
 
   public function testProjectBrowserProjects() {
-    // Attempt to fetch the default projects
+    // Attempt to fetch the default projects.
     $edit = array();
     $edit['search_text'] = '';
     $this->backdropPost('admin/modules/install', $edit, t('Search'));
@@ -64,7 +65,7 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
   }
 
   public function testProjectBrowserProjectEnabled() {
-    // Make sure project enabled detection works
+    // Make sure project enabled detection works.
     module_load_include('inc', 'installer', 'installer.browser');
     $this->assertTrue(_installer_browser_is_project_enabled('module', 'update'), t('Make sure project enabled detection works.'));
   }
@@ -73,29 +74,29 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     // Refresh the page
     $this->backdropGet('admin/modules/install');
 
-    // Simulate adding a project to the install queue
+    // Simulate adding a project to the install queue.
     $this->backdropGet('admin/installer/queue/nojs/add/ddd_installer_test', array('query' => array('destination' => 'admin/modules/install')));
     $this->assertNoText(t('Installation queue is empty.'));
     $this->assertNoText(t('Error: The project was not found.'));
 
-    // Simulate removing a project from the install queue
+    // Simulate removing a project from the install queue.
     $this->backdropGet('admin/installer/queue/nojs/remove/ddd_installer_test', array('query' => array('destination' => 'admin/modules/install')));
     $this->assertText(t('Installation queue is empty.'));
     $this->assertNoText(t('Error: The project was not found.'));
   }
 
   public function testProjectBrowserInstallPage() {
-    // Refresh the page
+    // Refresh the page.
     $this->backdropGet('admin/modules/install');
     $module_one = 'ddd_installer_test';
     $module_two = 'eee_installer_test';
 
-    // Attempt to install a project
+    // Attempt to install a project.
     $this->backdropGet('admin/installer/queue/nojs/add/' . $module_one, array('query' => array('destination' => 'admin/modules/install')));
     $this->backdropGet('admin/installer/queue/nojs/add/' . $module_two, array('query' => array('destination' => 'admin/modules/install')));
     $this->backdropPost('admin/modules/install', array(), t('Install'));
 
-    // Check that this is the install page
+    // Check that this is the install page.
     $this->assertText("You're about to install");
 
     // Check that two projects are listed for install and the recommended
@@ -105,21 +106,21 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $module_two_data = $this->getProjectData($module_two);
     $this->assertText($module_two_data['title'] . ' ' . $module_two_data['recommended']);
 
-    // Check that two versions of EEE Installer test are listed
+    // Check that two versions of EEE Installer test are listed.
     $releases = $this->xpath('//div[contains(@class, "installer-browser-releases-radios")]//div[contains(@class, "form-item-releases-eee-installer-test-release-name")]');
     $this->assertEqual(count($releases), 2, 'Two releases available for EEE Installer test.');
 
-    // Cancel and go back to project list
+    // Cancel and go back to project list.
     $this->backdropGet('admin/installer/reset/module/all');
 
-    // Check project installs
+    // Check project installs.
     $this->backdropGet('admin/installer/queue/nojs/add/' . $module_one, array('query' => array('destination' => 'admin/modules/install')));
     $this->backdropPost('admin/modules/install', array(), t('Install'));
 
-    // Check that this is the install page
+    // Check that this is the install page.
     $this->assertText("You're about to install");
 
-    // Set maintenance mode off
+    // Set maintenance mode off.
     $edit = array(
       // Cannot test in maintenance mode, as the HTTP request to fetch projects
       // always will fail since we are fetching from the (now offline) site

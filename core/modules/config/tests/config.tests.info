@@ -16,8 +16,8 @@ description = Tests the UI for syncing, diffing, importing, and exporting config
 group = Configuration
 file = config.test
 
-[ConfigurationSyncTest]
-name = Configuration sync
-description = Tests that hook_config_create() is run during configuration sync.
+[ConfigurationInstallDefaultHooksTest]
+name = Configuration default config tests
+description = Tests that hook_config_create() is run during installation of default config.
 group = Configuration
 file = config.test

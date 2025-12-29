@@ -11,6 +11,11 @@
 Backdrop.editors = {};
 
 /**
+ * Horizontal offset while the image browser window is open.
+ */
+Backdrop.filterModalLeft = undefined;
+
+/**
  * Displays the guidelines of the selected text format automatically.
  */
 Backdrop.behaviors.filterGuidelines = {
@@ -85,7 +90,9 @@ Backdrop.behaviors.filterEditors = {
       var $this = $(this);
       var activeEditor = $this.val();
       var field = $this.closest('.text-format-wrapper').find('textarea').get(-1);
-      $this.removeOnce('filterEditors');
+      if (trigger !== 'serialize') {
+        $this.removeOnce('filterEditors');
+      }
       if (field && Backdrop.settings.filter.formats[activeEditor]) {
         Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor], trigger);
       }
@@ -175,19 +182,19 @@ Backdrop.behaviors.editorImageDialog = {
       $(".editor-image-fields").addClass("editor-image-fields-full");
     }
 
-    var DialogLeftPosition;
     $newToggles.on('click', function(e) {
       var $link = $(e.target);
       if ($link.is('.editor-image-toggle') === false) {
         return;
       }
+
       // Find the first ancestor of link.
       var $currentItem = $link.closest('[data-editor-image-toggle]');
       var $allItems = $('[data-editor-image-toggle]');
       var offset = $currentItem.find('.editor-image-toggle').index($link);
       var $shownItem = $allItems.eq(offset);
       $allItems.not($shownItem).filter(':visible').hide().trigger('editor-image-hide');
-      var $newItem = $allItems.eq(offset).filter(':hidden').show();
+      var $newItem = $allItems.eq(offset).show();
       // Focus the first shown new element. This keeps focus on the dialog and
       // allows it to be closed with the escape key.
       $newItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
@@ -223,7 +230,7 @@ Backdrop.behaviors.editorImageDialog = {
         if ($('form').hasClass('filter-format-editor-image-form')) {
           // Remove the dialog position, let the filter.css CSS for a
           // percentage-based width take precedence.
-          DialogLeftPosition = $('.editor-dialog').position().left;
+          Backdrop.filterModalLeft = $('.editor-dialog').position().left;
           $('.editor-dialog').css('left', '');
           // Re-center the dialog by triggering a window resize.
           window.setTimeout(function() {
@@ -234,7 +241,7 @@ Backdrop.behaviors.editorImageDialog = {
 
           // Display the library view.
           $('.editor-image-fields').removeClass('editor-image-fields-full');
-          $('form.filter-format-editor-image-form').after('<div class="editor-image-library"></div>');
+          $('form.filter-format-editor-image-form').append('<div class="editor-image-library"></div>');
           $('[name=library_open]').trigger('click');
         }
       }
@@ -246,8 +253,8 @@ Backdrop.behaviors.editorImageDialog = {
         });
 
         // Restore the previous dialog position.
-        if (DialogLeftPosition) {
-          $(".editor-dialog").css('left', DialogLeftPosition + 'px');
+        if (Backdrop.filterModalLeft) {
+          $(".editor-dialog").css('left', Backdrop.filterModalLeft + 'px');
           // Re-center the dialog by triggering a window resize.
           window.setTimeout(function() {
             Backdrop.optimizedResize.trigger();
@@ -296,6 +303,15 @@ Backdrop.behaviors.editorImageLibrary = {
         var $submit = $form.find('.form-actions input[type=submit]:first');
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');
       });
+
+    // Empty width and height input fields, when an existing file is removed,
+    // so a newly uploaded one does not inherit dimensions.
+    // See Backdrop.behaviors.fileButtons, which triggers mousedown.
+    const $imageForm = $('.image-form-wrapper');
+    $imageForm.find('.file-remove-button').once('remove-button-listener').on('mousedown', function () {
+      $imageForm.find('[name="attributes[width]"]').val('');
+      $imageForm.find('[name="attributes[height]"]').val('');
+    });
   }
 };
 

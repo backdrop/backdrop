@@ -29,8 +29,8 @@ chdir(BACKDROP_ROOT);
 // The minimum version is specified explicitly, as BACKDROP_MINIMUM_PHP is not
 // yet available. It is defined in bootstrap.inc, but it is not possible to
 // load that file yet as it would cause a fatal error on older versions of PHP.
-if (version_compare(PHP_VERSION, '5.6.0') < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.6.0. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
+if (version_compare(PHP_VERSION, '7.1.0') < 0) {
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 7.1.0. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
   exit;
 }
 
@@ -47,10 +47,10 @@ if (version_compare(PHP_VERSION, '5.6.0') < 0) {
 define('MAINTENANCE_MODE', 'update');
 
 /**
- * Renders form with a list of available database updates.
+ * Renders form with a list of available site updates.
  */
 function update_selection_page() {
-  backdrop_set_title('Backdrop database update');
+  backdrop_set_title('Backdrop site update');
   $elements = backdrop_get_form('update_script_selection_form');
   $output = backdrop_render($elements);
 
@@ -127,45 +127,32 @@ function update_script_selection_form($form, &$form_state) {
     backdrop_set_message('Some of the pending updates cannot be applied because their dependencies were not met.', 'warning');
   }
 
-  if (empty($count)) {
-    backdrop_set_message(t('No pending updates.'));
-    unset($form);
-    $form['links'] = array(
-      '#theme' => 'links',
-      '#links' => update_helpful_links(),
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => 'Updates have been found that need to be applied. You may review the updates below before executing them.',
+    '#weight' => -5,
+  );
+  if ($incompatible_count) {
+    $form['start']['#title'] = format_plural(
+      $count,
+      '1 pending update (@number_applied to be applied, @number_incompatible skipped)',
+      '@count pending updates (@number_applied to be applied, @number_incompatible skipped)',
+      array('@number_applied' => $count - $incompatible_count, '@number_incompatible' => $incompatible_count)
     );
-
-    // No updates to run, so caches won't get flushed later.  Clear them now.
-    backdrop_flush_all_caches();
   }
   else {
-    $form['help'] = array(
-      '#type' => 'help',
-      '#markup' => 'Updates have been found that need to be applied. You may review the updates below before executing them.',
-      '#weight' => -5,
-    );
-    if ($incompatible_count) {
-      $form['start']['#title'] = format_plural(
-        $count,
-        '1 pending update (@number_applied to be applied, @number_incompatible skipped)',
-        '@count pending updates (@number_applied to be applied, @number_incompatible skipped)',
-        array('@number_applied' => $count - $incompatible_count, '@number_incompatible' => $incompatible_count)
-      );
-    }
-    else {
-      $form['start']['#title'] = format_plural($count, '1 pending update', '@count pending updates');
-    }
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Apply pending updates'),
-    );
-    $form['actions']['cancel'] = array(
-      '#type' => 'link',
-      '#href' => '<front>',
-      '#title' => t('Cancel'),
-    );
+    $form['start']['#title'] = format_plural($count, '1 pending update', '@count pending updates');
   }
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Apply pending updates'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'markup',
+    '#markup' => '<a href="' . $_SERVER['SCRIPT_NAME'] . '">' . t('Cancel') . '</a>',
+  );
+
   return $form;
 }
 
@@ -202,7 +189,7 @@ function update_helpful_links() {
  * Displays results of the update script with any accompanying errors.
  */
 function update_results_page() {
-  backdrop_set_title('Backdrop database update');
+  backdrop_set_title('Backdrop site update');
 
   update_task_list();
   // Report end result.
@@ -214,7 +201,10 @@ function update_results_page() {
   }
 
   $output = '';
-  if ($_SESSION['update_success']) {
+  if (!isset($_SESSION['update_success'])) {
+    $output = '<p>No updates needed.</p>';
+  }
+  elseif ($_SESSION['update_success']) {
     $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . ' ' . $log_message . '</p>';
   }
   else {
@@ -276,6 +266,8 @@ function update_results_page() {
       $output .= '</div>';
     }
   }
+
+  unset($_SESSION['update_initialized']);
   unset($_SESSION['update_results']);
   unset($_SESSION['update_success']);
 
@@ -283,17 +275,15 @@ function update_results_page() {
 }
 
 /**
- * Provides an overview of the Backdrop database update.
+ * Provides an overview of the Backdrop site update.
  *
  * This page provides cautionary suggestions that should happen before
  * proceeding with the update to ensure data integrity.
  *
- * @return
+ * @return string
  *   Rendered HTML form.
  */
 function update_info_page() {
-  global $databases;
-
   // Change query-strings on css/js files to enforce reload for all users.
   _backdrop_flush_css_js();
   // Flush the cache of all data for the update status module.
@@ -301,33 +291,21 @@ function update_info_page() {
     cache('update')->flush();
   }
 
-  // Get database name
-  $db_name = $databases['default']['default']['database'];
-
-  // Get the config path
-  $config_dir = config_get_config_directory('active');
+  // Flush the theme cache so we can render this page correctly if the theme
+  // registry been updated with new preprocess or template variables.
+  backdrop_theme_rebuild();
 
   update_task_list('info');
-  backdrop_set_title('Backdrop database update');
+  backdrop_set_title('Backdrop site update');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
+  $output = '<p>Use this utility to update your site whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
   $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
-  $output .= '<p>Before running updates, the following steps are recommended.</p>';
-  $output .= "<ol>\n";
-  $output .= "<li><strong>Create backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
-  $output .= "<ul>\n";
-  $output .= "<li><strong>Database:</strong> Create a database dump of the '" . $db_name . "' database.</li>\n";
-  $output .= "<li><strong>Config files:</strong> Back up the entire directory at '" . $config_dir . "'.</li>\n";
-  $output .= "</ul>\n";
-  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
-  $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
-  $output .= "</ol>\n";
-  $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
   $module_status_report = update_upgrade_check_dependencies();
-	if (!empty($module_status_report)) {
+  if (!empty($module_status_report)) {
     $output .= $module_status_report;
   }
-  $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
+
+  $form_action = check_url(backdrop_current_script_url(array('op' => 'check_updates', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
     <input type="submit" value="Continue" class="form-submit button-primary" />
@@ -336,6 +314,64 @@ function update_info_page() {
   </form>';
   $output .= "\n";
   return $output;
+}
+
+/**
+ * Provides a form to create an on-demand backup before updating.
+ *
+ * @return string
+ *   Rendered HTML form.
+ */
+function update_backup_page() {
+  update_task_list('backup');
+  backdrop_set_title('Pre-update backup');
+
+  $elements = backdrop_get_form('update_backup_form');
+  return backdrop_render($elements);
+}
+
+/**
+ * Form constructor for the list of available database module updates.
+ */
+function update_backup_form($form, &$form_state) {
+  // Check if Backup directory is specified. If FALSE, this form shouldn't even
+  // be displayed. If NULL, link to documentation on setting up backups.
+  $backup_directory = backup_get_backup_directory();
+
+  $help = '<p>' . t('Before running updates, it is recommended to create a backup of your database and configuration.') . '</p>';
+  $help .= '<p>' . t('If skipping the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.') . '</p>';
+
+  if (empty($backup_directory) && $backup_directory !== FALSE) {
+    $help .= '<p>' . t('Backups are not available because the variable !variable has not been set in !file.', array(
+      '!variable' => '<code>$settings[\'backup_directory\']</code>',
+      '!file' => '<code>settings.php</code>',
+    )) . '</p>';
+    $help .= '<p>' . t('Please check the <a href="!url">documentation on configuring backups</a>.', array(
+      '!url' => 'https://docs.backdropcms.org/documentation/creating-backups',
+    )) . '</p>';
+  }
+  else {
+    $help .= '<p>' . t('The backup process may take several minutes, depending on the size of your database.') . '</p>';
+  }
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => $help,
+    '#weight' => -5,
+  );
+
+  $form = backup_settings_form($form, $form_state);
+
+  $query = backdrop_get_query_parameters();
+  $query['op'] = 'selection';
+  // Low level URL building to avoid problems with language prefix on
+  // multilingual sites.
+  $skip_url = $_SERVER['SCRIPT_NAME'] . '?' . backdrop_http_build_query($query);
+  $form['actions']['continue'] = array(
+    '#type' => 'markup',
+    '#markup' => '<a href="' . $skip_url . '">' . t('Skip backup') . '</a>',
+  );
+
+  return $form;
 }
 
 /**
@@ -352,13 +388,24 @@ function update_access_denied_page() {
   $output = '';
   $steps = array();
 
-  $output .= t('You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
+  $output .= t('You are not authorized to access this page. Log in using either an account with the !permission permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit !settings_file to bypass this access check. To do this:', array(
+    '!permission' => '<em>administer software updates</em>',
+    '!settings_file' => '<code>settings.php</code>',
+  ));
   $output = '<p>' . $output . '</p>';
 
-  $steps[] = t('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
-  $steps[] = t('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'update_free_access\'] = FALSE</code>. Change it to <code>$settings[\'update_free_access\'] = TRUE</code>.');
-  $steps[] = t('Reload this page. The database update script should be able to run now.');
-  $steps[] = t('As soon as the update script is done, you must change the <code>update_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'update_free_access\'] = FALSE;</code>.');
+  $steps[] = t('Find the !settings_file file on your system, and open it with a text editor.', array(
+    '!settings_file' => '<code>settings.php</code>',
+  ));
+  $steps[] = t('Find the line for !current_value. Change it to !new_value.', array(
+    '!settings_file' => '<code>settings.php</code>',
+    '!current_value' => '<code>$settings[\'update_free_access\'] = FALSE;</code>',
+    '!new_value' => '<code>$settings[\'update_free_access\'] = TRUE;</code>',
+  ));
+  $steps[] = t('Reload this page. The site restore script should be able to run now.');
+  $steps[] = t('As soon as the update script is done, you must change the setting back to !value.', array(
+    '!value' => '<code>FALSE</code>',
+  ));
 
   $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
 
@@ -402,17 +449,27 @@ function update_task_list($set_active = NULL) {
   $tasks = array(
     'requirements' => 'Verify requirements',
     'info' => 'Overview',
+    'backup' => 'Backup',
     'select' => 'Review updates',
-    'run' => 'Run updates',
+    'update' => 'Run updates',
     'finished' => 'Review log',
   );
 
+  // Hide the Backup task if upgrading from Drupal 7, where the original
+  // database has already been modified and no config exists.
+  if (!update_backup_enabled()) {
+    unset($tasks['backup']);
+  }
+
   // Only show the task list on the left sidebar if the logged-in user is has
-  // permission to perform updates, or if the update_free_access' setting in
+  // permission to perform updates, or if the 'update_free_access' setting in
   // settings.php has been set to TRUE.
   if (settings_get('update_free_access') || user_access('administer software updates')) {
     return theme('task_list', array('items' => $tasks, 'active' => $active));
   }
+
+  // Return nothing if access is not allowed.
+  return '';
 }
 
 /**
@@ -445,8 +502,9 @@ function update_check_requirements($skip_warnings = FALSE) {
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && !$skip_warnings)) {
     backdrop_set_title('Requirements problem');
     $task_list = update_task_list('requirements');
-    $status_report = theme('status_report', array('requirements' => $requirements));
-    $status_report .= 'Check the messages and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
+    $status_report = 'Resolve the problems and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
+    $status_report .= '<br><br>';
+    $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'update'));
     print theme('update_page', array('content' => $status_report, 'sidebar' => $task_list));
     exit();
   }
@@ -526,51 +584,129 @@ ini_set('display_errors', TRUE);
 if (update_access_allowed()) {
 
   include_once BACKDROP_ROOT . '/core/includes/install.inc';
+  include_once BACKDROP_ROOT . '/core/includes/backup.inc';
   include_once BACKDROP_ROOT . '/core/includes/batch.inc';
   backdrop_load_updates();
 
   update_fix_compatibility();
 
+  $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
+  $valid_token = isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update');
+
   // Check the update requirements for all modules. If there are warnings, but
   // no errors, skip reporting them if the user has provided a URL parameter
   // acknowledging the warnings and indicating a desire to continue anyway. See
   // backdrop_requirements_url().
-  $skip_warnings = !empty($_GET['continue']);
-  update_check_requirements($skip_warnings);
+  if (!$op || $op == 'info') {
+    $skip_warnings = !empty($_GET['continue']);
+    update_check_requirements($skip_warnings);
+  }
 
-  $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
   switch ($op) {
     // update.php ops.
-
-    case 'selection':
-      if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
-        $output = update_selection_page();
-        break;
-      }
-
-    case t('Apply pending updates'):
-      update_upgrade_enable_dependencies();
-      if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
-        // Generate absolute URLs for the batch processing (using $base_root),
-        // since the batch API will pass them to url() which does not handle
-        // update.php correctly by default.
-        $batch_url = $base_root . backdrop_current_script_url();
-        $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'results'));
-        update_batch($_POST['start'], $redirect_url, $batch_url);
-        break;
-      }
-
     case 'info':
       $output = update_info_page();
       break;
 
+    case 'check_updates':
+      $_SESSION['update_initialized'] = TRUE;
+      $update_count = update_get_update_count();
+      if ($update_count === 0) {
+        backdrop_set_message(t('No pending updates.') . ' ' . t('All caches cleared.'));
+
+        // No updates to run, so caches won't get flushed later.  Clear them now.
+        backdrop_flush_all_caches();
+        install_goto('core/update.php?op=results');
+      }
+      else {
+        // Skip the backup and go to update selection if upgrading from Drupal 7.
+        $op = update_backup_enabled() ? 'backup' : 'selection';
+        $token = backdrop_get_token('update');
+        install_goto('core/update.php?op=' . $op . '&token=' . $token);
+      }
+      break;
+
+    case 'backup':
+      if ($valid_token) {
+        $output = update_backup_page();
+      }
+      else {
+        install_goto('core/update.php');
+      }
+      break;
+
+    case t('Create backup'):
+      if ($valid_token) {
+        // Generate absolute URLs for the batch processing (using $base_root),
+        // since the batch API will pass them to url() which does not handle
+        // update.php correctly by default. Note the "action" query parameter
+        // here distinguishes between the two batch operations, which can be
+        // either "batch" or "update".
+        $batch_url = $base_root . backdrop_current_script_url(array('action' => 'backup'));
+        $batch_redirect_url = $base_root . backdrop_current_script_url(array('op' => 'selection'));
+
+        // Check that a backup directory is specified.
+        $backup_targets = $_POST['targets'];
+        $errors = array();
+        $options = array(
+          // These values are escaped when output.
+          'label' => format_date(REQUEST_TIME),
+          'description' => t('Created by update.php. Contains: !targets.', array(
+            '!targets' => implode(', ', array_keys($backup_targets)),
+          )),
+        );
+        $ready = backup_batch_prepare($backup_targets, $options, $errors);
+        if ($ready) {
+          backup_batch($backup_targets, $options, $batch_redirect_url, $batch_url);
+          break;
+        }
+        else {
+          foreach ($errors as $error) {
+            backdrop_set_message($error, 'error');
+          }
+          $token = backdrop_get_token('update');
+          install_goto('core/update.php?op=backup&token=' . $token);
+        }
+      }
+      else {
+        install_goto('core/update.php');
+      }
+      break;
+
+    case 'selection':
+      if ($valid_token) {
+        $output = update_selection_page();
+      }
+      else {
+        install_goto('core/update.php');
+      }
+      break;
+
+    case t('Apply pending updates'):
+      update_upgrade_enable_dependencies();
+      if ($valid_token) {
+        // Generate absolute URLs for the batch processing (using $base_root),
+        // since the batch API will pass them to url() which does not handle
+        // update.php correctly by default.
+        $batch_url = $GLOBALS['base_root'] . backdrop_current_script_url(array('action' => 'update'));
+        $redirect_url = $GLOBALS['base_root'] . backdrop_current_script_url(array('op' => 'results'));
+        update_batch($_POST['start'], $redirect_url, $batch_url);
+      }
+      else {
+        install_goto('core/update.php');
+      }
+      break;
+
     case 'results':
+      // Remove the state indicating a Drupal 7 upgrade.
+      state_del('update_d7_upgrade');
       $output = update_results_page();
       break;
 
-    // Regular batch ops : defer to batch processing API.
+    // Regular batch ops: defer to batch processing API.
     default:
-      update_task_list('run');
+      $action = isset($_GET['action']) ? $_GET['action'] : 'update';
+      update_task_list($action);
       $output = _batch_page();
       break;
   }

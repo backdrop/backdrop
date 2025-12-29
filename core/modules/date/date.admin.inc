@@ -207,7 +207,7 @@ function _date_field_instance_settings_form($field, $instance) {
     '#fieldset' => 'default_values',
   );
 
-  $description = t("Describe a time by reference to the current day, like '+90 days' (90 days from the day the field is created) or '+1 Saturday' (the next Saturday). See !strtotime for more details.", array('!strtotime' => l(t('strtotime'), 'http://www.php.net/manual/en/function.strtotime.php')));
+  $description = t("Describe a time by reference to the current day, like '+90 days' (90 days from the day the field is created) or '+1 Saturday' (the next Saturday). See !strtotime for more details.", array('!strtotime' => l(t('strtotime'), 'https://www.php.net/manual/function.strtotime.php')));
   $form['default_value_code'] = array(
     '#type' => 'textfield',
     '#title' => t('Relative default value'),
@@ -333,7 +333,7 @@ function _date_field_widget_settings_form($field, $instance) {
       '#type' => 'textfield',
       '#title' => t('Custom input format'),
       '#default_value' => $settings['input_format_custom'],
-      '#description' => t('Override the input format selected above. Define a php date format string like "m-d-Y H:i" (see <a href="http://php.net/date">http://php.net/date</a> for more details).'),
+      '#description' => t('Override the input format selected above. Define a php date format string like "m-d-Y H:i" (see the <a href="https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters">PHP manual</a> for more details).'),
       '#weight' => 5,
       '#fieldset' => 'date_format',
       '#attributes' => array('class' => array('indent')),
@@ -394,31 +394,27 @@ function _date_field_widget_settings_form($field, $instance) {
     '#fieldset' => 'date_format',
     '#weight' => 9,
   );
-  if (in_array($widget['type'], array('date_select'))) {
-    $options = array(
-      'above' => t('Above'),
-      'within' => t('Within'),
-      'none' => t('None'),
-    );
-    $description = t("The location of date part labels, like 'Year', 'Month', or 'Day'. 'Above' displays the label as titles above each date part. 'Within' inserts the label as the first option in the select list and in blank textfields. 'None' doesn't visually label any of the date parts.");
-  }
-  else {
-    $options = array(
-      'none' => t('Hidden'),
-      'above' => t('Above'),
-    );
-    $description = t('The location of date part labels, like "Year", "Month", or "Day" . "Above" displays the label as titles above each date part. "Hidden" doesn\'t visually label any of the date parts.');
-  }
-  $form['advanced']['label_position'] = array(
-    '#type' => 'radios',
-    '#options' => $options,
-    '#default_value' => $settings['label_position'],
-    '#title' => t('Position of date part labels'),
-    '#description' => $description,
+
+  $options = array(
+    'above' => t('Above'),
+    'within' => t('Within'),
+    'none' => t('Hidden'),
   );
+  if ($widget['type'] == 'date_select') {
+    $form['advanced']['label_position'] = array(
+      '#type' => 'radios',
+      '#options' => $options,
+      '#default_value' => $settings['label_position'],
+      '#title' => t('Position of date part labels'),
+    );
+  }
+  $form['advanced']['label_position']['above']['#description'] = t("Displays the label as individual titles above each date part (like 'Year', 'Month', or 'Day').");
+  $form['advanced']['label_position']['within']['#description'] = t("Inserts the label as the first option in the select list and in blank textfields.");
+  $form['advanced']['label_position']['none']['#description'] = t("Doesn't visually label any of the date parts.");
   if ($widget['type'] == 'date_select') {
     $form['advanced']['text_parts']['#theme'] = 'date_text_parts';
   }
+
   $text_parts = (array) $settings['text_parts'];
   foreach (date_granularity_names() as $key => $value) {
     if ($widget['type'] == 'date_select') {
@@ -440,7 +436,7 @@ function _date_field_widget_settings_form($field, $instance) {
     '#type' => 'checkbox',
     '#title' => t('Exclude wrapping fieldset'),
     '#default_value' => !empty($settings['no_fieldset']),
-    '#description' => t('If using simple inputs such as a single textfield or the date popup, omitting the fieldset may provide simpler styling.'),
+    '#description' => t('Simplify styling when using simple inputs, such as a single text field or the date popup.'),
   );
 
   $context = array(
@@ -627,7 +623,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
   $form['cache_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Cache dates'),
-    '#description' => t('Date objects can be created and cached as date fields are loaded rather than when they are displayed to improve performance.'),
+    '#description' => t('Create and cache date objects when date fields are loaded, rather than when they are displayed. This can help to improve performance.'),
     '#default_value' => !empty($settings['cache_enabled']),
     '#weight' => 10,
   );
@@ -718,4 +714,3 @@ function date_timezone_handling_options() {
     'none' => t('No time zone conversion'),
   );
 }
-

@@ -398,17 +398,24 @@ class UserValidationTestCase extends BackdropUnitTestCase {
       'Foo O\'Bar'             => array('Valid username', 'assertNull'),
       'foo@bar'                => array('Valid username', 'assertNull'),
       'foo@example.com'        => array('Valid username', 'assertNull'),
-      'foo@-example.com'       => array('Valid username', 'assertNull'), // invalid domains are allowed in usernames
+      // Invalid domains are allowed in usernames.
+      'foo@-example.com'       => array('Valid username', 'assertNull'),
+      // cspell:disable
       'þòøÇßªř€'               => array('Valid username', 'assertNull'),
-      'foo+bar'                => array('Valid username', 'assertNull'), // '+' symbol is allowed
-      'ᚠᛇᚻ᛫ᛒᛦᚦ'                 => array('Valid UTF8 username', 'assertNull'), // runes
+      // Runes.
+      'ᚠᛇᚻ᛫ᛒᛦᚦ'                 => array('Valid UTF8 username', 'assertNull'),
+      // cspell:enable
+      // '+' symbol is allowed.
+      'foo+bar'                => array('Valid username', 'assertNull'),
       ' foo'                   => array('Invalid username that starts with a space', 'assertNotNull'),
       'foo '                   => array('Invalid username that ends with a space', 'assertNotNull'),
       'foo  bar'               => array('Invalid username that contains 2 spaces \'&nbsp;&nbsp;\'', 'assertNotNull'),
       ''                       => array('Invalid empty username', 'assertNotNull'),
       'foo/'                   => array('Invalid username containing invalid chars', 'assertNotNull'),
-      'foo' . chr(0) . 'bar'   => array('Invalid username containing chr(0)', 'assertNotNull'), // NULL
-      'foo' . chr(13) . 'bar'  => array('Invalid username containing chr(13)', 'assertNotNull'), // CR
+      // NULL.
+      'foo' . chr(0) . 'bar'   => array('Invalid username containing chr(0)', 'assertNotNull'),
+      // CR.
+      'foo' . chr(13) . 'bar'  => array('Invalid username containing chr(13)', 'assertNotNull'),
       str_repeat('x', USERNAME_MAX_LENGTH + 1) => array('Invalid excessively long username', 'assertNotNull'),
     );
     foreach ($test_cases as $name => $test_case) {
@@ -496,6 +503,14 @@ class UserLoginTestCase extends UserLoginTestBase {
     // A login with the correct password should also result in a flood error
     // message.
     $this->assertFailedLogin($user1, NULL, TRUE, 'ip');
+
+    // A login attempt after resetting the password should still fail, since the
+    // IP-based flood control count is not cleared after a password reset.
+    $new_pass = $this->resetUserPassword($user1);
+    $user1->pass_raw = $new_pass;
+    $this->backdropLogout();
+    $this->assertFailedLogin($user1, NULL, FALSE, 'ip');
+    $this->assertRaw(t('Sorry, too many failed login attempts from your IP address. This IP address is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'))));
   }
 
   /**
@@ -504,7 +519,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   function testPerUserLoginFloodControl() {
     config('user.flood')
       // Set a high global limit out so that it is not relevant in the test.
-      ->set('floo_ip_limit', 4000)
+      ->set('flood_ip_limit', 4000)
       ->set('flood_user_limit', 3)
       ->save();
 
@@ -536,6 +551,17 @@ class UserLoginTestCase extends UserLoginTestBase {
     // Try one more attempt for user 1, it should be rejected, even if the
     // correct password has been used.
     $this->assertFailedLogin($user1, NULL, TRUE, 'user');
+
+    // Resetting the password should clear the flood control for the user.
+    $new_pass = $this->resetUserPassword($user1);
+    $this->backdropLogout();
+
+    // Try to log in as user 1, it should be successful.
+    // Need to reload user since the password changed.
+    $user1->pass_raw = $new_pass;
+    $this->backdropLogin($user1);
+    $this->assertRaw('Member for');
+
   }
 
   /**
@@ -618,6 +644,34 @@ class UserLoginTestCase extends UserLoginTestBase {
     $this->backdropPost('user', $edit, t('Log in'), array(), array(), NULL, $extra_post);
     $this->assertText(t('Sorry, incorrect password.'));
   }
+
+  /**
+   * Resets the user password and logs the user in.
+   *
+   * @param User $user
+   *   The account to reset the password for.
+   * @return string
+   *   New password.
+   */
+  protected function resetUserPassword(User $user) {
+    $this->backdropGet('user/password');
+    $edit['name'] = $user->name;
+    $this->backdropPost(NULL, $edit, 'Reset password');
+    $emails = $this->backdropGetMails();
+    $email = end($emails);
+    $urls = array();
+    preg_match('#.+user/reset/.+#', $email['body'], $urls);
+    $resetURL = $urls[0];
+    $this->backdropGet($resetURL);
+    $pass = user_password();
+    $pass_edit = array(
+      'pass' => $pass,
+    );
+    $this->backdropPost(NULL, $pass_edit, t('Save password & log in'));
+
+    return $pass;
+  }
+
 }
 
 /**
@@ -651,7 +705,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Attempt bogus account cancellation request confirmation.
     $timestamp = $account->login;
-    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail));
     $this->assertResponse(403, 'Bogus cancelling request rejected.');
     $account = user_load($account->uid);
     $this->assertTrue($account->status == 1, 'User account was not canceled.');
@@ -725,14 +779,14 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Attempt bogus account cancellation request confirmation.
     $bogus_timestamp = $timestamp + 60;
-    $this->backdropGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login, $account->uid, $account->mail));
     $this->assertText(t('You have tried to use an account cancellation link that has expired. Please request a new one using the form below.'), 'Bogus cancelling request rejected.');
     $account = user_load($account->uid);
     $this->assertTrue($account->status == 1, 'User account was not canceled.');
 
     // Attempt expired account cancellation request confirmation.
     $bogus_timestamp = $timestamp - 86400 - 60;
-    $this->backdropGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login, $account->uid, $account->mail));
     $this->assertText(t('You have tried to use an account cancellation link that has expired. Please request a new one using the form below.'), 'Expired cancel account request rejected.');
     $accounts = user_load_multiple(array($account->uid), array('status' => 1));
     $this->assertTrue(reset($accounts), 'User account was not canceled.');
@@ -769,7 +823,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail));
     $account = user_load($account->uid, TRUE);
     $this->assertTrue($account->status == 0, 'User has been blocked.');
 
@@ -807,7 +861,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail));
     $account = user_load($account->uid, TRUE);
     $this->assertTrue($account->status == 0, 'User has been blocked.');
 
@@ -857,7 +911,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail));
     $this->assertFalse(user_load($account->uid, TRUE), 'User is not found in the database.');
 
     // Confirm that user's content has been attributed to anonymous user.
@@ -926,7 +980,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail));
     $this->assertFalse(user_load($account->uid, TRUE), 'User is not found in the database.');
 
     // Confirm that user's content has been deleted.
@@ -1567,10 +1621,10 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->assertEqual(trim($status_result[0]), 'Blocked', 'User C blocked');
 
     // Test unblocking of a user from /admin/people page and sending of activation mail
-    $editunblock = array();
-    $editunblock['action'] = 'user_unblock_user_action';
-    $editunblock[$user_c_checkbox] = TRUE;
-    $this->backdropPost('admin/people', $editunblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $edit_unblock = array();
+    $edit_unblock['action'] = 'user_unblock_user_action';
+    $edit_unblock[$user_c_checkbox] = TRUE;
+    $this->backdropPost('admin/people', $edit_unblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Active', 'User C unblocked');
     $this->assertMail("to", $user_c->mail, "Activation mail sent to user C");
@@ -1871,6 +1925,7 @@ class UserSaveTestCase extends BackdropWebTestCase {
     $test_name = $this->randomName();
 
     // Create the base user, based on backdropCreateUser().
+    /** @var User $user */
     $user = entity_create('user', array(
       'name' => $test_name,
       'uid' => $test_uid,
@@ -2071,6 +2126,39 @@ class UserEditTestCase extends BackdropWebTestCase {
     $this->backdropLogout();
     $user1->pass_raw = $new_pass;
     $this->backdropLogin($user1);
+
+    // Test that multiple failed password validations trigger flood control.
+    $config = config('user.flood');
+    $config->set('flood_user_limit', 2);
+    $config->save();
+    flood_clear_event('failed_pass_validation_user', $user1->uid);
+    $edit = array();
+    $edit['mail'] = $this->randomName() . '@new.example.com';
+    $edit['current_pass'] = $this->randomName();
+    // For the first and second attempt the password is validated.
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('Email address'))));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('Email address'))));
+    // For the third attempt error from the flood control is received.
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->assertRaw(t('Sorry, you have entered the incorrect password more than @count times. Changes to fields that require current password are temporarily blocked. Try again later.', array('@count' => $config->get('flood_user_limit'))));
+
+    // Test that multiple failed password validations with an empty password
+    // does not trigger flood control.
+    flood_clear_event('failed_pass_validation_user', $user1->uid);
+    $edit = array();
+    $edit['mail'] = $this->randomName() . '@new.example.com';
+    // For the first and second attempt the password is validated.
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('Email address'))));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('Email address'))));
+    // For the third attempt the password is still validated as no password was
+    // entered.
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('Email address'))));
+    $this->assertNoRaw(t('Sorry, you have entered incorrect password more than @count times. Changes to fields that require current password are temporarily blocked. Try again later.', array('@count' => $config->get('flood_user_limit'))));
     $this->backdropLogout();
   }
 
@@ -2776,5 +2864,108 @@ class UserEntityCallbacksTestCase extends BackdropWebTestCase {
   function testUriCallback() {
     $uri = entity_uri('user', $this->account);
     $this->assertEqual('user/' . $this->account->uid, $uri['path'], t('Correct user URI.'));
+  }
+}
+
+/**
+ * Test login page appearance.
+ */
+class UserLoginAppearanceTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $adminUser;
+
+  function setUp() {
+    parent::setUp(array('user_form_test'));
+    $this->adminUser = $this->backdropCreateUser(array('administer account settings', 'administer users'));
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
+    // Flush the same caches as user_admin_settings_submit() does.
+    backdrop_static_reset();
+    backdrop_flush_all_caches();
+  }
+
+  /**
+   * Test login page appearance.
+   */
+  function testLoginAppearance() {
+    $login_pages = array(
+      'user/login',
+      'user/password',
+      'user/register',
+    );
+    // Default login appearance is simplified: no layout, no tabs.
+    foreach ($login_pages as $page) {
+      $this->backdropGet($page);
+      $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+      $this->assertEqual(count($layout), 0, 'No layout in use on the login page.');
+      $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//ul[contains(@class, "tabs")]');
+      $this->assertEqual(count($tabs), 0, 'The tabs nav element was not found.');
+      $links = $this->xpath('(//ul[contains(@class, "login-links")])');
+      $this->assertEqual(count($links), 1, 'The links element was found.');
+      $this->assertRaw('user/css/user-simplified-page.css');
+    }
+
+    // Set login appearance to tabs.
+    $this->backdropLogin($this->adminUser);
+    $edit = array();
+    $edit['user_login_appearance'] = 'tabs';
+    $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
+    $this->backdropLogout();
+    foreach ($login_pages as $page) {
+      $this->backdropGet($page);
+      $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+      $this->assertEqual(count($layout), 1, 'Layout in use on the login page.');
+      $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//ul[contains(@class, "tabs")]');
+      $this->assertEqual(count($tabs), 1, 'The tabs nav element was found.');
+      $links = $this->xpath('(//ul[contains(@class, "login-links")])');
+      $this->assertEqual(count($links), 0, 'Login links were not found.');
+    }
+
+    // Set login appearance to links.
+    $this->backdropLogin($this->adminUser);
+    $edit = array();
+    $edit['user_login_appearance'] = 'links';
+    $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
+    $this->backdropLogout();
+    foreach ($login_pages as $page) {
+      $this->backdropGet($page);
+      $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+      $this->assertEqual(count($layout), 1, 'Layout in use on the login page.');
+      $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//ul[contains(@class, "tabs")]');
+      $this->assertEqual(count($tabs), 0, 'The tabs nav element was not found.');
+      $links = $this->xpath('(//ul[contains(@class, "login-links")])');
+      $this->assertEqual(count($links), 1, 'Login links were found.');
+    }
+
+    // Test hook_user_paths() and hook_user_paths_alter() in user_form_test.
+    $this->backdropLogin($this->adminUser);
+    $edit = array();
+    $edit['user_login_appearance'] = 'simplified';
+    $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
+
+    // This path should not use a simplified layout before hooks are enabled.
+    $this->backdropGet('user_form_test_current_password/' . $this->adminUser->uid);
+    $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+    $this->assertEqual(count($layout), 1, 'Layout in use before enabling hook_user_paths() in user_form_test.');
+
+    // Enable the hooks in user_form_test module.
+    state_set('user_form_test_user_paths', TRUE);
+    $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
+
+    // Now the custom form should be given the simplified appearance as the path
+    // is added in hook_user_paths().
+    $this->backdropGet('user_form_test_current_password/' . $this->adminUser->uid);
+    $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+    $this->assertEqual(count($layout), 0, 'Layout no longer in use after enabling hook_user_paths() in user_form_test.');
+    $this->backdropLogout();
+
+    // The user/login path should have a normal appearance now that it is
+    // excluded from user paths via hook_user_paths_alter().
+    $this->backdropGet('user/login');
+    $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+    $this->assertEqual(count($layout), 1, 'User login form is excluded from user paths by hook_user_paths_alter() in user_form_test.');
   }
 }

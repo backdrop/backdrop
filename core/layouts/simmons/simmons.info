@@ -1,5 +1,6 @@
 type = layout
 name = Simmons
+description = Includes a header, top, content, two sidebars, three triptych regions, four quarter regions, bottom, and footer.
 version = BACKDROP_VERSION
 backdrop = 1.x
 
@@ -9,9 +10,9 @@ regions[top]        = Top
 regions[content]    = Content
 regions[sidebar]    = First Sidebar
 regions[sidebar2]   = Second Sidebar
-regions[third1]     = Tryptych First
-regions[third2]     = Tryptych Second
-regions[third3]     = Tryptych Third
+regions[third1]     = Triptych First
+regions[third2]     = Triptych Second
+regions[third3]     = Triptych Third
 regions[quarter1]   = Quarter First
 regions[quarter2]   = Quarter Second
 regions[quarter3]   = Quarter Third

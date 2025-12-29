@@ -283,6 +283,7 @@ function menu_overview_form_language_filter_submit($form, &$form_state) {
   $query['langcode'] = $form_state['values']['langcode'];
   if (isset($_GET['destination'])) {
     $query['destination'] = $_GET['destination'];
+    unset($_GET['destination']);
   }
   backdrop_goto($_GET['q'], array('query' => $query));
 }
@@ -291,6 +292,7 @@ function menu_overview_form_language_filter_submit($form, &$form_state) {
  * Menu callback; Build the menu link editing form.
  */
 function menu_edit_item($form, &$form_state, $type, $item, $menu) {
+  $menus = menu_get_menus();
   if ($type == 'add' || empty($item)) {
     // This is an add form, initialize the menu link.
     $item = array(
@@ -310,8 +312,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   }
   else {
     // Get the human-readable menu title from the given menu name
-    $titles = menu_get_menus();
-    $current_title = $titles[$item['menu_name']];
+    $current_title = $menus[$item['menu_name']];
 
     // Get the current breadcrumb and add a link to that menu's overview page.
     $breadcrumb = menu_get_active_breadcrumb();
@@ -418,15 +419,50 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   if (!isset($options[$default])) {
     $default = 'main-menu:0';
   }
+  // This select element lists all available menus. When an option is chosen,
+  // the link options in the "Parent link" element below will be filtered to
+  // list only links from that chosen menu. This is accomplished via an AJAX
+  // request. Part of the AJAX request queries admin/structure/menu/parents,
+  // hence we ensure only users with access to that path (those users with
+  // "administer menu" permissions) will have access to this element.
+  // Since this requires JavaScript, the "js-show" class is added to hide this
+  // element if JavaScript is disabled.
+  $form['parent_menu'] = array(
+    '#type' => 'select',
+    '#title' => t('Menu'),
+    '#default_value' => $item['menu_name'],
+    '#options' => $menus,
+    '#description' => t('The parent menu'),
+    '#access' => user_access('administer menu'),
+    '#wrapper_attributes' => array(
+      'class' => array('js-show'),
+    ),
+  );
   $form['parent'] = array(
     '#type' => 'select',
     '#title' => t('Parent link'),
     '#default_value' => $default,
     '#options' => $options,
     '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
-    '#attributes' => array('class' => array('menu-title-select')),
+    '#attributes' => array(
+      'class' => array('menu-title-select'),
+      'data-menu-parent' => TRUE,
+    ),
     '#prefix' => '<div id="menu-parent-select-wrapper">',
     '#suffix' => '</div>',
+    '#attached' => array(
+      'js' => array(
+        backdrop_get_path('module', 'menu') . '/js/menu.admin.js',
+        array(
+          'data' => array('menu_edit_item_menu' => $item['menu_name']),
+          'type' => 'setting',
+        ),
+        array(
+          'data' => array('menu_edit_item_parents' => $menus),
+          'type' => 'setting',
+        ),
+      ),
+    ),
   );
   // Get number of items in all possible parent menus, so the weight selector is
   // sized appropriately.

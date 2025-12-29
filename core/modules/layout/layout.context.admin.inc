@@ -34,9 +34,11 @@ function layout_settings_form_context_add($form, &$form_state) {
  *
  * @ingroup forms
  */
-function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $context_id = NULL) {
+function layout_context_add_form($form, &$form_state, Layout $layout, $context_id = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+  // We need this as array key, even if null.
+  $context_id_key = (string) $context_id;
 
   $is_new_context = TRUE;
   if (isset($context_id)) {
@@ -55,8 +57,8 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
   );
 
   $contexts = $layout->getContexts();
-  if (isset($contexts[$context_id])) {
-    $handler = $contexts[$context_id];
+  if (isset($contexts[$context_id_key])) {
+    $handler = $contexts[$context_id_key];
     $form_state['handler'] = $handler;
   }
   else {
@@ -141,9 +143,11 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
  *
  * @ingroup forms
  */
-function layout_context_relationship_add_form($form, &$form_state, Layout $layout = NULL, $relationship_id = NULL) {
+function layout_context_relationship_add_form($form, &$form_state, Layout $layout, $relationship_id = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+  // We need this as array key, even if null.
+  $relationship_id_key = (string) $relationship_id;
 
   $contexts = $layout->getContexts();
 
@@ -181,8 +185,8 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
 
   $current_relationships = $layout->relationships;
   $form_state['relationships'] = $current_relationships;
-  if (isset($current_relationships[$relationship_id])) {
-    $handler = $current_relationships[$relationship_id];
+  if (isset($current_relationships[$relationship_id_key])) {
+    $handler = $current_relationships[$relationship_id_key];
     $form_state['handler'] = $handler;
   }
   else {
@@ -328,13 +332,13 @@ function layout_context_add_form_validate($form, &$form_state) {
  */
 function layout_context_add_form_submit($form, &$form_state) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
-  /* @var Layout $layout */
+  /** @var Layout $layout */
   $layout = $form_state['layout'];
 
   if (!isset($form_state['handler'])) {
     return;
   }
-  /* @var LayoutAccess $handler */
+  /** @var LayoutAccess $handler */
   $handler = $form_state['handler'];
   $handler->formSubmit($form, $form_state);
   if (!empty($handler->is_new)) {
