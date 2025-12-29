@@ -208,8 +208,8 @@ class BackdropDateTime extends DateTime {
    * In order to set a timezone for a datetime that doesn't have such
    * granularity, merge() it with one that does.
    *
-   * @param mixed $timezone
-   *   A timezone object. As of PHP 8.0: DateTimeZone.
+   * @param DateTimeZone $timezone
+   *   A timezone object.
    * @param bool $force
    *   Whether or not to skip a date with no time. Defaults to FALSE.
    *

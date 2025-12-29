@@ -608,7 +608,7 @@ function date_timezone_abbr($refresh = FALSE) {
  * Translates formatted date results, unlike PHP function date_format().
  * Should only be used for display, not input, because it can't be parsed.
  *
- * @param BackdropDateTime|string|null $date
+ * @param BackdropDateTime $date
  *   A date object.
  * @param string $type
  *   (optional) The date format to use. Can be 'small', 'medium' or 'large' for
@@ -626,7 +626,7 @@ function date_timezone_abbr($refresh = FALSE) {
  *
  * @see format_date()
  */
-function date_format_date($date, $type = 'medium', $format = '', $langcode = NULL) {
+function date_format_date(?BackdropDateTime $date, $type = 'medium', $format = '', $langcode = NULL) {
   if (empty($date)) {
     return '';
   }
@@ -1115,9 +1115,6 @@ function date_pad($value, $size = 2) {
  *   TRUE if the granularity contains a time portion, FALSE otherwise.
  */
 function date_has_time(array $granularity) {
-  if (!is_array($granularity)) {
-    $granularity = array();
-  }
   $options = array('hour', 'minute', 'second');
   return (bool) count(array_intersect($granularity, $options));
 }
@@ -1132,9 +1129,6 @@ function date_has_time(array $granularity) {
  *   TRUE if the granularity contains a date portion, FALSE otherwise.
  */
 function date_has_date(array $granularity) {
-  if (!is_array($granularity)) {
-    $granularity = array();
-  }
   $options = array('year', 'month', 'day');
   return (bool) count(array_intersect($granularity, $options));
 }
@@ -1363,7 +1357,7 @@ function date_nongranularity(array $granularity) {
     'second',
     'timezone',
   );
-  return array_diff($options, (array) $granularity);
+  return array_diff($options, $granularity);
 }
 
 
@@ -1454,13 +1448,13 @@ function date_range_valid($string) {
  *
  * @param string $string
  *   A min and max year string like '-3:+1'.
- * @param BackdropDateTime|string|null $date
+ * @param BackdropDateTime|null $date
  *   (optional) A date object. Defaults to NULL.
  *
  * @return array
  *   A numerically indexed array, containing a start and end year.
  */
-function date_range_years($string, $date = NULL) {
+function date_range_years($string, ?BackdropDateTime $date = NULL) {
   $this_year = date_format(date_now(), 'Y');
   list($start_year, $end_year) = explode(':', $string);
 

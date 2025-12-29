@@ -787,7 +787,7 @@ class Diff {
    * This is mostly for diagnostic purposed.
    *
    * @return int
-   *   The length of the LCS.
+   *   The length of the Longest Common Subsequence.
    */
   public function lcs() {
     $lcs = 0;
@@ -1269,7 +1269,7 @@ abstract class DiffFormatter {
   }
 
   /**
-   * @return void
+   * End block
    */
   protected function endBlock() {
   }
@@ -1482,8 +1482,6 @@ class BackdropDiffFormatter extends DiffFormatter {
   /**
    * @param array $lines
    *   Lines.
-   *
-   * @return void
    */
   protected function deleted(array $lines) {
     foreach ($lines as $line) {
@@ -1494,8 +1492,6 @@ class BackdropDiffFormatter extends DiffFormatter {
   /**
    * @param array $lines
    *   Lines.
-   *
-   * @return void
    */
   protected function context(array $lines) {
     foreach ($lines as $line) {

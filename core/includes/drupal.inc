@@ -476,7 +476,7 @@ function drupal_autoload_class($class) {
  * @deprecated since 1.0.0
  * @see backdrop_static()
  */
-function &drupal_static($name, $default_value = NULL, $reset = FALSE) {
+function &drupal_static($name, $default_value = NULL, $reset = FALSE) { // phpcs:ignore
   return backdrop_static($name, $default_value, $reset);
 }
 
@@ -516,7 +516,7 @@ function drupal_placeholder($text) {
  * @deprecated since 1.0.0
  * @see backdrop_register_shutdown_function()
  */
-function &drupal_register_shutdown_function($callback = NULL) {
+function &drupal_register_shutdown_function($callback = NULL) { // phpcs:ignore
   return backdrop_register_shutdown_function($callback);
 }
 
@@ -1390,7 +1390,7 @@ function drupal_sort_title($a, $b) {
  * @deprecated since 1.0.0
  * @see backdrop_array_get_nested_value()
  */
-function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) {
+function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) { // phpcs:ignore
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_array_get_nested_value($array, $parents, $key_exists);
 }
@@ -2224,8 +2224,7 @@ function drupal_match_path($path, $patterns) {
  *
  * @deprecated since 1.0.0
  */
-// cspell:disable-next-line
-function drupal_path_alias_whitelist_rebuild($source = NULL) {
+function drupal_path_alias_whitelist_rebuild($source = NULL) { // cspell:disable-line
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return array();
 }
@@ -2237,10 +2236,8 @@ function drupal_path_alias_whitelist_rebuild($source = NULL) {
  */
 function drupal_path_alias_allowlist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
-  // phpcs:disable
   // cspell:disable-next-line
-  return drupal_path_alias_whitelist_rebuild();
-  // phpcs:enable
+  return drupal_path_alias_whitelist_rebuild(); // phpcs:ignore
 }
 
 /**
