@@ -846,7 +846,7 @@ function _locale_import_tokenize_formula($formula) {
  *
  * Callback for array_map() within _locale_import_one_string().
  *
- * @param array $entry
+ * @param string $entry
  *   An array element.
  * @param int $key
  *   Index of the array element.
@@ -855,7 +855,7 @@ function _locale_import_tokenize_formula($formula) {
  *   The modified $entry parameter with "@count" strings replaced with the given
  *   $key value.
  */
-function _locale_import_append_plural(array $entry, $key) {
+function _locale_import_append_plural($entry, $key) {
   // No modifications for 0, 1.
   if ($key == 0 || $key == 1) {
     return $entry;
