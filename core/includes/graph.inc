@@ -4,7 +4,6 @@
  * Directed acyclic graph manipulation.
  */
 
-
 /**
  * Performs a depth-first search and sort on a directed acyclic graph.
  *
@@ -86,7 +85,7 @@ function backdrop_depth_first_search(array &$graph) {
  *
  * @see backdrop_depth_first_search()
  */
-function _backdrop_depth_first_search(&$graph, &$state, $start, &$component = NULL) {
+function _backdrop_depth_first_search(array &$graph, array &$state, $start, &$component = NULL) {
   // Assign new component for each new vertex, i.e. when not called recursively.
   if (!isset($component)) {
     $component = $start;

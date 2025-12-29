@@ -58,8 +58,18 @@ function _locale_import_po(File $file, $langcode, $mode) {
   // Rebuild the menu, strings may have changed.
   menu_rebuild();
 
-  backdrop_set_message(t('The translation was successfully imported. There are %number newly created translated strings, %update strings were updated and %delete strings were removed.', array('%number' => $additions, '%update' => $updates, '%delete' => $deletes)));
-  watchdog('locale', 'Imported %file into %locale: %number new strings added, %update updated and %delete removed.', array('%file' => $file->filename, '%locale' => $langcode, '%number' => $additions, '%update' => $updates, '%delete' => $deletes));
+  backdrop_set_message(t('The translation was successfully imported. There are %number newly created translated strings, %update strings were updated and %delete strings were removed.', array(
+    '%number' => $additions,
+    '%update' => $updates,
+    '%delete' => $deletes,
+  )));
+  watchdog('locale', 'Imported %file into %locale: %number new strings added, %update updated and %delete removed.', array(
+    '%file' => $file->filename,
+    '%locale' => $langcode,
+    '%number' => $additions,
+    '%update' => $updates,
+    '%delete' => $deletes,
+  ));
   if ($skips) {
     if (module_exists('dblog')) {
       $skip_message = format_plural($skips, 'A translation string was skipped because of disallowed or malformed HTML. <a href="@url">See the log</a> for details.', '@count translation strings were skipped because of disallowed or malformed HTML. <a href="@url">See the log</a> for details.', array('@url' => url('admin/reports/dblog')));
@@ -68,7 +78,10 @@ function _locale_import_po(File $file, $langcode, $mode) {
       $skip_message = format_plural($skips, 'A translation string was skipped because of disallowed or malformed HTML. See the log for details.', '@count translation strings were skipped because of disallowed or malformed HTML. See the log for details.');
     }
     backdrop_set_message($skip_message, 'error');
-    watchdog('locale', '@count disallowed HTML string(s) in %file', array('@count' => $skips, '%file' => $file->uri), WATCHDOG_WARNING);
+    watchdog('locale', '@count disallowed HTML string(s) in %file', array(
+      '@count' => $skips,
+      '%file' => $file->uri,
+    ), WATCHDOG_WARNING);
   }
   return TRUE;
 }
@@ -139,7 +152,6 @@ function _locale_import_read_po($op, File $file, $mode = NULL, $langcode = NULL)
 
     if (!strncmp('#', $line, 1)) {
       // Lines starting with '#' are comments.
-
       if ($context == 'COMMENT') {
         // Already in comment token, insert the comment.
         $current['#'][] = substr($line, 1);
@@ -162,7 +174,6 @@ function _locale_import_read_po($op, File $file, $mode = NULL, $langcode = NULL)
     }
     elseif (!strncmp('msgid_plural', $line, 12)) {
       // A plural form for the current message.
-
       if ($context != 'MSGID') {
         // A plural form cannot be added to anything else but the id directly.
         _locale_import_message('The translation file %filename contains an error: "msgid_plural" was expected but not found on line %line.', $file, $lineno);
@@ -172,7 +183,6 @@ function _locale_import_read_po($op, File $file, $mode = NULL, $langcode = NULL)
       // Remove 'msgid_plural' and trim away whitespace.
       $line = trim(substr($line, 12));
       // At this point, $line should now contain only the plural form.
-
       $quoted = _locale_import_parse_quoted($line);
       if ($quoted === FALSE) {
         // The plural form must be wrapped in quotes.
@@ -187,7 +197,6 @@ function _locale_import_read_po($op, File $file, $mode = NULL, $langcode = NULL)
     }
     elseif (!strncmp('msgid', $line, 5)) {
       // Starting a new message.
-
       if (($context == 'MSGSTR') || ($context == 'MSGSTR_ARR')) {
         // We are currently in a message string, close it out.
         _locale_import_one_string($op, $current, $mode, $langcode, $file);
@@ -218,7 +227,6 @@ function _locale_import_read_po($op, File $file, $mode = NULL, $langcode = NULL)
     }
     elseif (!strncmp('msgctxt', $line, 7)) {
       // Starting a new context.
-
       if (($context == 'MSGSTR') || ($context == 'MSGSTR_ARR')) {
         // We are currently in a message, start a new one.
         _locale_import_one_string($op, $current, $mode, $langcode, $file);
@@ -233,7 +241,6 @@ function _locale_import_read_po($op, File $file, $mode = NULL, $langcode = NULL)
       // Remove 'msgctxt' and trim away whitespaces.
       $line = trim(substr($line, 7));
       // At this point, $line should now contain the context.
-
       $quoted = _locale_import_parse_quoted($line);
       if ($quoted === FALSE) {
         // The context string must be quoted.
@@ -247,7 +254,6 @@ function _locale_import_read_po($op, File $file, $mode = NULL, $langcode = NULL)
     }
     elseif (!strncmp('msgstr[', $line, 7)) {
       // A message string for a specific plurality.
-
       if (($context != 'MSGID') && ($context != 'MSGCTXT') && ($context != 'MSGID_PLURAL') && ($context != 'MSGSTR_ARR')) {
         // Message strings must come after msgid, msgctxt, msgid_plural, or
         // other msgstr[] entries.
@@ -282,7 +288,6 @@ function _locale_import_read_po($op, File $file, $mode = NULL, $langcode = NULL)
     }
     elseif (!strncmp("msgstr", $line, 6)) {
       // A string for the an id or context.
-
       if (($context != 'MSGID') && ($context != 'MSGCTXT')) {
         // Strings are only valid within an id or context scope.
         _locale_import_message('The translation file %filename contains an error: "msgstr" is unexpected on line %line.', $file, $lineno);
@@ -292,7 +297,6 @@ function _locale_import_read_po($op, File $file, $mode = NULL, $langcode = NULL)
       // Remove 'msgstr' and trim away away whitespaces.
       $line = trim(substr($line, 6));
       // At this point, $line should now contain the message.
-
       $quoted = _locale_import_parse_quoted($line);
       if ($quoted === FALSE) {
         // The string must be quoted.
@@ -305,8 +309,8 @@ function _locale_import_read_po($op, File $file, $mode = NULL, $langcode = NULL)
       $context = 'MSGSTR';
     }
     elseif ($line != '') {
-      // Anything that is not a token may be a continuation of a previous token.
-
+      // Anything that is not a token may be a continuation of a previous
+      // token.
       $quoted = _locale_import_parse_quoted($line);
       if ($quoted === FALSE) {
         // The string must be quoted.
@@ -386,7 +390,12 @@ function _locale_import_message($message, File $file, $lineno = NULL) {
  *   information about currently stored strings. Other operations return NULL.
  */
 function _locale_import_one_string($op, ?array $value = NULL, $mode = NULL, $langcode = NULL, ?File $file = NULL) {
-  $report = &backdrop_static(__FUNCTION__, array('additions' => 0, 'updates' => 0, 'deletes' => 0, 'skips' => 0));
+  $report = &backdrop_static(__FUNCTION__, array(
+    'additions' => 0,
+    'updates' => 0,
+    'deletes' => 0,
+    'skips' => 0,
+  ));
   $header_done = &backdrop_static(__FUNCTION__ . ':header_done', FALSE);
   $strings = &backdrop_static(__FUNCTION__ . ':strings', array());
 
@@ -402,7 +411,13 @@ function _locale_import_one_string($op, ?array $value = NULL, $mode = NULL, $lan
 
     // Called at end of import to inform the user.
     case 'db-report':
-      return array($header_done, $report['additions'], $report['updates'], $report['deletes'], $report['skips']);
+      return array(
+        $header_done,
+        $report['additions'],
+        $report['updates'],
+        $report['deletes'],
+        $report['skips'],
+      );
 
     // Store the string we got in the database.
     case 'db-store':
@@ -489,7 +504,10 @@ function _locale_import_one_string($op, ?array $value = NULL, $mode = NULL, $lan
  *   The string ID of the existing string modified or the new string added.
  */
 function _locale_import_one_string_db(array &$report, $langcode, $context, $source, $translation, $location, $mode, $plid = 0, $plural = 0) {
-  $lid = db_query("SELECT lid FROM {locales_source} WHERE source = :source AND context = :context", array(':source' => $source, ':context' => $context))->fetchField();
+  $lid = db_query("SELECT lid FROM {locales_source} WHERE source = :source AND context = :context", array(
+    ':source' => $source,
+    ':context' => $context,
+  ))->fetchField();
 
   if (!empty($translation)) {
     // Skip this string unless it passes a check for dangerous code.
@@ -507,7 +525,10 @@ function _locale_import_one_string_db(array &$report, $langcode, $context, $sour
         ->condition('lid', $lid)
         ->execute();
 
-      $exists = db_query("SELECT COUNT(lid) FROM {locales_target} WHERE lid = :lid AND language = :language", array(':lid' => $lid, ':language' => $langcode))->fetchField();
+      $exists = db_query("SELECT COUNT(lid) FROM {locales_target} WHERE lid = :lid AND language = :language", array(
+        ':lid' => $lid,
+        ':language' => $langcode,
+      ))->fetchField();
 
       if (!$exists) {
         // No translation in this language.
@@ -550,11 +571,11 @@ function _locale_import_one_string_db(array &$report, $langcode, $context, $sour
 
       db_insert('locales_target')
         ->fields(array(
-           'lid' => $lid,
-           'language' => $langcode,
-           'translation' => $translation,
-           'plid' => $plid,
-           'plural' => $plural
+          'lid' => $lid,
+          'language' => $langcode,
+          'translation' => $translation,
+          'plid' => $plid,
+          'plural' => $plural,
         ))
         ->execute();
 
@@ -655,7 +676,15 @@ function _locale_import_parse_plural_forms($plural_forms, $filepath) {
  */
 function _locale_import_parse_arithmetic($string) {
   // Operator precedence table.
-  $precedence = array("(" => -1, ")" => -1, "?" => 1, ":" => 1, "||" => 3, "&&" => 4, "==" => 5, "!=" => 5, "<" => 6, ">" => 6, "<=" => 6, ">=" => 6, "+" => 7, "-" => 7, "*" => 8, "/" => 8, "%" => 8);
+  $precedence = array(
+    "(" => -1, ")" => -1, "?" => 1, ":" => 1,
+    "||" => 3,
+    "&&" => 4,
+    "==" => 5, "!=" => 5,
+    "<" => 6, ">" => 6, "<=" => 6, ">=" => 6,
+    "+" => 7, "-" => 7,
+    "*" => 8, "/" => 8, "%" => 8,
+  );
   // Right associativity.
   $right_associativity = array("?" => 1, ":" => 1);
 
@@ -749,7 +778,7 @@ function _locale_import_parse_arithmetic($string) {
 /**
  * Provides backward-compatible formula parsing for token_get_all().
  *
- * @param string $string
+ * @param string $formula
  *   A string containing the arithmetic formula.
  *
  * @return array
@@ -846,7 +875,7 @@ function _locale_import_append_plural(array $entry, $key) {
  * @return string
  *   Short one-string version of the comment.
  */
-function _locale_import_shorten_comments($comment) {
+function _locale_import_shorten_comments(array $comment) {
   $comm = '';
   while (count($comment)) {
     $test = $comm . substr(array_shift($comment), 1) . ', ';
@@ -1041,7 +1070,10 @@ function _locale_export_po(?stdClass $language = NULL, $output = NULL) {
   // Log the export event.
   if (isset($language)) {
     $filename = $language->langcode . '.po';
-    watchdog('locale', 'Exported %locale translation file: %filename.', array('%locale' => $language->name, '%filename' => $filename));
+    watchdog('locale', 'Exported %locale translation file: %filename.', array(
+      '%locale' => $language->name,
+      '%filename' => $filename,
+    ));
   }
   else {
     $filename = 'backdrop.pot';
