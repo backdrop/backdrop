@@ -148,6 +148,13 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     $edit = array(
       'path' => 'node/%',
+      'additional_paths[0]' => 'node/%/subpath/%',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path node/%/subpath/% should have the same number of placeholders as primary path node/%.');
+
+    $edit = array(
+      'path' => 'node/%',
       'additional_paths[0]' => 'foobar',
     );
     $this->backdropPost(NULL, $edit, t('Save layout'));
@@ -198,7 +205,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
 
-    // Test layout-created paths.
+    // Test string context on additional paths.
     $edit = array(
       'path' => 'passthrough/%',
       'additional_paths[0]' => 'passthrough/%/subpath',
@@ -458,8 +465,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Check that the view page link is present.
     $this->assertLinkByHref($layout_url, 0, 'View page link found.');
-    $this->assertLink('View page', 0, 'View page link text found.');
-    $this->clickLink(t('View page'));
+    $this->assertLink('View page: a-menu-item-path', 0, 'View page link text found.');
+    $this->clickLink(t('View page: a-menu-item-path'));
     $this->assertResponse(200, 'View page link goes to path.');
 
     // Create a new layout overriding node/%.
