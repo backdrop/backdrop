@@ -119,12 +119,10 @@ class Layout {
   var $menu_item = NULL;
 
   /**
-   * A LayoutMenuItem containing menu properties for this layout.
+   * A array of LayoutMenuItems containing menu properties for this layout's
+   * additional paths.
    *
-   * Layouts that are at user-defined paths (not overriding a module) must have
-   * a menu item specified. Multiple layouts may share the same menu item.
-   *
-   * @var LayoutMenuItem
+   * @var array
    */
   var $additional_menu_items = array();
 
@@ -217,6 +215,11 @@ class Layout {
   public $additional_paths = array();
 
   /**
+   * @var array
+   */
+  var $old_additional_paths = array();
+
+  /**
    * @var bool
    */
   public $is_new;
@@ -291,6 +294,9 @@ class Layout {
     if (is_null($this->contexts)) {
       $this->contexts = array();
     }
+
+    // Save original additional paths, to track any deletions.
+    $this->old_additional_paths = $this->additional_paths;
   }
 
   /**
@@ -430,6 +436,15 @@ class Layout {
             }
           }
         }
+      }
+    }
+    // Cleanup menu items that were provided by any deleted additional menu
+    // items.
+    $paths_to_delete = array_diff($this->old_additional_paths, $this->additional_paths);
+    foreach ($paths_to_delete as $path_to_delete) {
+      if (layout_provides_path($path_to_delete) === TRUE) {
+        $menu_item_to_delete = layout_menu_item_load_multiple_by_path($path_to_delete);
+        $menu_item_to_delete->delete();
       }
     }
 
