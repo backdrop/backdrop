@@ -35,8 +35,7 @@ function config($config_file, $type = 'active') {
     $storage = config_get_config_storage($type);
     $config = new Config($config_file, $storage);
     $config->load();
-    $cache = $config->get('_config_static');
-    if ($cache) {
+    if ($config->isStatic()) {
       $loaded_configs[$type][$config_file] = $config;
     }
   }
@@ -637,6 +636,23 @@ class Config {
   }
 
   /**
+   * Returns whether this config object is statically cached in memory.
+   *
+   * When a configuration is read from disk, the internal "_config_static"
+   * flag is read to determine if the contents of that configuration should be
+   * cached in memory for the duration of the request.
+   *
+   * @return bool
+   *   TRUE if this configuration object is cached in memory.
+   *
+   * @see config()
+   * @see Config::setStatic()
+   */
+  public function isStatic() {
+    return (bool) $this->get('_config_static');
+  }
+
+  /**
    * Check if a particular config key is overridden.
    *
    * @param string $key
@@ -979,6 +995,35 @@ class Config {
   }
 
   /**
+   * Sets the flag for whether this config is statically stored in memory.
+   *
+   * This cache can substantially reduce reads from disk by allowing multiple
+   * calls to config() or config_get() to read from an in-memory cache that is
+   * populated once per request.
+   *
+   * Any config that is read more than once per request should be cached in some
+   * way. Some more advanced concepts like Views, Fields, or Content Types
+   * provide their own caching systems, so not all config should always use this
+   * cache. Configuration that is simple and has limited content, such as the
+   * typical "my_module.settings" config that is used to store site-wide module
+   * settings should have this flag set to TRUE.
+   *
+   * @param bool $value
+   *   Set to TRUE to enable memory caching. FALSE to disable memory caching.
+   *
+   * @see config()
+   * @see Config::isStatic()
+   */
+  public function setStatic($value = TRUE) {
+    if ($value) {
+      $this->set('_config_static', (bool) $value);
+    }
+    else {
+      $this->clear('_config_static');
+    }
+  }
+
+  /**
    * Unsets a value in this configuration object.
    *
    * @param string $key
@@ -1041,7 +1086,18 @@ class Config {
       $this->load();
     }
     // Ensure config name is saved in the result.
-    $this->data = array_merge(array('_config_name' => $this->name), $this->data);
+    $this->data['_config_name'] = $this->name;
+
+    // Ensure all _config_* keys are positioned at the top of the saved data.
+    $config_keys = array();
+    foreach ($this->data as $key => $value) {
+      if (strpos($key, '_config_') === 0) {
+        $config_keys[$key] = $value;
+      }
+    }
+    ksort($config_keys, SORT_STRING);
+    $this->data = array_merge($config_keys, $this->data);
+
     $this->storage->write($this->name, $this->data);
     $this->isNew = FALSE;
 

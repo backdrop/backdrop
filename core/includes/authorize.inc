@@ -167,7 +167,7 @@ function _authorize_filetransfer_connection_settings($backend) {
  *
  * @param array $element
  *   Reference to the Form API form element we're operating on.
- * @param string $key
+ * @param string|null $key
  *   The key for our current form element, if any.
  * @param array $defaults
  *   The default settings for the file transfer backend we're operating on.
@@ -184,8 +184,14 @@ function _authorize_filetransfer_connection_settings_set_defaults(array &$elemen
   // there's a subarray of settings for the form key we're currently
   // processing, pass in that subarray to the recursive call. Otherwise, just
   // pass on the whole $defaults array.
+  if ($key && isset($defaults[$key]) && is_array($defaults[$key])) {
+    $default_settings = $defaults[$key];
+  }
+  else {
+    $default_settings = $defaults;
+  }
   foreach (element_children($element) as $child_key) {
-    _authorize_filetransfer_connection_settings_set_defaults($element[$child_key], $child_key, ((isset($defaults[$key]) && is_array($defaults[$key])) ? $defaults[$key] : $defaults));
+    _authorize_filetransfer_connection_settings_set_defaults($element[$child_key], $child_key, $default_settings);
   }
 }
 
