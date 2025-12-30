@@ -123,6 +123,7 @@ class Layout {
    * additional paths.
    *
    * @var array
+   * @since 1.33.0
    */
   var $additional_menu_items = array();
 
@@ -211,11 +212,13 @@ class Layout {
    * @var array
    * @see layout_settings_form_validate()
    * @see layout_layout_presave()
+   * @since 1.33.0
    */
   public $additional_paths = array();
 
   /**
    * @var array
+   * @since 1.33.0
    */
   var $old_additional_paths = array();
 
@@ -248,7 +251,7 @@ class Layout {
     );
 
     // Load additional paths..
-    $this->additional_paths = isset($this->settings['additional_paths'])? $this->settings['additional_paths'] : array();
+    $this->additional_paths = isset($this->settings['additional_paths']) ? $this->settings['additional_paths'] : array();
 
     // Adjust for the renaming of "layout" to "layout_template".
     // See https://github.com/backdrop/backdrop-issues/issues/998

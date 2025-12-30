@@ -496,7 +496,9 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['add_additional_paths']['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add path'),
-    '#attributes' => array('class' => array('layout-link-button', 'layout-additional-paths-add')),
+    '#attributes' => array(
+      'class' => array('layout-link-button', 'layout-additional-paths-add')
+    ),
     '#validate' => array(),
     '#submit' => array(
       'layout_settings_form_update_layout',
@@ -619,7 +621,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 
   foreach ($contexts as $context_key => $layout_context) {
     if ($layout_context->usageType !== LayoutContext::USAGE_TYPE_SYSTEM) {
-            
       // Contexts that are locked to a particular position (such as node/%).
       if ($layout_context->position && $layout_context->required) {
         if (strpos($context_key, 'ap_') === 0) {
@@ -996,7 +997,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   }
 
   if (isset($form_state['values']['additional_paths'])) {
-    foreach ($form_state['values']['additional_paths'] as $key => $additional_path){
+    foreach ($form_state['values']['additional_paths'] as $key => $additional_path) {
       $additional_path = trim($additional_path);
       if (!empty($additional_path)) {
         $alias = NULL;
@@ -1033,7 +1034,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
               ));
             }
             elseif ($count_additional_path_parts !== $count_path_parts) {
-              foreach($path_parts as $i => $path_part) {
+              foreach ($path_parts as $i => $path_part) {
                 if (isset($additional_path_parts[$i]) && $additional_path_parts[$i] !== $path_parts[$i]) {
                   form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
                     array(
@@ -1273,7 +1274,7 @@ function layout_settings_form_update_layout($form, &$form_state) {
   // or additional path fields.
   $layout->additional_paths = array();
   if (!empty($form_state['additional_paths'])) {
-    foreach ($form_state['additional_paths'] as $additional_path){
+    foreach ($form_state['additional_paths'] as $additional_path) {
       $layout->additional_paths[] = $additional_path;
     }
   }
@@ -1433,7 +1434,7 @@ function layout_settings_form_save_submit($form, &$form_state) {
   }
 
   if (!empty($form_state['values']['additional_paths'])) {
-    foreach ($form_state['values']['additional_paths'] as $additional_path){
+    foreach ($form_state['values']['additional_paths'] as $additional_path) {
       $layout->setAdditionalMenuItems($additional_path);
     }
   }
