@@ -475,9 +475,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       '#type' => 'submit',
       '#name' => 'additional_path_remove'.$i,
       '#value' => t('Remove'),
-      '#validate' => array(
-        'layout_settings_form_validate',
-      ),
+      '#limit_validation_errors' => array(),
       '#attributes' => array(
         'data-layout-additional-path-remove' => $i,
         'class' => array('layout-additional-path-remove')
@@ -1023,8 +1021,8 @@ function layout_settings_form_validate(&$form, &$form_state) {
             }
           }
           else {
-            // Path parts must match up to the last wildcard, otherwise we cannot
-            // be sure about context positions.
+            // Path parts must match up to the last wildcard, otherwise we
+            // cannot be sure about context positions.
             if (abs($count_additional_path_parts - $count_path_parts) > 1) {
               form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
                 array(
@@ -1138,7 +1136,8 @@ function layout_settings_form_additional_path_remove($form, &$form_state) {
  * Updates available contexts and information about path matching.
  */
 function layout_settings_form_add_additional_paths($form, &$form_state) {
-  $form_state['additional_paths'][] = '';
+  $new_path = (strpos($form_state['values']['path'], '%') !== FALSE) ? $form_state['values']['path'] . '/' : '';
+  $form_state['additional_paths'][] = $new_path;
   $form_state['rebuild'] = TRUE;
 }
 
