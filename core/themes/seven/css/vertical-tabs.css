@@ -69,11 +69,11 @@
 .vertical-tab-selected .fieldset-wrapper {
   display: block;
 }
-.vertical-tabs-pane button,
-.vertical-tabs-pane input,
-.vertical-tabs-pane optgroup,
-.vertical-tabs-pane select,
-.vertical-tabs-pane textarea {
+.vertical-tabs-panes button,
+.vertical-tabs-panes input,
+.vertical-tabs-panes optgroup,
+.vertical-tabs-panes select,
+.vertical-tabs-panes textarea {
   max-width: 100%;
 }
 @media (min-width: 750px) {
