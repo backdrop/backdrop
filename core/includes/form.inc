@@ -657,7 +657,7 @@ function form_state_keys_no_cache() {
 function form_include_file(&$form_state, $module, $filename = NULL) {
   if (!isset($form_state['build_info']['files']["$module:$filename"])) {
     // Only add successfully included files to the form state.
-    if ($result = backdrop_file_include($module, $filename)) {
+    if ($result = backdrop_include_file($module, $filename)) {
       $parts = explode('.', $filename);
       $type = array_pop($parts);
       $name = implode('.', $parts);
