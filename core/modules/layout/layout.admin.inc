@@ -71,6 +71,31 @@ function layout_list_page() {
   $override_rows = array();
   $default_rows = array();
 
+  $start = FALSE;
+  $last_path = '';
+  $combinable_groups = array();
+  foreach ($path_groups as $path => $group) {
+    $first_layout_in_group = reset($group);
+    $first_layout_in_group_name = $first_layout_in_group->name;
+    $single_layout_group = count($group) === 1;
+    // First single layout row
+    if ($single_layout_group && $start === FALSE) {
+      $last_group_name = $first_layout_in_group_name;
+      $combinable_groups[$path] = 1;
+      $start = TRUE;
+      $last_path = $path;
+    }
+    elseif ($single_layout_group && $first_layout_in_group_name === $last_group_name) {
+      $combinable_groups[$path] = 1;
+      $last_group_name = $first_layout_in_group_name;
+      $last_path = $path;
+    }
+    elseif ($first_layout_in_group_name !== $last_group_name) {
+      unset($combinable_groups[$last_path]);
+      $start = FALSE;
+    }
+  }      
+
   foreach ($path_groups as $path => $group) {
     // Print a row for rearranging a group of layouts.
     $operations = array(
