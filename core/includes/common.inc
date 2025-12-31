@@ -9255,10 +9255,10 @@ function backdrop_get_filetransfer_info() {
  * Examples:
  * @code
  *   // Include node.admin.inc from the Node module.
- *   backdrop_include_file('module', 'node', 'node.admin.inc');
+ *   backdrop_include_file('node', 'node.admin.inc');
  *
  *   // Include template.php from the Basis theme.
- *   backdrop_include_file('theme', 'basis', 'template.php');
+ *   backdrop_include_file('basis', 'template.php', 'theme');
  * @endcode
  *
  * Do not use this function to include a module's install file in any situation
@@ -9272,21 +9272,21 @@ function backdrop_get_filetransfer_info() {
  *   require_once BACKDROP_ROOT . '/path/file'
  * @endcode
  *
- * @param string $project_type
- *   The type of project to include the file from (module, theme, layout,
- *   profile).
  * @param string $project_name
  *   The name of the project to include the file from (e.g. admin_bar).
  * @param string $filename
  *   The name of the file to include. Specify the full filename, including the
  *   extension (e.g. admin_bar.theme.inc).
+ * @param string $project_type
+ *   The type of project to include the file from (module, theme, layout,
+ *   profile, theme_engine).
  *
  * @return string|bool
  *   The full path to the included file, if successful. FALSE otherwise.
  *
- * @since 1.22.0
+ * @since 1.33.0
  */
-function backdrop_include_file($project_type, $project_name, $filename) {
+function backdrop_include_file($project_name, $filename, $project_type = 'module') {
   static $files = array();
 
   if (isset($files[$project_name][$filename])) {

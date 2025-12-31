@@ -315,7 +315,7 @@ function module_load_install($module) {
  * @endcode
  * Preferred:
  * @code
- *   backdrop_include_file('module', 'node', 'node.admin.inc');
+ *   backdrop_include_file('node', 'node.admin.inc');
  * @endcode
  *
  * Do not use this function to load a module's install file in any situation
@@ -346,7 +346,7 @@ function module_load_include($type, $module, $name = NULL) {
   if (!isset($name)) {
     $name = $module;
   }
-  return backdrop_include_file('module', $module, $name . '.' . $type);
+  return backdrop_include_file($module, $name . '.' . $type);
 }
 
 /**

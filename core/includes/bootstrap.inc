@@ -4088,7 +4088,7 @@ function backdrop_get_complete_schema($rebuild = FALSE) {
       // complete list of modules.
       $modules = module_list(TRUE);
       foreach ($modules as $module) {
-        backdrop_include_file('module', $module, $module . '.install');
+        backdrop_include_file($module, $module . '.install');
       }
 
       require_once BACKDROP_ROOT . '/core/includes/common.inc';
