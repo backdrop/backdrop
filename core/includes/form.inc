@@ -710,7 +710,7 @@ function form_load_include(&$form_state, $type, $module, $name = NULL) {
   if (!isset($name)) {
     $name = $module;
   }
-  return form_include_file($form_state, $module, $name . $type);
+  return form_include_file($form_state, $module, "$name.$type");
 }
 
 /**
