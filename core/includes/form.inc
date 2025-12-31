@@ -646,7 +646,9 @@ function form_state_keys_no_cache() {
  * @param $module
  *   The module to which the include file belongs.
  * @param $filename
- *   The file name including the type extension.
+ *   The file name including the type extension. If omitted,
+ *   $module is used with an extenstion of '.inc', i.e., resulting in
+ *   "$module.inc" by default.
  *
  * @return
  *   The filepath of the loaded include file, or FALSE if the include file was
@@ -655,6 +657,9 @@ function form_state_keys_no_cache() {
  * @see backdrop_include_file()
  */
 function form_include_file(&$form_state, $module, $filename = NULL) {
+  if (is_null($filename)) {
+    $filename = "$module.inc";
+  }
   if (!isset($form_state['build_info']['files']["$module:$filename"])) {
     // Only add successfully included files to the form state.
     if ($result = backdrop_include_file($module, $filename)) {
