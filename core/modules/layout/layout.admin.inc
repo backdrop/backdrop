@@ -2696,12 +2696,13 @@ function layout_toggle_enabled(Layout $layout, $status) {
     backdrop_set_message(t('Layout %title has been enabled.', array('%title' => $layout->title)));
   }
   else {
-    $path = $layout->getPath();
     $removal_removes_page = layout_removal_removes_page($layout);
     $layout->disable();
     backdrop_set_message(t('Layout %title has been disabled.', array('%title' => $layout->title)));
     if ($removal_removes_page) {
-      layout_warn_if_site_info_path($path, 'disable');
+      foreach ($removal_removes_page as $path) {
+        layout_warn_if_site_info_path($path, 'disable');
+      }
     }
   }
   backdrop_goto('admin/structure/layouts');
@@ -2935,22 +2936,26 @@ function layout_delete_form($form, &$form_state, $layout) {
   if ($delete_layout) {
     $question = t('Delete layout @title?', array('@title' => $layout->title));
 
-    if (layout_removal_removes_page($layout)) {
-      $path = $layout->getPath();
-      $site_config = config('system.core');
-      if ($path == $site_config->get('site_frontpage')) {
-        $text = t('This layout creates a page at %path that is used as the home page of the site.', array('%path' => $path)) . ' ' . t(' If you delete or disable this layout, that page will be removed.') . ' ' . _layout_site_info_page_message('edit-front-page', t('home page'));
+    if ($paths = layout_removal_removes_page($layout)) {
+      $text_array = array();
+      $text = t('Are you sure you want to delete this layout?') . "<br />";
+      foreach ($paths as $path) {
+        $site_config = config('system.core');
+        if ($path == $site_config->get('site_frontpage')) {
+          $text_array[] = t('This layout creates a page at %path that is used as the home page of the site.', array('%path' => $path)) . ' ' . t(' If you delete or disable this layout, that page will be removed.') . ' ' . _layout_site_info_page_message('edit-front-page', t('home page'));
+        }
+        elseif ($path == $site_config->get('site_403')) {
+          $text_array[] = t('This layout creates a page at %path that is used as the default 403 (access denied) page of the site.', array('%path' => $path)) . ' ' . t(' If you delete or disable this layout, that page will be removed.') . ' ' . _layout_site_info_page_message('edit-error-page', t('403 page'));
+        }
+        elseif ($path == $site_config->get('site_404')) {
+          $url = url('admin/config/system/site-information') . '#edit-error-page';
+          $text_array[] = t('This layout creates a page at %path that is used as the default 404 (not found) page of the site.', array('%path' => $path)) . ' ' . t(' If you delete or disable this layout, that page will be removed.') . ' ' . _layout_site_info_page_message('edit-error-page', t('404 page'));
+        }
+        else {
+          $text_array[] = t('The page at %path will be completely removed.', array('%path' => $path)) . ' ' . t('This action cannot be undone. You may prefer to disable the layout instead.');
+        }
       }
-      elseif ($path == $site_config->get('site_403')) {
-        $text = t('This layout creates a page at %path that is used as the default 403 (access denied) page of the site.', array('%path' => $path)) . ' ' . t(' If you delete or disable this layout, that page will be removed.') . ' ' . _layout_site_info_page_message('edit-error-page', t('403 page'));
-      }
-      elseif ($path == $site_config->get('site_404')) {
-        $url = url('admin/config/system/site-information') . '#edit-error-page';
-        $text = t('This layout creates a page at %path that is used as the default 404 (not found) page of the site.', array('%path' => $path)) . ' ' . t(' If you delete or disable this layout, that page will be removed.') . ' ' . _layout_site_info_page_message('edit-error-page', t('404 page'));
-      }
-      else {
-        $text = t('Are you sure you want to delete this layout?') . ' ' . t('The page at %path will be completely removed.') . ' ' . t('This action cannot be undone. You may prefer to disable the layout instead.', array('%path' => $path));
-      }
+      $text .= implode("<br />", $text_array);
     }
     else {
       // We're deleting the layout, but there will still be a page at its path.
@@ -2994,7 +2999,9 @@ function layout_delete_form_submit(&$form, &$form_state) {
       $layout->delete();
       backdrop_set_message(t('Layout %title has been deleted.', array('%title' => $title)));
       if ($removal_removes_page) {
-        layout_warn_if_site_info_path($path, 'delete');
+        foreach ($removal_removes_page as $path) {
+          layout_warn_if_site_info_path($path, 'delete');
+        }
       }
       break;
 
@@ -3002,7 +3009,9 @@ function layout_delete_form_submit(&$form, &$form_state) {
       $layout->disable();
       backdrop_set_message(t('Layout %title has been disabled.', array('%title' => $title)));
       if ($removal_removes_page) {
-        layout_warn_if_site_info_path($path, 'disable');
+        foreach ($removal_removes_page as $path) {
+          layout_warn_if_site_info_path($path, 'disable');
+        }
       }
       break;
 
@@ -3016,28 +3025,38 @@ function layout_delete_form_submit(&$form, &$form_state) {
 }
 
 /**
-* Determines whether the deletion or disabling of this layout would remove the
-* page at its path.
-*
-* @return Boolean.
-*   TRUE if the layout creates a page that is the last enabled layout with the
-*   same path. FALSE if not.
-*/
+ * Determines whether the deletion or disabling of this layout would remove the
+ * page at its path or additional paths.
+ *
+ * @return array|FALSE
+ *   Returns an array of paths, including the primary path or additional paths,
+ *   if the layout creates a page at that path that is the last enabled layout
+ *   with the same path. FALSE if not.
+ *
+ * @since 1.33.0 Modified to return array|FALSE instead of Boolean.
+ */
 function layout_removal_removes_page($layout) {
-  $path = $layout->getPath();
-  $form['layout_path'] = $path;
-  $router_item = menu_get_item($path);
-  if ($router_item != FALSE) {
-    $is_layout_page = ($router_item['page_callback'] == 'layout_page_callback');
-    if ($is_layout_page) {
-      if (!isset($router_item['map'])) {
-        // This needs to exist but isn't always set by menu_get_item().
-        $router_item['map'] = array();
+  $paths[] = $layout->getPath();
+  foreach ($layout->additional_paths as $additional_path) {
+    $paths[] = $additional_path;
+  }
+  $removed_pages = array();
+  foreach ($paths as $path) {
+    $router_item = menu_get_item($path);
+    if ($router_item != FALSE) {
+      $is_layout_page = ($router_item['page_callback'] == 'layout_page_callback');
+      if ($is_layout_page) {
+        if (!isset($router_item['map'])) {
+          // This needs to exist but isn't always set by menu_get_item().
+          $router_item['map'] = array();
+        }
+        if (count(layout_load_multiple_by_router_item($router_item)) == 1) {
+          $removed_pages[] = $path;
+        }
       }
-      return count(layout_load_multiple_by_router_item($router_item)) == 1;
     }
   }
-  return FALSE;
+  return empty($removed_pages) ? FALSE : $removed_pages;
 }
 
 /**
