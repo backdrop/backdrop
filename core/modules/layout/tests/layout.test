@@ -228,48 +228,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('node/' . $this->test_node2->nid);
     $this->assertResponse(200);
     $this->assertNoRaw('Foo subject', 'Testing block is not present on post layout');
-
-    // Test additional paths grouping in layout list.
-    $this->backdropGet('admin/structure/layouts/manage/' . $test_page_layout_name . '/configure');
-    $this->backdropPost(null, array(), t('Add path'));
-    $edit = array(
-      'path' => 'node/%/edit',
-      'additional_paths[0]' => 'node/%',
-    );
-    $this->backdropPost(NULL, $edit, t('Save layout'));
-
-    // Check paths listed in layouts list.
-    $this->backdropGet('admin/structure/layouts');
-    $path_listings = $this->xpath('//tr[contains(@class, :class) and contains(., :header_text)]//following-sibling::tr[contains(@class, :subclass)]', array(
-      ':class' => 'layout-group',
-      ':header_text' => 'System path: node/%',
-      ':subclass' => 'layout-row',
-    ));
-    $this->assertEqual(count($path_listings), 4, 'Four listing in the layout list.');
-    // Two layouts with node/%/edit paths, one from a primary and one from
-    // additional paths.
-    $path_listings = $this->xpath('//tr[contains(@class, :class) and contains(., :header_text)]//following-sibling::tr[contains(@class, :subclass)]', array(
-      ':class' => 'layout-group',
-      ':header_text' => 'System path: node/%/edit',
-      ':subclass' => 'layout-row',
-    ));
-    $this->assertEqual(count($path_listings), 2, 'Four listing in the layout list.');
-    // One is the Post test layout.
-    $path_listings = $this->xpath('//tr[contains(@class, :class) and contains(., :header_text)]//following-sibling::tr[contains(@class, :subclass) and contains(., :layout_name)]', array(
-      ':class' => 'layout-group',
-      ':header_text' => 'System path: node/%/edit',
-      ':subclass' => 'layout-row',
-      ':layout_name' => 'Post test',
-    ));
-    $this->assertEqual(count($path_listings), 1, 'One Post test name listing found.');
-    // One is the Page test layout.
-    $path_listings = $this->xpath('//tr[contains(@class, :class) and contains(., :header_text)]//following-sibling::tr[contains(@class, :subclass) and contains(., :layout_name)]', array(
-      ':class' => 'layout-group',
-      ':header_text' => 'System path: node/%/edit',
-      ':subclass' => 'layout-row',
-      ':layout_name' => 'Page test',
-    ));
-    $this->assertEqual(count($path_listings), 1, 'One Page test name listing found.');
   }
 
   /**
@@ -440,8 +398,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Check that the view page link is present.
     $this->assertLinkByHref($layout_url, 0, 'View page link found.');
-    $this->assertLink('View page: a-menu-item-path', 0, 'View page link text found.');
-    $this->clickLink(t('View page: a-menu-item-path'));
+    $this->assertLink('View page', 0, 'View page link text found.');
+    $this->clickLink(t('View page'));
     $this->assertResponse(200, 'View page link goes to path.');
 
     // Create a new layout overriding node/%.
@@ -3905,22 +3863,13 @@ class LayoutPathTest extends BackdropWebTestCase {
    * Set up environment.
    */
   public function setUp() {
-    parent::setUp(array('layout_test', 'path'));
-
-    // Create content types for testing.
-    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
-    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+    parent::setUp(array('layout_test'));
 
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
-      'access administration pages',
       'access content',
       'administer layouts',
       'access user profiles',
-      'edit any page content',
-      'edit any post content',
-      'administer nodes',
-      'create url aliases',
     ));
     $this->backdropLogin($this->admin_user);
   }

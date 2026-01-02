@@ -31,19 +31,6 @@ function layout_list_page() {
     if ($path && !in_array($path, $layout_paths)) {
       $layout_paths[] = $path;
     }
-    foreach ($layout->additional_paths as $additional_path) {
-      // Admin layouts are to be added to the bottom of the list.
-      if (path_is_admin($additional_path)) {
-        $admin_path_groups[$additional_path][$layout->name] = $layout;
-      }
-      else {
-        $path_groups[$additional_path][$layout->name] = $layout;
-      }
-      // Build a list of all layout paths to check callbacks for.
-      if ($additional_path && !in_array($additional_path, $layout_paths)) {
-        $layout_paths[] = $additional_path;
-      }
-    }
   }
 
   // Put admin layouts at the bottom of the list.
@@ -70,31 +57,6 @@ function layout_list_page() {
   $stand_alone_rows = array();
   $override_rows = array();
   $default_rows = array();
-
-  $start = FALSE;
-  $last_path = '';
-  $combinable_groups = array();
-  foreach ($path_groups as $path => $group) {
-    $first_layout_in_group = reset($group);
-    $first_layout_in_group_name = $first_layout_in_group->name;
-    $single_layout_group = count($group) === 1;
-    // First single layout row
-    if ($single_layout_group && $start === FALSE) {
-      $last_group_name = $first_layout_in_group_name;
-      $combinable_groups[$path] = 1;
-      $start = TRUE;
-      $last_path = $path;
-    }
-    elseif ($single_layout_group && $first_layout_in_group_name === $last_group_name) {
-      $combinable_groups[$path] = 1;
-      $last_group_name = $first_layout_in_group_name;
-      $last_path = $path;
-    }
-    elseif ($first_layout_in_group_name !== $last_group_name) {
-      unset($combinable_groups[$last_path]);
-      $start = FALSE;
-    }
-  }      
 
   foreach ($path_groups as $path => $group) {
     // Print a row for rearranging a group of layouts.
@@ -467,6 +429,11 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
     '#suffix' => "<div id='layout-path-description'>" . _layout_path_matches_description($path, $is_new) . '</div>',
+  );
+  $form['additional_paths_label'] = array(
+    '#type' => 'item',
+    '#title' => 'Additional paths',
+    '#markup' => '',
   );
   $form['additional_paths_wrapper'] = array(
     '#type' => 'container',
@@ -1163,8 +1130,7 @@ function layout_settings_form_additional_path_remove($form, &$form_state) {
  * Updates available contexts and information about path matching.
  */
 function layout_settings_form_add_additional_paths($form, &$form_state) {
-  $new_path = (strpos($form_state['values']['path'], '%') !== FALSE) ? $form_state['values']['path'] . '/' : '';
-  $form_state['additional_paths'][] = $new_path;
+  $form_state['additional_paths'][] = '';
   $form_state['rebuild'] = TRUE;
 }
 
@@ -1528,23 +1494,22 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
   );
 
   // Add a link to preview the page.
-  $link_paths = array_merge(array($layout->getPath()), array_values($layout->additional_paths));
-  $form['top']['#theme_wrappers'] = array('container');
-  $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
+  $link_path = $layout->getPath();
+  // A null path returns the site root.
+  // See https://github.com/backdrop/backdrop-issues/issues/4383
+  if (!is_null($link_path) && backdrop_valid_path($link_path)) {
+    $form['top']['#theme_wrappers'] = array('container');
+    $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
 
-  $form['top']['button'] = array(
-    '#type' => 'dropbutton',
-  );
-  $form['top']['button']['#links'] = array();
-  foreach ($link_paths as $link_path){
-    // A null path returns the site root.
-    // See https://github.com/backdrop/backdrop-issues/issues/4383
-    if (!is_null($link_path) && backdrop_valid_path($link_path)) {
-        $form['top']['button']['#links'][] = array(
-          'title' => t('View page: !page', array('!page' => $link_path)),
-          'href' => $link_path,
-        );
-    }
+    $form['top']['button'] = array(
+      '#type' => 'dropbutton',
+    );
+    $form['top']['button']['#links'] = array(
+      array(
+        'title' => t('View page'),
+        'href' => $link_path,
+      ),
+    );
   }
 
   $form['content'] = array('#tree' => TRUE);

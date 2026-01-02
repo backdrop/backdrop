@@ -424,7 +424,7 @@ input.layout-additional-path-remove.form-submit {
 }
 .edit-layout-top .dropbutton-wrapper {
   float: right; /* LTR */
-  width: 200px;
+  width: 140px;
 }
 [dir="rtl"] .edit-layout-top .dropbutton-wrapper {
   float: left;
