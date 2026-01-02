@@ -1243,8 +1243,8 @@ function hook_menu_block_tree_alter(&$tree, &$config) {
   // Trim to the active path regardless of block settings.
   system_menu_tree_trim_active_path($tree);
 
-  // Force the clickdown setting to be active.
-  $config['clickdown'] = TRUE;
+  // Force the style to be a tree.
+  $config['style'] = 'tree';
 }
 
 /**
