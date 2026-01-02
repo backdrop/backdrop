@@ -1225,11 +1225,7 @@ function hook_menu_contextual_links_alter(&$links, $router_item, $root_path) {
 }
 
 /**
- * Alter of the menu block tree and config.
- *
- * This hook is invoked by system_menu_tree_block_data(). The menu tree for the
- * given configuration is passed in by reference. The menu block config is also
- * passed by reference.
+ * Modify a menu structure before it is rendered in a menu block.
  *
  * The tree contains an array of menu links in the order they should be
  * rendered. menu_tree_page_data() explains the data structure in more detail.
