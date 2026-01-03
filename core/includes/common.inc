@@ -7249,10 +7249,10 @@ function render(&$element) {
  * $element['#access'] = FALSE
  * @endcode
  *
- * @param array $element
+ * @param array|null $element
  *   The element to be hidden.
  *
- * @return array|null
+ * @return array
  *   The element.
  *
  * @see render()
