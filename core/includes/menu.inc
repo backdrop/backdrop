@@ -3514,7 +3514,7 @@ function _menu_clear_page_cache() {
   $cache_cleared = &backdrop_static(__FUNCTION__, 0);
 
   // Clear the page and block caches, but at most twice, including at
-  //  the end of the page load when there are multiple links saved or deleted.
+  // the end of the page load when there are multiple links saved or deleted.
   if ($cache_cleared == 0) {
     cache_clear_all();
     // Keep track of which menus have expanded items.
@@ -3540,10 +3540,10 @@ function _menu_set_expanded_menus() {
 /**
  * Finds the router path which will serve this path.
  *
- * @param $link_path
+ * @param string $link_path
  *   The path for we are looking up its router path.
  *
- * @return
+ * @return string
  *   A path from $menu keys or empty if $link_path points to a nonexisting
  *   place.
  */
@@ -3582,18 +3582,18 @@ function _menu_find_router_path($link_path) {
 /**
  * Inserts, updates, or deletes an un-customized menu link related to a module.
  *
- * @param $module
+ * @param string $module
  *   The name of the module.
- * @param $op
+ * @param string $op
  *   Operation to perform: insert, update or delete.
- * @param $link_path
+ * @param string $link_path
  *   The path this link points to.
- * @param $link_title
+ * @param string $link_title
  *   Title of the link to insert or new title to update the link to.
  *   Unused for delete.
  *
- * @return
- *   The insert op returns the mlid of the new item. Others op return NULL.
+ * @return int|false
+ *   The insert op returns the mlid of the new item. Others op return VOID.
  */
 function menu_link_maintain($module, $op, $link_path, $link_title) {
   switch ($op) {
@@ -3606,7 +3606,10 @@ function menu_link_maintain($module, $op, $link_path, $link_title) {
       return menu_link_save($menu_link);
       break;
     case 'update':
-      $result = db_query("SELECT * FROM {menu_links} WHERE link_path = :link_path AND module = :module AND customized = 0", array(':link_path' => $link_path, ':module' => $module))->fetchAll(PDO::FETCH_ASSOC);
+      $result = db_query("SELECT * FROM {menu_links} WHERE link_path = :link_path AND module = :module AND customized = 0", array(
+        ':link_path' => $link_path,
+        ':module' => $module,
+      ))->fetchAll(PDO::FETCH_ASSOC);
       foreach ($result as $link) {
         $link['link_title'] = $link_title;
         $link['options'] = unserialize($link['options']);
@@ -3625,14 +3628,14 @@ function menu_link_maintain($module, $op, $link_path, $link_title) {
  * For example, if the item has a depth of 2, and the maximum of any child in
  * the menu link tree is 5, the relative depth is 3.
  *
- * @param $item
+ * @param array $item
  *   An array representing a menu link item.
  *
- * @return
+ * @return int
  *   The relative depth, or zero.
  *
  */
-function menu_link_children_relative_depth($item) {
+function menu_link_children_relative_depth(array $item) {
   $query = db_select('menu_links');
   $query->addField('menu_links', 'depth');
   $query->condition('menu_name', $item['menu_name']);
@@ -3643,7 +3646,7 @@ function menu_link_children_relative_depth($item) {
   $p = 'p1';
   while ($i <= MENU_MAX_DEPTH && $item[$p]) {
     $query->condition($p, $item[$p]);
-    $p = 'p' . ++$i;
+    $p = 'p' . (++$i);
   }
 
   $max_depth = $query->execute()->fetchField();
@@ -3664,15 +3667,15 @@ function _menu_link_move_children($item, $existing_item) {
 
   $p = 'p1';
   $expressions = array();
-  for ($i = 1; $i <= $item['depth']; $p = 'p' . ++$i) {
+  for ($i = 1; $i <= $item['depth']; $p = 'p' . (++$i)) {
     $expressions[] = array($p, ":p_$i", array(":p_$i" => $item[$p]));
   }
   $j = $existing_item['depth'] + 1;
   while ($i <= MENU_MAX_DEPTH && $j <= MENU_MAX_DEPTH) {
-    $expressions[] = array('p' . $i++, 'p' . $j++, array());
+    $expressions[] = array('p' . ($i++), 'p' . ($j++), array());
   }
   while ($i <= MENU_MAX_DEPTH) {
-    $expressions[] = array('p' . $i++, 0, array());
+    $expressions[] = array('p' . ($i++), 0, array());
   }
 
   $shift = $item['depth'] - $existing_item['depth'];
@@ -3690,7 +3693,7 @@ function _menu_link_move_children($item, $existing_item) {
   $query->expression('depth', 'depth + :depth', array(':depth' => $shift));
   $query->condition('menu_name', $existing_item['menu_name']);
   $p = 'p1';
-  for ($i = 1; $i <= MENU_MAX_DEPTH && $existing_item[$p]; $p = 'p' . ++$i) {
+  for ($i = 1; $i <= MENU_MAX_DEPTH && $existing_item[$p]; $p = 'p' . (++$i)) {
     $query->condition($p, $existing_item[$p]);
   }
 
@@ -3730,20 +3733,24 @@ function _menu_update_parental_status($item, $exclude = FALSE) {
 function _menu_link_parents_set(&$item, $parent) {
   $i = 1;
   while ($i < $item['depth']) {
-    $p = 'p' . $i++;
+    $p = 'p' . ($i++);
     $item[$p] = $parent[$p];
   }
-  $p = 'p' . $i++;
+  $p = 'p' . ($i++);
   // The parent (p1 - p9) corresponding to the depth always equals the mlid.
   $item[$p] = $item['mlid'];
   while ($i <= MENU_MAX_DEPTH) {
-    $p = 'p' . $i++;
+    $p = 'p' . ($i++);
     $item[$p] = 0;
   }
 }
 
 /**
  * Builds the router table based on the data from hook_menu().
+ *
+ * @param array $callbacks
+ *
+ * @return array
  */
 function _menu_router_build($callbacks) {
   // First pass: separate callbacks from paths, making paths ready for
@@ -3971,8 +3978,13 @@ function _menu_router_build($callbacks) {
 
 /**
  * Saves data from menu_router_build() to the router table.
+ *
+ * @param array $menu
+ * @param array $masks
+ *
+ * @return array
  */
-function _menu_router_save($menu, $masks) {
+function _menu_router_save(array $menu, array $masks) {
   // Delete the existing router since we have some data to replace it.
   db_truncate('menu_router')->execute();
 
@@ -4055,7 +4067,7 @@ function _menu_router_save($menu, $masks) {
  * This function will log the current user out and redirect to home page
  * if the current user has no 'access site in maintenance mode' permission.
  *
- * @param string $path
+ * @param string|null $path
  *   The path at which to check site status. Some pages (such as user/login) may
  *   be considered online while the rest of the site is offline. If empty, the
  *   current path will be used.
@@ -4063,7 +4075,7 @@ function _menu_router_save($menu, $masks) {
  *   If set to TRUE, messages will be displayed indicating the site is in
  *   offline mode.
  *
- * @return
+ * @return bool
  *   FALSE if the site is not in maintenance mode, the user login page is
  *   displayed, or the user has the 'access site in maintenance mode'
  *   permission. TRUE for anonymous users not being on the login page when the
@@ -4086,7 +4098,11 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
       // excluded paths in order to suppress the warning on the maintenance mode
       // settings page when clearing caches (see
       // https://github.com/backdrop/backdrop-issues/issues/3313).
-      $excluded_paths = array('batch', 'admin/config/development/maintenance', 'admin_bar/flush-cache');
+      $excluded_paths = array(
+        'batch',
+        'admin/config/development/maintenance',
+        'admin_bar/flush-cache',
+      );
       if ($display_messages && !in_array(current_path(), $excluded_paths)) {
         $message = t('The site is currently in maintenance mode.');
         if (user_access('administer site configuration')) {
