@@ -7252,13 +7252,13 @@ function render(&$element) {
  * @param array $element
  *   The element to be hidden.
  *
- * @return array
+ * @return array|null
  *   The element.
  *
  * @see render()
  * @see show()
  */
-function hide(array &$element) {
+function hide(?array &$element) {
   $element['#printed'] = TRUE;
   return $element;
 }
