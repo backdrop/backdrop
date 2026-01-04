@@ -2768,3 +2768,13 @@ function _layout_clean_custom_css($classes = array()) {
 function layout_field_delete_instance($instance) {
   cache('layout_path')->flush();
 }
+
+/**
+ * Render a block
+ *
+ * @param Block $block
+ * The Block object to render
+ */
+function layout_render_block($block) {
+  return backdrop_render($block->build());
+}

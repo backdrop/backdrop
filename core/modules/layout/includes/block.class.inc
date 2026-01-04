@@ -74,6 +74,13 @@ class Block extends LayoutHandler {
   public $layout_title;
 
   /**
+   * A boolean holding whether prepare() has run
+   *
+   * @var bool
+   */
+  public $isPrepared;
+
+  /**
    * Create a new Block object.
    *
    * @param string $plugin_name
@@ -123,6 +130,7 @@ class Block extends LayoutHandler {
 
     // All other settings.
     $this->settings = $data['settings'];
+    $this->isPrepared = FALSE;
   }
 
   /**
@@ -132,7 +140,9 @@ class Block extends LayoutHandler {
    * the block being rendered. This method is useful to save duplicate
    * processing if both getTitle() and getContent() need to use the same data.
    */
-  function prepare() {}
+  function prepare() {
+    $this->isPrepared = TRUE;
+  }
 
   /**
    * Return the title of a block as configured in the layout.
@@ -425,6 +435,56 @@ class Block extends LayoutHandler {
    */
   function getChildren() {
     return NULL;
+  }
+
+  /**
+   * Generate an array for rendering the block.
+   *
+   * @return array
+   *   A render array of the block as expected by backdrop_render().
+   */
+  function build() {
+    $content = $this->getContent();
+    if (empty($content)) {
+      return array();
+    }
+
+    if (!$this->isPrepared) {
+      $this->prepare();
+    }
+
+    if (is_string($content)) {
+      $content = array(
+        '#markup' => $content,
+      );
+    }
+
+    $title = '';
+    if ($this->settings['title_display'] !== LAYOUT_TITLE_NONE) {
+      $title = $this->getTitle();
+    }
+
+    $data = array(
+      'title' => $title,
+      'content' => $content,
+    );
+    // Allow altering of the title and content by other modules.
+    backdrop_alter(array(
+      'block_view',
+      'block_view_' . $this->module . '_' . str_replace('-', '_', $this->delta),
+    ), $data, $this);
+
+    // Assemble a structured content array.
+    $content = (object) array(
+      'title' => $data['title'],
+      'content' => $data['content'],
+    );
+
+    return array(
+      '#theme' => 'block',
+      '#content' => $content,
+      '#block' => $this,
+    );
   }
 }
 
