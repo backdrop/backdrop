@@ -93,7 +93,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Test validation.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
 
-    $this->backdropPost(null, array(), t('Add path'));
+    $this->backdropPost(NULL, array(), t('Add path'));
 
     $edit = array(
       'additional_paths[0]' => 'foobar%',
