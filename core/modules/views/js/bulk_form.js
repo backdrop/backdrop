@@ -1,5 +1,7 @@
 (function ($) {
 
+"use strict";
+
 Backdrop.behaviors.viewsBulkForm = {
   attach: function(context) {
     $('.views-form', context).each(function() {
@@ -111,8 +113,8 @@ Backdrop.viewsBulkForm.initGenericBehaviors = function(form) {
       var table = $(this).closest('table')[0];
       if (table) {
         // If there's a "select all" row, hide it.
-        if ($('.bulk-form-table-select-this-page', table).length) {
-          $('.bulk-form-views-table-row-select-all', table).hide();
+        if ($('.views-select-all-pages--row', table).length) {
+          $('.views-select-all-pages--row', table).hide();
           // Disable "select all across pages".
           Backdrop.viewsBulkForm.tableSelectThisPage(form);
         }
