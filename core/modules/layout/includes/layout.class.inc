@@ -125,7 +125,7 @@ class Layout {
    * @var array
    * @since 1.33.0
    */
-  var $additional_menu_items = array();
+  public $additional_menu_items = array();
 
   /**
    * All user-specified settings for this layout.
