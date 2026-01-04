@@ -220,7 +220,7 @@ class Layout {
    * @var array
    * @since 1.33.0
    */
-  var $old_additional_paths = array();
+  protected $old_additional_paths = array();
 
   /**
    * @var bool
@@ -750,7 +750,7 @@ class Layout {
   }
 
   /**
-   * Set a layout path.
+   * Set additional menu items based on the path provided.
    */
   function setAdditionalMenuItems($path) {
     $item_exists = FALSE;
