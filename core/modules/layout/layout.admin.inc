@@ -1115,6 +1115,8 @@ function layout_settings_form_add_additional_paths($form, &$form_state) {
  * removing additional paths.
  */
 function layout_settings_form_add_additional_paths_ajax($form, &$form_state) {
+  $commands[] = ajax_command_remove('.l-messages');
+  $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
   $commands[] = ajax_command_html('#layout-additional-paths-wrapper', backdrop_render($form['additional_paths_wrapper']));
   $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
   return array(
