@@ -636,7 +636,7 @@ class FormElementTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests expansion of #options for #type checkboxes and radios.
+   * Tests expansion and defaults of #options for #type checkboxes and radios.
    */
   public function testOptions() {
     $this->backdropGet('form-test/checkboxes-radios');
@@ -673,6 +673,19 @@ class FormElementTestCase extends BackdropWebTestCase {
       $this->assertTrue(count($elements), format_string('Custom %type option description found.', array(
         '%type' => $type,
       )));
+    }
+
+    // Check that default options are being set properly.
+    $this->backdropGet('form-test/checkboxes-radios-defaults');
+
+    // Verify that the correct default option (only) is set.
+    foreach (array('checkbox', 'radio') as $type) {
+      $elements = $this->xpath('//input[@type=:type]', array(':type' => $type));
+      foreach ($elements as $element) {
+        $is_checked = isset($element['checked']);
+        $not_default = $element['value'] != 'foo';
+        $this->assertTrue($is_checked xor $not_default);
+      }
     }
   }
 
