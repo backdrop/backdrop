@@ -615,23 +615,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     if ($layout_context->usageType !== LayoutContext::USAGE_TYPE_SYSTEM) {
       // Contexts that are locked to a particular position (such as node/%).
       if ($layout_context->position && $layout_context->required) {
-        if (strpos($context_key, 'ap_') === 0) {
-          $tstr = explode('ap_', $context_key, 2);
-          $str_path = $tstr[1];
-        }
-        else {
-          $str_path = $layout->getPath();
-        }
-        // Additional paths might add path context that match the default path
-        // context. Remove duplicates by type and position.
-        static $duplicate_contexts = array();
-        if (isset($duplicate_contexts[$layout_context->plugin . ':' . $layout_context->position])) {
-          continue;
-        }
-        $duplicate_contexts[$layout_context->plugin . ':' . $layout_context->position] = TRUE;
-
         $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
-          '#markup' => $layout_context->getAdminSummary($str_path),
+          '#markup' => $layout_context->getAdminSummary($layout->getPath()),
         );
         if ($layout_context->locked) {
           $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
@@ -1105,9 +1090,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
 }
 
 /**
- * Submit handler for layout_settings_form().
- *
- * Updates available contexts and information about path matching.
+ * Submit handler for layout_settings_form() that removes an additional path.
  */
 function layout_settings_form_additional_path_remove($form, &$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Remove')) {
@@ -1118,9 +1101,7 @@ function layout_settings_form_additional_path_remove($form, &$form_state) {
 }
 
 /**
- * Submit handler for layout_settings_form().
- *
- * Updates available contexts and information about path matching.
+ * Submit handler for layout_settings_form() that adds an additional path.
  */
 function layout_settings_form_add_additional_paths($form, &$form_state) {
   $form_state['additional_paths'][] = '';
@@ -1128,9 +1109,10 @@ function layout_settings_form_add_additional_paths($form, &$form_state) {
 }
 
 /**
- * Submit handler for layout_settings_form().
+ * AJAX handler for layout_settings_form().
  *
- * Updates available contexts and information about path matching.
+ * Returns updated contexts and additional path form data when adding or
+ * removing additional paths.
  */
 function layout_settings_form_add_additional_paths_ajax($form, &$form_state) {
   $commands[] = ajax_command_html('#layout-additional-paths-wrapper', backdrop_render($form['additional_paths_wrapper']));
@@ -1264,15 +1246,6 @@ function layout_settings_form_update_layout($form, &$form_state) {
   }
 
   $layout_contexts = $layout->getContexts();
-  foreach ($layout_contexts as $context_key => $layout_context) {
-    if (strpos($context_key, 'ap_') === 0) {
-      $tstr = explode('ap_', $context_key, 2);
-      $str_path = $tstr[1];
-      if (!empty($str_path) && !in_array($str_path, $form_state['additional_paths'])) {
-        $layout->clearContexts($context_key);
-      }
-    }
-  }
 
   // Update contexts.
   // @todo: Provide methods/API for setting menu item arguments.
