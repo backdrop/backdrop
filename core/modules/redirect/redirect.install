@@ -171,7 +171,7 @@ function redirect_update_1003() {
   $config = config('redirect.settings');
   $default_status = $config->get('default_status_code');
   $additional_statuses = !in_array($default_status, array(301, 302));
-  $config->clear('default_status');
+  $config->clear('default_status_code');
   $config->clear('warning');
   $config->set('additional_statuses', $additional_statuses);
   $config->save();
@@ -189,4 +189,13 @@ function redirect_update_1004() {
     }
     db_drop_field('redirect', 'status');
   }
+}
+
+/**
+ * Remove the unused default_status_code config value.
+ */
+function redirect_update_1005() {
+  // This value was not cleared properly in redirect_update_1003(). Remove it
+  // again for sites that upgraded from Drupal 7.
+  config_clear('redirect.settings', 'default_status_code');
 }

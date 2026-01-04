@@ -18,27 +18,27 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
   /**
    * Overrides BackdropDatabaseCache::get().
    */
-  function get($cid) {
+  public function get($cid) {
     return FALSE;
   }
 
   /**
    * Overrides BackdropDatabaseCache::getMultiple().
    */
-  function getMultiple(array &$cids) {
+  public function getMultiple(array &$cids) {
     return array();
   }
 
   /**
    * Overrides BackdropDatabaseCache::set().
    */
-  function set($cid, $data, $expire = CACHE_PERMANENT) {
+  public function set($cid, $data, $expire = CACHE_PERMANENT) {
   }
 
   /**
    * Overrides BackdropDatabaseCache::delete().
    */
-  function delete($cid) {
+  public function delete($cid) {
     try {
       if (class_exists('Database')) {
         parent::delete($cid);
@@ -51,7 +51,7 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
   /**
    * Overrides BackdropDatabaseCache::deleteMultiple().
    */
-  function deleteMultiple(array $cids) {
+  public function deleteMultiple(array $cids) {
     try {
       if (class_exists('Database')) {
         parent::deleteMultiple($cids);
@@ -64,7 +64,7 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
   /**
    * Overrides BackdropDatabaseCache::deletePrefix().
    */
-  function deletePrefix($cid) {
+  public function deletePrefix($cid) {
     try {
       if (class_exists('Database')) {
         parent::deletePrefix($cid);
@@ -77,7 +77,7 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
   /**
    * Overrides BackdropDatabaseCache::flush().
    */
-  function flush() {
+  public function flush() {
     try {
       if (class_exists('Database')) {
         parent::flush();
@@ -90,7 +90,7 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
   /**
    * Overrides BackdropDatabaseCache::garbageCollection().
    */
-  function garbageCollection() {
+  public function garbageCollection() {
     try {
       if (class_exists('Database')) {
         parent::garbageCollection();
@@ -103,7 +103,7 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
   /**
    * Overrides BackdropDatabaseCache::isEmpty().
    */
-  function isEmpty() {
+  public function isEmpty() {
     return TRUE;
   }
 }

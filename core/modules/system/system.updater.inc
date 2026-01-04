@@ -220,7 +220,7 @@ class LayoutUpdater extends Updater {
   }
 
   public function postInstall() {
-    layout_reset_caches();
+    cache()->delete('layout_info');
     clearstatcache();
   }
 
