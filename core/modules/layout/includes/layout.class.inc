@@ -445,7 +445,7 @@ class Layout {
     // items.
     $paths_to_delete = array_diff($this->old_additional_paths, $this->additional_paths);
     foreach ($paths_to_delete as $path_to_delete) {
-      if (layout_provides_path($path_to_delete) === TRUE) {
+      if ($this->path != $path_to_delete && layout_provides_path($path_to_delete) === TRUE) {
         $menu_item_to_delete = layout_menu_item_load_multiple_by_path($path_to_delete);
         $menu_item_to_delete->delete();
       }
