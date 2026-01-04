@@ -999,7 +999,9 @@ function system_modules_submit($form, &$form_state) {
       foreach (array_keys($files[$name]->requires) as $required) {
         if (empty($modules[$required]['enabled'])) {
           if (isset($files[$required])) {
-            $dependencies[] = $files[$required]->info['name'];
+            if (!$files[$required]->status) {
+              $dependencies[] = $files[$required]->info['name'];
+            }
             $modules[$required]['enabled'] = TRUE;
           }
           else {
@@ -1568,7 +1570,8 @@ function system_site_information_settings_submit($form, &$form_state) {
   if (!empty($form_state['values']['site_logo_upload'])) {
     $file = $form_state['values']['site_logo_upload'];
     unset($form_state['values']['site_logo_upload']);
-    $filename = file_unmanaged_copy($file->uri);
+    // Site logos must always be public.
+    $filename = file_unmanaged_copy($file->uri, 'public://');
     $form_state['values']['site_logo_theme'] = 0;
     $form_state['values']['site_logo_path'] = $filename;
     // Delete the file entity record.
@@ -1593,7 +1596,8 @@ function system_site_information_settings_submit($form, &$form_state) {
   if (!empty($form_state['values']['site_favicon_upload'])) {
     $file = $form_state['values']['site_favicon_upload'];
     unset($form_state['values']['site_favicon_upload']);
-    $filename = file_unmanaged_copy($file->uri);
+    // Site favicons must always be public.
+    $filename = file_unmanaged_copy($file->uri, 'public://');
     $form_state['values']['site_favicon_theme'] = 0;
     $form_state['values']['site_favicon_path'] = $filename;
     // Delete the file entity record.

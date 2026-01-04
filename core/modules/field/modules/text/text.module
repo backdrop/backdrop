@@ -216,9 +216,9 @@ function text_field_load($entity_type, $entities, $field, $instances, $langcode,
 /**
  * Implements hook_field_is_empty().
  */
-function text_field_is_empty($item, $field) {
+function text_field_is_empty($item, $field, $instance) {
   if (!isset($item['value']) || $item['value'] === '') {
-    if (isset($item['format']) && $item['format'] !== '' && $item['format'] != filter_default_format()) {
+    if (isset($item['format']) && $item['format'] !== '' && !_text_field_uses_default_format($item, $instance)) {
       // If this text field has a text format setting, save it regardless of
       // empty value to keep the format. Unless it's the default format.
       return FALSE;
@@ -226,6 +226,35 @@ function text_field_is_empty($item, $field) {
     elseif (!isset($item['summary']) || $item['summary'] === '') {
       // Neither value nor summary nor format are set,
       // no need to save to database.
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Utility to determine whether the default format is in use.
+ *
+ * @param array $item
+ *   Values from text field.
+ * @param array $instance
+ *   Field API instance definition.
+ *
+ * @return bool
+ */
+function _text_field_uses_default_format($item, $instance) {
+  if (isset($item['format'])) {
+    // The global default value for current account.
+    if ($item['format'] == filter_default_format()) {
+      return TRUE;
+    }
+    // Instance default value setting.
+    if (!empty($instance['default_value']) && $instance['default_value'][0]['format'] == $item['format']) {
+      return TRUE;
+    }
+    // There's a format restriction and this is the first, possibly only
+    // available format for this field instance.
+    if (!empty($instance['settings']['allowed_formats']) && $instance['settings']['allowed_formats'][0] == $item['format']) {
       return TRUE;
     }
   }
