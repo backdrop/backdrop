@@ -7258,7 +7258,7 @@ function render(&$element) {
  * @see render()
  * @see show()
  */
-function hide(?array &$element) {
+function hide(&$element) {
   $element['#printed'] = TRUE;
   return $element;
 }
