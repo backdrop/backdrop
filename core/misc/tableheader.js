@@ -244,7 +244,7 @@ $.extend(TableHeader.prototype, {
     // Update offset.
     TableHeader.computeOffsetTop();
     this.tableOffset = this.$originalTable.offset();
-    var leftOffset = parseInt(this.$originalTable.offset().left);
+    var leftOffset = parseFloat(this.$originalTable.offset().left);
     this.stickyPosition(TableHeader.offsetTop, leftOffset);
 
     // Update columns width.
@@ -259,7 +259,7 @@ $.extend(TableHeader.prototype, {
       $stickyCell = this.$stickyHeaderCells.eq($that.index());
       display = $that.css('display');
       if (display !== 'none') {
-        $stickyCell.css({'width': $that.width(), 'display': display});
+        $stickyCell.css({'width': $that.outerWidth(), 'display': display, 'box-sizing': 'border-box'});
       }
       else {
         $stickyCell.css('display', 'none');
