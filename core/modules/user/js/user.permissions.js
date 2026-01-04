@@ -61,7 +61,12 @@ Backdrop.behaviors.permissionsFilter = {
     }
 
     if ($form.length) {
-      $input.trigger('focus').on('keyup', filterPermissionsList);
+      // Set focus on search input only if no hash requires jumping to a
+      // specific item on page.
+      if (window.location.hash === '') {
+        $input.trigger('focus');
+      }
+      $input.on('keyup', filterPermissionsList);
       $input.triggerHandler('keyup');
       $resetLink.on('click', resetPermissionsList);
     }

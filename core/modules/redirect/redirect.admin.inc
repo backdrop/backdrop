@@ -849,8 +849,6 @@ function redirect_list_404_filter_form_reset($form, &$form_state) {
  */
 function redirect_list_table($redirects, $header) {
   $destination = backdrop_get_destination();
-  $config = config('redirect.settings');
-  $default_status_code = $config->get('default_status_code');
 
   // Set up the header.
   $header = array_combine($header, $header);
@@ -877,7 +875,7 @@ function redirect_list_table($redirects, $header) {
     $redirect_url = redirect_url($redirect->redirect, array_merge($redirect->redirect_options, array('alias' => TRUE)));
     $row['data']['source'] = l($source_url, $redirect->source, $redirect->source_options);
     $row['data']['redirect'] = l($redirect_url, $redirect->redirect, $redirect->redirect_options);
-    $row['data']['status_code'] = $redirect->status_code ? $redirect->status_code : t('Default (@default)', array('@default' => $default_status_code));
+    $row['data']['status_code'] = $redirect->status_code;
     $row['data']['language'] = language_name($redirect->langcode);
     $row['data']['count'] = $redirect->count;
     if ($redirect->access) {

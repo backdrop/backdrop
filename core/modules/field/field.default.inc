@@ -72,7 +72,7 @@ function field_default_extract_form_values($entity_type, $entity, $field, $insta
  */
 function field_default_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   // Filter out empty values.
-  $items = _field_filter_items($field, $items);
+  $items = _field_filter_items($field, $items, $instance);
 
   // Check that the number of values doesn't exceed the field cardinality.
   // For form submitted values, this can only happen with 'multiple value'
@@ -93,7 +93,7 @@ function field_default_validate($entity_type, $entity, $field, $instance, $langc
  */
 function field_default_submit($entity_type, $entity, $field, $instance, $langcode, &$items, $form, &$form_state) {
   // Filter out empty values.
-  $items = _field_filter_items($field, $items);
+  $items = _field_filter_items($field, $items, $instance);
   // Reorder items to account for drag-n-drop reordering.
   $items = _field_sort_items($field, $items);
 }

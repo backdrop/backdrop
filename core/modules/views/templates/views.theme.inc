@@ -1234,6 +1234,105 @@ function theme_views_container($variables) {
 }
 
 /**
+ * Default theme function for the Bulk Operations select all rows in view.
+ */
+function theme_bulk_operations_select_all(&$variables) {
+  $view = $variables['view'];
+  $enable_select_all_pages = $variables['enable_select_all_pages'];
+  $build_array = array();
+  // Theming for table plugin.
+  if ($view->style_plugin instanceof views_plugin_style_table && empty($view->style_plugin->options['grouping'])) {
+    if (!$enable_select_all_pages) {
+      return '';
+    }
+    // Provide hidden markup that will be shown as needed on the first row
+    // of the table.
+    $this_page_count = format_plural(count($view->result), '1 row', '@count rows');
+    $this_page = t('Selected <strong>!row_count</strong> in this page.', array('!row_count' => $this_page_count));
+    $all_pages_count = format_plural($view->total_rows, '1 row', '@count rows');
+    $all_pages = t('Selected <strong>!row_count</strong> in this view.', array('!row_count' => $all_pages_count));
+    $build_array['bulk_form_select_all_pages_wrapper'] = array(
+      '#type' => 'container',
+      '#tree' => FALSE,
+      '#attributes' => array(
+        'class' => array(
+          'bulk-form-table-select-all-markup'
+        ),
+      ),
+    );
+    $build_array['bulk_form_select_all_pages_wrapper']['bulk_form_select_all_pages'] = array(
+      '#type' => 'button',
+      '#attributes' => array(
+        'class' => array(
+          'bulk-form-table-select-all-pages',
+        ),
+      ),
+      '#value' => t('Select all !row_count in this view.', array('!row_count' => $all_pages_count)),
+      '#prefix' => '<span class="bulk-form-table-this-page">' . $this_page . ' &nbsp;',
+      '#suffix' => '</span>',
+    );
+    $build_array['bulk_form_select_all_pages_wrapper']['bulk_form_select_this_page'] = array(
+      '#type' => 'button',
+      '#attributes' => array(
+        'class' => array(
+          'bulk-form-table-select-this-page',
+        ),
+      ),
+      '#value' => t('Select only !row_count in this page.', array('!row_count' => $this_page_count)),
+      '#prefix' => '<span class="bulk-form-table-all-pages" style="display: none">' . $all_pages . ' &nbsp;',
+      '#suffix' => '</span>',
+    );
+  }
+  else {
+    $this_page_count = format_plural(count($view->result), '1 item', '@count items');
+    $all_pages_count = format_plural($view->total_rows, '1 item', '@count items');
+    $build_array['bulk_form_select_all'] = array(
+      '#type' => 'fieldset',
+      '#attributes' => array(
+        'class' => array(
+          'bulk-form-fieldset-select-all',
+          'bulk-form-select-all-markup'
+        ),
+      ),
+    );
+    $build_array['bulk_form_select_all']['this_page'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Select !this_page_count on this page', array('!this_page_count' => $this_page_count)),
+      '#default_value' => '',
+      '#attributes' => array(
+        'class' => array(
+          'bulk-form-select-this-page',
+        ),
+      ),
+      // Since this build array is not form-processed, we supply a unique id so
+      // that the label contains a "for" attribute, making it clickable.
+      '#id' => backdrop_html_id('bulk-form-select-this-page'),
+    );
+
+    if ($enable_select_all_pages) {
+      $build_array['bulk_form_select_all']['or'] = array(
+        '#type' => 'markup',
+        '#markup' => '<em>' . t('or') . '</em>',
+      );
+      $build_array['bulk_form_select_all']['all_pages'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Select !all_pages_count on all pages', array('!all_pages_count' => $all_pages_count)),
+        '#default_value' => '',
+        '#attributes' => array(
+          'class' => array(
+            'bulk-form-select-all-pages',
+          ),
+        ),
+        // Since this build array is not form-processed, we supply a unique id so
+        // that the label contains a "for" attribute, making it clickable.
+        '#id' => backdrop_html_id('bulk-form-select-all-pages'),
+      );
+    }
+  }
+
+  return backdrop_render($build_array);
+}
+/**
  * @defgroup views_templates Views template files
  * @{
  * All views templates can be overridden with a variety of names, using
