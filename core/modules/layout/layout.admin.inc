@@ -434,11 +434,13 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#type' => 'item',
     '#title' => 'Additional paths',
     '#markup' => '',
+    '#access' => !$layout->isDefault(),
   );
   $form['additional_paths_wrapper'] = array(
     '#type' => 'container',
     '#prefix' => '<div id="layout-additional-paths-wrapper">',
     '#suffix' => '</div>',
+    '#access' => !$layout->isDefault(),
   );
   if (!isset($form_state['additional_paths'])) {
     $form_state['additional_paths'] = $layout->additional_paths;
@@ -484,6 +486,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
   $form['add_additional_paths'] = array(
     '#theme' => 'layout_action_links',
+    '#access' => !$layout->isDefault(),
   );
   $form['add_additional_paths']['add'] = array(
     '#type' => 'submit',
