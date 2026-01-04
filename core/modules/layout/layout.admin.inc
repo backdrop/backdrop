@@ -840,13 +840,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   else {
     $default_value = '';
   }
-  $toggle_additional = ' <a class="layout-additional-paths-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
-  $description_additional_items = array(
-    t('Content: <code>node/%/edit</code> if primary path is <code>node/%</code>'),
-    t('Views page: <code>user/%/posts</code> if primary path is <code>user/%</code>'),
-    t('Login: <code>user/register</code> if primary path is <code>user/login</code>'),
-  );
-  $description_additional_list = '<div class="layout-additional-paths-examples">' . t('Some common examples of additional paths include:') . theme('item_list', array('items' => $description_additional_items)) . '</div>';
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
