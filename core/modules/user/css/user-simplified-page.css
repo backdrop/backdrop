@@ -28,6 +28,13 @@
   background: white;
   position: relative;
 }
+.user-simplified-page button,
+.user-simplified-page input,
+.user-simplified-page optgroup,
+.user-simplified-page select,
+.user-simplified-page textarea {
+  max-width: 100%;
+}
 @media all and (min-width: 768px) {
   .user-simplified-page-body  {
     width: 100%;
