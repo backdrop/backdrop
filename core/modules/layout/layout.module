@@ -1199,7 +1199,7 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
   }
 
   // Load menu items for additional paths.
-  foreach ($loaded_layouts as $loaded_layout) {
+  foreach ($loaded_layouts as $layout_name => $loaded_layout) {
     if (!empty($loaded_layout->additional_paths) && !$skip_menu_items) {
       foreach ($loaded_layout->additional_paths as $additional_path) {
         if (isset($menu_items[$additional_path])) {
