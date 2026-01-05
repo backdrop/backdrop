@@ -17,7 +17,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   protected $orphaned_blocks = FALSE;
 
   function setUp() {
-    parent::setUp('layout_test');
+    parent::setUp('layout_test', 'path');
 
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
@@ -27,6 +27,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'administer modules',
       'administer layouts',
       'administer nodes',
+      'create url aliases',
+      'bypass node access',
     ));
     $this->backdropLogin($this->admin_user);
 
@@ -52,6 +54,180 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title' => $this->randomString(),
       'uid' => $this->web_user->uid,
     ));
+  }
+
+  /**
+   * Test additional layout paths.
+   */
+  public function testAdditionalLayoutPaths() {
+    config_set('system.core', 'node_admin_theme', 0);
+
+    // Create a new layout using the UI.
+    $test_page_layout_name = 'test_page_layout';
+    $edit = array(
+      'title' => 'Page test',
+      'name' => $test_page_layout_name,
+      'layout_template' => 'boxton',
+      'path' => 'foobar',
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Create a new layout using the UI.
+    $layout_name = 'test_post_layout';
+    $edit = array(
+      'title' => 'Post test',
+      'name' => $layout_name,
+      'layout_template' => 'boxton',
+      'path' => 'node',
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add a few blocks via the API.
+    $test_layout_1 = layout_load($layout_name);
+    $test_layout_1->addBlock('layout_test', 'foo', 'content');
+    $test_layout_1->addBlock('layout_test', 'foo', 'sidebar');
+    $test_layout_1->save();
+
+    $this->assertRaw($layout_name);
+
+    // Test validation.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
+
+    $this->backdropPost(NULL, array(), t('Add path'));
+
+    $edit = array(
+      'additional_paths[0]' => 'foobar%',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path foobar% must match primary path node since the primary path has no placeholders (%).', 'Error message: placeholders must be separate');
+
+    $edit = array(
+      'additional_paths[0]' => 'node/2',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path node/2 cannot be used as an additional path. It requires a context in the primary path.', 'Error message: path requires context');
+
+    $alias = backdrop_get_path_alias('node/' . $this->test_node1->nid);
+    $edit = array(
+      'additional_paths[0]' => $alias,
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path ' . $alias . ' is currently assigned to be an alias for "node/1" and cannot be used.', 'Error message: cannot use an alias');
+
+    $edit = array(
+      'path' => 'foobar',
+      'additional_paths[0]' => 'node/%',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path node/% must match primary path foobar since the primary path has no placeholders (%).', 'Error message: must match primary path');
+
+    $edit = array(
+      'path' => 'node/%',
+      'additional_paths[0]' => 'node/%/subpath/%',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path node/%/subpath/% should have the same number of placeholders as primary path node/%.');
+
+    $edit = array(
+      'path' => 'node/%',
+      'additional_paths[0]' => 'foobar',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path foobar must match primary path node/% since the primary path has placeholders (%).', 'Error message: must match primary path');
+
+    $edit = array(
+      'path' => 'node/%',
+      'additional_paths[0]' => 'user/%',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path user/% must match primary path node/% since the primary path has placeholders (%).', 'Error message: must match primary path');
+
+    $edit = array(
+      'additional_paths[0]' => 'node/%/edit',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertResponse(200);
+    $this->assertRaw('Foo subject', 'Testing block is present on post layout');
+
+    $this->backdropGet('node/' . $this->test_node1->nid . '/edit');
+    $this->assertResponse(200);
+    $this->assertRaw('Foo subject', 'Testing block is present on post layout');
+
+    $this->backdropGet('/');
+    $this->assertResponse(200);
+    $this->assertNoRaw('Foo subject', 'Testing block is not present on home layout');
+
+    // Test layout-created paths.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
+
+    $edit = array(
+      'path' => 'randompath',
+      'additional_paths[0]' => 'randompathtwo',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+
+    $this->backdropGet('randompath');
+    $this->assertResponse(200);
+    $this->assertRaw('Foo subject', 'Testing block is present on randompath');
+
+    $this->backdropGet('randompathtwo');
+    $this->assertResponse(200);
+    $this->assertRaw('Foo subject', 'Testing block is present on randompathtwo');
+
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
+
+    // Test string context on additional paths.
+    $edit = array(
+      'path' => 'passthrough/%',
+      'additional_paths[0]' => 'passthrough/%/subpath',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+
+    // Add the test block that requires both node and user contexts.
+    $this->clickLink(t('Add block'), 2);
+    $this->clickLink(t('String pass-through test'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $argument_string = 'argument-value-from-url';
+    $this->backdropGet('passthrough/' . $argument_string);
+    $this->assertText(format_string('The page argument is @string', array('@string' => $argument_string)));
+
+    $argument_string = 'argument-value-from-url';
+    $this->backdropGet('passthrough/' . $argument_string . '/subpath');
+    $this->assertText(format_string('The page argument is @string', array('@string' => $argument_string)));
+
+    // Test layout conditions.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
+    $edit = array(
+      'path' => 'node/%',
+      'additional_paths[0]' => 'node/%/edit',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $edit = array(
+      'condition' => 'node_type',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'bundles[post]' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertResponse(200);
+    $this->assertRaw('Foo subject', 'Testing block is present on post layout');
+
+    $this->backdropGet('node/' . $this->test_node2->nid);
+    $this->assertResponse(200);
+    $this->assertNoRaw('Foo subject', 'Testing block is not present on post layout');
   }
 
   /**
