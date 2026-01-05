@@ -78,7 +78,12 @@ function field_ui_menu() {
           if ($access['access callback'] != 'user_access' || $access['access arguments'] != array('administer fields')) {
             $access = array(
               'access callback' => 'field_ui_admin_access',
-              'access arguments' => array($access['access callback'], $access['access arguments'], $bundle_position, $bundle_arg),
+              'access arguments' => array(
+                $access['access callback'],
+                $access['access arguments'],
+                $bundle_position,
+                $bundle_arg
+              ),
             );
           }
 

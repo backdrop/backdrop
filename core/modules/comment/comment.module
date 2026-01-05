@@ -1132,6 +1132,14 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#title' => t('Enable comments'),
       '#default_value' => $node_type->settings['comment_enabled'],
     );
+
+    // Common variable used to show other settings if comments are enabled.
+    $comment_states = array(
+      'invisible' => array(
+        ':input[name="comment_enabled"]' => array('checked' => FALSE),
+      ),
+    );
+
     $form['comment']['comment_default'] = array(
       '#type' => 'radios',
       '#title' => t('Default comment setting for new content'),
@@ -1140,11 +1148,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_NODE_OPEN => t('Open comments'),
         COMMENT_NODE_CLOSED => t('Closed comments'),
       ),
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="comment_enabled"]' => array('checked' => FALSE),
-        ),
-      ),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_per_page'] = array(
       '#type' => 'number',
@@ -1154,22 +1158,14 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#min' => 10,
       '#max' => 1000,
       '#step' => 10,
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="comment_enabled"]' => array('checked' => FALSE),
-        ),
-      ),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_mode'] = array(
       '#type' => 'checkbox',
       '#title' => t('Show comment replies in a threaded list'),
       '#default_value' => $node_type->settings['comment_mode'],
       '#description' => t('A threaded list differs from a chronological list in that each comment follows its parent, and is usually indented.'),
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="comment_enabled"]' => array('checked' => FALSE),
-        ),
-      ),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_anonymous'] = array(
       '#type' => 'select',
@@ -1181,11 +1177,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_ANONYMOUS_MUST_CONTACT => t('Anonymous posters must leave their contact information'),
       ),
       '#access' => user_access('post comments', backdrop_anonymous_user()),
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="comment_enabled"]' => array('checked' => FALSE),
-        ),
-      ),
+      '#states' => $comment_states,
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
@@ -1203,11 +1195,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#type' => 'checkbox',
       '#title' => t('Show reply form on the same page as comments'),
       '#default_value' => $node_type->settings['comment_form_location'],
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="comment_enabled"]' => array('checked' => FALSE),
-        ),
-      ),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_preview'] = array(
       '#type' => 'radios',
@@ -1218,21 +1206,13 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         BACKDROP_OPTIONAL => t('Optional'),
         BACKDROP_REQUIRED => t('Required'),
       ),
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="comment_enabled"]' => array('checked' => FALSE),
-        ),
-      ),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_close_enabled'] = array(
       '#type' => 'checkbox',
       '#title' => t('Automatically close comments on old content'),
       '#default_value' => $node_type->settings['comment_close_enabled'],
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="comment_enabled"]' => array('checked' => FALSE),
-        ),
-      ),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_close_days'] = array(
       '#type' => 'number',
@@ -1259,11 +1239,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_TITLE_AUTO => t('Visible, auto-generated'),
         COMMENT_TITLE_HIDDEN => t('Hidden'),
       ),
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="comment_enabled"]' => array('checked' => FALSE),
-        ),
-      ),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_title_options'][COMMENT_TITLE_CUSTOM]['#description'] = t('A title field is provided, to allow customizing comment titles.');
     $form['comment']['comment_title_options'][COMMENT_TITLE_AUTO]['#description'] = t('Comment titles are automatically generated from the comment body.');
