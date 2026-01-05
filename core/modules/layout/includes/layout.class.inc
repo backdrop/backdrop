@@ -139,6 +139,15 @@ class Layout {
   var $menu_item = NULL;
 
   /**
+   * A array of LayoutMenuItems containing menu properties for this layout's
+   * additional paths.
+   *
+   * @var array
+   * @since 1.33.0
+   */
+  public $additional_menu_items = array();
+
+  /**
    * All user-specified settings for this layout.
    *
    * @var array
@@ -181,14 +190,14 @@ class Layout {
    *
    * @var array
    */
-  var $orphaned_blocks = array();
+  public $orphaned_blocks = array();
 
   /**
    * The region where orphaned blocks are placed in new template.
    *
    * @var string
    */
-  var $refuge_region;
+  public $refuge_region;
 
   /**
    * An array of LayoutContext instances used by this menu item.
@@ -211,7 +220,27 @@ class Layout {
    * @see removeBlock()
    * @see layout_layout_presave()
    */
-  var $removed_blocks = array();
+  public $removed_blocks = array();
+
+  /**
+   * An array of additional paths.
+   *
+   * This is being used to to keep track of additional paths in the layout being
+   * edited. If the layout edits are saved, this is used in
+   * layout_layout_presave() in order save the paths.
+   *
+   * @var array
+   * @see layout_settings_form_validate()
+   * @see layout_layout_presave()
+   * @since 1.33.0
+   */
+  public $additional_paths = array();
+
+  /**
+   * @var array
+   * @since 1.33.0
+   */
+  protected $old_additional_paths = array();
 
   /**
    * @var bool
@@ -240,6 +269,9 @@ class Layout {
       'title_display' => LAYOUT_TITLE_DEFAULT,
       'title_block' => NULL,
     );
+
+    // Load additional paths.
+    $this->additional_paths = isset($this->settings['additional_paths']) ? $this->settings['additional_paths'] : array();
 
     // Adjust for the renaming of "layout" to "layout_template".
     // See https://github.com/backdrop/backdrop-issues/issues/998
@@ -288,6 +320,9 @@ class Layout {
     if (is_null($this->contexts)) {
       $this->contexts = array();
     }
+
+    // Save original additional paths, to track any deletions.
+    $this->old_additional_paths = $this->additional_paths;
   }
 
   /**
@@ -410,6 +445,35 @@ class Layout {
         }
       }
     }
+
+    if (!empty($this->additional_menu_items)) {
+      $all_menu_items = layout_menu_item_load_all();
+      foreach ($this->additional_paths as $path) {
+        if ((layout_provides_path($path) === FALSE) && menu_get_item($path)) {
+          if (isset($this->additional_menu_items[$path])) {
+            $this->additional_menu_items[$path]->delete();
+          }
+        }
+        else {
+          if (isset($this->additional_menu_items[$path])) {
+            if (!isset($all_menu_items[$path])) {
+              $menu_item = $this->additional_menu_items[$path];
+              $menu_item->save();
+            }
+          }
+        }
+      }
+    }
+    // Cleanup menu items that were provided by any deleted additional menu
+    // items.
+    $paths_to_delete = array_diff($this->old_additional_paths, $this->additional_paths);
+    foreach ($paths_to_delete as $path_to_delete) {
+      if ($this->path != $path_to_delete && layout_provides_path($path_to_delete) === TRUE) {
+        $menu_item_to_delete = layout_menu_item_load_multiple_by_path($path_to_delete);
+        $menu_item_to_delete->delete();
+      }
+    }
+
     layout_reset_caches();
 
     $new_this = layout_load($this->name);
@@ -705,6 +769,49 @@ class Layout {
     if ($this->path !== $path) {
       $this->path = $path;
       $this->resetContexts();
+    }
+  }
+
+  /**
+   * Set additional menu items based on the path provided.
+   */
+  function setAdditionalMenuItems($path) {
+    $item_exists = FALSE;
+    if (empty($this->additional_menu_items)) {
+      $item_exists = FALSE;
+    }
+    else {
+      foreach ($this->additional_menu_items as $item) {
+        if ($item->path === $path) {
+          $item_exists = TRUE;
+        }
+      }
+    }
+    if (!$item_exists) {
+      // Use an existing menu item if one exists at this path.
+      if ($existing_item = layout_menu_item_load_multiple_by_path($path)) {
+        $this->additional_menu_items[$path] = $existing_item;
+      }
+      // If this layout doesn't have a menu item, make one. If the path is
+      // provided by another module, no menu item is necessary.
+      elseif (layout_provides_path($path) === NULL) {
+        if (!isset($this->additional_menu_items[$path])) {
+          $menu_item_settings = array(
+            'path' => $path,
+            'name' => $this->name . '_' . system_transliterate_machine_name($path),
+          );
+          $this->additional_menu_items[$path] = new LayoutMenuItem($menu_item_settings);
+        }
+        else {
+          $this->additional_menu_items[$path]->path = $path;
+        }
+      }
+      else {
+        if (isset($this->additional_menu_items[$path])) {
+          $this->additional_menu_items[$path]->delete();
+          unset($this->additional_menu_items[$path]);
+        }
+      }
     }
   }
 

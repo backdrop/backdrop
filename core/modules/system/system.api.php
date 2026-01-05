@@ -1225,6 +1225,29 @@ function hook_menu_contextual_links_alter(&$links, $router_item, $root_path) {
 }
 
 /**
+ * Modify a menu structure before it is rendered in a menu block.
+ *
+ * The tree contains an array of menu links in the order they should be
+ * rendered. menu_tree_page_data() explains the data structure in more detail.
+ *
+ * @param array $tree
+ *   An array of menu links.
+ * @param array $config
+ *   The settings for a menu block.
+ *
+ * @see system_menu_tree_block_data()
+ * @see menu_tree_page_data()
+ */
+function hook_menu_block_tree_alter(&$tree, &$config) {
+
+  // Trim to the active path regardless of block settings.
+  system_menu_tree_trim_active_path($tree);
+
+  // Force the style to be a tree.
+  $config['style'] = 'tree';
+}
+
+/**
  * Perform alterations before a form is rendered.
  *
  * One popular use of this hook is to add form elements to the node form. When

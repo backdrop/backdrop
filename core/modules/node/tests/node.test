@@ -3542,7 +3542,9 @@ class NodeAccessPagerTestCase extends BackdropWebTestCase {
    */
   public function testCommentPager() {
     // Create a node.
-    $node = $this->backdropCreateNode();
+    $node = $this->backdropCreateNode(array(
+      'type' => 'post',
+    ));
 
     // Create 60 comments.
     for ($i = 0; $i < 60; $i++) {

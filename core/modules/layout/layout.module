@@ -1201,6 +1201,20 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
     }
   }
 
+  // Load menu items for additional paths.
+  foreach ($loaded_layouts as $layout_name => $loaded_layout) {
+    if (!empty($loaded_layout->additional_paths) && !$skip_menu_items) {
+      foreach ($loaded_layout->additional_paths as $additional_path) {
+        if (isset($menu_items[$additional_path])) {
+          $loaded_layouts[$layout_name]->additional_menu_items[$additional_path] = $menu_items[$additional_path];
+        }
+        elseif ($additional_path_menu_item = layout_menu_item_load_multiple_by_path($additional_path)) {
+          $loaded_layouts[$layout_name]->additional_menu_items[$additional_path] = $additional_path_menu_item;
+        }
+      }
+    }
+  }
+
   // Return the requested layouts.
   $layouts = array();
 
@@ -1461,6 +1475,13 @@ function layout_get_path_layout_names($path) {
     foreach ($configs as $layout_name => $config) {
       if (isset($config['path'])) {
         $path_map[$config['path']][] = $layout_name;
+      }
+      if (isset($config['settings']['additional_paths'])) {
+        foreach ($config['settings']['additional_paths'] as $additional_path) {
+          if (!empty($additional_path)) {
+            $path_map[$additional_path][] = $layout_name;
+          }
+        }
       }
     }
   }
@@ -2553,6 +2574,10 @@ function layout_layout_template_info($flexible_template_type = 'flexible') {
  * Implements hook_layout_presave().
  */
 function layout_layout_presave($layout) {
+  if (!empty($layout->additional_paths)) {
+    $layout->settings['additional_paths'] = $layout->additional_paths;
+  }
+
   if (!empty($layout->removed_blocks)) {
     foreach ($layout->removed_blocks as $uuid => $block) {
       // @todo: Follow-up for other block types with files/images.
@@ -2818,10 +2843,7 @@ function layout_field_delete_instance($instance) {
  * sending it back.
  *
  * @param string $layout_template_type
- *   The custom template type machine name to process.
- *
- * @return string
- *   The processed template type.
+ *   The custom template type machine name to process, passed by reference.
  */
 function _layout_check_template_type(string &$layout_template_type = 'flexible') {
   $reserved_types = array(
@@ -2831,4 +2853,29 @@ function _layout_check_template_type(string &$layout_template_type = 'flexible')
   if (!in_array($layout_template_type, $reserved_types) && strpos($layout_template_type, 'custom_') !== 0) {
     $layout_template_type = 'custom_' . $layout_template_type;
   }
+}
+
+/**
+ * Ensure path is properly formed.
+ *
+ * @param array $form
+ *   An associative array containing the structure of the form.
+ * @param string $field_name
+ *   The machine name of the field.
+ * @param string $path
+ *   The menu routing path, with all placeholders represented by "%" symbols.
+ *
+ * @return bool
+ *   TRUE if error found, else FALSE
+ */
+function _layout_set_message_on_path_error(array &$form, $field_name, $path) {
+  $parts = explode('/', $path);
+  foreach ($parts as $part) {
+    $wildcard_position = strpos($part, '%');
+    if ($wildcard_position !== FALSE && ($wildcard_position > 0 || strlen($part) > 1)) {
+      form_error($form[$field_name], t('Placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
