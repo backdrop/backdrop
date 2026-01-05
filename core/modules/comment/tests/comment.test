@@ -24,6 +24,7 @@ class CommentHelperCase extends BackdropWebTestCase {
       'type' => 'post',
       'name' => 'Post',
       'settings' => array(
+        'comment_enabled' => TRUE,
         'comment_default' => COMMENT_NODE_OPEN,
       ),
       'is_new' => TRUE,
