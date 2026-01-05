@@ -2676,8 +2676,7 @@ function system_block_view($delta = '', $settings = array()) {
         require_once BACKDROP_ROOT . '/' . $router_item['include_file'];
       }
       $block['subject'] = NULL;
-      // Don't allow to render the main content block if the block is rendering
-      // the main page content.
+      // Don't allow the main page content to be rendered twice.
       if ($router_item['page_callback'] != 'layout_page_callback') {
         $block['content'] = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);
       }
