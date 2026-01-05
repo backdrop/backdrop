@@ -455,6 +455,8 @@ function field_ui_admin_access($access_callback, $access_arguments, $bundle_posi
   // access callback is wrapped, the substitution needs to be done again before
   // calling the child access callback.
   $bundle_access_key = array_search((int) $bundle_position, $access_arguments, TRUE);
-  $access_arguments[$bundle_access_key] = $bundle_value;
+  if ($bundle_access_key !== FALSE) {
+    $access_arguments[$bundle_access_key] = $bundle_value;
+  }
   return user_access('administer fields') && call_user_func_array($access_callback, $access_arguments);
 }
