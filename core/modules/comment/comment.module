@@ -137,7 +137,8 @@ function comment_entity_info() {
         'path' => 'admin/structure/types/manage/%comment_menu_node_type/comment',
         'bundle argument' => 4,
         'real path' => 'admin/structure/types/manage/' . str_replace('_', '-', $type) . '/comment',
-        'access arguments' => array('administer content types'),
+        'access callback' => '_comment_menu_admin_access',
+        'access arguments' => array(4),
       ),
     );
   }
@@ -308,6 +309,23 @@ function comment_menu_node_type_load($name) {
   if ($type = node_type_get_type(strtr($name, array('-' => '_')))) {
     return 'comment_node_' . $type->type;
   }
+}
+
+/**
+ * Menu access callback; determines if menu entries should be shown.
+ *
+ * @param string $entity_type_name
+ *   The machine name of the entity type on which fields are being applied. This
+ *   is the value after comment_menu_node_type_load() has been called. For
+ *   example, "comment_node_post" for the "post" node type.
+ *
+ * @return bool
+ *   TRUE if menu items should be accessible, FALSE if hidden or not allowed.
+ */
+function _comment_menu_admin_access($entity_type_name) {
+  $node_type_name = str_replace('comment_node_', '', $entity_type_name);
+  $node_type = node_type_get_type($node_type_name);
+  return $node_type && $node_type->settings['comment_enabled'] && user_access('administer fields');
 }
 
 /**
