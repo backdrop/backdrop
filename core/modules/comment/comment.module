@@ -1384,7 +1384,9 @@ function comment_node_load($nodes, $types) {
 function comment_node_prepare(Node $node) {
   if (!isset($node->comment)) {
     $node_type = node_type_get_type($node->type);
-    $node->comment = $node_type->settings['comment_default'];
+    if ($node_type->settings['comment_enabled']) {
+      $node->comment = $node_type->settings['comment_default'];
+    }
   }
 }
 
