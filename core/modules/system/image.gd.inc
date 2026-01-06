@@ -318,30 +318,34 @@ function image_gd_save(stdClass $image, $destination) {
  */
 function image_gd_create_tmp(stdClass $image, $width, $height) {
   $res = imagecreatetruecolor($width, $height);
-
   if ($image->info['extension'] == 'gif') {
-    // Grab transparent color index from image resource.
+    // Check if the original gif has transparency.
     $transparent = imagecolortransparent($image->resource);
-
     if ($transparent >= 0) {
-      // The original must have a transparent color, allocate to the new image.
-      $transparent_color = imagecolorsforindex($image->resource, $transparent);
-      $transparent = imagecolorallocate($res, $transparent_color['red'], $transparent_color['green'], $transparent_color['blue']);
-
-      // Flood with our new transparent color.
-      imagefill($res, 0, 0, $transparent);
+      // Convert to truecolor for easier transparency handling.
+      imagepalettetotruecolor($image->resource);
+      $transparent = imagecolortransparent($image->resource);
+      // As both are truecolor, we can use the same index now.
       imagecolortransparent($res, $transparent);
+      imagefill($res, 0, 0, $transparent);
+    }
+    else {
+      // The original image doesn't have a transparent color set.
+      // Flood with the closest we have to white instead.
+      imagefill($res, 0, 0, imagecolorclosest($res, 255, 255, 255));
     }
   }
-  elseif ($image->info['extension'] == 'png') {
-    imagealphablending($res, FALSE);
-    $transparency = imagecolorallocatealpha($res, 0, 0, 0, 127);
-    imagefill($res, 0, 0, $transparency);
-    imagealphablending($res, TRUE);
-    imagesavealpha($res, TRUE);
-  }
   else {
-    imagefill($res, 0, 0, imagecolorallocate($res, 255, 255, 255));
+    if ($image->info['extension'] == 'png' || $image->info['extension'] == 'webp') {
+      imagealphablending($res, FALSE);
+      $transparency = imagecolorallocatealpha($res, 0, 0, 0, 127);
+      imagefill($res, 0, 0, $transparency);
+      imagealphablending($res, TRUE);
+      imagesavealpha($res, TRUE);
+    }
+    else {
+      imagefill($res, 0, 0, imagecolorallocate($res, 255, 255, 255));
+    }
   }
 
   return $res;
@@ -404,7 +408,7 @@ function image_gd_get_info(stdClass $image) {
  *   color is provided this will default to transparent For images that support
  *   transparency, otherwise it will be white.
  *
- * @see image_hex2rgba().
+ * @see image_hex2rgba()
  */
 function _image_gd_get_colorindex(stdClass $image, $background = NULL) {
   if (isset($background)) {

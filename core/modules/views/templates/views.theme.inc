@@ -1234,6 +1234,105 @@ function theme_views_container($variables) {
 }
 
 /**
+ * Default theme function for selecting all rows in view for bulk operations.
+ */
+function theme_views_select_all_pages(&$variables) {
+  $view = $variables['view'];
+  $enable_select_all_pages = $variables['enable_select_all_pages'];
+  $build_array = array();
+  // Theming for table plugin.
+  if ($view->style_plugin instanceof views_plugin_style_table && empty($view->style_plugin->options['grouping'])) {
+    if (!$enable_select_all_pages) {
+      return '';
+    }
+    // Provide hidden markup that will be shown as needed on the first row
+    // of the table.
+    $this_page_count = format_plural(count($view->result), '1 row', '@count rows');
+    $this_page = t('Selected <strong>!row_count</strong> on this page.', array('!row_count' => $this_page_count));
+    $all_pages_count = format_plural($view->total_rows, '1 row', '@count rows');
+    $all_pages = t('Selected <strong>!row_count</strong> on all pages.', array('!row_count' => $all_pages_count));
+    $build_array['select_all_pages_wrapper'] = array(
+      '#type' => 'container',
+      '#tree' => FALSE,
+      '#attributes' => array(
+        'class' => array(
+          'views-select-all-pages--wrapper'
+        ),
+      ),
+    );
+    $build_array['select_all_pages_wrapper']['select_all_pages'] = array(
+      '#type' => 'button',
+      '#attributes' => array(
+        'class' => array(
+          'views-select-all-pages--all-pages-button',
+        ),
+      ),
+      '#value' => t('Select all !row_count on all pages', array('!row_count' => $all_pages_count)),
+      '#prefix' => '<span class="views-select-all-pages--this-page">' . $this_page . ' &nbsp;',
+      '#suffix' => '</span>',
+    );
+    $build_array['select_all_pages_wrapper']['select_this_page'] = array(
+      '#type' => 'button',
+      '#attributes' => array(
+        'class' => array(
+          'views-select-all-pages--this-page-button',
+        ),
+      ),
+      '#value' => t('Select only !row_count on this page', array('!row_count' => $this_page_count)),
+      '#prefix' => '<span class="views-select-all-pages--all-pages" style="display: none">' . $all_pages . ' &nbsp;',
+      '#suffix' => '</span>',
+    );
+  }
+  else {
+    $this_page_count = format_plural(count($view->result), '1 item', '@count items');
+    $all_pages_count = format_plural($view->total_rows, '1 item', '@count items');
+    $build_array['select_all_pages'] = array(
+      '#type' => 'fieldset',
+      '#attributes' => array(
+        'class' => array(
+          'views-select-all-pages--fieldset',
+          'views-select-all-pages--wrapper'
+        ),
+      ),
+    );
+    $build_array['select_all_pages']['this_page'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Select !this_page_count on this page', array('!this_page_count' => $this_page_count)),
+      '#default_value' => '',
+      '#attributes' => array(
+        'class' => array(
+          'views-select-all-pages--this-page-checkbox',
+        ),
+      ),
+      // Since this build array is not form-processed, we supply a unique id so
+      // that the label contains a "for" attribute, making it clickable.
+      '#id' => backdrop_html_id('views-select-all-pages--this-page-checkbox'),
+    );
+
+    if ($enable_select_all_pages) {
+      $build_array['select_all_pages']['or'] = array(
+        '#type' => 'markup',
+        '#markup' => '<em>' . t('or') . '</em>',
+      );
+      $build_array['select_all_pages']['all_pages'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Select @count on all pages', array('@count' => $all_pages_count)),
+        '#default_value' => '',
+        '#attributes' => array(
+          'class' => array(
+            'views-select-all-pages--all-pages-checkbox',
+          ),
+        ),
+        // Since this build array is not form-processed, we supply a unique id so
+        // that the label contains a "for" attribute, making it clickable.
+        '#id' => backdrop_html_id('views-select-all-pages--all-pages-checkbox'),
+      );
+    }
+  }
+
+  return backdrop_render($build_array);
+}
+/**
  * @defgroup views_templates Views template files
  * @{
  * All views templates can be overridden with a variety of names, using
