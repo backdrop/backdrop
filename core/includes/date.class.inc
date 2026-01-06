@@ -217,7 +217,7 @@ class BackdropDateTime extends DateTime {
    *   This object with the timezone updated.
    */
   #[\ReturnTypeWillChange]
-  public function setTimezone($timezone, $force = FALSE) {
+  public function setTimezone($timezone, $force = FALSE) { // phpcs:ignore
     if (!$this->hasTime() || !$this->hasGranularity('timezone') || $force) {
       // This has no time or timezone granularity, so timezone doesn't mean
       // much. We set the timezone using the method, which will change the

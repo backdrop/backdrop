@@ -67,8 +67,9 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     if (version_compare(PHP_VERSION, '8.4.99') > 0) {
       $connection_options['pdo'] += array(
         // Make sure MySQL returns all matched rows on update queries including
-        // rows that actually didn't have to be updated because the values didn't
-        // change. This matches common behaviour among other database systems.
+        // rows that actually didn't have to be updated because the values
+        // didn't change. This matches common behaviour among other database
+        // systems.
         Pdo\Mysql::ATTR_FOUND_ROWS => TRUE,
         // Avoid mess around with cursors and unbuffered queries by default.
         Pdo\Mysql::ATTR_USE_BUFFERED_QUERY => TRUE,
@@ -76,8 +77,8 @@ class DatabaseConnection_mysql extends DatabaseConnection {
         PDO::ATTR_EMULATE_PREPARES => TRUE,
         // Convert numeric values to strings when fetching. In PHP 8.1,
         // PDO::ATTR_EMULATE_PREPARES now behaves the same way as non emulated
-        // prepares and returns integers. See https://externals.io/message/113294
-        // for further discussion.
+        // prepares and returns integers. See
+        // https://externals.io/message/113294 for further discussion.
         PDO::ATTR_STRINGIFY_FETCHES => TRUE,
         // Limit SQL to a single statement like mysqli.
         Pdo\Mysql::ATTR_MULTI_STATEMENTS => FALSE,
