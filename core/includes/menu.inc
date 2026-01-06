@@ -315,15 +315,15 @@ define('MENU_PREFERRED_LINK', '1cf698d64d1aa4b83907cf6ed55db3a7f8e92c91');
  * numbers that correspond the patterns of wildcards of router items that
  * actually exists. This list of 'masks' is built in menu_rebuild().
  *
- * @param $parts
+ * @param array $parts
  *   An array of path parts; for the above example,
  *   array('node', '12345', 'edit').
  *
- * @return
+ * @return array
  *   An array which contains the ancestors and placeholders. Placeholders
  *   contain as many '%s' as the ancestors.
  */
-function menu_get_ancestors($parts) {
+function menu_get_ancestors(array $parts) {
   $number_parts = count($parts);
   $ancestors = array();
   $length = $number_parts - 1;
@@ -392,17 +392,17 @@ function menu_get_ancestors($parts) {
  * indicate specifically that node_load(123) is to be called to load the node
  * whose ID is 123 for this menu item.
  *
- * @param $data
+ * @param string $data
  *   A serialized array of menu data, as read from the database.
- * @param $map
+ * @param array $map
  *   A path argument array, used to replace integer values in $data; an integer
  *   value N in $data will be replaced by value $map[N]. Typically, the $map
  *   array is generated from a call to the arg() function.
  *
- * @return
+ * @return array
  *   The unserialized $data array, with path arguments replaced.
  */
-function menu_unserialize($data, $map) {
+function menu_unserialize($data, array $map) {
   if ($data = unserialize($data)) {
     foreach ($data as $k => $v) {
       if (is_int($v)) {
@@ -421,9 +421,9 @@ function menu_unserialize($data, $map) {
 /**
  * Replaces the statically cached item for a given path.
  *
- * @param $path
+ * @param string $path
  *   The path.
- * @param $router_item
+ * @param string $router_item
  *   The router item. Usually a router entry from menu_get_item() is either
  *   modified or set to a different path. This allows the menu block, the page
  *   title, the breadcrumb, and the page help to be modified in one call.
@@ -435,13 +435,13 @@ function menu_set_item($path, $router_item) {
 /**
  * Gets a router item.
  *
- * @param $path
+ * @param string|null $path
  *   The path; for example, 'node/5'. The function will find the corresponding
  *   node/% item and return that. Defaults to the current path.
- * @param $router_item
+ * @param string|null $router_item
  *   Internal use only.
  *
- * @return array|FALSE
+ * @return array|false
  *   The router item or, if an error occurs in _menu_translate(), FALSE. A
  *   router item is an associative array corresponding to one row in the
  *   menu_router table. The value corresponding to the key 'map' holds the
@@ -495,20 +495,20 @@ function menu_get_item($path = NULL, $router_item = NULL) {
 /**
  * Execute the page callback associated with the current path.
  *
- * @param $path
+ * @param string|null $path
  *   The Backdrop path whose handler is to be be executed. If set to NULL, then
  *   the current path is used.
- * @param $deliver
+ * @param bool $deliver
  *   (optional) A boolean to indicate whether the content should be sent to the
  *   browser using the appropriate delivery callback (TRUE) or whether to return
  *   the result to the caller (FALSE).
- * @param $route_handler
+ * @param string|null $route_handler
  *   A callback function name to handle the content at this particular path. If
  *   left empty, the default route handler will be used. In most installations
  *   of Backdrop, the Layout module will provide the route handler, wrapping
  *   HTML pages in a layout.
  *
- * @return string|NULL
+ * @return string|null
  *   If $deliver is FALSE, then the string result of the current active menu
  *   item will be returned. If $deliver is TRUE, no result will be returned;
  *   it will be printed directly to the page.
@@ -577,10 +577,15 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
  * core, Layout module usually will take precedence over this callback with its
  * function layout_router_handler().
  *
+ * @param array $router_item
+ *   A menu router item.
+ *
+ * @return mixed
+ *
  * @see menu_execute_active_handler()
  * @see layout_router_handler()
  */
-function menu_default_route_handler($router_item) {
+function menu_default_route_handler(array $router_item) {
   if ($router_item['include_file']) {
     require_once BACKDROP_ROOT . '/' . $router_item['include_file'];
   }
@@ -590,12 +595,12 @@ function menu_default_route_handler($router_item) {
 /**
  * Loads objects into the map as defined in the $item['load_functions'].
  *
- * @param $item
- *   A menu router or menu link item
- * @param $map
+ * @param array $item
+ *   A menu router or menu link item.
+ * @param array $map
  *   An array of path arguments; for example, array('node', '5').
  *
- * @return
+ * @return bool|null
  *   Returns TRUE for success, FALSE if an object cannot be loaded, and NULL
  *   if the $map contains the placeholders (e.g., '%node'), not arguments for
  *   the load functions (e.g., '5').
@@ -604,7 +609,7 @@ function menu_default_route_handler($router_item) {
  *   $item['load_functions'] array.
  *   $item['access'] is set to FALSE if an object cannot be loaded.
  */
-function _menu_load_objects(&$item, &$map) {
+function _menu_load_objects(array &$item, array &$map) {
   if ($load_functions = $item['load_functions']) {
     // If the path map is the same as the router path, don't bother loading
     // placeholders.
@@ -669,15 +674,15 @@ function _menu_load_objects(&$item, &$map) {
 /**
  * Checks access to a menu item using the access callback.
  *
- * @param $item
- *   A menu router or menu link item
- * @param $map
+ * @param array $item
+ *   A menu router or menu link item.
+ * @param array $map
  *   An array of path arguments; for example, array('node', '5').
  *
- * @return
+ * @return void
  *   $item['access'] becomes TRUE if the item is accessible, FALSE otherwise.
  */
-function _menu_check_access(&$item, $map) {
+function _menu_check_access(array &$item, array $map) {
   $item['access'] = FALSE;
   // Determine access callback, which will decide whether or not the current
   // user has access to this path.
@@ -709,17 +714,17 @@ function _menu_check_access(&$item, $map) {
  * strings in the database, yet display of them in the language required
  * by the current user.
  *
- * @param $item
+ * @param array $item
  *   A menu router item or a menu link item.
- * @param $map
+ * @param array $map
  *   The path as an array with objects already replaced. E.g., for path
  *   node/123 $map would be array('node', $node) where $node is the node
  *   object for node 123.
- * @param $link_translate
+ * @param bool $link_translate
  *   TRUE if we are translating a menu link item; FALSE if we are
  *   translating a menu router item.
  *
- * @return
+ * @return void
  *   No return value.
  *   $item['title'] is localized according to $item['title_callback'].
  *   If an item's callback is check_plain(), $item['options']['html'] becomes
@@ -728,7 +733,7 @@ function _menu_check_access(&$item, $map) {
  *   When doing link translation and the $item['options']['attributes']['title']
  *   (link title attribute) matches the description, it is translated as well.
  */
-function _menu_item_localize(&$item, $map, $link_translate = FALSE) {
+function _menu_item_localize(array &$item, array $map, $link_translate = FALSE) {
   $callback = $item['title_callback'];
   $item['localized_options'] = $item['options'];
   // All 'class' attributes are assumed to be an array during rendering, but
@@ -801,22 +806,22 @@ function _menu_item_localize(&$item, $map, $link_translate = FALSE) {
  * allow for storage of English strings in the database, and translation
  * to the language required to generate the current page.
  *
- * @param $router_item
- *   A menu router item
- * @param $map
+ * @param array $router_item
+ *   A menu router item.
+ * @param array $map
  *   An array of path arguments; for example, array('node', '5').
- * @param $to_arg
+ * @param bool $to_arg
  *   Execute $item['to_arg_functions'] or not. Use only if you want to render a
  *   path from the menu table, for example tabs.
  *
- * @return
+ * @return array
  *   Returns the map with objects loaded as defined in the
  *   $item['load_functions']. $item['access'] becomes TRUE if the item is
  *   accessible, FALSE otherwise. $item['href'] is set according to the map.
  *   If an error occurs during calling the load_functions (like trying to load
  *   a non-existent node) then this function returns FALSE.
  */
-function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
+function _menu_translate(array &$router_item, array $map, $to_arg = FALSE) {
   if ($to_arg && !empty($router_item['to_arg_functions'])) {
     // Fill in missing path elements, such as the current uid.
     _menu_link_map_translate($map, $router_item['to_arg_functions']);
@@ -868,14 +873,15 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
 /**
  * Translates the path elements in the map using any to_arg helper function.
  *
- * @param $map
+ * @param array $map
  *   An array of path arguments; for example, array('node', '5').
- * @param $to_arg_functions
- *   An array of helper functions; for example, array(2 => 'menu_tail_to_arg').
+ * @param string $to_arg_functions
+ *   A serialized array of helper functions; for example,
+ *   array(2 => 'menu_tail_to_arg').
  *
  * @see hook_menu()
  */
-function _menu_link_map_translate(&$map, $to_arg_functions) {
+function _menu_link_map_translate(array &$map, $to_arg_functions) {
   $to_arg_functions = unserialize($to_arg_functions);
   foreach ($to_arg_functions as $index => $function) {
     // Translate place-holders into real values.
@@ -891,8 +897,17 @@ function _menu_link_map_translate(&$map, $to_arg_functions) {
 
 /**
  * Returns a string containing the path relative to the current index.
+ *
+ * @param string $arg
+ *   The load arguments. Not used.
+ * @param array $map
+ *   An array of path arguments; for example, array('node', '5').
+ * @param string $index
+ *   The current index of the map array.
+ *
+ * @return string
  */
-function menu_tail_to_arg($arg, $map, $index) {
+function menu_tail_to_arg($arg, array $map, $index) {
   return implode('/', array_slice($map, $index));
 }
 
@@ -905,9 +920,16 @@ function menu_tail_to_arg($arg, $map, $index) {
  * $item['load arguments'] = array('%map', '%index');
  * @endcode
  *
+ * @param string $arg
+ *   The load arguments.
+ * @param array $map
+ *   An array of path arguments; for example, array('node', '5').
+ * @param string $index
+ *   The current index of the map array.
+ *
  * @see search_menu()
  */
-function menu_tail_load($arg, &$map, $index) {
+function menu_tail_load($arg, array &$map, $index) {
   $arg = implode('/', array_slice($map, $index));
   $map = array_slice($map, 0, $index);
   return $arg;
@@ -919,14 +941,14 @@ function menu_tail_load($arg, &$map, $index) {
  * This function is similar to _menu_translate(), but it also does
  * link-specific preparation (such as always calling to_arg() functions).
  *
- * @param $item
+ * @param array $item
  *   A menu link.
- * @param $translate
+ * @param bool $translate
  *   (optional) Whether to try to translate a link containing dynamic path
  *   argument placeholders (%) based on the menu router item of the current
  *   path. Defaults to FALSE. Internally used for breadcrumbs.
  *
- * @return
+ * @return array|false
  *   Returns the map of path arguments with objects loaded as defined in the
  *   $item['load_functions'].
  *   $item['access'] becomes TRUE if the item is accessible, FALSE otherwise.
@@ -935,7 +957,7 @@ function menu_tail_load($arg, &$map, $index) {
  *   $item['options'] is unserialized; it is also changed within the call here
  *   to $item['localized_options'] by _menu_item_localize().
  */
-function _menu_link_translate(&$item, $translate = FALSE) {
+function _menu_link_translate(array &$item, $translate = FALSE) {
   if (!is_array($item['options'])) {
     $item['options'] = unserialize($item['options']);
   }
@@ -1000,9 +1022,9 @@ function _menu_link_translate(&$item, $translate = FALSE) {
     }
   }
 
-  // Allow other customizations - e.g. adding a page-specific query string to the
-  // options array. For performance reasons we only invoke this hook if the link
-  // has the 'alter' flag set in the options array.
+  // Allow other customizations - e.g. adding a page-specific query string to
+  // the options array. For performance reasons we only invoke this hook if the
+  // link has the 'alter' flag set in the options array.
   if (!empty($item['options']['alter'])) {
     backdrop_alter('translated_menu_link', $item, $map);
   }
@@ -1024,18 +1046,18 @@ function _menu_link_translate(&$item, $translate = FALSE) {
  * $story = $node->type == 'story';
  * @endcode
  *
- * @param $type
+ * @param string $type
  *   Type of the object. Defaults to node. These appear in hook_menu definitions
  *   as %type. Core provides contact, filter_format, menu, menu_link, node,
  *   taxonomy_vocabulary, user. See the relevant {$type}_load functions.
- * @param $position
+ * @param int $position
  *   The position of the object in the path, where the first path segment is 0.
  *   For node/%node, the position of %node is 1, but for comment/reply/%node,
  *   it's 2. Defaults to 1.
- * @param $path
+ * @param string|null $path
  *   See menu_get_item() for more on this. Defaults to the current path.
  *
- * @return Entity|stdClass|array|NULL
+ * @return Entity|stdClass|array|null
  *   The loaded object affiliated with the menu item position given. This can
  *   be nearly any kind of data (even an array in some cases). If no item is
  *   found at the given position, NULL is returned.
@@ -1055,10 +1077,10 @@ function menu_get_object($type = 'node', $position = 1, $path = NULL) {
  * changed according to the defined to_arg functions (for example the 'My
  * account' link is changed from user/% to a link with the current user's uid).
  *
- * @param $menu_name
+ * @param string $menu_name
  *   The name of the menu.
  *
- * @return
+ * @return array
  *   A structured array representing the specified menu on the current page, to
  *   be rendered by backdrop_render().
  */
@@ -1080,16 +1102,16 @@ function menu_tree($menu_name) {
  * - collapsed: The menu item has a submenu which is not shown.
  * - leaf: The menu item has no submenu.
  *
- * @param $tree
+ * @param array $tree
  *   A data structure representing the tree as returned from menu_tree_data.
  *
- * @param $_current_depth
+ * @param int $_current_depth
  *   Internal use only. The current menu level depth being printed out.
  *
- * @return
+ * @return array
  *   A structured array to be rendered by backdrop_render().
  */
-function menu_tree_output($tree, $_current_depth = 0) {
+function menu_tree_output(array $tree, $_current_depth = 0) {
   global $language_url;
 
   $build = array();
@@ -1181,21 +1203,21 @@ function menu_tree_output($tree, $_current_depth = 0) {
  * Since this can be the full tree including hidden items, the data returned
  * may be used for generating an an admin interface or a select.
  *
- * @param $menu_name
- *   The named menu links to return
- * @param $link
+ * @param string $menu_name
+ *   The named menu links to return.
+ * @param array|null $link
  *   A fully loaded menu link, or NULL. If a link is supplied, only the
  *   path to root will be included in the returned tree - as if this link
  *   represented the current page in a visible menu.
- * @param $max_depth
+ * @param int|null $max_depth
  *   Optional maximum depth of links to retrieve. Typically useful if only one
  *   or two levels of a sub tree are needed in conjunction with a non-NULL
  *   $link, in which case $max_depth should be greater than $link['depth'].
- * @param string $langcode
+ * @param string|null $langcode
  *   Optional, filter tree by this langcode, defaults to current language if not
  *   set. Language neutral items are always included.
  *
- * @return
+ * @return array
  *   An tree of menu links in an array, in the order they should be rendered.
  *
  * @since 1.17.5 $langcode parameter added.
@@ -1203,9 +1225,11 @@ function menu_tree_output($tree, $_current_depth = 0) {
 function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL, $langcode = NULL) {
   $tree = &backdrop_static(__FUNCTION__, array());
 
-  // Use $mlid as a flag for whether the data being loaded is for the whole tree.
+  // Use $mlid as a flag for whether the data being loaded is for the whole
+  // tree.
   $mlid = isset($link['mlid']) ? $link['mlid'] : 0;
-  // Generate a cache ID (cid) specific for this $menu_name, $link, $language, and depth.
+  // Generate a cache ID (cid) specific for this $menu_name, $link, $language,
+  // and depth.
   if (empty($langcode)) {
     $langcode = $GLOBALS['language']->langcode;
     $langcode_params = FALSE;
@@ -1283,7 +1307,7 @@ function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL, $langco
  * @param string $path
  *   The path to use when finding the active trail.
  *
- * @return string|NULL
+ * @return string|null
  *   The current menu path for the given menu, if any. NULL if not set.
  */
 function menu_tree_set_path($menu_name, $path = NULL) {
@@ -1297,10 +1321,10 @@ function menu_tree_set_path($menu_name, $path = NULL) {
 /**
  * Gets the path for determining the active trail of the specified menu tree.
  *
- * @param $menu_name
+ * @param string $menu_name
  *   The menu name of the requested tree.
  *
- * @return
+ * @return string|null
  *   A string containing the path. If no path has been specified with
  *   menu_tree_set_path(), NULL is returned.
  */
@@ -1314,9 +1338,9 @@ function menu_tree_get_path($menu_name) {
  * The tree order is maintained by storing each parent in an individual
  * field, see http://drupal.org/node/141866 for more.
  *
- * @param $menu_name
+ * @param string $menu_name
  *   The named menu links to return.
- * @param $max_depth
+ * @param int|null $max_depth
  *   (optional) The maximum depth of links to retrieve.
  * @param bool $only_active_trail
  *   (optional) Whether to only return the links in the active trail (TRUE)
@@ -1326,12 +1350,12 @@ function menu_tree_get_path($menu_name) {
  *   (optional) Since 1.5.0. Expand the entire menu tree. If set to TRUE, the
  *   value of $only_active_trail is disregarded.
  *
- * @return
+ * @return array
  *   An array of menu links, in the order they should be rendered. The array
  *   is a list of associative arrays -- these have two keys, 'link' and 'below'.
- *   'link' is a menu item, ready for rendering as a link. 'below' represents the
- *   submenu below the link if there is one, and it is a subtree that has the
- *   same structure described for the top-level array.
+ *   'link' is a menu item, ready for rendering as a link. 'below' represents
+ *   the submenu below the link if there is one, and it is a subtree that has
+ *   the same structure described for the top-level array.
  */
 function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail = FALSE, $expand_all = FALSE) {
   $tree = &backdrop_static(__FUNCTION__, array());
@@ -1432,7 +1456,10 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
               $query->condition('has_children', 1);
               $query->condition('plid', $parents, 'IN');
               $query->condition('mlid', $parents, 'NOT IN');
-              $query->condition('langcode', array($GLOBALS['language']->langcode, 'und'), 'IN');
+              $query->condition('langcode', array(
+                $GLOBALS['language']->langcode,
+                'und',
+              ), 'IN');
               try {
                 $result = $query->execute();
               }
@@ -1478,9 +1505,9 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
 /**
  * Builds a menu tree, translates links, and checks access.
  *
- * @param $menu_name
+ * @param string $menu_name
  *   The name of the menu.
- * @param $parameters
+ * @param array $parameters
  *   (optional) An associative array of build parameters. Possible keys:
  *   - expanded: An array of parent link ids to return only menu links that are
  *     children of one of the plids in this list. If empty, the whole menu tree
@@ -1497,7 +1524,7 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
  *   - conditions: An associative array of custom database select query
  *     condition key/value pairs; see _menu_build_tree() for the actual query.
  *
- * @return
+ * @return array
  *   A fully built menu tree.
  */
 function menu_build_tree($menu_name, array $parameters = array()) {
@@ -1514,6 +1541,11 @@ function menu_build_tree($menu_name, array $parameters = array()) {
  * This function may be used build the data for a menu tree only, for example
  * to further massage the data manually before further processing happens.
  * menu_tree_check_access() needs to be invoked afterwards.
+ *
+ * @param string $menu_name
+ *   The name of the menu.
+ * @param array $parameters
+ *   (optional) An associative array of build parameters.
  *
  * @see menu_build_tree()
  */
@@ -1625,12 +1657,12 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
 /**
  * Collects node links from a given menu tree recursively.
  *
- * @param $tree
+ * @param array $tree
  *   The menu tree you wish to collect node links from.
- * @param $node_links
+ * @param array $node_links
  *   An array in which to store the collected node links.
  */
-function menu_tree_collect_node_links(&$tree, &$node_links) {
+function menu_tree_collect_node_links(array &$tree, array &$node_links) {
   foreach ($tree as $key => $v) {
     if ($tree[$key]['link']['router_path'] == 'node/%') {
       $nid = substr($tree[$key]['link']['link_path'], 5);
@@ -1648,13 +1680,13 @@ function menu_tree_collect_node_links(&$tree, &$node_links) {
 /**
  * Checks access and performs dynamic operations for each link in the tree.
  *
- * @param $tree
+ * @param array $tree
  *   The menu tree you wish to operate on.
- * @param $node_links
+ * @param array $node_links
  *   A collection of node link references generated from $tree by
  *   menu_tree_collect_node_links().
  */
-function menu_tree_check_access(&$tree, $node_links = array()) {
+function menu_tree_check_access(array &$tree, array $node_links = array()) {
   if ($node_links) {
     $nids = array_keys($node_links);
     $select = db_select('node', 'n');
@@ -1674,8 +1706,11 @@ function menu_tree_check_access(&$tree, $node_links = array()) {
 
 /**
  * Sorts the menu tree and recursively checks access for each item.
+ *
+ * @param array $tree
+ *   The menu tree you wish to operate on.
  */
-function _menu_tree_check_access(&$tree) {
+function _menu_tree_check_access(array &$tree) {
   $new_tree = array();
   foreach ($tree as $key => $v) {
     $item = &$tree[$key]['link'];
@@ -1685,7 +1720,8 @@ function _menu_tree_check_access(&$tree) {
         _menu_tree_check_access($tree[$key]['below']);
       }
       // The weights are made a uniform 5 digits by adding 50000 as an offset.
-      // After _menu_link_translate(), $item['title'] has the localized link title.
+      // After _menu_link_translate(), $item['title'] has the localized link
+      // title.
       // Adding the mlid to the end of the index insures that it is unique.
       $new_tree[(50000 + $item['weight']) . ' ' . $item['title'] . ' ' . $item['mlid']] = $tree[$key];
     }
@@ -1698,20 +1734,20 @@ function _menu_tree_check_access(&$tree) {
 /**
  * Sorts and returns the built data representing a menu tree.
  *
- * @param $links
+ * @param array $links
  *   A flat array of menu links that are part of the menu. Each array element
  *   is an associative array of information about the menu link, containing the
  *   fields from the {menu_links} table, and optionally additional information
  *   from the {menu_router} table, if the menu item appears in both tables.
  *   This array must be ordered depth-first. See _menu_build_tree() for a sample
  *   query.
- * @param $parents
+ * @param array $parents
  *   An array of the menu link ID values that are in the path from the current
  *   page to the root of the menu tree.
- * @param $depth
+ * @param int $depth
  *   The minimum depth to include in the returned menu tree.
  *
- * @return
+ * @return array
  *   An array of menu links in the form of a tree. Each item in the tree is an
  *   associative array containing:
  *   - link: The menu link item from $links, with additional element
@@ -1732,8 +1768,19 @@ function menu_tree_data(array $links, array $parents = array(), $depth = 1) {
  *
  * The function is a bit complex because the rendering of a link depends on
  * the next menu link.
+ *
+ * @param array $links
+ *   A flat array of menu links that are part of the menu.
+ * @param array $parents
+ *   An array of the menu link ID values that are in the path from the current
+ *   page to the root of the menu tree.
+ * @param int $depth
+ *   The minimum depth to include in the returned menu tree.
+ *
+ * @return array
+ *   An array of menu links in the form of a tree.
  */
-function _menu_tree_data(&$links, $parents, $depth) {
+function _menu_tree_data(array &$links, array $parents, $depth) {
   $tree = array();
   while ($item = array_pop($links)) {
     // We need to determine if we're on the path to root so we can later build
@@ -1788,25 +1835,29 @@ function template_preprocess_menu_tree(&$variables) {
  * Note that this may be called multiple times for rendering a menu and its
  * children if showing multiple levels of depth.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - attributes: Since 1.5.0. Attributes to be added to this menu tree.
  *   - depth: Since 1.5.0. The menu level depth. Will be 0 for the first level.
  *   - tree: An HTML string containing the tree's items.
  *
+ * @return string
+ *
  * @see template_preprocess_menu_tree()
  * @ingroup themeable
  */
-function theme_menu_tree($variables) {
+function theme_menu_tree(array $variables) {
   return '<ul' . backdrop_attributes($variables['attributes']) . '>' . $variables['tree'] . '</ul>';
 }
 
 /**
  * Returns HTML for a menu link and submenu.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - element: Structured array data for a menu link.
+ *
+ * @return string
  *
  * @ingroup themeable
  */
@@ -1824,16 +1875,18 @@ function theme_menu_link(array $variables) {
 /**
  * Returns HTML for a single local task link.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - element: A render element containing:
  *     - #link: A menu link array with 'title', 'href', and 'localized_options'
  *       keys.
  *     - #active: A boolean indicating whether the local task is active.
  *
+ * @return string
+ *
  * @ingroup themeable
  */
-function theme_menu_local_task($variables) {
+function theme_menu_local_task(array $variables) {
   $link = $variables['element']['#link'];
   $link_text = $link['title'];
 
@@ -1847,7 +1900,10 @@ function theme_menu_local_task($variables) {
       $link['title'] = check_plain($link['title']);
     }
     $link['localized_options']['html'] = TRUE;
-    $link_text = t('!local-task-title!active', array('!local-task-title' => $link['title'], '!active' => $active));
+    $link_text = t('!local-task-title!active', array(
+      '!local-task-title' => $link['title'],
+      '!active' => $active,
+    ));
   }
 
   return '<li' . (!empty($variables['element']['#active']) ? ' class="active"' : '') . '>' . l($link_text, $link['href'], $link['localized_options']) . "</li>\n";
@@ -1856,16 +1912,18 @@ function theme_menu_local_task($variables) {
 /**
  * Returns HTML for a single local action link.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - element: A render element containing:
  *     - #link: A menu link array with 'title', 'href', and 'localized_options'
  *       keys.
  *
+ * @return string
+ *
  * @see theme_menu_local_actions()
  * @ingroup themeable
  */
-function theme_menu_local_action($variables) {
+function theme_menu_local_action(array $variables) {
   $link = $variables['element']['#link'];
 
   $output = '<li>';
@@ -1886,14 +1944,16 @@ function theme_menu_local_action($variables) {
 /**
  * Returns rendered HTML for the local actions.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *     - actions: An array of action links.
+ *
+ * @return string
  *
  * @see theme_menu_local_action()
  * @ingroup themeable
  */
-function theme_menu_local_actions($variables) {
+function theme_menu_local_actions(array $variables) {
   $output = backdrop_render($variables['actions']);
   if ($output) {
     $output = '<ul class="action-links">' . $output . '</ul>';
@@ -1904,16 +1964,18 @@ function theme_menu_local_actions($variables) {
 /**
  * Returns rendered HTML for a menu toggle.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *     - enabled: A boolean indicating whether the menu toggle should be shown.
  *     - id: Unique identifier, generated with backdrop_html_id().
  *     - text: Translated text for the menu toggle button.
  *
+ * @return string
+ *
  * @see theme_menu_toggle()
  * @ingroup themeable
  */
-function theme_menu_toggle($variables) {
+function theme_menu_toggle(array $variables) {
   $output = '';
   if ($variables['enabled']) {
     $id = $variables['id'];
@@ -1930,11 +1992,11 @@ function theme_menu_toggle($variables) {
 /**
  * Gets the custom theme for the current page, if there is one.
  *
- * @param $initialize
+ * @param bool $initialize
  *   This parameter should only be used internally; it is set to TRUE in order
  *   to force the custom theme to be initialized for the current page request.
  *
- * @return
+ * @return string
  *   The machine-readable name of the custom theme, if there is one.
  *
  * @see menu_set_custom_theme()
@@ -1985,6 +2047,8 @@ function menu_set_custom_theme() {
 
 /**
  * Returns an array containing the names of system-defined (default) menus.
+ *
+ * @return array
  */
 function menu_list_system_menus() {
   return array(
@@ -1997,12 +2061,12 @@ function menu_list_system_menus() {
 /**
  * Returns an array of links for a navigation menu.
  *
- * @param $menu_name
+ * @param string $menu_name
  *   The name of the menu.
- * @param $level
+ * @param int $level
  *   Optional, the depth of the menu to be returned.
  *
- * @return
+ * @return array
  *   An array of links of the specified menu and level.
  */
 function menu_navigation_links($menu_name, $level = 0) {
@@ -2016,7 +2080,8 @@ function menu_navigation_links($menu_name, $level = 0) {
 
   // Go down the active trail until the right level is reached.
   while ($level-- > 0 && $tree) {
-    // Loop through the current level's items until we find one that is in trail.
+    // Loop through the current level's items until we find one that is in
+    // trail.
     while ($item = array_shift($tree)) {
       if ($item['link']['in_active_trail']) {
         // If the item is in the active trail, we continue in the subtree.
@@ -2056,10 +2121,10 @@ function menu_navigation_links($menu_name, $level = 0) {
 /**
  * Collects the local tasks (tabs), action links, and the root path.
  *
- * @param $level
+ * @param int $level
  *   The level of tasks you ask for. Primary tasks are 0, secondary are 1.
  *
- * @return
+ * @return array
  *   An array containing
  *   - tabs: Local tasks for the requested level:
  *     - count: The number of local tasks.
@@ -2134,7 +2199,8 @@ function menu_local_tasks($level = 0) {
     // Find all tabs below the current path.
     $path = $router_item['path'];
     // Tab parenting may skip levels, so the number of parts in the path may not
-    // equal the depth. Thus we use the $depth counter (offset by 1000 for ksort).
+    // equal the depth. Thus we use the $depth counter (offset by 1000 for
+    // ksort).
     $depth = 1001;
     $actions['count'] = 0;
     $actions['output'] = array();
@@ -2156,7 +2222,8 @@ function menu_local_tasks($level = 0) {
           // The default task is always active. As tabs can be normal items
           // too, so bitmask with MENU_LINKS_TO_PARENT before checking.
           if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-            // Find the first parent which is not a default local task or action.
+            // Find the first parent which is not a default local task or
+            // action.
             for ($p = $item['tab_parent']; ($tasks[$p]['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT; $p = $tasks[$p]['tab_parent']);
             // Use the path of the parent instead.
             $link['href'] = $tasks[$p]['href'];
@@ -2310,27 +2377,27 @@ function menu_local_tasks($level = 0) {
  * If the path "node/123" is passed to this function, then it will return the
  * links for 'edit' and 'report-as-spam'.
  *
- * @param $module
+ * @param string $module
  *   The name of the implementing module. This is used to prefix the key for
  *   each contextual link, which is transformed into a CSS class during
  *   rendering by theme_links(). For example, if $module is 'block' and the
  *   retrieved local task path argument is 'edit', then the resulting CSS class
  *   will be 'block-edit'.
- * @param $parent_path
+ * @param string $parent_path
  *   The static menu router path of the object to retrieve local tasks for, for
  *   example 'node' or 'admin/structure/block/manage'.
- * @param $args
+ * @param array $args
  *   A list of dynamic path arguments to append to $parent_path to form the
  *   fully-qualified menu router path, for example array(123) for a certain
  *   node or array('system', 'main-menu') for a certain block.
  *
- * @return
+ * @return array
  *   A list of menu router items that are local tasks for the passed-in path.
  *
  * @see contextual_links_preprocess()
  * @see hook_menu()
  */
-function menu_contextual_links($module, $parent_path, $args) {
+function menu_contextual_links($module, $parent_path, array $args) {
   static $path_empty = array();
 
   $links = array();
@@ -2397,6 +2464,8 @@ function menu_contextual_links($module, $parent_path, $args) {
 
 /**
  * Returns the rendered local tasks at the top level.
+ *
+ * @return string
  */
 function menu_primary_local_tasks() {
   $links = menu_local_tasks(0);
@@ -2406,6 +2475,8 @@ function menu_primary_local_tasks() {
 
 /**
  * Returns the rendered local tasks at the second level.
+ *
+ * @return string
  */
 function menu_secondary_local_tasks() {
   $links = menu_local_tasks(1);
@@ -2415,6 +2486,8 @@ function menu_secondary_local_tasks() {
 
 /**
  * Returns the rendered local actions at the current level.
+ *
+ * @return string
  */
 function menu_local_actions() {
   $links = menu_local_tasks();
@@ -2423,6 +2496,8 @@ function menu_local_actions() {
 
 /**
  * Returns the router path, or the path for a default local task's parent.
+ *
+ * @return string
  */
 function menu_tab_root_path() {
   $links = menu_local_tasks();
@@ -2431,6 +2506,8 @@ function menu_tab_root_path() {
 
 /**
  * Returns rendered HTML for the primary and secondary tabs.
+ *
+ * @return string
  */
 function menu_local_tabs() {
   return theme('menu_local_tasks', array(
@@ -2442,15 +2519,17 @@ function menu_local_tabs() {
 /**
  * Returns HTML for primary and secondary local tasks.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *     - primary: (optional) An array of local tasks (tabs).
  *     - secondary: (optional) An array of local tasks (tabs).
  *
+ * @return string
+ *
  * @ingroup themeable
  * @see menu_local_tasks()
  */
-function theme_menu_local_tasks($variables) {
+function theme_menu_local_tasks(array $variables) {
   $output = '';
 
   if (!empty($variables['primary'])) {
@@ -2474,7 +2553,10 @@ function theme_menu_local_tasks($variables) {
  *
  * The active menu for the page determines the active trail.
  *
- * @return
+ * @param array|null $menu_names
+ *   (Optional) A list of menu names.
+ *
+ * @return array
  *   An array of menu machine names, in order of preference. The
  *   'system.core.active_menus_default' config item may be used to assert a menu
  *   order different from the order of creation, or to prevent a particular menu
@@ -2495,6 +2577,8 @@ function menu_set_active_menu_names($menu_names = NULL) {
 
 /**
  * Gets the active menu for the current page.
+ *
+ * @return array
  */
 function menu_get_active_menu_names() {
   return menu_set_active_menu_names();
@@ -2507,7 +2591,7 @@ function menu_get_active_menu_names() {
  * in the page load, such as during hook_boot(), or unless you call
  * menu_execute_active_handler() to generate your page output.
  *
- * @param $path
+ * @param string $path
  *   A Backdrop path - not a URL alias.
  */
 function menu_set_active_item($path) {
@@ -2529,15 +2613,15 @@ function menu_set_active_item($path) {
  * To affect the trail used by menu trees, use menu_tree_set_path(). To affect
  * the page content, use menu_set_active_item() instead.
  *
- * @param $new_trail
+ * @param array|null $new_trail
  *   Menu trail to set; the value is saved in a static variable and can be
  *   retrieved by menu_get_active_trail(). The format of this array should be
  *   the same as the return value of menu_get_active_trail().
  *
- * @return
+ * @return array
  *   The active trail. See menu_get_active_trail() for details.
  */
-function menu_set_active_trail($new_trail = NULL) {
+function menu_set_active_trail(?array $new_trail = NULL) {
   $trail = &backdrop_static(__FUNCTION__);
 
   if (isset($new_trail)) {
@@ -2612,15 +2696,15 @@ function menu_set_active_trail($new_trail = NULL) {
 /**
  * Looks up the preferred menu link for a given system path.
  *
- * @param $path
+ * @param string $path
  *   The path; for example, 'node/5'. The function will find the corresponding
  *   menu link ('node/5' if it exists, or fallback to 'node/%').
- * @param $selected_menu
+ * @param string $selected_menu
  *   The name of a menu used to restrict the search for a preferred menu link.
  *   If not specified, all the menus returned by menu_get_active_menu_names()
  *   will be used.
  *
- * @return
+ * @return array|false
  *   A fully translated menu link, or FALSE if no matching menu link was
  *   found. The most specific menu link ('node/5' preferred over 'node/%') in
  *   the most preferred menu (as defined by menu_get_active_menu_names()) is
@@ -2715,7 +2799,7 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
  * page is calculated and returned. The calculated trail is also saved as a
  * static value for use by subsequent calls to menu_get_active_trail().
  *
- * @return
+ * @return array
  *   Path to menu root of the current page, as an array of menu link items,
  *   starting with the site's home page. Each link item is an associative array
  *   with the following components:
@@ -2731,6 +2815,8 @@ function menu_get_active_trail() {
 
 /**
  * Gets the breadcrumb for the current page, as determined by the active trail.
+ *
+ * @return array
  *
  * @see menu_set_active_trail()
  */
@@ -2782,6 +2868,8 @@ function menu_get_active_breadcrumb() {
 
 /**
  * Gets the title of the current page, as determined by the active trail.
+ *
+ * @return string
  */
 function menu_get_active_title() {
   $active_trail = menu_get_active_trail();
@@ -2827,7 +2915,7 @@ function menu_get_active_title() {
  *   to FALSE, access checks are performed and $item['access'] will be populated
  *   with the current user's access to the menu item.
  *
- * @return
+ * @return array|false
  *   A menu link, with $item['access'] filled and link translated for
  *   rendering.
  */
@@ -2854,6 +2942,9 @@ function menu_link_load($mlid, $skip_access_check = FALSE) {
 
 /**
  * Clears the cached data for a single named menu.
+ *
+ * @param string $menu_name
+ *   The menu name.
  */
 function menu_cache_clear($menu_name = 'main-menu') {
   cache('menu')->deletePrefix('links:' . $menu_name . ':');
@@ -2891,7 +2982,7 @@ function menu_reset_static_cache() {
  * to {menu_links} for new router items, and then remove stale items from
  * {menu_links}.
  *
- * @return
+ * @return bool
  *   TRUE if the menu was rebuilt, FALSE if another thread was rebuilding
  *   in parallel and the current thread just waited for completion.
  */
@@ -2927,6 +3018,8 @@ function menu_rebuild() {
 
 /**
  * Collects and alters the menu definitions.
+ *
+ * @return array
  */
 function menu_router_build() {
   // We need to manually call each module so that we can know which module
@@ -2951,8 +3044,13 @@ function menu_router_build() {
 
 /**
  * Stores the menu router if we have it in memory.
+ *
+ * @param array|null $new_menu
+ *   The new menu.
+ *
+ * @return array|null
  */
-function _menu_router_cache($new_menu = NULL) {
+function _menu_router_cache(?array $new_menu = NULL) {
   $menu = &backdrop_static(__FUNCTION__);
 
   if (isset($new_menu)) {
@@ -2963,6 +3061,8 @@ function _menu_router_cache($new_menu = NULL) {
 
 /**
  * Gets the menu router.
+ *
+ * @return array|null
  */
 function menu_get_router() {
   // Check first if we have it in memory already.
@@ -2975,8 +3075,13 @@ function menu_get_router() {
 
 /**
  * Builds a link from a router item.
+ *
+ * @param array $item
+ *   A router item.
+ *
+ * @return array
  */
-function _menu_link_build($item) {
+function _menu_link_build(array $item) {
   // Suggested items are disabled by default.
   if ($item['type'] == MENU_SUGGESTED_ITEM) {
     $item['hidden'] = 1;
@@ -3010,8 +3115,11 @@ function _menu_link_build($item) {
 
 /**
  * Builds menu links for the items in the menu router.
+ *
+ * @param array $menu
+ *   The menu router.
  */
-function _menu_navigation_links_rebuild($menu) {
+function _menu_navigation_links_rebuild(array $menu) {
   // Add normal and suggested items as links.
   $menu_links = array();
   $default_menu_link_paths = array();
@@ -3113,21 +3221,21 @@ function _menu_navigation_links_rebuild($menu) {
 /**
  * Clones an array of menu links.
  *
- * @param $links
+ * @param array $links
  *   An array of menu links to clone.
- * @param $menu_name
- *   (optional) The name of a menu that the links will be cloned for. If not
+ * @param string|null $menu_name
+ *   (Optional) The name of a menu that the links will be cloned for. If not
  *   set, the cloned links will be in the same menu as the original set of
  *   links that were passed in.
  *
- * @return
+ * @return array
  *   An array of menu links with the same properties as the passed-in array,
  *   but with the link identifiers removed so that a new link will be created
  *   when any of them is passed in to menu_link_save().
  *
  * @see menu_link_save()
  */
-function menu_links_clone($links, $menu_name = NULL) {
+function menu_links_clone(array $links, $menu_name = NULL) {
   foreach ($links as &$link) {
     unset($link['mlid']);
     unset($link['plid']);
@@ -3141,10 +3249,10 @@ function menu_links_clone($links, $menu_name = NULL) {
 /**
  * Returns an array containing all links for a menu.
  *
- * @param $menu_name
+ * @param string $menu_name
  *   The name of the menu whose links should be returned.
  *
- * @return
+ * @return array
  *   An array of menu links.
  */
 function menu_load_links($menu_name) {
@@ -3166,7 +3274,7 @@ function menu_load_links($menu_name) {
 /**
  * Deletes all links for a menu.
  *
- * @param $menu_name
+ * @param string $menu_name
  *   The name of the menu whose links will be deleted.
  */
 function menu_delete_links($menu_name) {
@@ -3184,9 +3292,9 @@ function menu_delete_links($menu_name) {
 /**
  * Delete one or several menu links.
  *
- * @param $mlid
+ * @param string|null $mlid
  *   A valid menu link mlid or NULL. If NULL, $path is used.
- * @param $path
+ * @param string|null $path
  *   The path to the menu items to be deleted. $mlid must be NULL.
  */
 function menu_link_delete($mlid, $path = NULL) {
@@ -3204,9 +3312,9 @@ function menu_link_delete($mlid, $path = NULL) {
 /**
  * Deletes a single menu link.
  *
- * @param $item
+ * @param object|array $item
  *   Item to be deleted.
- * @param $force
+ * @param bool $force
  *   Forces deletion. Internal use only, setting to TRUE is discouraged.
  *
  * @see menu_link_delete()
@@ -3242,7 +3350,7 @@ function _menu_delete_item($item, $force = FALSE) {
  * After calling this function, rebuild the menu cache using
  * menu_cache_clear_all().
  *
- * @param $item
+ * @param array $item
  *   An associative array representing a menu link item, with elements:
  *   - link_path: (required) The path of the menu item, which should be
  *     normalized first by calling backdrop_get_normal_path() on it.
@@ -3261,17 +3369,17 @@ function _menu_delete_item($item, $force = FALSE) {
  *     to insert a new link.
  *   - plid: (optional) The mlid of the parent.
  *   - router_path: (optional) The path of the relevant router item.
- * @param $existing_item
+ * @param array $existing_item
  *   Optional, the current record from the {menu_links} table as an array.
- * @param $parent_candidates
+ * @param array $parent_candidates
  *   Optional array of menu links keyed by mlid. Used by
  *   _menu_navigation_links_rebuild() only.
  *
- * @return
+ * @return string|false
  *   The mlid of the saved menu link, or FALSE if the menu link could not be
  *   saved.
  */
-function menu_link_save(&$item, $existing_item = array(), $parent_candidates = array()) {
+function menu_link_save(array &$item, array $existing_item = array(), array $parent_candidates = array()) {
   backdrop_alter('menu_link', $item);
 
   // This is the easiest way to handle the unique internal path '<front>',
@@ -3438,16 +3546,16 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
  *  - else, for system menu links (derived from hook_menu()), reparent
  *    based on the path hierarchy.
  *
- * @param $menu_link
+ * @param array $menu_link
  *   A menu link.
- * @param $parent_candidates
+ * @param array $parent_candidates
  *   An array of menu links keyed by mlid.
  *
- * @return
+ * @return array|false
  *   A menu link structure of the possible parent or FALSE if no valid parent
  *   has been found.
  */
-function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
+function _menu_link_find_parent(array $menu_link, array $parent_candidates = array()) {
   $parent = FALSE;
 
   // This item is explicitly top-level, skip the rest of the parenting.
@@ -3604,7 +3712,7 @@ function menu_link_maintain($module, $op, $link_path, $link_title) {
         'module' => $module,
       );
       return menu_link_save($menu_link);
-      break;
+      break; // phpcs:ignore
     case 'update':
       $result = db_query("SELECT * FROM {menu_links} WHERE link_path = :link_path AND module = :module AND customized = 0", array(
         ':link_path' => $link_path,
@@ -3659,8 +3767,13 @@ function menu_link_children_relative_depth(array $item) {
  *
  * The menu name, parents (p1 - p6), and depth are updated for all children of
  * the link, and the has_children status of the previous parent is updated.
+ *
+ * @param array $item
+ *   The new link item.
+ * @param array $existing_item
+ *   The existing link item.
  */
-function _menu_link_move_children($item, $existing_item) {
+function _menu_link_move_children(array $item, array $existing_item) {
   $query = db_update('menu_links');
 
   $query->fields(array('menu_name' => $item['menu_name']));
@@ -3705,8 +3818,13 @@ function _menu_link_move_children($item, $existing_item) {
 
 /**
  * Checks and updates the 'has_children' status for the parent of a link.
+ *
+ * @param array $item
+ *   The link item.
+ * @param bool $exclude
+ *   If TRUE, exclude the item.
  */
-function _menu_update_parental_status($item, $exclude = FALSE) {
+function _menu_update_parental_status(array $item, $exclude = FALSE) {
   // If plid == 0, there is nothing to update.
   if ($item['plid']) {
     // Check if at least one visible child exists in the table.
@@ -3729,8 +3847,13 @@ function _menu_update_parental_status($item, $exclude = FALSE) {
 
 /**
  * Sets the p1 through p9 values for a menu link being saved.
+ *
+ * @param array $item
+ *   The menu link.
+ * @param array $parent
+ *   The menu link parent.
  */
-function _menu_link_parents_set(&$item, $parent) {
+function _menu_link_parents_set(array &$item, array $parent) {
   $i = 1;
   while ($i < $item['depth']) {
     $p = 'p' . ($i++);
@@ -3749,10 +3872,11 @@ function _menu_link_parents_set(&$item, $parent) {
  * Builds the router table based on the data from hook_menu().
  *
  * @param array $callbacks
+ *   An associative array of router callbacks with router items.
  *
  * @return array
  */
-function _menu_router_build($callbacks) {
+function _menu_router_build(array $callbacks) {
   // First pass: separate callbacks from paths, making paths ready for
   // matching. Calculate fitness, and fill some default values.
   $menu = array();
@@ -3980,7 +4104,9 @@ function _menu_router_build($callbacks) {
  * Saves data from menu_router_build() to the router table.
  *
  * @param array $menu
+ *   The menu array.
  * @param array $masks
+ *   An array of bit masks.
  *
  * @return array
  */
