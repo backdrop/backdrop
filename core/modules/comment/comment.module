@@ -137,7 +137,8 @@ function comment_entity_info() {
         'path' => 'admin/structure/types/manage/%comment_menu_node_type/comment',
         'bundle argument' => 4,
         'real path' => 'admin/structure/types/manage/' . str_replace('_', '-', $type) . '/comment',
-        'access arguments' => array('administer content types'),
+        'access callback' => '_comment_menu_admin_access',
+        'access arguments' => array(4),
       ),
     );
   }
@@ -308,6 +309,23 @@ function comment_menu_node_type_load($name) {
   if ($type = node_type_get_type(strtr($name, array('-' => '_')))) {
     return 'comment_node_' . $type->type;
   }
+}
+
+/**
+ * Menu access callback; determines if menu entries should be shown.
+ *
+ * @param string $entity_type_name
+ *   The machine name of the entity type on which fields are being applied. This
+ *   is the value after comment_menu_node_type_load() has been called. For
+ *   example, "comment_node_post" for the "post" node type.
+ *
+ * @return bool
+ *   TRUE if menu items should be accessible, FALSE if hidden or not allowed.
+ */
+function _comment_menu_admin_access($entity_type_name) {
+  $node_type_name = str_replace('comment_node_', '', $entity_type_name);
+  $node_type = node_type_get_type($node_type_name);
+  return $node_type && $node_type->settings['comment_enabled'] && user_access('administer fields');
 }
 
 /**
@@ -639,8 +657,8 @@ function comment_new_page_count($num_comments, $new_replies, Node $node) {
 function comment_node_view(Node $node, $view_mode) {
   $links = array();
 
-  if ($node->comment != COMMENT_NODE_HIDDEN) {
-    $node_type = node_type_get_type($node->type);
+  $node_type = node_type_get_type($node->type);
+  if ($node->comment != COMMENT_NODE_HIDDEN && $node_type->settings['comment_enabled']) {
     if ($view_mode == 'rss') {
       // Add a comments RSS element which is a URL to the comments of this node.
       $node->rss_elements[] = array(
@@ -751,6 +769,11 @@ function comment_node_page_additions(Node $node) {
     'comments' => array(),
     'comment_form' => array(),
   );
+
+  // Don't render anything if comments are disabled.
+  if (!$node_type->settings['comment_enabled']) {
+    return $additions;
+  }
 
   // Only attempt to render comments if the node has visible comments.
   // Unpublished comments are not included in $node->comment_count, so show
@@ -1104,9 +1127,19 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
       '#weight' => 25,
     );
-    // Unlike comment_form_node_form_alter(), all of these settings are applied
-    // as defaults to all new nodes. Therefore, it would be wrong to use #states
-    // to hide the other settings based on the primary comment setting.
+    $form['comment']['comment_enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable comments'),
+      '#default_value' => $node_type->settings['comment_enabled'],
+    );
+
+    // Common variable used to show other settings if comments are enabled.
+    $comment_states = array(
+      'invisible' => array(
+        ':input[name="comment_enabled"]' => array('checked' => FALSE),
+      ),
+    );
+
     $form['comment']['comment_default'] = array(
       '#type' => 'radios',
       '#title' => t('Default comment setting for new content'),
@@ -1115,6 +1148,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_NODE_OPEN => t('Open comments'),
         COMMENT_NODE_CLOSED => t('Closed comments'),
       ),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_per_page'] = array(
       '#type' => 'number',
@@ -1124,12 +1158,14 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#min' => 10,
       '#max' => 1000,
       '#step' => 10,
+      '#states' => $comment_states,
     );
     $form['comment']['comment_mode'] = array(
       '#type' => 'checkbox',
       '#title' => t('Show comment replies in a threaded list'),
       '#default_value' => $node_type->settings['comment_mode'],
       '#description' => t('A threaded list differs from a chronological list in that each comment follows its parent, and is usually indented.'),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_anonymous'] = array(
       '#type' => 'select',
@@ -1141,18 +1177,25 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_ANONYMOUS_MUST_CONTACT => t('Anonymous posters must leave their contact information'),
       ),
       '#access' => user_access('post comments', backdrop_anonymous_user()),
+      '#states' => $comment_states,
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
         '#type' => 'checkbox',
         '#title' => t('Display pictures for comment authors'),
         '#default_value' => $node_type->settings['comment_user_picture'],
+        '#states' => array(
+          'invisible' => array(
+            ':input[name="comment_enabled"]' => array('checked' => FALSE),
+          ),
+        ),
       );
     }
     $form['comment']['comment_form_location'] = array(
       '#type' => 'checkbox',
       '#title' => t('Show reply form on the same page as comments'),
       '#default_value' => $node_type->settings['comment_form_location'],
+      '#states' => $comment_states,
     );
     $form['comment']['comment_preview'] = array(
       '#type' => 'radios',
@@ -1163,11 +1206,13 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         BACKDROP_OPTIONAL => t('Optional'),
         BACKDROP_REQUIRED => t('Required'),
       ),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_close_enabled'] = array(
       '#type' => 'checkbox',
       '#title' => t('Automatically close comments on old content'),
       '#default_value' => $node_type->settings['comment_close_enabled'],
+      '#states' => $comment_states,
     );
     $form['comment']['comment_close_days'] = array(
       '#type' => 'number',
@@ -1177,7 +1222,8 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#maxlength' => 4,
       '#states' => array(
         'invisible' => array(
-          ':input[name="comment_close_enabled"]' => array('checked' => FALSE),
+          array(':input[name="comment_close_enabled"]' => array('checked' => FALSE)),
+          array(':input[name="comment_enabled"]' => array('checked' => FALSE)),
         ),
       ),
       '#field_prefix' => t('Close comments after'),
@@ -1193,6 +1239,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_TITLE_AUTO => t('Visible, auto-generated'),
         COMMENT_TITLE_HIDDEN => t('Hidden'),
       ),
+      '#states' => $comment_states,
     );
     $form['comment']['comment_title_options'][COMMENT_TITLE_CUSTOM]['#description'] = t('A title field is provided, to allow customizing comment titles.');
     $form['comment']['comment_title_options'][COMMENT_TITLE_AUTO]['#description'] = t('Comment titles are automatically generated from the comment body.');
@@ -1205,6 +1252,13 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
  */
 function comment_form_node_form_alter(&$form, $form_state) {
   $node = $form['#node'];
+  $node_type = node_type_load($node->type);
+
+  // Exit if comments are disabled.
+  if (!$node_type->settings['comment_enabled']) {
+    return;
+  }
+
   $form['comment_settings'] = array(
     '#type' => 'fieldset',
     '#access' => user_access('administer comment settings'),
@@ -1253,9 +1307,7 @@ function comment_form_node_form_alter(&$form, $form_state) {
     );
   }
 
-  $node_type = node_type_load($node->type);
   $enable = $node_type->settings['comment_close_enabled'];
-
   if ($enable) {
     $form['comment_settings']['comment_close_enabled'] = array(
       '#type' => 'checkbox',
@@ -1298,8 +1350,10 @@ function comment_node_load($nodes, $types) {
   // Check if comments are enabled for each node. If comments are disabled,
   // assign values without hitting the database.
   foreach ($nodes as $node) {
+    $node_type = node_type_get_type($node->type);
+
     // Store whether comments are enabled for this node.
-    if ($node->comment != COMMENT_NODE_HIDDEN) {
+    if ($node->comment != COMMENT_NODE_HIDDEN && $node_type->settings['comment_enabled']) {
       $comments_enabled[] = $node->nid;
     }
     else {
@@ -1330,7 +1384,9 @@ function comment_node_load($nodes, $types) {
 function comment_node_prepare(Node $node) {
   if (!isset($node->comment)) {
     $node_type = node_type_get_type($node->type);
-    $node->comment = $node_type->settings['comment_default'];
+    if ($node_type->settings['comment_enabled']) {
+      $node->comment = $node_type->settings['comment_default'];
+    }
   }
 }
 
