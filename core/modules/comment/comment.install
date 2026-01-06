@@ -512,6 +512,32 @@ function comment_update_1008() {
   }
 }
 
+
+/**
+ * Enable comments on types with existing comments for backwards-compatibility.
+ */
+function comment_update_1009() {
+  // Comments can now be disabled per type, but prior to Backdrop 1.33.0,
+  // they were always enabled on all types.
+  $count = 0;
+  foreach (config_get_names_with_prefix('node.type.') as $config_name) {
+    $config = config($config_name);
+    $node_type = $config->get('type');
+    $default_setting = $config->get('settings.comment_default');
+    $comment_count = (int) db_query('SELECT COUNT(*) FROM {comment} c INNER JOIN {node} n WHERE n.type = :type', array(':type' => $node_type))->fetchField();
+    // Constant avoided if the module is not loaded, COMMENT_NODE_OPEN == 2.
+    if ($default_setting == 2 || $comment_count > 0) {
+      $config->set('settings.comment_enabled', TRUE);
+      $config->save();
+      $count++;
+    }
+  }
+
+  if ($count) {
+    return format_plural($count, 'Comments enabled on @count content type.', 'Comments enabled on @count content types.');
+  }
+}
+
 /**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.

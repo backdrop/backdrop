@@ -707,6 +707,7 @@ function ajax_process_form(array $element, &$form_state) {
  * @param array $element
  *   An associative array containing the properties of the element.
  *   Properties used:
+ *   @code
  *   - #ajax['event']
  *   - #ajax['prevent']
  *   - #ajax['disable']
@@ -715,6 +716,7 @@ function ajax_process_form(array $element, &$form_state) {
  *   - #ajax['wrapper']
  *   - #ajax['parameters']
  *   - #ajax['effect']
+ *   @endcode
  *
  * @return array
  *   The processed element with the necessary JavaScript attached to it.
@@ -1018,7 +1020,7 @@ function ajax_command_html($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery prepend() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -1051,7 +1053,7 @@ function ajax_command_prepend($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery append() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -1084,7 +1086,7 @@ function ajax_command_append($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery after() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -1117,7 +1119,7 @@ function ajax_command_after($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery before() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array

@@ -299,7 +299,7 @@ function system_menu_block_build(array $config) {
  * Gets the data structure representing a menu tree for the given configuration.
  *
  * @param array $config
- *   See the $config param of menu_tree_build().
+ *   See the $config param of system_menu_block_build().
  *
  * @return array
  */
