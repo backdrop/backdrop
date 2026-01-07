@@ -229,13 +229,13 @@ function user_hash_password($password, $count_log2 = 0) {
  *
  * @param string $password
  *   A plain-text password.
- * @param User $account
+ * @param object $account
  *   A user object with at least the fields from the {users} table.
  *
  * @return bool
  *   TRUE or FALSE.
  */
-function user_check_password($password, User $account) {
+function user_check_password($password, object $account) {
   if (substr($account->pass, 0, 2) == 'U$') {
     // This may be an updated password from user_update_7000(). Such hashes
     // have 'U' added as the first character and need an extra md5() (see the
@@ -279,13 +279,13 @@ function user_check_password($password, User $account) {
  * Alternative implementations of this function might use other criteria based
  * on the fields in $account.
  *
- * @param User $account
+ * @param object $account
  *   A user object with at least the fields from the {users} table.
  *
  * @return bool
  *   TRUE or FALSE.
  */
-function user_needs_new_hash(User $account) {
+function user_needs_new_hash(object $account) {
   // Check whether this was an updated password.
   if ((substr($account->pass, 0, 3) != '$S$') || (strlen($account->pass) != BACKDROP_HASH_LENGTH)) {
     return TRUE;
