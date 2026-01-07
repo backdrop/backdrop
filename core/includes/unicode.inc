@@ -45,6 +45,7 @@ define('UNICODE_MULTIBYTE', 1);
  * @see http://unicode.org/glossary
  */
 // cspell:disable
+// phpcs:disable
 define('PREG_CLASS_UNICODE_WORD_BOUNDARY',
   '\x{0}-\x{2F}\x{3A}-\x{40}\x{5B}-\x{60}\x{7B}-\x{A9}\x{AB}-\x{B1}\x{B4}' .
   '\x{B6}-\x{B8}\x{BB}\x{BF}\x{D7}\x{F7}\x{2C2}-\x{2C5}\x{2D2}-\x{2DF}' .
@@ -110,12 +111,12 @@ function _unicode_check() {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Check for mbstring extension
+  // Check for mbstring extension.
   if (!function_exists('mb_strlen')) {
     return array(UNICODE_SINGLEBYTE, $t('Operations on Unicode strings are emulated on a best-effort basis. Install the <a href="@url">PHP mbstring extension</a> for improved Unicode support.', array('@url' => 'http://www.php.net/mbstring')));
   }
 
-  // Check mbstring configuration
+  // Check mbstring configuration.
   if (ini_get('mbstring.func_overload') != 0) {
     return array(UNICODE_ERROR, $t('Multibyte string function overloading in PHP is active and must be disabled. Check the php.ini <em>mbstring.func_overload</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')));
   }
@@ -123,7 +124,7 @@ function _unicode_check() {
     return array(UNICODE_ERROR, $t('Multibyte string input conversion in PHP is active and must be disabled. Check the php.ini <em>mbstring.encoding_translation</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')));
   }
 
-  // Set appropriate configuration
+  // Set appropriate configuration.
   mb_internal_encoding('utf-8');
   mb_language('uni');
   return array(UNICODE_MULTIBYTE, '');
@@ -183,7 +184,7 @@ function unicode_requirements() {
  * @ingroup php_wrappers
  */
 function backdrop_xml_parser_create(&$data) {
-  // Default XML encoding is UTF-8
+  // Default XML encoding is UTF-8.
   $encoding = 'utf-8';
   $bom = FALSE;
 
@@ -389,7 +390,7 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
  */
 function mime_header_encode($string) {
   if (preg_match('/[^\x20-\x7E]/', $string)) {
-    $chunk_size = 47; // floor((75 - strlen("=?UTF-8?B??=")) * 0.75);
+    $chunk_size = 47; // floor((75 - strlen("=?UTF-8?B??=")) * 0.75);.
     $len = strlen($string);
     $output = '';
     while ($len > 0) {
@@ -439,7 +440,7 @@ function _mime_header_decode($matches) {
   // Regexp groups:
   // 1: Character set name
   // 2: Escaping method (Q or B)
-  // 3: Encoded data
+  // 3: Encoded data.
   $data = ($matches[2] == 'B') ? base64_decode($matches[3]) : str_replace('_', ' ', quoted_printable_decode($matches[3]));
   if (strtolower($matches[1]) != 'utf-8') {
     $data = backdrop_convert_to_utf8($data, $matches[1]);
@@ -517,9 +518,9 @@ function backdrop_strtoupper($text) {
     return mb_strtoupper($text);
   }
   else {
-    // Use C-locale for ASCII-only uppercase
+    // Use C-locale for ASCII-only uppercase.
     $text = strtoupper($text);
-    // Case flip Latin-1 accented letters
+    // Case flip Latin-1 accented letters.
     $text = preg_replace_callback('/\xC3[\xA0-\xB6\xB8-\xBE]/', '_unicode_caseflip', $text);
     return $text;
   }
@@ -548,9 +549,9 @@ function backdrop_strtolower($text) {
     return mb_strtolower($text);
   }
   else {
-    // Use C-locale for ASCII-only lowercase
+    // Use C-locale for ASCII-only lowercase.
     $text = strtolower($text);
-    // Case flip Latin-1 accented letters
+    // Case flip Latin-1 accented letters.
     $text = preg_replace_callback('/\xC3[\x80-\x96\x98-\x9E]/', '_unicode_caseflip', $text);
     return $text;
   }
