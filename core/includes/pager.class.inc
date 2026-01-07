@@ -16,7 +16,7 @@ class PagerDefault extends SelectQueryExtender {
    *
    * @var int
    */
-  static $maxElement = 0;
+  public static $maxElement = 0;
 
   /**
    * The number of elements per page to allow.
@@ -39,6 +39,12 @@ class PagerDefault extends SelectQueryExtender {
    */
   protected $customCountQuery = FALSE;
 
+  /**
+   * @param SelectQueryInterface $query
+   *   The select query class.
+   * @param DatabaseConnection $connection
+   *   The database connection.
+   */
   public function __construct(SelectQueryInterface $query, DatabaseConnection $connection) {
     parent::__construct($query, $connection);
 
@@ -48,7 +54,7 @@ class PagerDefault extends SelectQueryExtender {
   }
 
   /**
-   * Override the execute method.
+   * {@inheritdoc}
    *
    * Before we run the query, we need to add pager-based range() instructions
    * to it.
@@ -72,7 +78,8 @@ class PagerDefault extends SelectQueryExtender {
     $current_page = pager_default_initialize($total_items, $this->limit, $this->element);
     $this->range($current_page * $this->limit, $this->limit);
 
-    // Now that we've added our pager-based range instructions, run the query normally.
+    // Now that we've added our pager-based range instructions, run the query
+    // normally.
     return $this->query->execute();
   }
 
@@ -81,8 +88,8 @@ class PagerDefault extends SelectQueryExtender {
    * If an element was not specified previously, then the value of the
    * $maxElement counter is taken, after which the counter is incremented.
    *
-   * After running this method, access $this->element to get the element for this
-   * query.
+   * After running this method, access $this->element to get the element for
+   * this query.
    */
   protected function ensureElement() {
     if (!isset($this->element)) {
@@ -97,8 +104,8 @@ class PagerDefault extends SelectQueryExtender {
    * one is generated off of the pager query itself.
    *
    * @param SelectQueryInterface $query
-   *   The count query object.  It must return a single row with a single column,
-   *   which is the total number of records.
+   *   The count query object.  It must return a single row with a single
+   *   column, which is the total number of records.
    */
   public function setCountQuery(SelectQueryInterface $query) {
     $this->customCountQuery = $query;
@@ -127,7 +134,7 @@ class PagerDefault extends SelectQueryExtender {
    *
    * The default if not specified is 10 items per page.
    *
-   * @param $limit
+   * @param int $limit
    *   An integer specifying the number of elements per page.  If passed a false
    *   value (FALSE, 0, NULL), the pager is disabled.
    *
