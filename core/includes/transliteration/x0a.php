@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => NULL, NULL, 'N', NULL, NULL, 'a', 'a', 'i', 'i', 'u', 'u', NULL, NULL, NULL, NULL, 'e',

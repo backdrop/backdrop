@@ -9,8 +9,14 @@
 
 /**
  * Initializes the table sort context.
+ *
+ * @param array $header
+ *   An array of column headers in the format described in theme_table().
+ *
+ * @return array
+ *   The table sort context array containing order, sort, and query information.
  */
-function tablesort_init($header) {
+function tablesort_init(array $header) {
   $ts = tablesort_get_order($header);
   $ts['sort'] = tablesort_get_sort($header);
   $ts['query'] = tablesort_get_query_parameters();
@@ -23,17 +29,17 @@ function tablesort_init($header) {
  * If the cell in question is the column header for the current sort criterion,
  * it gets special formatting. All possible sort criteria become links.
  *
- * @param $cell
+ * @param array|string $cell
  *   The cell to format.
- * @param $header
+ * @param array $header
  *   An array of column headers in the format described in theme_table().
- * @param $ts
+ * @param array $ts
  *   The current table sort context as returned from tablesort_init().
  *
- * @return
+ * @return array
  *   A properly formatted cell, ready for _theme_table_cell().
  */
-function tablesort_header($cell, $header, $ts) {
+function tablesort_header($cell, array $header, array $ts) {
   // Special formatting for the currently sorted column header.
   if (is_array($cell) && isset($cell['field'])) {
     $title = t('sort by @s', array('@s' => $cell['data']));
@@ -47,11 +53,19 @@ function tablesort_header($cell, $header, $ts) {
       $image = theme('tablesort_indicator', array('style' => $ts['sort']));
     }
     else {
-      // If the user clicks a different header, we want to sort ascending initially.
+      // If the user clicks a different header, we want to sort ascending
+      // initially.
       $ts['sort'] = 'asc';
       $image = '';
     }
-    $cell['data'] = l($cell['data'] . $image, $_GET['q'], array('attributes' => array('title' => $title), 'query' => array_merge($ts['query'], array('sort' => $ts['sort'], 'order' => $cell['data'])), 'html' => TRUE));
+    $cell['data'] = l($cell['data'] . $image, $_GET['q'], array(
+      'attributes' => array('title' => $title),
+      'query' => array_merge($ts['query'], array(
+        'sort' => $ts['sort'],
+        'order' => $cell['data'],
+      )),
+      'html' => TRUE,
+    ));
 
     unset($cell['field'], $cell['sort']);
   }
@@ -63,19 +77,19 @@ function tablesort_header($cell, $header, $ts) {
  *
  * Adds a class attribute to all cells in the currently active column.
  *
- * @param $cell
+ * @param array|string $cell
  *   The cell to format.
- * @param $header
+ * @param array $header
  *   An array of column headers in the format described in theme_table().
- * @param $ts
+ * @param array $ts
  *   The current table sort context as returned from tablesort_init().
- * @param $i
+ * @param int $i
  *   The index of the cell's table column.
  *
- * @return
+ * @return array
  *   A properly formatted cell, ready for _theme_table_cell().
  */
-function tablesort_cell($cell, $header, $ts, $i) {
+function tablesort_cell($cell, array $header, array $ts, $i) {
   if (isset($header[$i]['data']) && $header[$i]['data'] == $ts['name'] && !empty($header[$i]['field'])) {
     if (is_array($cell)) {
       $cell['class'][] = 'active';
@@ -90,7 +104,7 @@ function tablesort_cell($cell, $header, $ts, $i) {
 /**
  * Composes a URL query parameter array for table sorting links.
  *
- * @return
+ * @return array
  *   A URL query parameter array that consists of all components of the current
  *   page request except for those pertaining to table sorting.
  */
@@ -101,15 +115,15 @@ function tablesort_get_query_parameters() {
 /**
  * Determines the current sort criterion.
  *
- * @param $headers
+ * @param array $headers
  *   An array of column headers in the format described in theme_table().
  *
- * @return
+ * @return array
  *   An associative array describing the criterion, containing the keys:
  *   - "name": The localized title of the table column.
  *   - "sql": The name of the database field to sort on.
  */
-function tablesort_get_order($headers) {
+function tablesort_get_order(array $headers) {
   $order = isset($_GET['order']) ? $_GET['order'] : '';
   foreach ($headers as $header) {
     if (is_array($header)) {
@@ -138,13 +152,13 @@ function tablesort_get_order($headers) {
 /**
  * Determines the current sort direction.
  *
- * @param $headers
+ * @param array $headers
  *   An array of column headers in the format described in theme_table().
  *
- * @return
+ * @return string
  *   The current sort direction ("asc" or "desc").
  */
-function tablesort_get_sort($headers) {
+function tablesort_get_sort(array $headers) {
   if (isset($_GET['sort'])) {
     return (strtolower($_GET['sort']) == 'desc') ? 'desc' : 'asc';
   }

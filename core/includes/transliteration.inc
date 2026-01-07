@@ -9,18 +9,19 @@
  *
  * Based on Mediawiki's UtfNormal::quickIsNFCVerify().
  *
- * @param $string
+ * @param string $string
  *   UTF-8 encoded text input.
- * @param $unknown
+ * @param string $unknown
  *   Replacement string for characters that do not have a suitable ASCII
  *   equivalent.
- * @param $source_langcode
+ * @param string|null $source_langcode
  *   Optional ISO 639 language code that denotes the language of the input and
  *   is used to apply language-specific variations. If the source language is
  *   not known at the time of transliteration, it is recommended to set this
  *   argument to the site default language to produce consistent results.
  *   Otherwise the current display language will be used.
- * @return
+ *
+ * @return string
  *   Transliterated text.
  */
 function _transliteration_process($string, $unknown = '?', $source_langcode = NULL) {
@@ -82,13 +83,12 @@ function _transliteration_process($string, $unknown = '?', $source_langcode = NU
     //
     // Since PHP is not the fastest language on earth, some of this code is a
     // little ugly with inner loop optimizations.
-
     $head = '';
     $chunk = strlen($str);
     // Counting down is faster. I'm *so* sorry.
     $len = $chunk + 1;
 
-    for ($i = -1; --$len; ) {
+    for ($i = -1; --$len;) {
       $c = $str[++$i];
       if ($remaining = $tail_bytes[$c]) {
         // UTF-8 head byte!
@@ -162,16 +162,17 @@ function _transliteration_process($string, $unknown = '?', $source_langcode = NU
 /**
  * Replaces a Unicode character using the transliteration database.
  *
- * @param $ord
+ * @param int $ord
  *   An ordinal Unicode character code.
- * @param $unknown
+ * @param string $unknown
  *   Replacement string for characters that do not have a suitable ASCII
  *   equivalent.
- * @param $langcode
+ * @param string|null $langcode
  *   Optional ISO 639 language code that denotes the language of the input and
  *   is used to apply language-specific variations.  Defaults to the current
  *   display language.
- * @return
+ *
+ * @return string
  *   ASCII replacement character.
  */
 function _transliteration_replace($ord, $unknown = '?', $langcode = NULL) {
@@ -222,18 +223,19 @@ function _transliteration_replace($ord, $unknown = '?', $langcode = NULL) {
  *
  * The resulting file name has white space replaced with underscores, consists
  * of only US-ASCII characters, and is converted to lowercase (if configured).
- * If multiple files have been submitted as an array, the names will be
+ * If multiple files have been submitted as an array, names will be
  * processed recursively.
  *
- * @param $filename
+ * @param string|array $filename
  *   A file name, or an array of file names.
- * @param $source_langcode
+ * @param string|null $source_langcode
  *   Optional ISO 639 language code that denotes the language of the input and
  *   is used to apply language-specific variations. If the source language is
  *   not known at the time of transliteration, it is recommended to set this
  *   argument to the site default language to produce consistent results.
- *   Otherwise the current display language will be used.
- * @return
+ *   Otherwise current display language will be used.
+ *
+ * @return string|array
  *   Sanitized file name, or array of sanitized file names.
  *
  * @see language_default()
@@ -270,13 +272,14 @@ function transliteration_clean_filename($filename, $source_langcode = NULL) {
  * @param string $unknown
  *   Replacement string for characters that do not have a suitable ASCII
  *   equivalent.
- * @param string $source_langcode
+ * @param string|null $source_langcode
  *   Optional ISO 639 language code that denotes the language of the input and
  *   is used to apply language-specific variations. If the source language is
  *   not known at the time of transliteration, it is recommended to set this
  *   argument to the site default language to produce consistent results.
- *   Otherwise the current display language will be used.
- * @return
+ *   Otherwise current display language will be used.
+ *
+ * @return string
  *   Transliterated text.
  *
  * @see language_default()
@@ -289,6 +292,15 @@ function transliteration_get($text, $unknown = '?', $source_langcode = NULL) {
   return _transliteration_process($text, $unknown, $source_langcode);
 }
 
+/**
+ * Removes diacritics from a string.
+ *
+ * @param string $string
+ *   The string to remove diacritics from.
+ *
+ * @return string
+ *   The string with diacritics removed.
+ */
 function transliteration_remove_diacritics($string) {
   $result = '';
 
@@ -299,14 +311,18 @@ function transliteration_remove_diacritics($string) {
     // few characters that aren't accented letters mixed in. So define the
     // ranges and the excluded characters.
     $range1 = $code > 0x00bf && $code < 0x017f;
-    $exclusions_range1 = array(0x00d0, 0x00d7, 0x00f0, 0x00f7, 0x0138, 0x014a, 0x014b);
+    $exclusions_range1 = array(
+      0x00d0, 0x00d7, 0x00f0, 0x00f7, 0x0138, 0x014a, 0x014b,
+    );
     $range2 = $code > 0x01cc && $code < 0x0250;
-    $exclusions_range2 = array(0x01DD, 0x01f7, 0x021c, 0x021d, 0x0220, 0x0221, 0x0241, 0x0242, 0x0245);
+    $exclusions_range2 = array(
+      0x01DD, 0x01f7, 0x021c, 0x021d, 0x0220, 0x0221, 0x0241, 0x0242, 0x0245,
+    );
 
     $replacement = $character;
     if (($range1 && !in_array($code, $exclusions_range1)) || ($range2 && !in_array($code, $exclusions_range2))) {
       $to_add = transliteration_get($code, 'xyz');
-      if(strlen($to_add) === 1) {
+      if (strlen($to_add) === 1) {
         $replacement = $to_add;
       }
     }
