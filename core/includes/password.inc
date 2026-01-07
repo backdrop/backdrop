@@ -190,12 +190,12 @@ function _password_crypt($algo, $password, $setting) {
 /**
  * Parse the log2 iteration count from a stored hash or setting string.
  *
- * @param array $setting
+ * @param string $setting
  *   An existing hash or the output of _password_generate_salt().
  *
  * @return string
  */
-function _password_get_count_log2(array $setting) {
+function _password_get_count_log2($setting) {
   $itoa64 = _password_itoa64();
   return strpos($itoa64, $setting[3]);
 }
