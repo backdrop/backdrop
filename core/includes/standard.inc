@@ -11,7 +11,7 @@
  * in ISO 3166-1 alpha-2. Originally from the location project
  * (http://drupal.org/project/location).
  *
- * @return
+ * @return array
  *   An array of country code => country name pairs.
  */
 function standard_country_list() {
@@ -297,7 +297,7 @@ function standard_country_list() {
  * make otherwise strange looking PHP syntax natural (to not be displayed in
  * right to left). See http://drupal.org/node/128866#comment-528929.
  *
- * @return
+ * @return array
  *   An array of language code to language name information.
  *   Language name information itself is an array of English and native names.
  */
@@ -305,7 +305,8 @@ function standard_language_list() {
   return array(
     'af' => array('Afrikaans', 'Afrikaans'),
     'am' => array('Amharic', 'አማርኛ'),
-    'ar' => array('Arabic', /* Left-to-right marker "‭" */ 'العربية', LANGUAGE_RTL),
+    'ar' => array(
+      'Arabic', /* Left-to-right marker "‭" */ 'العربية', LANGUAGE_RTL),
     'ast' => array('Asturian', 'Asturianu'),
     'az' => array('Azerbaijani', 'Azərbaycanca'),
     'be' => array('Belarusian', 'Беларуская'),
@@ -326,7 +327,8 @@ function standard_language_list() {
     'es' => array('Spanish', 'Español'),
     'et' => array('Estonian', 'Eesti'),
     'eu' => array('Basque', 'Euskera'),
-    'fa' => array('Persian, Farsi', /* Left-to-right marker "‭" */ 'فارسی', LANGUAGE_RTL),
+    'fa' => array(
+      'Persian, Farsi', /* Left-to-right marker "‭" */ 'فارسی', LANGUAGE_RTL),
     'fi' => array('Finnish', 'Suomi'),
     'fil' => array('Filipino', 'Filipino'),
     'fo' => array('Faeroese', 'Føroyskt'),
@@ -337,7 +339,8 @@ function standard_language_list() {
     'gl' => array('Galician', 'Galego'),
     'gsw-berne' => array('Swiss German', 'Schwyzerdütsch'),
     'gu' => array('Gujarati', 'ગુજરાતી'),
-    'he' => array('Hebrew', /* Left-to-right marker "‭" */ 'עברית', LANGUAGE_RTL),
+    'he' => array(
+      'Hebrew', /* Left-to-right marker "‭" */ 'עברית', LANGUAGE_RTL),
     'hi' => array('Hindi', 'हिन्दी'),
     'hr' => array('Croatian', 'Hrvatski'),
     'ht' => array('Haitian Creole', 'Kreyòl ayisyen'),
@@ -413,7 +416,7 @@ function standard_language_list() {
 /**
  * Get an array of all timezones and their matching country code.
  *
- * @return
+ * @return array
  *   An array of timezone => country code pairs.
  */
 function standard_timezone_country_list() {

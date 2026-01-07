@@ -3,8 +3,8 @@
  * @file
  * Backdrop stream wrapper interface.
  *
- * Provides a Backdrop interface and classes to implement PHP stream wrappers for
- * public, private, and temporary files.
+ * Provides a Backdrop interface and classes to implement PHP stream wrappers
+ * for public, private, and temporary files.
  *
  * A stream wrapper is an abstraction of a file system that allows Backdrop to
  * use the same set of methods to access both local files and remote resources.
@@ -85,7 +85,8 @@ define('STREAM_WRAPPERS_READ_VISIBLE', STREAM_WRAPPERS_READ | STREAM_WRAPPERS_VI
 define('STREAM_WRAPPERS_NORMAL', STREAM_WRAPPERS_WRITE_VISIBLE);
 
 /**
- * Stream wrapper type flag -- visible, readable and writeable using local files.
+ * Stream wrapper type flag -- visible, readable and writeable using local
+ * files.
  */
 define('STREAM_WRAPPERS_LOCAL_NORMAL', STREAM_WRAPPERS_LOCAL | STREAM_WRAPPERS_NORMAL);
 
@@ -95,24 +96,295 @@ define('STREAM_WRAPPERS_LOCAL_NORMAL', STREAM_WRAPPERS_LOCAL | STREAM_WRAPPERS_N
  * @see http://www.php.net/manual/class.streamwrapper.php
  */
 interface StreamWrapperInterface {
-  public function stream_open($uri, $mode, $options, &$opened_url);
+
+  /**
+   * Stream Open
+   *
+   * Support for fopen(), file_get_contents(), file_put_contents() etc.
+   *
+   * @param string $uri
+   *   A string containing the URI to the file to open.
+   * @param string $mode
+   *   The file mode ("r", "wb" etc.).
+   * @param int $options
+   *   A bit mask of STREAM_USE_PATH and STREAM_REPORT_ERRORS.
+   * @param ?string $opened_path
+   *   A string containing the path actually opened.
+   *
+   * @return bool
+   *   Returns TRUE if file was opened successfully.
+   *
+   * @see http://php.net/manual/streamwrapper.stream-open.php
+   */
+  public function stream_open($uri, $mode, $options, &$opened_path);
+
+  /**
+   * Support for fclose().
+   *
+   * @return void
+   *
+   * @see http://php.net/manual/streamwrapper.stream-close.php
+   */
   public function stream_close();
+
+  /**
+   * Support for flock().
+   *
+   * @param int $operation
+   *   One of the following:
+   *   - LOCK_SH to acquire a shared lock (reader).
+   *   - LOCK_EX to acquire an exclusive lock (writer).
+   *   - LOCK_UN to release a lock (shared or exclusive).
+   *   - LOCK_NB if you don't want flock() to block while locking (not
+   *     supported on Windows).
+   *
+   * @return bool
+   *   Always returns TRUE at the present time.
+   *
+   * @see http://php.net/manual/streamwrapper.stream-lock.php
+   */
   public function stream_lock($operation);
+
+  /**
+   * Support for fread(), file_get_contents() etc.
+   *
+   * @param int $count
+   *   Maximum number of bytes to be read.
+   *
+   * @return string|false
+   *   The string that was read, or FALSE in case of an error.
+   *
+   * @see http://php.net/manual/streamwrapper.stream-read.php
+   */
   public function stream_read($count);
+
+  /**
+   * Support for fwrite(), file_put_contents() etc.
+   *
+   * @param string $data
+   *   The string to be written.
+   *
+   * @return int
+   *   The number of bytes written (integer).
+   *
+   * @see http://php.net/manual/streamwrapper.stream-write.php
+   */
   public function stream_write($data);
+
+  /**
+   * Support for feof().
+   *
+   * @return bool
+   *   TRUE if end-of-file has been reached.
+   *
+   * @see http://php.net/manual/streamwrapper.stream-eof.php
+   */
   public function stream_eof();
+
+  /**
+   * Support for fseek().
+   *
+   * @param int $offset
+   *   The byte offset to got to.
+   * @param int $whence
+   *   SEEK_SET, SEEK_CUR, or SEEK_END.
+   *
+   * @return bool
+   *   TRUE on success.
+   *
+   * @see http://php.net/manual/streamwrapper.stream-seek.php
+   */
   public function stream_seek($offset, $whence);
+
+  /**
+   * Support for fflush().
+   *
+   * @return bool
+   *   TRUE if data was successfully stored (or there was no data to store).
+   *
+   * @see http://php.net/manual/streamwrapper.stream-flush.php
+   */
   public function stream_flush();
+
+  /**
+   * Support for ftell().
+   *
+   * @return int
+   *   The current offset in bytes from the beginning of file.
+   *
+   * @see http://php.net/manual/streamwrapper.stream-tell.php
+   */
   public function stream_tell();
+
+  /**
+   * Support for fstat().
+   *
+   * @return array|false
+   *   An array with file status, or FALSE in case of an error - see fstat()
+   *   for a description of this array.
+   *
+   * @see http://php.net/manual/streamwrapper.stream-stat.php
+   */
   public function stream_stat();
+
+  /**
+   * Sets metadata on the stream.
+   *
+   * WARNING: Do not call this method directly! It will be called internally by
+   * PHP itself when one of the following functions is called on a stream URL:
+   *
+   * @param string $uri
+   *   A string containing the URI to the file to set metadata on.
+   * @param int $option
+   *   One of:
+   *   - STREAM_META_TOUCH: The method was called in response to touch().
+   *   - STREAM_META_OWNER_NAME: The method was called in response to chown()
+   *     with string parameter.
+   *   - STREAM_META_OWNER: The method was called in response to chown().
+   *   - STREAM_META_GROUP_NAME: The method was called in response to chgrp().
+   *   - STREAM_META_GROUP: The method was called in response to chgrp().
+   *   - STREAM_META_ACCESS: The method was called in response to chmod().
+   * @param mixed $value
+   *   If option is:
+   *   - STREAM_META_TOUCH: Array consisting of two arguments of the touch()
+   *     function.
+   *   - STREAM_META_OWNER_NAME or STREAM_META_GROUP_NAME: The name of the owner
+   *     user/group as string.
+   *   - STREAM_META_OWNER or STREAM_META_GROUP: The value of the owner
+   *     user/group as integer.
+   *   - STREAM_META_ACCESS: The argument of the chmod() as integer.
+   *
+   * @return bool
+   *   Returns TRUE on success or FALSE on failure. If $option is not
+   *   implemented, FALSE should be returned.
+   *
+   * @see touch()
+   * @see chmod()
+   * @see chown()
+   * @see chgrp()
+   * @link http://php.net/manual/streamwrapper.stream-metadata.php
+   */
+  public function stream_metadata($uri, $option, $value);
+
+  /**
+   * Support for unlink().
+   *
+   * @param string $uri
+   *   A string containing the URI to the resource to delete.
+   *
+   * @return bool
+   *   TRUE if resource was successfully deleted.
+   *
+   * @see http://php.net/manual/streamwrapper.unlink.php
+   */
   public function unlink($uri);
+
+  /**
+   * Support for rename().
+   *
+   * @param string $from_uri
+   *   The URI to the file to rename.
+   * @param string $to_uri
+   *   The new URI for file.
+   *
+   * @return bool
+   *   TRUE if file was successfully renamed.
+   *
+   * @see http://php.net/manual/streamwrapper.rename.php
+   */
   public function rename($from_uri, $to_uri);
+
+  /**
+   * Support for mkdir().
+   *
+   * @param string $uri
+   *   A string containing the URI to the directory to create.
+   * @param int $mode
+   *   Permission flags - see mkdir().
+   * @param int $options
+   *   A bit mask of STREAM_REPORT_ERRORS and STREAM_MKDIR_RECURSIVE.
+   *
+   * @return bool
+   *   TRUE if directory was successfully created.
+   *
+   * @see http://php.net/manual/streamwrapper.mkdir.php
+   */
   public function mkdir($uri, $mode, $options);
+
+  /**
+   * Support for rmdir().
+   *
+   * @param string $uri
+   *   A string containing the URI to the directory to delete.
+   * @param int $options
+   *   A bit mask of STREAM_REPORT_ERRORS.
+   *
+   * @return bool
+   *   TRUE if directory was successfully removed.
+   *
+   * @see http://php.net/manual/streamwrapper.rmdir.php
+   */
   public function rmdir($uri, $options);
+
+  /**
+   * Support for stat().
+   *
+   * @param string $uri
+   *   A string containing the URI to get information about.
+   * @param int $flags
+   *   A bit mask of STREAM_URL_STAT_LINK and STREAM_URL_STAT_QUIET.
+   *
+   * @return array|false
+   *   An array with file status, or FALSE in case of an error - see fstat()
+   *   for a description of this array.
+   *
+   * @see http://php.net/manual/streamwrapper.url-stat.php
+   */
   public function url_stat($uri, $flags);
+
+  /**
+   * Support for opendir().
+   *
+   * @param string $uri
+   *   A string containing the URI to the directory to open.
+   * @param int $options
+   *   Unknown (parameter is not documented in PHP Manual).
+   *
+   * @return bool
+   *   TRUE on success.
+   *
+   * @see http://php.net/manual/streamwrapper.dir-opendir.php
+   */
   public function dir_opendir($uri, $options);
+
+  /**
+   * Support for readdir().
+   *
+   * @return string|false
+   *   The next filename, or FALSE if there are no more files in the directory.
+   *
+   * @see http://php.net/manual/streamwrapper.dir-readdir.php
+   */
   public function dir_readdir();
+
+  /**
+   * Support for rewinddir().
+   *
+   * @return bool
+   *   TRUE on success.
+   *
+   * @see http://php.net/manual/streamwrapper.dir-rewinddir.php
+   */
   public function dir_rewinddir();
+
+  /**
+   * Support for closedir().
+   *
+   * @return bool
+   *   TRUE on success.
+   *
+   * @see http://php.net/manual/streamwrapper.dir-closedir.php
+   */
   public function dir_closedir();
 }
 
@@ -129,7 +401,7 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    * This allows you to set the URI. Generally is only called by the factory
    * method.
    *
-   * @param $uri
+   * @param string $uri
    *   A string containing the URI that should be used for this instance.
    */
   public function setUri($uri);
@@ -137,7 +409,7 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
   /**
    * Returns the stream resource URI.
    *
-   * @return
+   * @return bool
    *   Returns the current URI of the instance.
    */
   public function getUri();
@@ -150,7 +422,7 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    * "youtube://xIpLd0WQKCY" might be
    * "http://www.youtube.com/watch?v=xIpLd0WQKCY".
    *
-   * @return
+   * @return string
    *   Returns a string containing a web accessible URL for the resource.
    */
   public function getExternalUrl();
@@ -158,18 +430,18 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
   /**
    * Returns the MIME type of the resource.
    *
-   * @param $uri
+   * @param string $uri
    *   The URI, path, or filename.
-   * @param $mapping
+   * @param array|null $mapping
    *   An optional map of extensions to their mimetypes, in the form:
    *    - 'mimetypes': a list of mimetypes, keyed by an identifier,
    *    - 'extensions': the mapping itself, an associative array in which
    *      the key is the extension and the value is the mimetype identifier.
    *
-   * @return
+   * @return string
    *   Returns a string containing the MIME type of the resource.
    */
-  public static function getMimeType($uri, $mapping = NULL);
+  public static function getMimeType($uri, ?array $mapping = NULL);
 
   /**
    * Changes permissions of the resource.
@@ -177,11 +449,11 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    * PHP lacks this functionality and it is not part of the official stream
    * wrapper interface. This is a custom implementation for Backdrop.
    *
-   * @param $mode
+   * @param int $mode
    *   Integer value for the permissions. Consult PHP chmod() documentation
    *   for more information.
    *
-   * @return
+   * @return bool
    *   Returns TRUE on success or FALSE on failure.
    */
   public function chmod($mode);
@@ -193,7 +465,7 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    * wrappers. We provide this as a default so that individual wrappers may
    * implement their own solutions.
    *
-   * @return
+   * @return string|false
    *   Returns a string with absolute pathname on success (implemented
    *   by core wrappers), or FALSE on failure or if the registered
    *   wrapper does not provide an implementation.
@@ -207,10 +479,10 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    * around the normal PHP dirname() function, which does not support stream
    * wrappers.
    *
-   * @param $uri
+   * @param string|null $uri
    *   An optional URI.
    *
-   * @return
+   * @return string|false
    *   A string containing the directory name, or FALSE if not applicable.
    *
    * @see backdrop_dirname()
@@ -257,22 +529,22 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * Gets the path that the wrapper is responsible for.
    * @TODO: Review this method name per http://drupal.org/node/701358
    *
-   * @return
+   * @return string
    *   String specifying the path.
    */
-  abstract function getDirectoryPath();
+  abstract public function getDirectoryPath();
 
   /**
-   * Base implementation of setUri().
+   * {@inheritdoc}
    */
-  function setUri($uri) {
+  public function setUri($uri) {
     $this->uri = $uri;
   }
 
   /**
-   * Base implementation of getUri().
+   * {@inheritdoc}
    */
-  function getUri() {
+  public function getUri() {
     return $this->uri;
   }
 
@@ -285,10 +557,10 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * method may return a URI or path suitable for writing that is completely
    * separate from the URI used for reading.
    *
-   * @param $uri
+   * @param string|null $uri
    *   Optional URI.
    *
-   * @return
+   * @return string|false
    *   Returns a string representing a location suitable for writing of a file,
    *   or FALSE if unable to write to the file such as with read-only streams.
    */
@@ -304,9 +576,9 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Base implementation of getMimeType().
+   * {@inheritdoc}
    */
-  static function getMimeType($uri, $mapping = NULL) {
+  public static function getMimeType($uri, $mapping = NULL) {
     if (!isset($mapping)) {
       // The default file map, defined in file.mimetypes.inc is quite big.
       // We only load it when necessary.
@@ -322,9 +594,9 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
 
     // Iterate over the file parts, trying to find a match.
     // For my.awesome.image.jpeg, we try:
-    //   - jpeg
-    //   - image.jpeg, and
-    //   - awesome.image.jpeg
+    // - jpeg
+    // - image.jpeg, and
+    // - awesome.image.jpeg.
     while ($additional_part = array_pop($file_parts)) {
       $extension = strtolower($additional_part . ($extension ? '.' . $extension : ''));
       if (isset($mapping['extensions'][$extension])) {
@@ -336,9 +608,9 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Base implementation of chmod().
+   * {@inheritdoc}
    */
-  function chmod($mode) {
+  public function chmod($mode) {
     $output = @chmod($this->getLocalPath(), $mode);
     // We are modifying the underlying file here, so we have to clear the stat
     // cache so that PHP understands that URI has changed too.
@@ -347,16 +619,16 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Base implementation of realpath().
+   * {@inheritdoc}
    */
-  function realpath() {
+  public function realpath() {
     return $this->getLocalPath();
   }
 
   /**
    * Returns the canonical absolute path of the URI, if possible.
    *
-   * @param string $uri
+   * @param string|null $uri
    *   (optional) The stream wrapper URI to be converted to a canonical
    *   absolute path. This may point to a directory or another type of file.
    *
@@ -385,21 +657,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for fopen(), file_get_contents(), file_put_contents() etc.
-   *
-   * @param $uri
-   *   A string containing the URI to the file to open.
-   * @param $mode
-   *   The file mode ("r", "wb" etc.).
-   * @param $options
-   *   A bit mask of STREAM_USE_PATH and STREAM_REPORT_ERRORS.
-   * @param $opened_path
-   *   A string containing the path actually opened.
-   *
-   * @return
-   *   Returns TRUE if file was opened successfully.
-   *
-   * @see http://php.net/manual/streamwrapper.stream-open.php
+   * {@inheritdoc}
    */
   public function stream_open($uri, $mode, $options, &$opened_path) {
     $this->uri = $uri;
@@ -419,20 +677,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for flock().
-   *
-   * @param $operation
-   *   One of the following:
-   *   - LOCK_SH to acquire a shared lock (reader).
-   *   - LOCK_EX to acquire an exclusive lock (writer).
-   *   - LOCK_UN to release a lock (shared or exclusive).
-   *   - LOCK_NB if you don't want flock() to block while locking (not
-   *     supported on Windows).
-   *
-   * @return
-   *   Always returns TRUE at the present time.
-   *
-   * @see http://php.net/manual/streamwrapper.stream-lock.php
+   * {@inheritdoc}
    */
   public function stream_lock($operation) {
     if (in_array($operation, array(LOCK_SH, LOCK_EX, LOCK_UN, LOCK_NB))) {
@@ -443,151 +688,68 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for fread(), file_get_contents() etc.
-   *
-   * @param $count
-   *   Maximum number of bytes to be read.
-   *
-   * @return
-   *   The string that was read, or FALSE in case of an error.
-   *
-   * @see http://php.net/manual/streamwrapper.stream-read.php
+   * {@inheritdoc}
    */
   public function stream_read($count) {
     return fread($this->handle, $count);
   }
 
   /**
-   * Support for fwrite(), file_put_contents() etc.
-   *
-   * @param $data
-   *   The string to be written.
-   *
-   * @return
-   *   The number of bytes written (integer).
-   *
-   * @see http://php.net/manual/streamwrapper.stream-write.php
+   * {@inheritdoc}
    */
   public function stream_write($data) {
     return fwrite($this->handle, $data);
   }
 
   /**
-   * Support for feof().
-   *
-   * @return
-   *   TRUE if end-of-file has been reached.
-   *
-   * @see http://php.net/manual/streamwrapper.stream-eof.php
+   * {@inheritdoc}
    */
   public function stream_eof() {
     return feof($this->handle);
   }
 
   /**
-   * Support for fseek().
-   *
-   * @param $offset
-   *   The byte offset to got to.
-   * @param $whence
-   *   SEEK_SET, SEEK_CUR, or SEEK_END.
-   *
-   * @return
-   *   TRUE on success.
-   *
-   * @see http://php.net/manual/streamwrapper.stream-seek.php
+   * {@inheritdoc}
    */
   public function stream_seek($offset, $whence) {
-    // fseek returns 0 on success and -1 on a failure.
+    // Fseek returns 0 on success and -1 on a failure.
     // stream_seek   1 on success and  0 on a failure.
     return !fseek($this->handle, $offset, $whence);
   }
 
   /**
-   * Support for fflush().
-   *
-   * @return
-   *   TRUE if data was successfully stored (or there was no data to store).
-   *
-   * @see http://php.net/manual/streamwrapper.stream-flush.php
+   * {@inheritdoc}
    */
   public function stream_flush() {
     return fflush($this->handle);
   }
 
   /**
-   * Support for ftell().
-   *
-   * @return
-   *   The current offset in bytes from the beginning of file.
-   *
-   * @see http://php.net/manual/streamwrapper.stream-tell.php
+   * {@inheritdoc}
    */
   public function stream_tell() {
     return ftell($this->handle);
   }
 
   /**
-   * Support for fstat().
-   *
-   * @return
-   *   An array with file status, or FALSE in case of an error - see fstat()
-   *   for a description of this array.
-   *
-   * @see http://php.net/manual/streamwrapper.stream-stat.php
+   * {@inheritdoc}
    */
   public function stream_stat() {
     return fstat($this->handle);
   }
 
   /**
-   * Support for fclose().
+   * {@inheritdoc}
    *
-   * @return
+   * @return bool
    *   TRUE if stream was successfully closed.
-   *
-   * @see http://php.net/manual/streamwrapper.stream-close.php
    */
   public function stream_close() {
     return fclose($this->handle);
   }
 
   /**
-   * Sets metadata on the stream.
-   *
-   * WARNING: Do not call this method directly! It will be called internally by
-   * PHP itself when one of the following functions is called on a stream URL:
-   *
-   * @param string $uri
-   *   A string containing the URI to the file to set metadata on.
-   * @param int $option
-   *   One of:
-   *   - STREAM_META_TOUCH: The method was called in response to touch().
-   *   - STREAM_META_OWNER_NAME: The method was called in response to chown()
-   *     with string parameter.
-   *   - STREAM_META_OWNER: The method was called in response to chown().
-   *   - STREAM_META_GROUP_NAME: The method was called in response to chgrp().
-   *   - STREAM_META_GROUP: The method was called in response to chgrp().
-   *   - STREAM_META_ACCESS: The method was called in response to chmod().
-   * @param mixed $value
-   *   If option is:
-   *   - STREAM_META_TOUCH: Array consisting of two arguments of the touch()
-   *     function.
-   *   - STREAM_META_OWNER_NAME or STREAM_META_GROUP_NAME: The name of the owner
-   *     user/group as string.
-   *   - STREAM_META_OWNER or STREAM_META_GROUP: The value of the owner
-   *     user/group as integer.
-   *   - STREAM_META_ACCESS: The argument of the chmod() as integer.
-   *
-   * @return bool
-   *   Returns TRUE on success or FALSE on failure. If $option is not
-   *   implemented, FALSE should be returned.
-   *
-   * @see touch()
-   * @see chmod()
-   * @see chown()
-   * @see chgrp()
-   * @link http://php.net/manual/streamwrapper.stream-metadata.php
+   * {@inheritdoc}
    */
   public function stream_metadata($uri, $option, $value) {
     $target = $this->getLocalPath($uri);
@@ -702,15 +864,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for unlink().
-   *
-   * @param $uri
-   *   A string containing the URI to the resource to delete.
-   *
-   * @return
-   *   TRUE if resource was successfully deleted.
-   *
-   * @see http://php.net/manual/streamwrapper.unlink.php
+   * {@inheritdoc}
    */
   public function unlink($uri) {
     $this->uri = $uri;
@@ -718,17 +872,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for rename().
-   *
-   * @param $from_uri,
-   *   The URI to the file to rename.
-   * @param $to_uri
-   *   The new URI for file.
-   *
-   * @return
-   *   TRUE if file was successfully renamed.
-   *
-   * @see http://php.net/manual/streamwrapper.rename.php
+   * {@inheritdoc}
    */
   public function rename($from_uri, $to_uri) {
     return rename($this->getLocalPath($from_uri), $this->getLocalPath($to_uri));
@@ -741,10 +885,10 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * around the PHP dirname() function because it does not support stream
    * wrappers.
    *
-   * @param $uri
+   * @param string $uri
    *   A URI or path.
    *
-   * @return
+   * @return string
    *   A string containing the directory name.
    *
    * @see backdrop_dirname()
@@ -762,19 +906,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for mkdir().
-   *
-   * @param $uri
-   *   A string containing the URI to the directory to create.
-   * @param $mode
-   *   Permission flags - see mkdir().
-   * @param $options
-   *   A bit mask of STREAM_REPORT_ERRORS and STREAM_MKDIR_RECURSIVE.
-   *
-   * @return
-   *   TRUE if directory was successfully created.
-   *
-   * @see http://php.net/manual/streamwrapper.mkdir.php
+   * {@inheritdoc}
    */
   public function mkdir($uri, $mode, $options) {
     $this->uri = $uri;
@@ -796,17 +928,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for rmdir().
-   *
-   * @param $uri
-   *   A string containing the URI to the directory to delete.
-   * @param $options
-   *   A bit mask of STREAM_REPORT_ERRORS.
-   *
-   * @return
-   *   TRUE if directory was successfully removed.
-   *
-   * @see http://php.net/manual/streamwrapper.rmdir.php
+   * {@inheritdoc}
    */
   public function rmdir($uri, $options) {
     $this->uri = $uri;
@@ -819,18 +941,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for stat().
-   *
-   * @param $uri
-   *   A string containing the URI to get information about.
-   * @param $flags
-   *   A bit mask of STREAM_URL_STAT_LINK and STREAM_URL_STAT_QUIET.
-   *
-   * @return
-   *   An array with file status, or FALSE in case of an error - see fstat()
-   *   for a description of this array.
-   *
-   * @see http://php.net/manual/streamwrapper.url-stat.php
+   * {@inheritdoc}
    */
   public function url_stat($uri, $flags) {
     $this->uri = $uri;
@@ -846,17 +957,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for opendir().
-   *
-   * @param $uri
-   *   A string containing the URI to the directory to open.
-   * @param $options
-   *   Unknown (parameter is not documented in PHP Manual).
-   *
-   * @return
-   *   TRUE on success.
-   *
-   * @see http://php.net/manual/streamwrapper.dir-opendir.php
+   * {@inheritdoc}
    */
   public function dir_opendir($uri, $options) {
     $this->uri = $uri;
@@ -866,24 +967,14 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for readdir().
-   *
-   * @return
-   *   The next filename, or FALSE if there are no more files in the directory.
-   *
-   * @see http://php.net/manual/streamwrapper.dir-readdir.php
+   * {@inheritdoc}
    */
   public function dir_readdir() {
     return readdir($this->handle);
   }
 
   /**
-   * Support for rewinddir().
-   *
-   * @return
-   *   TRUE on success.
-   *
-   * @see http://php.net/manual/streamwrapper.dir-rewinddir.php
+   * {@inheritdoc}
    */
   public function dir_rewinddir() {
     rewinddir($this->handle);
@@ -894,12 +985,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   }
 
   /**
-   * Support for closedir().
-   *
-   * @return
-   *   TRUE on success.
-   *
-   * @see http://php.net/manual/streamwrapper.dir-closedir.php
+   * {@inheritdoc}
    */
   public function dir_closedir() {
     closedir($this->handle);
@@ -928,7 +1014,7 @@ class BackdropPublicStreamWrapper extends BackdropLocalStreamWrapper {
    *
    * Return the HTML URI of a public file.
    */
-  function getExternalUrl() {
+  public function getExternalUrl() {
     $path = str_replace('\\', '/', $this->getTarget());
     return $GLOBALS['base_url'] . '/' . self::getDirectoryPath() . '/' . backdrop_encode_path($path);
   }
@@ -954,8 +1040,8 @@ class BackdropPublicStreamWrapper extends BackdropLocalStreamWrapper {
 /**
  * Backdrop private (private://) stream wrapper class.
  *
- * Provides support for storing privately accessible files with the Backdrop file
- * interface.
+ * Provides support for storing privately accessible files with the Backdrop
+ * file interface.
  */
 class BackdropPrivateStreamWrapper extends BackdropLocalStreamWrapper {
   /**
@@ -966,11 +1052,11 @@ class BackdropPrivateStreamWrapper extends BackdropLocalStreamWrapper {
   }
 
   /**
-   * Overrides getExternalUrl().
+   * {@inheritdoc}
    *
    * Return the HTML URI of a private file.
    */
-  function getExternalUrl() {
+  public function getExternalUrl() {
     $path = str_replace('\\', '/', $this->getTarget());
     return url('system/files/' . $path, array('absolute' => TRUE));
   }
@@ -997,7 +1083,7 @@ class BackdropTemporaryStreamWrapper extends BackdropLocalStreamWrapper {
   }
 
   /**
-   * Overrides getExternalUrl().
+   * {@inheritdoc}
    */
   public function getExternalUrl() {
     $path = str_replace('\\', '/', $this->getTarget());
