@@ -17,7 +17,7 @@
   display: none;
 }
 .layout-list .layout-group.hidden-row td {
-  background: #dedede;
+  background: #f7f7f7;
 }
  .layout-list .layout-row td:first-child {
   padding-left: 24px;

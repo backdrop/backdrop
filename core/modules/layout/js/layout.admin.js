@@ -29,7 +29,7 @@ Backdrop.behaviors.layoutList = {
     var $examplesToggle = $('.add-path-toggle').once('add-toggle');
     if ($examplesToggle.length) {
       $examplesToggle.on('click', function(e) {
-        $(this).closest('.layout-row').nextUntil('layout-row', '.layout-group.hidden-row').toggle();
+        $(this).closest('.layout-row').nextUntil('.layout-row', '.layout-group.hidden-row').toggle();
         e.preventDefault();
         e.stopPropagation();
       });
