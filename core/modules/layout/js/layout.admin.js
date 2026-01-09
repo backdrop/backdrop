@@ -25,6 +25,15 @@ Backdrop.behaviors.layoutList = {
         $element.addClass('no-flexbox');
       }
     }
+    // Handle toggling the additional path rows.
+    var $examplesToggle = $('.add-path-toggle').once('add-toggle');
+    if ($examplesToggle.length) {
+      $examplesToggle.on('click', function(e) {
+        $(this).closest('.layout-row').nextUntil('layout-row', '.layout-group.hidden-row').toggle();
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    }
   }
 };
 

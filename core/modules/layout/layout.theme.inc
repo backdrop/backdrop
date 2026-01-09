@@ -64,7 +64,11 @@ function theme_layout_info($variables) {
   $output .= $preview;
   $output .= '<div class="layout-detail">' . $label . '</div>';
   $output .= '</div>';
-
+  if (!empty($layout->additional_paths)) {
+    $output .= '<div class="add-path-toggle">';
+    $output .= l('Additional paths: ' . implode(', ', $layout->additional_paths), '/');
+    $output .= '</div>';
+  }
   return $output;
 }
 

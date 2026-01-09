@@ -13,6 +13,12 @@
  .layout-list .layout-group td.missing-path a {
    color: #c40d00;
  }
+.layout-list .layout-group.hidden-row {
+  display: none;
+}
+.layout-list .layout-group.hidden-row td {
+  background: #dedede;
+}
  .layout-list .layout-row td:first-child {
   padding-left: 24px;
 }
