@@ -19,6 +19,9 @@
 .layout-list .layout-group.hidden-row td {
   background: #f7f7f7;
 }
+.layout-list .add-path-toggle {
+  clear: both;
+}
  .layout-list .layout-row td:first-child {
   padding-left: 24px;
 }
