@@ -185,6 +185,12 @@ function form_test_menu() {
     'page arguments' => array('form_test_checkboxes_radios_select_indentations'),
     'access callback' => TRUE,
   );
+  $items['form-test/checkboxes-radios-defaults'] = array(
+    'title' => t('Checkboxes, Radios default options'),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_checkboxes_radios_defaults'),
+    'access callback' => TRUE,
+  );
   $items['form-test/email'] = array(
     'title' => 'Email fields',
     'page callback' => 'backdrop_get_form',
@@ -1753,6 +1759,39 @@ function form_test_checkboxes_radios_select_indentations($form, &$form_state) {
   );
   $form['select']['foo']['#indentation'] = 1;
   $form['select']['bar']['#indentation'] = 2;
+
+  return $form;
+}
+
+/**
+ * Form constructor to test default options in checkboxes and radios.
+ */
+function form_test_checkboxes_radios_defaults($form, &$form_state, $customize = FALSE) {
+  $form['#submit'] = array('_form_test_submit_values_json');
+
+  // Mix string and numeric keys and set a string default value.
+  $form['checkboxes'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Checkboxes'),
+    '#options' => array(
+      'foo' => t('Foo'),
+      0 => t('Zero'),
+      'bar' => t('Bar'),
+    ),
+    '#default_value' => array('foo'),
+  );
+  $form['radios'] = array(
+    '#type' => 'radios',
+    '#title' => t('Radios'),
+    '#options' => array(
+      'foo' => t('Foo'),
+      0 => t('Zero'),
+      'bar' => t('Bar'),
+    ),
+    '#default_value' => 'foo',
+  );
+
+  $form['submit'] = array('#type' => 'submit', '#value' => 'Submit');
 
   return $form;
 }

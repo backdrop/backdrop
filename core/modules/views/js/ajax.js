@@ -56,7 +56,7 @@
    */
   Backdrop.theme.tableDragChangedWarning = function () {
     return [];
-  }
+  };
 
   /**
    * Trigger preview when the "live preview" checkbox is checked.
@@ -69,7 +69,7 @@
         }
       });
     }
-  }
+  };
 
   /**
    * Sync preview display.
