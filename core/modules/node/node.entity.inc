@@ -200,13 +200,6 @@ class Node extends Entity {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->title;
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {
@@ -352,18 +345,12 @@ class Node extends Entity {
         $query->condition($nids);
         $query->range(0, 1);
 
-        $grants = db_or();
-        foreach (node_access_grants($op, $account) as $realm => $gids) {
-          foreach ($gids as $gid) {
-            $grants->condition(db_and()
-              ->condition('gid', $gid)
-              ->condition('realm', $realm)
-            );
-          }
-        }
+        $grants = node_add_node_grants_to_query(node_access_grants($op, $account));
+
         if (count($grants) > 0) {
           $query->condition($grants);
         }
+
         $result = (bool) $query
           ->execute()
           ->fetchField();
@@ -714,9 +701,11 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
     // Remove previously built content, if exists.
     $node->content = array();
+    // It is null for newly created, but we need it as array key.
+    $nid = (string) $node->id();
 
     // Allow modules to change the display mode.
-    $view_mode = key(entity_view_mode_prepare('node', array($node->nid => $node), $view_mode, $langcode));
+    $view_mode = key(entity_view_mode_prepare('node', array($nid => $node), $view_mode, $langcode));
 
     // The 'view' hook can be implemented to overwrite the default function
     // to display nodes.
@@ -728,8 +717,8 @@ class NodeStorageController extends EntityDatabaseStorageController {
     // In case of a multiple view, node_view_multiple() already ran the
     // 'prepare_view' step. An internal flag prevents the operation from running
     // twice.
-    field_attach_prepare_view('node', array($node->nid => $node), $view_mode, $langcode);
-    entity_prepare_view('node', array($node->nid => $node));
+    field_attach_prepare_view('node', array($nid => $node), $view_mode, $langcode);
+    entity_prepare_view('node', array($nid => $node));
     $node->content += field_attach_view('node', $node, $view_mode, $langcode);
 
     // Always display a read more link on teasers because we have no way
@@ -777,7 +766,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($nodes as $node) {
-      /* @var Node $node */
+      /** @var Node $node */
       if (isset($node->preview) && ($node->preview == 'Preview')) {
         backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
         backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
@@ -791,7 +780,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
       unset($node->content);
 
       $build += array(
-        '#theme' => 'node__' . $node->type . '__' . $view_mode,
+        '#theme' => 'node',
         '#node' => $node,
         '#view_mode' => $view_mode,
         '#langcode' => $langcode,
@@ -809,7 +798,9 @@ class NodeStorageController extends EntityDatabaseStorageController {
       // Allow modules to modify the structured node.
       $type = 'node';
       backdrop_alter(array('node_view', 'entity_view'), $build, $type);
-      $view[$type][$node->id()] = $build;
+      // It is null for newly created, but we need it as array key.
+      $nid = (string) $node->id();
+      $view[$type][$nid] = $build;
     }
 
     return $view;

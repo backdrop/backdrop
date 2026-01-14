@@ -2008,7 +2008,7 @@ function views_ui_clone_form_submit($form, &$form_state) {
   $new_view->name = $form_state['values']['name'];
   $new_view->human_name = $form_state['values']['label'];
   $new_view->save();
-  backdrop_set_message(t('The view %old_name as been cloned into %new_name.', array('%old_name' => $form_state['view']->get_human_name(), '%new_name' => $new_view->get_human_name())));
+  backdrop_set_message(t('The view %old_name has been cloned into %new_name.', array('%old_name' => $form_state['view']->get_human_name(), '%new_name' => $new_view->get_human_name())));
   $form_state['redirect'] = 'admin/structure/views/view/' . $new_view->name;
 }
 
@@ -2144,9 +2144,7 @@ function views_ui_edit_view_form_cancel($form, &$form_state) {
   tempstore_clear('views.view', $form_state['view']->name);
   backdrop_set_message(t('Any changes to the %name view have been discarded.', array('%name' => $form_state['view']->get_human_name())), 'info');
   if (empty($form['view']->vid)) {
-    // I seem to have to backdrop_goto here because I can't get fapi to
-    // honor the redirect target. Not sure what I screwed up here.
-    backdrop_goto('admin/structure/views');
+    $form_state['redirect'] = 'admin/structure/views';
   }
 }
 

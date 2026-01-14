@@ -35,8 +35,7 @@ function config($config_file, $type = 'active') {
     $storage = config_get_config_storage($type);
     $config = new Config($config_file, $storage);
     $config->load();
-    $cache = $config->get('_config_static');
-    if ($cache) {
+    if ($config->isStatic()) {
       $loaded_configs[$type][$config_file] = $config;
     }
   }
@@ -288,28 +287,57 @@ function config_install_default_config($project, $config_name = NULL) {
     }
   }
   $project_config_dir = $project_path . '/config';
-  if (is_dir($project_config_dir)) {
-    $storage = new ConfigFileStorage($project_config_dir);
-    $files = glob($project_config_dir . '/*.json');
-    foreach ($files as $file) {
-      // Load config data into the active store and write it out to the
-      // file system in the Backdrop config directory. Note the config name
-      // needs to be the same as the file name WITHOUT the extension.
-      $parts = explode('/', $file);
-      $file = array_pop($parts);
-      $file_config_name = str_replace('.json', '', $file);
-      if (is_null($config_name) || $file_config_name === $config_name) {
-        $data = $storage->read($file_config_name);
-        $config = config($file_config_name);
-        // We only create new configs, and do not overwrite existing ones.
-        if ($config->isNew()) {
-          $config->setData($data);
-          module_invoke_all('config_create', $config);
-          $config->save();
-        }
+  $storage = new ConfigFileStorage($project_config_dir);
+
+  $default_config_names = config_get_default_config_names($project);
+  foreach ($default_config_names as $default_config_name) {
+    // Load config data into the active store and write it out to the
+    // file system in the Backdrop config directory. Note the config name
+    // needs to be the same as the file name WITHOUT the extension.
+    if (is_null($config_name) || $default_config_name === $config_name) {
+      $data = $storage->read($default_config_name);
+      $config = config($default_config_name);
+      // We only create new configs, and do not overwrite existing ones.
+      if ($config->isNew()) {
+        $config->setData($data);
+        module_invoke_all('config_create', $config);
+        $config->save();
       }
     }
   }
+}
+
+/**
+ * Gets the name of config files provided by a module or theme.
+ *
+ * @param $project
+ *   The name of the project for which config names should be returned.
+ *
+ * @return string[]
+ *   An unindexed array of config names, without the .json extension.
+ *
+ * @since 1.31.0 Function added.
+ */
+function config_get_default_config_names($project) {
+  $project_path = NULL;
+  foreach (array('module', 'theme') as $project_type) {
+    if ($project_path = backdrop_get_path($project_type, $project)) {
+      break;
+    }
+  }
+
+  $config_names = array();
+  $project_config_dir = $project_path . '/config';
+  if (is_dir($project_config_dir)) {
+    $files = glob($project_config_dir . '/*.json');
+    foreach ($files as $file) {
+      $parts = explode('/', $file);
+      $file = array_pop($parts);
+      $config_names[] = str_replace('.json', '', $file);
+    }
+  }
+
+  return $config_names;
 }
 
 /**
@@ -317,13 +345,11 @@ function config_install_default_config($project, $config_name = NULL) {
  *
  * @param string $project
  *   The name of the project we are uninstalling.
- * @param string|NULL $config_name
- *   (optional) If wanting to remove just a single configuration file from the
- *   project, specify the configuration file name without the extension.
  *
- * @since 1.26.0 First parameter changed from $module to $project.
+ * @since 1.26.0 The first parameter has been changed from $module to $project.
+ * @since 1.30.0 Unused parameter $config_name removed.
  */
-function config_uninstall_config($project, $config_name = NULL) {
+function config_uninstall_config($project) {
   // If this is a theme key, load the matching template.php file.
   if (!backdrop_load('module', $project) && $theme_path = backdrop_get_path('theme', $project)) {
     if (file_exists($theme_path . '/template.php')) {
@@ -585,7 +611,12 @@ class Config {
    */
   public function validateData() {
     if (!$this->validated) {
+      // Get config info if available. This may not be present if the providing
+      // module is being enabled at the same time.
       $config_info = config_get_info($this->getName());
+      if (!$config_info) {
+        $config_info = NULL;
+      }
       module_invoke_all('config_data_validate', $this, $config_info);
       $this->validated = TRUE;
     }
@@ -602,6 +633,23 @@ class Config {
       $this->load();
     }
     return $this->isNew;
+  }
+
+  /**
+   * Returns whether this config object is statically cached in memory.
+   *
+   * When a configuration is read from disk, the internal "_config_static"
+   * flag is read to determine if the contents of that configuration should be
+   * cached in memory for the duration of the request.
+   *
+   * @return bool
+   *   TRUE if this configuration object is cached in memory.
+   *
+   * @see config()
+   * @see Config::setStatic()
+   */
+  public function isStatic() {
+    return (bool) $this->get('_config_static');
   }
 
   /**
@@ -947,6 +995,35 @@ class Config {
   }
 
   /**
+   * Sets the flag for whether this config is statically stored in memory.
+   *
+   * This cache can substantially reduce reads from disk by allowing multiple
+   * calls to config() or config_get() to read from an in-memory cache that is
+   * populated once per request.
+   *
+   * Any config that is read more than once per request should be cached in some
+   * way. Some more advanced concepts like Views, Fields, or Content Types
+   * provide their own caching systems, so not all config should always use this
+   * cache. Configuration that is simple and has limited content, such as the
+   * typical "my_module.settings" config that is used to store site-wide module
+   * settings should have this flag set to TRUE.
+   *
+   * @param bool $value
+   *   Set to TRUE to enable memory caching. FALSE to disable memory caching.
+   *
+   * @see config()
+   * @see Config::isStatic()
+   */
+  public function setStatic($value = TRUE) {
+    if ($value) {
+      $this->set('_config_static', (bool) $value);
+    }
+    else {
+      $this->clear('_config_static');
+    }
+  }
+
+  /**
    * Unsets a value in this configuration object.
    *
    * @param string $key
@@ -1009,7 +1086,18 @@ class Config {
       $this->load();
     }
     // Ensure config name is saved in the result.
-    $this->data = array_merge(array('_config_name' => $this->name), $this->data);
+    $this->data['_config_name'] = $this->name;
+
+    // Ensure all _config_* keys are positioned at the top of the saved data.
+    $config_keys = array();
+    foreach ($this->data as $key => $value) {
+      if (strpos($key, '_config_') === 0) {
+        $config_keys[$key] = $value;
+      }
+    }
+    ksort($config_keys, SORT_STRING);
+    $this->data = array_merge($config_keys, $this->data);
+
     $this->storage->write($this->name, $this->data);
     $this->isNew = FALSE;
 

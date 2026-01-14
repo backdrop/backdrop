@@ -6,13 +6,13 @@ on:
 jobs:
   phpcs:
     name: Run phpcs
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Setup PHP with CodeSniffer tool
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          tools: phpcs:3.7
+          tools: phpcs
 
       # The checkout action refuses to put it outside, so we have to do it in
       # two steps.
@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: backdrop-ops/phpcs
-          ref: 1.0.0-beta1
+          ref: 1.2.0
           path: phpcs
 
       - name: Move standard outside current dir
@@ -31,11 +31,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: thenabeel/action-phpcs@v8
-        with:
-          files: "**.php,**.inc,**.module,**.install,**.profile,**.test"
-          standard: ../phpcs/Backdrop
-          fail_on_warnings: false
+      - name: Run phpcs on changed code
+        run: |
+          chmod 700 .github/misc/phpcs-changeset-check.sh
+          .github/misc/phpcs-changeset-check.sh origin/${{ github.base_ref }}
 
   spellcheck:
     name: Check spelling

@@ -124,7 +124,7 @@ function menu_tokens($type, $tokens, array $data = array(), array $options = arr
             $replacements[$original] = token_render_array($parents, $options);
           }
           break;
-        case 'root';
+        case 'root':
           if (!empty($link['p1']) && $link['p1'] != $link['mlid'] && $root = _menu_token_link_load($link['p1'])) {
             $replacements[$original] = $sanitize ? check_plain($root['title']) : $root['title'];
           }

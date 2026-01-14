@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.29.x-dev');
+define('BACKDROP_VERSION', '1.33.x-dev');
 
 /**
  * Core API compatibility.
@@ -17,7 +17,7 @@ define('BACKDROP_CORE_COMPATIBILITY', '1.x');
 /**
  * Minimum supported version of PHP.
  */
-define('BACKDROP_MINIMUM_PHP', '5.6.0');
+define('BACKDROP_MINIMUM_PHP', '7.1.0');
 
 /**
  * Minimum recommended value of PHP memory_limit.
@@ -469,6 +469,9 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * Destructs the BackdropCacheArray object.
    */
   public function __destruct() {
+    if (!is_array($this->keysToPersist)) {
+      throw new UnexpectedValueException();
+    }
     $data = array();
     foreach ($this->keysToPersist as $offset => $persist) {
       if ($persist) {
@@ -735,8 +738,7 @@ function backdrop_environment_initialize() {
   // e.g. "&" or "%" that have special meanings in URLs and must be encoded.
   $_GET['q'] = request_path();
 
-  // Enforce E_STRICT, but allow users to set levels not part of E_STRICT.
-  error_reporting(E_STRICT | E_ALL | error_reporting());
+  error_reporting(E_ALL);
 
   // Override PHP settings required for Backdrop to work properly.
   // settings.php contains more runtime settings.
@@ -860,21 +862,66 @@ function backdrop_settings_initialize() {
     require_once BACKDROP_ROOT . '/core/includes/drupal.inc';
   }
 
-  // Convert simplified database settings into the full databases array.
-  if (!empty($database) && $database !== 'mysql://user:pass@localhost/database_name') {
-    $database_parts = parse_url($database);
-    if (!$database_parts) {
-      trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+  $database_is_set = FALSE;
+
+  // The database connection can be specified in multiple formats:
+  // - $database as a string.
+  // - $database as an simple array.
+  // - $databases as a multi-level nested array.
+  // Both the simplified syntaxes are converted to the larger $databases array.
+
+  // First option: the database connection settings have been provided in the
+  // form of a connection string. This was the default format in versions prior
+  // to Backdrop 1.30.0:
+  if (!empty($database) && is_string($database)) {
+    $default_db_string = 'mysql://user:pass@localhost/database_name';
+    if ($database !== $default_db_string) {
+      // Convert simplified database settings string into the full databases
+      // array.
+      $database_parts = parse_url($database);
+      if (!$database_parts) {
+        trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+      }
+      $databases['default']['default'] = array(
+        'driver' => $database_parts['scheme'],
+        // Remove leading slash.
+        'database' => rawurldecode(substr($database_parts['path'], 1)),
+        'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
+        'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
+        'host' => $database_parts['host'],
+        'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
+        'prefix' => !empty($database_prefix) ? $database_prefix : '',
+      );
+      $database_is_set = TRUE;
     }
-    $databases['default']['default'] = array(
-      'driver' => $database_parts['scheme'],
-      'database' => rawurldecode(substr($database_parts['path'], 1)), // Remove leading slash.
-      'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
-      'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
-      'host' => $database_parts['host'],
-      'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
-      'prefix' => !empty($database_prefix) ? $database_prefix : '',
+  }
+  // Second option: the database connection settings is a simplified array. This
+  // is the default format in version 1.30.0 and higher.
+  if (!empty($database) && is_array($database)) {
+    $default_db_array = array(
+      'database' => 'database_name',
+      'username' => 'user',
+      'password' => 'pass',
+      'host' => 'localhost',
     );
+    if ($database != $default_db_array) {
+      // Specify default values.
+      $database += array(
+        'prefix' => '',
+        'driver' => 'mysql',
+        'port' => NULL,
+        'charset' => 'utf8mb4',
+        'collation' => 'utf8mb4_general_ci',
+      );
+      $databases['default']['default'] = $database;
+      $database_is_set = TRUE;
+    }
+  }
+
+  // If using one of the simplified syntaxes, verify all the necessary parts
+  // are specified.
+  if ($database_is_set) {
+    // Check that all required parts are included.
     $required_parts = array('driver', 'database', 'username', 'host');
     foreach ($required_parts as $key) {
       if (!$databases['default']['default'][$key]) {
@@ -969,8 +1016,8 @@ function backdrop_settings_initialize() {
     // Otherwise use $base_url as session name, without the protocol
     // to use the same session identifiers across HTTP and HTTPS.
     list( , $session_name) = explode('://', $base_url, 2);
-    // HTTP_HOST can be modified by a visitor, but we already sanitized it
-    // in backdrop_settings_initialize().
+    // HTTP_HOST can be modified by a visitor, but we already sanitized it in
+    // backdrop_environment_initialize().
     if (!empty($_SERVER['HTTP_HOST'])) {
       $cookie_domain = $_SERVER['HTTP_HOST'];
       // Strip leading periods, www., and port numbers from cookie domain.
@@ -1396,6 +1443,33 @@ function state_del($name) {
   if ($states && array_key_exists($name, $states)) {
     unset($states[$name]);
   }
+}
+
+/**
+ * Get the backup directory (if any) for this site.
+ *
+ * This setting comes from $settings['backup_directory'] in settings.php. Note
+ * that settings_get('backup_directory') should not be called directly, instead
+ * use this function, which takes into account test runs.
+ *
+ * This function is in bootstrap.inc so that it can be used without loading
+ * backup.inc if backups are not enabled.
+ *
+ * @return string|null
+ *   The path to the backup directory, relative or absolute, depending on the
+ *   site configuration, or NULL if no backup directory is specified.
+ *
+ * @since 1.30.0 Function added.
+ */
+function backup_get_backup_directory() {
+  $backup_directory = settings_get('backup_directory', '');
+
+  // For test runs, specify a specific sub-directory. See BackdropWebTestBase::setUp().
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    $backup_directory = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/backups';
+  }
+
+  return $backup_directory;
 }
 
 /**
@@ -2905,6 +2979,12 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
  * at an empty database. If this happens, redirect the user to install.php.
  */
 function backdrop_bootstrap_is_installed() {
+  // If in any maintenance mode (install, update, restore, etc.) assume the site
+  // is in the process of installing or restoring.
+  if (defined('MAINTENANCE_MODE')) {
+    return TRUE;
+  }
+
   // We may get a situation where the config directory has been specified in
   // settings.php but the database is empty. In which case a config exception
   // is thrown in the first bootstrap phase but the database hasn't been loaded.
@@ -3043,9 +3123,13 @@ function _backdrop_bootstrap_configuration() {
     install_goto('core/install.php');
   }
 
-  // Untrusted host names, throw an exception for the end-user.
+  // Untrusted host names, return 400 Bad Request to the end-user.
   if (!defined('MAINTENANCE_MODE') && !backdrop_check_trusted_hosts($_SERVER['HTTP_HOST'])) {
-    throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
+    http_response_code(400);
+    print format_string('HTTP Host "@hostname" is not included in the "trusted_host_patterns" setting of this site.', array(
+      '@hostname' => $_SERVER['HTTP_HOST'],
+    ));
+    exit;
   }
 
   // Bootstrap the database if it is needed but not yet available.
@@ -4181,19 +4265,20 @@ function backdrop_autoload($class) {
  * }
  * @endcode
  *
- * @param $name
+ * @param string|null $name
  *   Globally unique name for the variable. For a function with only one static,
  *   variable, the function name (e.g. via the PHP magic __FUNCTION__ constant)
  *   is recommended. For a function with multiple static variables add a
  *   distinguishing suffix to the function name for each one.
- * @param $default_value
+ *   Note that NULL is for internal use in backdrop_static_reset() only.
+ * @param mixed $default_value
  *   Optional default value.
- * @param $reset
+ * @param bool $reset
  *   TRUE to reset one or all variables(s). This parameter is only used
  *   internally and shouldn't be passed in; use backdrop_static_reset() instead.
  *   (This function's return value should not be used when TRUE is passed in.)
  *
- * @return
+ * @return mixed
  *   Returns a variable by reference.
  *
  * @see backdrop_static_reset()
@@ -4201,7 +4286,8 @@ function backdrop_autoload($class) {
 function &backdrop_static($name, $default_value = NULL, $reset = FALSE) {
   static $data = array(), $default = array();
   // First check if dealing with a previously defined static variable.
-  if (isset($data[$name]) || array_key_exists($name, $data)) {
+  // If the key is set in $data, it's also set in $default.
+  if ($name && array_key_exists($name, $data)) {
     // Non-NULL $name and both $data[$name] and $default[$name] statics exist.
     if ($reset) {
       // Reset pre-existing static variable to its default value.

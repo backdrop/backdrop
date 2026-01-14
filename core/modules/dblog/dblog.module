@@ -173,7 +173,7 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
     '#type' => 'textfield',
     '#title' => t('Date format for log messages'),
     '#maxlength' => 100,
-    '#description' => t('A date format using PHP date and time codes. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#description' => t('A date format using PHP date and time codes. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
     '#default_value' => $pattern,
     '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
     '#ajax' => array(

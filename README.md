@@ -9,10 +9,10 @@ Backdrop aims to provide:
 
 Requirements
 ------------
-- PHP 5.6.0 or higher. Even if Backdrop can run on older versions of PHP, we
+- PHP 7.1.0 or higher. Even if Backdrop can run on older versions of PHP, we
   strongly recommend that you use a
   [supported version of PHP](https://secure.php.net/supported-versions.php).
-- MySQL 5.0.15 or higher with PDO enabled
+- MySQL 5.5.0 or higher with PDO enabled
 - Apache (recommended) or Nginx web server
 - 50 MB of disk space (recommended), 15 MB (minimum)
 
@@ -107,7 +107,7 @@ Backdrop is [GPL v2](http://www.gnu.org/licenses/gpl-2.0.html) (or higher)
 software. See the LICENSE.txt file for complete text. Distributions of this
 software may relicense it as any later version of the GPL.
 
-All Backdrop code is Copyright 2001 - 2024 by the original authors.
+All Backdrop code is Copyright 2001 - 2025 by the original authors.
 
 Backdrop also includes works under different copyright notices that are
 distributed according to the terms of the GNU General Public License or a

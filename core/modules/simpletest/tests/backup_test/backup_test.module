@@ -1,0 +1,57 @@
+<?php
+/**
+ * @file
+ * Test module for verifying backup capabilities.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function backup_test_menu() {
+  $items = array();
+
+  $items['backup-test'] = array(
+    'title' => 'Backup test form',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('backup_test_settings_form'),
+    // There is no separate permission for creating backups.
+    'access arguments' => array('restore site backups'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Form that contains Backup form capabilities.
+ */
+function backup_test_settings_form(array $form, array &$form_state) {
+  include_once BACKDROP_ROOT . '/core/includes/backup.inc';
+
+  // Add in the Backup settings form, with settings.
+  $form = backup_settings_form($form, $form_state, array(
+    'show_settings' => TRUE,
+    'show_default_targets' => TRUE,
+  ));
+
+  $form['options']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Backup name'),
+    '#description' => t('May include only letters, numbers, underscores and dashes.'),
+  );
+
+  $form['options']['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Backup label'),
+  );
+
+  $form['options']['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Description'),
+  );
+
+  // Add our additional submit handler and the one provided by backup.inc.
+  $form['#submit'] = array('backup_settings_form_submit');
+
+  return $form;
+}

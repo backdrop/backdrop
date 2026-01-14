@@ -134,14 +134,16 @@ function theme_views_ui_rearrange_form($variables) {
       $rows[] = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
     }
   }
-  if (empty($rows)) {
-    $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
-  }
 
   $header = array('', t('Weight'), t('Remove'));
   $output = backdrop_render($form['override']);
   $output .= '<div class="scroll" data-backdrop-views-scroll>';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange')));
+  $output .= theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No fields available.'),
+    'attributes' => array('id' => 'arrange'),
+  ));
   $output .= '</div>';
   $output .= backdrop_render_children($form);
   backdrop_add_tabledrag('arrange', 'order', 'sibling', 'weight');
@@ -321,9 +323,6 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
       }
     }
   }
-  if (empty($rows)) {
-    $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
-  }
 
   $output = backdrop_render($form['override']);
   $output .= '<div class="scroll">';
@@ -338,7 +337,15 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
   if (!empty($ungroupable_rows)) {
     backdrop_add_tabledrag('views-rearrange-filters-ungroupable', 'order', 'sibling', 'weight');
     $header = array(t('Ungroupable filters'), t('Weight'), array('class' => array('views-hide-label'), 'data' => t('Group')), array('class' => array('views-hide-label'), 'data' => t('Remove')));
-    $output .= theme('table', array('header' => $header, 'rows' => $ungroupable_rows, 'attributes' => array('id' => 'views-rearrange-filters-ungroupable', 'class' => array('arrange'))));
+    $output .= theme('table', array(
+      'header' => $header,
+      'rows' => $ungroupable_rows,
+      'empty' => t('No fields available.'),
+      'attributes' => array(
+        'id' => 'views-rearrange-filters-ungroupable',
+        'class' => array('arrange'),
+      ),
+    ));
   }
 
   // Set up tabledrag so that the weights are changed when rows are dragged.
