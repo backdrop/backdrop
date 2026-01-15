@@ -945,15 +945,17 @@ function _layout_menu_router_path_exists($path, $layout_name) {
     ', array(':path' => $path))
     ->fetchAll();
   if (!empty($path_matches)) {
-    if ($layout_name) {
+    if (!empty($layout_name)) {
       $layout = layout_load($layout_name);
-      if ($layout->getPath() == $path) {
-        return FALSE;
-      }
-      if (!empty($layout->additional_menu_items)) {
-        foreach ($layout->additional_menu_items as $menu_item) {
-          if ($menu_item->path == $path) {
-            return FALSE;
+      foreach ($path_matches as $path_match) {
+        if ($path_match->page_callback == 'layout_path_access' && $layout->getPath() == $path) {
+          return FALSE;
+        }
+        if (!empty($layout->additional_menu_items)) {
+          foreach ($layout->additional_menu_items as $menu_item) {
+            if ($menu_item->path == $path) {
+              return FALSE;
+            }
           }
         }
       }
