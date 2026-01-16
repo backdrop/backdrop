@@ -303,7 +303,6 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
   $form['#file_type'] = $file_type->type;
   $form['#view_mode'] = $view_mode;
   $form['#tree'] = TRUE;
-  $form['#attached']['js'][] = backdrop_get_path('module', 'file') . '/js/file.admin.js';
 
   // Retrieve available formatters for this file type.
   $formatters = file_info_formatter_types();

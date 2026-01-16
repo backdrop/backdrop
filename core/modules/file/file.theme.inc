@@ -357,26 +357,12 @@ function theme_file_type_overview($variables) {
 
 /**
  * Returns HTML for a file display's display order table.
+ *
+ * @deprecated as of 1.32.2. In Backdrop there is no functionality to reorder
+ * file displays.
  */
 function theme_file_display_order($variables) {
-  $element = $variables['element'];
-
-  $rows = array();
-  foreach (element_children($element, TRUE) as $name) {
-    $element[$name]['weight']['#attributes']['class'][] = 'file-display-order-weight';
-    $rows[] = array(
-      'data' => array(
-        backdrop_render($element[$name]['label']),
-        backdrop_render($element[$name]['weight']),
-      ),
-      'class' => array('draggable'),
-    );
-  }
-  $output = backdrop_render_children($element);
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'file-displays-order')));
-  backdrop_add_tabledrag('file-displays-order', 'order', 'sibling', 'file-display-order-weight', NULL, NULL, TRUE);
-
-  return $output;
+  watchdog_deprecated_function('theme', __FUNCTION__);
 }
 
 /**
