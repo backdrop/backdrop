@@ -358,7 +358,7 @@ function theme_file_type_overview($variables) {
 /**
  * Returns HTML for a file display's display order table.
  *
- * @deprecated as of 1.28.1. In Backdrop there is no functionality to reorder
+ * @deprecated as of 1.32.2. In Backdrop there is no functionality to reorder
  * file displays.
  */
 function theme_file_display_order($variables) {
