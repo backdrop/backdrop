@@ -768,18 +768,21 @@ function field_get_values(Entity $entity, $field_name, $value_key = 'value', $la
 /**
  * Helper function to filter out empty field values.
  *
+ * Treat this as a public function. Multiple modules have been treating it as
+ * such.
+ *
  * @param array $field
  *   The field definition.
  * @param array $items
  *   The field values to filter.
- * @param array $instance
+ * @param array|null $instance
  *   The field API instance definition.
  *
  * @return array
  *   The array of items without empty field values. The function also renumbers
  *   the array keys to ensure sequential deltas.
  */
-function _field_filter_items($field, $items, $instance) {
+function _field_filter_items($field, $items, $instance = NULL) {
   $function = $field['module'] . '_field_is_empty';
   foreach ((array) $items as $delta => $item) {
     // Explicitly break if the function is undefined.
