@@ -125,6 +125,7 @@ function system_themes_page() {
     'enabled' => array(),
     'disabled' => array(),
   );
+  $broken_dependencies = array();
 
   foreach ($themes as &$theme) {
     if (!empty($theme->info['hidden'])) {
@@ -140,6 +141,30 @@ function system_themes_page() {
     if (isset($themes[$theme->name]->base_themes)) {
       $theme_keys = array_keys($themes[$theme->name]->base_themes);
       $theme_keys[] = $theme->name;
+      // Make sure, we have no missing dependency.
+      foreach ($theme->base_themes as $name => $value) {
+        // A value of NULL indicates that the base theme is missing.
+        if ($value == NULL) {
+          $broken_dependencies[$theme->name][] = $name;
+          // If the theme is enabled, warn about that problem.
+          if ($theme->status) {
+            if ($theme->is_default) {
+              $message = t('%theme is a sub theme of %base_theme, but its base theme is missing. Set another theme as default theme or download the base theme.', array(
+                '%theme' => $theme->info['name'],
+                '%base_theme' => $name,
+              ));
+              backdrop_set_message($message, 'error');
+            }
+            else {
+              $message = t('%theme is a sub theme of %base_theme, but its base theme is missing. Either download the base theme or disable it.', array(
+                '%theme' => $theme->info['name'],
+                '%base_theme' => $name,
+              ));
+              backdrop_set_message($message, 'warning');
+            }
+          }
+        }
+      }
     }
     else {
       $theme_keys = array($theme->name);
@@ -182,27 +207,31 @@ function system_themes_page() {
             'query' => $query,
             'attributes' => array('title' => t('Disable !theme theme', array('!theme' => $theme->info['name']))),
           );
-          $theme->operations['default'] = array(
-            'title' => t('Set default'),
-            'href' => 'admin/appearance/default',
-            'query' => $query,
-            'attributes' => array('title' => t('Set !theme as default theme', array('!theme' => $theme->info['name']))),
-          );
+          if (!array_key_exists($theme->name, $broken_dependencies)) {
+            $theme->operations['default'] = array(
+              'title' => t('Set default'),
+              'href' => 'admin/appearance/default',
+              'query' => $query,
+              'attributes' => array('title' => t('Set !theme as default theme', array('!theme' => $theme->info['name']))),
+            );
+          }
         }
       }
       else {
-        $theme->operations['enable'] = array(
-          'title' => t('Enable'),
-          'href' => 'admin/appearance/enable',
-          'query' => $query,
-          'attributes' => array('title' => t('Enable !theme theme', array('!theme' => $theme->info['name']))),
-        );
-        $theme->operations['enable-default'] = array(
-          'title' => t('Enable and set default'),
-          'href' => 'admin/appearance/default',
-          'query' => $query,
-          'attributes' => array('title' => t('Enable !theme as default theme', array('!theme' => $theme->info['name']))),
-        );
+        if (!array_key_exists($theme->name, $broken_dependencies)) {
+          $theme->operations['enable'] = array(
+            'title' => t('Enable'),
+            'href' => 'admin/appearance/enable',
+            'query' => $query,
+            'attributes' => array('title' => t('Enable !theme theme', array('!theme' => $theme->info['name']))),
+          );
+          $theme->operations['enable-default'] = array(
+            'title' => t('Enable and set default'),
+            'href' => 'admin/appearance/default',
+            'query' => $query,
+            'attributes' => array('title' => t('Enable !theme as default theme', array('!theme' => $theme->info['name']))),
+          );
+        }
       }
     }
 
@@ -216,6 +245,9 @@ function system_themes_page() {
     if ($theme->is_admin) {
       $theme->classes[] = 'admin-theme';
       $theme->notes[] = t('administration theme');
+    }
+    if (array_key_exists($theme->name, $broken_dependencies)) {
+      $theme->missing_dependencies = $broken_dependencies[$theme->name];
     }
 
     // Sort enabled and disabled themes into their own groups.
@@ -967,7 +999,9 @@ function system_modules_submit($form, &$form_state) {
       foreach (array_keys($files[$name]->requires) as $required) {
         if (empty($modules[$required]['enabled'])) {
           if (isset($files[$required])) {
-            $dependencies[] = $files[$required]->info['name'];
+            if (!$files[$required]->status) {
+              $dependencies[] = $files[$required]->info['name'];
+            }
             $modules[$required]['enabled'] = TRUE;
           }
           else {
@@ -1536,7 +1570,8 @@ function system_site_information_settings_submit($form, &$form_state) {
   if (!empty($form_state['values']['site_logo_upload'])) {
     $file = $form_state['values']['site_logo_upload'];
     unset($form_state['values']['site_logo_upload']);
-    $filename = file_unmanaged_copy($file->uri);
+    // Site logos must always be public.
+    $filename = file_unmanaged_copy($file->uri, 'public://');
     $form_state['values']['site_logo_theme'] = 0;
     $form_state['values']['site_logo_path'] = $filename;
     // Delete the file entity record.
@@ -1561,7 +1596,8 @@ function system_site_information_settings_submit($form, &$form_state) {
   if (!empty($form_state['values']['site_favicon_upload'])) {
     $file = $form_state['values']['site_favicon_upload'];
     unset($form_state['values']['site_favicon_upload']);
-    $filename = file_unmanaged_copy($file->uri);
+    // Site favicons must always be public.
+    $filename = file_unmanaged_copy($file->uri, 'public://');
     $form_state['values']['site_favicon_theme'] = 0;
     $form_state['values']['site_favicon_path'] = $filename;
     // Delete the file entity record.
@@ -1644,15 +1680,8 @@ function system_cron_settings($form, &$form_state) {
  * @ingroup forms
  */
 function system_run_cron_submit($form, &$form_state) {
-  // Run cron manually from Cron form.
-  if (backdrop_cron_run()) {
-    backdrop_set_message(t('Cron run successfully.'));
-  }
-  else {
-    backdrop_set_message(t('Cron run failed.'), 'error');
-  }
-
-  backdrop_goto('admin/config/system/cron');
+  // Run cron manually.
+  system_run_cron();
 }
 
 /**
@@ -2648,7 +2677,7 @@ function _system_format_debug_info(array $lines, array $format_settings) {
  * Menu callback: run cron manually.
  */
 function system_run_cron() {
-  // Run cron manually
+  // Run cron manually.
   if (backdrop_cron_run()) {
     backdrop_set_message(t('Cron ran successfully.'));
   }
@@ -2656,7 +2685,12 @@ function system_run_cron() {
     backdrop_set_message(t('Cron run failed.'), 'error');
   }
 
-  backdrop_goto('admin/reports/status');
+  if ($_SERVER['HTTP_REFERER']) {
+    backdrop_goto($_SERVER['HTTP_REFERER']);
+  }
+  else {
+    backdrop_goto('admin/reports/status');
+  }
 }
 
 /**
@@ -3109,7 +3143,8 @@ function system_transliteration_retroactive_submit($form, &$form_state) {
   $result = system_transliteration_file_query()->execute();
 
   while ($row = $result->fetchAssoc()) {
-    $file = new File($row);
+    /** @var File $file */
+    $file = entity_create('file', $row);
     $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
     $scheme = file_uri_scheme($file->uri);
 

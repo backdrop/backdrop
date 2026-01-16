@@ -28,6 +28,7 @@ class TaxonomyWebTestCase extends BackdropWebTestCase {
    * Returns a new term with random properties in the given vocabulary.
    */
   function createTerm($vocabulary) {
+    /** @var TaxonomyTerm $term */
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),
@@ -423,9 +424,9 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
     $this->createVocabulary();
     $this->createVocabulary();
 
-    $vocabs = taxonomy_vocabulary_load_multiple(FALSE);
-    foreach ($vocabs as $name => $vocab) {
-      $this->assertTrue(!empty($vocab->dynamicProp), format_string('Dynamic property via load hook for vocabulary %vocab is set.', array(
+    $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
+    foreach ($vocabularies as $name => $vocabulary) {
+      $this->assertTrue(!empty($vocabulary->dynamicProp), format_string('Dynamic property via load hook for vocabulary %vocab is set.', array(
         '%vocab' => $name,
       )));
     }

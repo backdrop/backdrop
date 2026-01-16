@@ -14,8 +14,8 @@ function system_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Report Backdrop version.
   if ($phase == 'runtime') {
+    // Report Backdrop version.
     $requirements['backdrop'] = array(
       'title' => $t('Backdrop CMS'),
       'value' => BACKDROP_VERSION,
@@ -23,23 +23,61 @@ function system_requirements($phase) {
       'weight' => -10,
     );
 
-    // Display the currently active installation profile, if the site
-    // is not running the default installation profile.
+    // Display the currently active installation profile, if the site is not
+    // running the default installation profile.
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
-      // If a version has been specified, append it to the profile.
-      $profile .= !empty($info['version']) ? '-' . $info['version'] : '';
-      $requirements['install_profile'] = array(
-        'title' => $t('Install profile'),
-        'value' => $t('%profile_name (%profile)', array(
-          '%profile_name' => $info['name'],
-          '%profile' => $profile,
-        )),
-        'severity' => REQUIREMENT_INFO,
-        'weight' => -9,
-      );
+      // Profiles might not ship with modules.
+      if (!empty($info)) {
+        // If a version has been specified, append it to the profile.
+        $profile .= !empty($info['version']) ? '-' . $info['version'] : '';
+        $requirements['install_profile'] = array(
+          'title' => $t('Install profile'),
+          'value' => $t('%profile_name (%profile)', array(
+            '%profile_name' => $info['name'],
+            '%profile' => $profile,
+          )),
+          'severity' => REQUIREMENT_INFO,
+          'weight' => -9,
+        );
+      }
     }
+
+    // Report the configuration storage being used.
+    $config_storage_types = array(
+      'active' => t('Active'),
+      'staging' => t('Staging'),
+    );
+    foreach ($config_storage_types as $type => $type_name) {
+      $storage = config_get_config_storage($type);
+      $class = get_class($storage);
+
+      switch ($class) {
+        case 'ConfigDatabaseStorage':
+          $config_locations[$type] = t('!type: database: <code>@config_location</code>', array (
+            // $type_name has already been passed through t() earlier. Avoid
+            // double-escaping.
+            '!type' => $type_name,
+            '@config_location' => 'db://default/config_' . $type,
+          ));
+          break;
+        case 'ConfigFileStorage':
+        default:
+          $config_locations[$type] = t('!type: JSON files: <code>@config_location</code>', array (
+            // $type_name has already been passed through t() earlier. Avoid
+            // double-escaping.
+            '!type' => $type_name,
+            '@config_location' => config_get_config_directory($type),
+          ));
+      }
+    }
+
+    $requirements['config_storage'] = array(
+      'title' => $t('Configuration storage'),
+      'value' => theme('item_list', array('items' => $config_locations)),
+      'severity' => REQUIREMENT_INFO,
+    );
   }
 
   // Web server information.
@@ -77,10 +115,10 @@ function system_requirements($phase) {
   // Minimum recommended PHP version can be incremented when deprecating older
   // versions of PHP but while they are still supported. This does not throw
   // a warning or error on updates to keep upgrade tests compatible.
-  $minimum_recommended_version = '5.6.0';
+  $minimum_recommended_version = '7.1.0';
   $minimum_warning = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => $minimum_recommended_version));
   if (version_compare($phpversion, $minimum_recommended_version) < 0) {
-    $requirements['php']['description'] = $minimum_warning . ' ' . l(t('Read about the minimum version increase'), 'https://backdropcms.org/news/backdrop-cms-drops-support-for-php-versions-prior-to-56') . '.';
+    $requirements['php']['description'] = $minimum_warning . ' ' . l(t('Read about the minimum version increase'), 'https://backdropcms.org/news/backdrop-cms-drops-support-for-php-versions-prior-to-71') . '.';
     $requirements['php']['severity'] = $phase === 'runtime' ? REQUIREMENT_ERROR : REQUIREMENT_INFO;
   }
 
@@ -199,7 +237,7 @@ function system_requirements($phase) {
   else {
     // Database information.
     $class = 'DatabaseTasks_' . Database::getConnection()->driver();
-    /* @var DatabaseTasks $tasks */
+    /** @var DatabaseTasks $tasks */
     $tasks = new $class();
     $dbinfo = $t('!system version !version', array('!system' => $tasks->name(), '!version' => Database::getConnection()->version()));
     $requirements['database_system'] = array(
@@ -266,13 +304,28 @@ function system_requirements($phase) {
       $config_storage = config_get_config_storage($type);
       if (is_a($config_storage, 'ConfigFileStorage')) {
         $config_directory = config_get_config_directory($type);
-        file_save_htaccess($config_directory);
+        $config_directory_accessible = strstr(realpath($config_directory), BACKDROP_ROOT);
+        if ($config_directory_accessible) {
+          file_save_htaccess($config_directory);
 
-        $htaccess_files[$config_directory . '/.htaccess'] = array(
-          'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
-          'directory' => $config_directory,
-        );
+          $htaccess_files[$config_directory . '/.htaccess'] = array(
+            'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+            'directory' => $config_directory,
+          );
+        }
       }
+    }
+
+    // Check/create the .htaccess file for the backup directory.
+    $backup_directory = backup_get_backup_directory();
+    $backup_directory_accessible = strstr(realpath($backup_directory), BACKDROP_ROOT);
+    if ($backup_directory && $backup_directory_accessible) {
+      file_save_htaccess($backup_directory);
+
+      $htaccess_files[$backup_directory . '/.htaccess'] = array(
+        'title' => $t('Backup directory'),
+        'directory' => $backup_directory,
+      );
     }
 
     // Try to write the .htaccess files first, to prevent false alarms in case
@@ -423,25 +476,35 @@ function system_requirements($phase) {
   // See if updates are available in update.php.
   if ($phase == 'runtime') {
     $requirements['update'] = array(
-      'title' => $t('Database updates'),
+      'title' => $t('Site updates'),
       'severity' => REQUIREMENT_OK,
       'value' => $t('Up to date'),
     );
 
     // Check installed modules.
+    $modules_update_required = array();
     foreach (module_list() as $module) {
       $updates = backdrop_get_schema_versions($module);
       if ($updates !== FALSE) {
         $current_schema = backdrop_get_installed_schema_version($module);
+        // Special case: modules installed in Drupal 6, that did not receive any
+        // update in Drupal 7, but have updates available in Backdrop.
+        if ($current_schema >= 6000 && $current_schema < 7000) {
+          $current_schema = 0;
+        }
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
-          $update_link = base_path() . 'core/update.php';
-          $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run database updates</a>)', array('@update' => $update_link));
-          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => $update_link));
-          break;
+          // Add the module with the latest schema to a list.
+          $modules_update_required[] = $module . ' (' . $current_schema . ' → ' . $latest_schema . ')';
         }
       }
+    }
+    if (!empty($modules_update_required)) {
+      $update_link = base_path() . 'core/update.php';
+      $requirements['update']['severity'] = REQUIREMENT_ERROR;
+      $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
+      $modules_update_required_list = theme('item_list', array('items' => $modules_update_required));
+      $requirements['update']['description'] = $t('The modules listed below have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link)) . $modules_update_required_list;
     }
   }
 
@@ -451,7 +514,12 @@ function system_requirements($phase) {
       $requirements['update access'] = array(
         'value' => $t('Not protected'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => $t('The <code>update.php</code> script is accessible to everyone without authentication check, which is a security risk. You must change the <code>update_free_access</code> value in your <code>settings.php</code> back to <code>FALSE</code>.'),
+        'description' => $t('The !file script is accessible to everyone without authentication check, which is a security risk. You must change the !setting value in your !settings_file back to !value.', array(
+          '!file' => '<code>update.php</code>',
+          '!setting' => '<code>update_free_access</code>',
+          '!settings_file' => '<code>settings.php</code>',
+          '!value' => '<code>FALSE</code>',
+        )),
       );
     }
     else {
@@ -460,6 +528,28 @@ function system_requirements($phase) {
       );
     }
     $requirements['update access']['title'] = $t('Access to update.php');
+  }
+
+  // Verify the restore.php access setting.
+  if ($phase == 'runtime') {
+    if (!empty($GLOBALS['settings']['restore_free_access'])) {
+      $requirements['restore access'] = array(
+        'value' => $t('Not protected'),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => $t('The !file script is accessible to everyone without authentication check, which is a security risk. You must change the !setting value in your !settings_file back to !value.', array(
+          '!file' => '<code>restore.php</code>',
+          '!setting' => '<code>restore_free_access</code>',
+          '!settings_file' => '<code>settings.php</code>',
+          '!value' => '<code>FALSE</code>',
+        )),
+      );
+    }
+    else {
+      $requirements['restore access'] = array(
+        'value' => $t('Protected'),
+      );
+    }
+    $requirements['restore access']['title'] = $t('Access to restore.php');
   }
 
   // Display an error if a newly introduced dependency in a module is not resolved.
@@ -723,7 +813,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
 
   $utf8mb4_active = $connection->utf8mb4IsActive();
   $utf8mb4_supported = $connection->utf8mb4IsSupported();
-  $documentation_url = 'https://docs.backdropcms.org/documentation/database-configuration';
+  $documentation_url = 'https://docs.backdropcms.org/documentation/database-configuration#utf8mb4';
   $upgrade_path = 'admin/config/development/utf8mb4-upgrade';
 
   $requirements['description'] = $t('4-byte UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
@@ -774,7 +864,8 @@ function _system_check_db_utf8mb4_requirements($phase) {
  * Implements hook_install().
  */
 function system_install() {
-  // Create tables.
+  // As an exception from other modules, the System module needs to explicitly
+  // call backdrop_install_schema('system') or its tables won't be created.
   backdrop_install_schema('system');
   $versions = backdrop_get_schema_versions('system');
   $version = $versions ? max($versions) : SCHEMA_INSTALLED;
@@ -815,6 +906,9 @@ function system_install() {
   if (valid_email_address($site_mail)) {
     config_set('system.core', 'site_mail', $site_mail);
   }
+
+  // Set the install version to the current version of Backdrop.
+  config_set('system.core', 'install_version', BACKDROP_VERSION);
 }
 
 /**
@@ -1131,7 +1225,7 @@ function system_schema() {
   $schema['menu_links'] = array(
     'description' => 'Contains the individual links within a menu.',
     'fields' => array(
-     'menu_name' => array(
+      'menu_name' => array(
         'description' => "The menu name. All links with the same menu name (such as 'main-menu') are part of the same menu.",
         'type' => 'varchar',
         'length' => 32,
@@ -1166,7 +1260,7 @@ function system_schema() {
         'default' => '',
       ),
       'link_title' => array(
-      'description' => 'The text displayed for the link, which may be modified by a title callback stored in {menu_router}.',
+        'description' => 'The text displayed for the link, which may be modified by a title callback stored in {menu_router}.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -1404,7 +1498,7 @@ function system_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-     ),
+    ),
     'primary key' => array('value'),
   );
 
@@ -2019,7 +2113,7 @@ function system_update_1018() {
   $config = config('system.authorize');
   $config->set('filetransfer_default', update_variable_get('authorize_filetransfer_default', ''));
   $settings = db_query("SELECT name, value FROM {variable} WHERE name LIKE 'authorize_filetransfer_connection_settings_%'");
-  foreach ($settings as $row)  {
+  foreach ($settings as $row) {
     $row = unserialize($row);
     $config->set('authorize_filetransfer_connection_settings_' . $row[0], $row[1]);
   }
@@ -2330,7 +2424,7 @@ function system_update_1025() {
     ),
     'content' => array(
       '84c43df4-1165-4faf-8700-c362a7153c0b' => array(
-      'plugin' => 'system:header',
+        'plugin' => 'system:header',
         'data' => array(
           'module' => 'system',
           'delta' => 'header',
@@ -3329,9 +3423,14 @@ function system_update_1078() {
 
 /**
  * Clear the cache to reset allowlist settings.
+ *
+ * This update has been removed because it causes a regression when later update
+ * hooks create cache tables.
+ *
+ * @see https://github.com/backdrop/backdrop-issues/issues/6974
  */
 function system_update_1079() {
-  backdrop_flush_all_caches();
+  // This update has been removed.
 }
 
 /**
@@ -3543,6 +3642,228 @@ function system_update_1095() {
     $save = TRUE;
   }
   if ($save) {
+    $config->save();
+  }
+}
+
+/**
+ * Fix icon display for customized system menu items.
+ */
+function system_update_1096() {
+  $icon_mapping = array(
+    'admin/dashboard' => 'speedometer-fill',
+    'admin/content' => 'pencil-fill',
+    'admin/people' => 'users-fill',
+    'admin/appearance' => 'palette-fill',
+    'admin/modules' => 'puzzle-piece-fill',
+    'admin/structure' => 'stack-fill',
+    'admin/config' => 'gear-fill',
+    'admin/reports' => 'info-fill',
+  );
+
+  $items = db_select('menu_links')
+    ->fields('menu_links')
+    ->condition('menu_name', 'management')
+    ->condition('module', 'system')
+    ->condition('depth', 2)
+    ->condition('customized', 1)
+    ->execute()->fetchAllAssoc('router_path');
+
+  foreach ($items as $router_path => $item) {
+    if (!array_key_exists($router_path, $icon_mapping)) {
+      continue;
+    }
+    $existing_item = (array) $item;
+    $options = unserialize($existing_item['options']);
+    if (isset($options['icon'])) {
+      continue;
+    }
+    $updated_item = $existing_item;
+    $options['icon'] = $icon_mapping[$router_path];
+    $updated_item['options'] = $options;
+    menu_link_save($updated_item, $existing_item);
+  }
+}
+
+/**
+ * Set local_action_position in Admin Bar.
+ */
+function system_update_1097() {
+  $config = config('admin_bar.settings');
+  if ($config->get('local_action_position') === NULL) {
+    $config->set('local_action_position', 'top');
+    $config->save();
+  }
+}
+
+/**
+ * Uninstall the fast_token_browser contrib module, now part of core.
+ */
+function system_update_1098() {
+  $module = db_query("SELECT name FROM {system} WHERE name = 'fast_token_browser' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'fast_token_browser');
+    backdrop_set_message(t('The contributed module <em>Fast Token Browser</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the Fast Token Browser module from the system table.
+    // As this module does not provide any config or settings, there doesn't
+    // seem to be anything else left to clean up or migrate.
+    // While the contrib module remains in the filesystem, this entry will be
+    // recreated, but it will have status 0 (disabled), and schema -1
+    // (uninstalled), so it is safe to remove.
+    db_query("DELETE FROM {system} WHERE name = 'fast_token_browser' AND type = 'module'");
+  }
+  else {
+    return t('<em>Fast Token Browser</em> not found. Nothing to be done.');
+  }
+}
+
+/**
+ * Set the 'initial version' based on the system install time.
+ */
+function system_update_1099() {
+  $config = config('system.core');
+  $install_version = $config->get('install_version');
+  if (!isset($install_version)) {
+    $install_time = state_get('install_time');
+    $version_timestamps = array(
+      '1.0.x' => 1421280000, // 2015-01-15
+      '1.1.x' => 1431648000, // 2015-05-15
+      '1.2.x' => 1442275200, // 2015-09-15
+      '1.3.x' => 1452816000, // 2016-01-15
+      '1.4.x' => 1463270400, // 2016-05-15
+      '1.5.x' => 1473897600, // 2016-09-15
+      '1.6.x' => 1484438400, // 2017-01-15
+      '1.7.x' => 1494806400, // 2017-05-15
+      '1.8.x' => 1505433600, // 2017-09-15
+      '1.9.x' => 1515974400, // 2018-01-15
+      '1.10.x' => 1526342400, // 2018-05-15
+      '1.11.x' => 1536969600, // 2018-09-15
+      '1.12.x' => 1547510400, // 2019-01-15
+      '1.13.x' => 1557878400, // 2019-05-15
+      '1.14.x' => 1568505600, // 2019-09-15
+      '1.15.x' => 1579046400, // 2020-01-15
+      '1.16.x' => 1589500800, // 2020-05-15
+      '1.17.x' => 1600128000, // 2020-09-15
+      '1.18.x' => 1610668800, // 2021-01-15
+      '1.19.x' => 1621036800, // 2021-05-15
+      '1.20.x' => 1631664000, // 2021-09-15
+      '1.21.x' => 1642204800, // 2022-01-15
+      '1.22.x' => 1652572800, // 2022-05-15
+      '1.23.x' => 1663200000, // 2022-09-15
+      '1.24.x' => 1673740800, // 2023-01-15
+      '1.25.x' => 1684108800, // 2023-05-15
+      '1.26.x' => 1694736000, // 2023-09-15
+      '1.27.x' => 1705276800, // 2024-01-15
+      '1.28.x' => 1715731200, // 2024-05-15
+      '1.29.x' => 1726358400, // 2024-09-15
+    );
+    // Loop over the array and print version and timestamp.
+    foreach ($version_timestamps as $version => $timestamp) {
+      if ($install_time < $timestamp) {
+        break;
+      }
+    }
+    $config->set('install_version', $version);
+    $config->save();
+    return t('Install version set to @version', array('@version' => $version));
+  }
+  return t('Install version had already been set, no changes.');
+}
+
+/**
+ * Set the default Basis settings for CSS updates.
+ */
+function system_update_1100() {
+  $themes = system_list('theme');
+  if (!empty($themes['basis']->status)) {
+    $config = config('basis.settings');
+    $data = $config->getData();
+    // Put the _config_static option at the top of the file.
+    $data = array_merge(array(
+      '_config_static' => TRUE,
+    ), $data);
+    if (!isset($data['css_update'])) {
+      $data['css_update'] = 'install';
+      // An empty version is sufficient, the same as "No updates" for existing
+      // sites running Basis.
+      $data['css_update_version'] = '';
+    }
+    $config->setData($data);
+    $config->save();
+  }
+}
+
+/**
+ * Create the default backup settings configuration.
+ */
+function system_update_1101() {
+  $config = config('system.backup');
+  if ($config->isNew()) {
+    $data = array(
+      '_config_static' => TRUE,
+      'backup_limit' => 5,
+    );
+    $config->setData($data);
+    $config->save();
+  }
+}
+
+/**
+ * Set the "Log in", "Reset password", and "Create new account" pages to use
+ * tabs for switching between these pages.
+ */
+function system_update_1102() {
+  $config = config('system.core');
+  if ($config->get('user_login_appearance') === NULL) {
+    $config->set('user_login_appearance', 'tabs');
+    $config->set('login_admin_theme', 1);
+    $config->save();
+  }
+}
+
+/**
+ * Create system.extensions config and populate with enabled modules and themes.
+ */
+function system_update_1103() {
+  $result = db_query("SELECT name, status, type, schema_version, info FROM {system} ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+  $modules = [];
+  $themes = [];
+  foreach ($result as $row) {
+    $extension = (array) $row;
+    $extension['info'] = unserialize($extension['info']);
+
+    if ($extension['type'] === 'module') {
+      // Do not include hidden modules in the list.
+      if (!empty($extension['info']['hidden'])) {
+        continue;
+      }
+      // Do not include uninstalled modules in the list.
+      if ($extension['schema_version'] == -1) {
+        continue;
+      }
+
+      $modules[$extension['name']] = (bool) $extension['status'];
+    }
+
+    // Only add enabled themes to the list.
+    if ($extension['type'] === 'theme' && $extension['status']) {
+      $themes[$extension['name']] = (bool) $extension['status'];
+    }
+  }
+
+  $config = config('system.extensions');
+  $config->set('modules', $modules);
+  $config->set('themes', $themes);
+  $config->save();
+}
+
+/**
+ * Ensure system.core uses _config_static for better performance.
+ */
+function system_update_1104() {
+  $config = config('system.core');
+  if ($config->get('_config_static') === NULL) {
+    $config->set('_config_static', TRUE);
     $config->save();
   }
 }

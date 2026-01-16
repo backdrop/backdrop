@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Backdrop database update API.
+ * Backdrop site update API.
  *
- * This file contains functions to perform database updates for a Backdrop
- * installation. It is included and used extensively by update.php.
+ * This file contains functions to perform database and config updates for a
+ * Backdrop installation. It is included and used extensively by update.php.
  */
 
 /**
@@ -306,6 +306,9 @@ function update_module_add_to_system($modules = array()) {
 function update_upgrade_check_dependencies() {
   $status_report = '';
   if (backdrop_get_installed_schema_version('system') > 7000) {
+    // Set a state indicating we are upgrading a Drupal 7 site.
+    state_set('update_d7_upgrade', TRUE);
+
     $modules_to_enable = update_upgrade_modules_to_enable();
 
     if (empty($modules_to_enable)) {
@@ -611,7 +614,7 @@ function update_do_one($module, $number, $dependency_map, &$context) {
 class BackdropUpdateException extends Exception { }
 
 /**
- * Starts the database update batch process.
+ * Starts the site update batch process.
  *
  * @param $start
  *   An array whose keys contain the names of modules to be updated during the
@@ -714,11 +717,11 @@ function update_finished($success, $results, $operations) {
 }
 
 /**
- * Returns a list of all the pending database updates.
+ * Returns a list of all the pending site updates.
  *
- * @return
- *   An associative array keyed by module name which contains all information
- *   about database updates that need to be run, and any updates that are not
+ * @return array
+ *   An associative array keyed by module name, which contains all information
+ *   about site updates that need to be run and any updates that are not
  *   going to proceed due to missing requirements. The system module will
  *   always be listed first.
  *
@@ -759,6 +762,13 @@ function update_get_update_list() {
         continue;
       }
 
+      // Some modules, like the Book module, never received any update during
+      // Drupal 7. But they might have been installed in Drupal 6.
+      if ($schema_version >= 6000 && $schema_version < 7000) {
+        // If they got installed in Drupal 7, their schema version would be 0.
+        $schema_version = 0;
+      }
+
       // Reduce schema versions by 7000 for legacy updates.
       if ($schema_version >= 7000 && $schema_version < 9000) {
         $schema_version -= 7000;
@@ -792,6 +802,23 @@ function update_get_update_list() {
     unset($ret['system']);
   }
   return $ret;
+}
+
+/**
+ * Returns a count of all the pending site updates.
+ *
+ * @return int
+ *   The number of updates pending (not yet run).
+ */
+function update_get_update_count() {
+  $updates = update_get_update_list();
+  $count = 0;
+  foreach ($updates as $update) {
+    if (isset($update['pending'])) {
+      $count = $count + count($update['pending']);
+    }
+  }
+  return $count;
 }
 
 /**
@@ -1021,6 +1048,15 @@ function update_is_missing($module, $number, $update_functions) {
  */
 function update_already_performed($module, $number) {
   return $number <= backdrop_get_installed_schema_version($module);
+}
+
+/**
+ * Check if backups are enabled during the update.php process.
+ */
+function update_backup_enabled() {
+  // Backups are disabled when upgrading from Drupal 7, and if the
+  // $settings['backup_directory'] is set to FALSE in settings.php.
+  return state_get('update_d7_upgrade', FALSE) === FALSE && backup_get_backup_directory() !== FALSE;
 }
 
 /**

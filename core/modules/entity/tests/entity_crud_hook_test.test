@@ -53,6 +53,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
    * Tests hook invocations for CRUD operations on comments.
    */
   public function testCommentHooks() {
+    /** @var Node $node */
     $node = entity_create('node', array(
       'uid' => 1,
       'type' => 'post',
@@ -68,6 +69,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
     $node->save();
     $nid = $node->nid;
 
+    /** @var Comment $comment */
     $comment = entity_create('comment', array(
       'cid' => NULL,
       'pid' => 0,
@@ -126,6 +128,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
   public function testFileHooks() {
     $url = 'public://entity_crud_hook_test.file';
     file_put_contents($url, 'Test test test');
+    /** @var File $file */
     $file = entity_create('file', array(
       'fid' => NULL,
       'uid' => 1,
@@ -180,6 +183,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
    * Tests hook invocations for CRUD operations on nodes.
    */
   public function testNodeHooks() {
+    /** @var Node $node */
     $node = entity_create('node', array(
       'uid' => 1,
       'type' => 'post',
@@ -243,6 +247,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
     ));
     taxonomy_vocabulary_save($vocabulary);
 
+    /** @var TaxonomyTerm $term */
     $term = entity_create('taxonomy_term', array(
       'name' => 'Test term',
       'vocabulary' => $vocabulary->machine_name,
@@ -293,6 +298,7 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
    * Tests hook invocations for CRUD operations on users.
    */
   public function testUserHooks() {
+    /** @var User $account */
     $account = entity_create('user', array(
       'name' => 'Test user',
       'mail' => 'test@example.com',

@@ -78,6 +78,11 @@ class DashboardContentTypesBlock extends Block {
             'href' => 'admin/structure/types/manage/' . $type_url_string . '/display',
             'query' => $options,
           );
+          $links['layouts'] = array(
+            'title' => t('Manage layouts'),
+            'href' => 'admin/structure/types/manage/' . $type_url_string . '/layouts',
+            'query' => $options,
+          );
           $operations = array(
             '#type' => 'dropbutton',
             '#links' => $links,
@@ -95,15 +100,6 @@ class DashboardContentTypesBlock extends Block {
       return array();
     }
 
-    if (empty($rows)) {
-      $rows[] = array(
-        array(
-          'data' => t('There are no content types to display.'),
-          'colspan' => 4,
-        ),
-      );
-    }
-
     $panel = array(
       '#theme' => 'dashboard_panel__node_types',
     );
@@ -111,6 +107,7 @@ class DashboardContentTypesBlock extends Block {
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
+      '#empty' => t('There are no content types to display.'),
     );
 
     if ($access) {

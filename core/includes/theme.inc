@@ -108,7 +108,16 @@ function backdrop_theme_initialize() {
   $base_themes = array();
   $ancestor = $theme;
   while ($ancestor && isset($themes[$ancestor]->base_theme)) {
+    $current_theme = $themes[$ancestor];
     $ancestor = $themes[$ancestor]->base_theme;
+    if (!array_key_exists($ancestor, $themes)) {
+      // A base theme is missing, warn about the problem and skip adding.
+      watchdog('theme', '%theme is a sub theme of %base_theme, but its base theme is missing.', array(
+        '%theme' => $current_theme->info['name'],
+        '%base_theme' => $ancestor,
+      ), WATCHDOG_WARNING);
+      continue;
+    }
     $base_themes[] = $themes[$ancestor];
   }
   _backdrop_theme_initialize($themes[$theme], array_reverse($base_themes));
@@ -931,10 +940,10 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  * @subsection sub_preprocess_templates Preprocessing for Template Files
  * If the implementation is a template file, several functions are called
  * before the template file is invoked, to modify the $variables array. These
- * fall into the "preprocessing" phase and the "processing" phase, and are
- * executed (if they exist), in the following order (note that in the following
- * list, HOOK indicates the theme hook name, MODULE indicates a module name,
- * THEME indicates a theme name, and ENGINE indicates a theme engine name):
+ * fall into the "preprocessing" phase, and are executed (if they exist) in the
+ * following order (note that in the following list, HOOK indicates the theme
+ * hook name, MODULE indicates a module name, THEME indicates a theme name, and
+ * ENGINE indicates a theme engine name):
  * - template_preprocess(&$variables, $hook): Creates a default set of
  *   variables for all theme hooks with template implementations.
  * - template_preprocess_HOOK(&$variables): Should be implemented by the module
@@ -952,11 +961,6 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  *   variables for all theme hooks with template implementations.
  * - THEME_preprocess_HOOK(&$variables): Allows the theme to set necessary
  *   variables specific to the particular theme hook.
- * - MODULE_process(&$variables, $hook): hook_process() is invoked on all
- *   implementing modules.
- * - MODULE_process_HOOK(&$variables): hook_process_HOOK() is invoked on
- *   on all implementing modules, so that modules that didn't define the theme
- *   hook can alter the variables.
  *
  * @subsection sub_preprocess_theme_funcs Preprocessing for Theme Functions
  * If the implementation is a function, only the theme-hook-specific preprocess
@@ -1012,11 +1016,16 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  * @see themeable
  * @see hook_theme()
  * @see template_preprocess()
+ *
+ * @since 1.0.0 The template process layer and process functions (e.g.
+ *   template_process_HOOK(), MODULE_process_HOOK(), THEME_process_HOOK()) have
+ *   been removed.
+ *   See https://docs.backdropcms.org/change-records/removed-the-theme-process-layer
  */
 function theme($hook, $variables = array()) {
   // If called before all modules are loaded, we do not necessarily have a full
-  // theme registry to work with, and therefore cannot process the theme
-  // request properly. See also _theme_load_registry().
+  // theme registry to work with, and therefore cannot process the theme request
+  // properly. See also _theme_load_registry().
   if (!module_load_all(NULL) && !defined('MAINTENANCE_MODE')) {
     throw new Exception(t('theme() may not be called until all modules are loaded.'));
   }
@@ -1158,6 +1167,11 @@ function theme($hook, $variables = array()) {
     }
   }
 
+  // Attach any assets that were specified in the theme hook.
+  if (!empty($info['attached'])) {
+    $elements['#attached'] = $info['attached'];
+    backdrop_process_attached($elements);
+  }
   // Generate the output using either a function or a template.
   $output = '';
   if (isset($info['function'])) {
@@ -1474,6 +1488,10 @@ function theme_get_setting($setting_name, $theme = NULL) {
   $value = $configs[$theme]->get($setting_name);
   if (is_null($value)) {
     $themes = list_themes();
+    // Do not try to access settings of missing (base-)themes.
+    if (!isset($themes[$theme])) {
+      return;
+    }
     $theme_info = $themes[$theme];
     $value = isset($theme_info->info['settings'][$setting_name]) ? $theme_info->info['settings'][$setting_name] : NULL;
   }
@@ -1504,6 +1522,9 @@ function theme_has_settings($theme) {
     return TRUE;
   }
   $themes = list_themes();
+  if (!isset($themes[$theme])) {
+    return FALSE;
+  }
   $theme_info = $themes[$theme];
   if (!empty($theme_info->info['settings'])) {
     return TRUE;
@@ -1641,15 +1662,28 @@ function _theme_render_template_debug($template_function, $template_file, $varia
 function theme_enable($theme_list) {
   backdrop_clear_css_cache();
 
-  foreach ($theme_list as $key) {
+  foreach ($theme_list as $theme) {
     db_update('system')
       ->fields(array('status' => 1))
       ->condition('type', 'theme')
-      ->condition('name', $key)
+      ->condition('name', $theme)
       ->execute();
 
     // Copy any default configuration data to the system config directory.
-    config_install_default_config($key);
+    config_install_default_config($theme);
+
+    // Update the theme status in the system.extensions config.
+    $config = config('system.extensions');
+    $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
+    $themes_in_config[$theme] = TRUE;
+
+    watchdog('system', '%theme theme enabled.', array('%theme' => $theme), WATCHDOG_INFO);
+  }
+
+  // Save the updated config.
+  if (isset($config) && isset($themes_in_config)) {
+    $config->set('themes', $themes_in_config);
+    $config->save();
   }
 
   list_themes(TRUE);
@@ -1677,14 +1711,19 @@ function theme_disable($theme_list) {
 
   backdrop_clear_css_cache();
 
-  foreach ($theme_list as $key) {
+  foreach ($theme_list as $theme) {
     db_update('system')
       ->fields(array('status' => 0))
       ->condition('type', 'theme')
-      ->condition('name', $key)
+      ->condition('name', $theme)
       ->execute();
 
-    config_uninstall_config($key);
+    config_uninstall_config($theme);
+
+    // Remove the theme from the system.extensions config.
+    config_clear('system.extensions', 'themes.' . $theme);
+
+    watchdog('system', '%theme theme disabled.', array('%theme' => $theme), WATCHDOG_INFO);
   }
 
   list_themes(TRUE);
@@ -2351,12 +2390,24 @@ function theme_table(array $variables) {
  *     show.
  */
 function theme_tablesort_indicator($variables) {
-  if ($variables['style'] == "asc") {
-    return theme('image', array('path' => 'core/misc/arrow-asc.png', 'width' => 13, 'height' => 13, 'alt' => t('sort ascending'), 'title' => t('sort ascending')));
+  if ($variables['style'] == 'asc') {
+    $icon = 'caret-down-fill';
+    $alt = t('sort ascending');
   }
   else {
-    return theme('image', array('path' => 'core/misc/arrow-desc.png', 'width' => 13, 'height' => 13, 'alt' => t('sort descending'), 'title' => t('sort descending')));
+    $icon = 'caret-up-fill';
+    $alt = t('sort descending');
   }
+
+  $options = array(
+    'alt' => $alt,
+    'attributes' => array(
+      'width' => 15,
+      'height' => 15,
+    ),
+  );
+
+  return icon($icon, $options);
 }
 
 /**

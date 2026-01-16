@@ -85,7 +85,7 @@ function template_preprocess_views_view(&$variables) {
   $variables['title'] = !empty($view->views_ui_context) ? filter_xss_admin($view->get_title()) : '';
 
   if ($view->display_handler->render_pager()) {
-    $exposed_input = isset($view->exposed_raw_input) ? $view->exposed_raw_input : NULL;
+    $exposed_input = $view->get_exposed_input();
     $variables['pager']      = $view->query->render_pager($exposed_input);
   }
 
@@ -134,6 +134,7 @@ function template_preprocess_views_view(&$variables) {
             // To fit multiple views on a page, the programmer may have
             // overridden the display's pager_element.
             'pager_element' => isset($view->query->pager) ? $view->query->pager->get_pager_id() : 0,
+            'exposed_form_in_block' => $view->display_handler->get_option('exposed_block'),
           ),
         ),
       ),
@@ -693,6 +694,10 @@ function template_preprocess_views_view_grid(&$variables) {
   // For old view default to table if view settings haven't been updated.
   $variables['deprecated_table'] = (!isset($options['deprecated_table']) || $options['deprecated_table']) ? TRUE : FALSE;
 
+  // Existing grid is unresponsive. Default to unresponsive if the view settings
+  // haven't been updated.
+  $variables['unresponsive'] = (!isset($options['unresponsive']) || $options['unresponsive']) ? TRUE : FALSE;
+
   if (!$variables['deprecated_table']) {
     $rows = $variables['rows'];
 
@@ -700,8 +705,8 @@ function template_preprocess_views_view_grid(&$variables) {
     $count = 0;
     $max = count($rows);
 
-    // Reorder based on vertical alignment.
-    if ($options['alignment'] == 'vertical') {
+    // Reorder based on vertical alignment if not using responsive option.
+    if ($options['alignment'] == 'vertical' && $variables['unresponsive']) {
       $rows = array();
       $rows_reorder = array();
       $num_rows = floor(count($variables['rows']) / $columns);
@@ -772,8 +777,27 @@ function template_preprocess_views_view_grid(&$variables) {
         $col_count++;
       }
     }
-    $variables['classes'] = array('views-view-grid', 'views-view-grid-cols-' . $columns);
+    if (!$variables['unresponsive']) {
+      $variables['classes'] = array(
+        'views-view-grid',
+        'views-view-responsive-grid',
+      );
+      $variables['classes'][] = 'views-view-responsive-grid--' . $options['alignment'];
+      $variables['attributes'] = array('style' => implode(';', array(
+        '--views-responsive-grid--column-count:' . $options['columns'],
+        '--views-responsive-grid--cell-min-width:' . ($options['cell_min_width']['width'] ?? 16) . ($options['cell_min_width']['unit'] ?? 'rem'),
+        '--views-responsive-grid--layout-gap:' . ($options['grid_gutter']['width'] ?? 2) . ($options['grid_gutter']['unit'] ?? 'rem'),
+      )));
+    }
+    // Non-responsive grid uses a simple grid style.
+    else {
+      $variables['classes'] = array(
+        'views-view-grid',
+        'views-view-grid-cols-' . $columns,
+      );
+    }
   }
+  // Deprecated table style.
   else {
     if ($options['alignment'] == 'horizontal') {
       $row = array();
@@ -976,7 +1000,7 @@ function template_preprocess_views_view_rss(&$variables) {
 
   if ($view->display_handler->get_option('sitename_title')) {
     $site_config = config('system.core');
-    $title = $site_config->get('site_name');
+    $title = $site_config->getTranslated('site_name');
     if ($slogan = $site_config->getTranslated('site_slogan')) {
       $title .= ' - ' . $slogan;
     }
@@ -1209,6 +1233,105 @@ function theme_views_container($variables) {
   return '<div' . backdrop_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
 }
 
+/**
+ * Default theme function for selecting all rows in view for bulk operations.
+ */
+function theme_views_select_all_pages(&$variables) {
+  $view = $variables['view'];
+  $enable_select_all_pages = $variables['enable_select_all_pages'];
+  $build_array = array();
+  // Theming for table plugin.
+  if ($view->style_plugin instanceof views_plugin_style_table && empty($view->style_plugin->options['grouping'])) {
+    if (!$enable_select_all_pages) {
+      return '';
+    }
+    // Provide hidden markup that will be shown as needed on the first row
+    // of the table.
+    $this_page_count = format_plural(count($view->result), '1 row', '@count rows');
+    $this_page = t('Selected <strong>!row_count</strong> on this page.', array('!row_count' => $this_page_count));
+    $all_pages_count = format_plural($view->total_rows, '1 row', '@count rows');
+    $all_pages = t('Selected <strong>!row_count</strong> on all pages.', array('!row_count' => $all_pages_count));
+    $build_array['select_all_pages_wrapper'] = array(
+      '#type' => 'container',
+      '#tree' => FALSE,
+      '#attributes' => array(
+        'class' => array(
+          'views-select-all-pages--wrapper'
+        ),
+      ),
+    );
+    $build_array['select_all_pages_wrapper']['select_all_pages'] = array(
+      '#type' => 'button',
+      '#attributes' => array(
+        'class' => array(
+          'views-select-all-pages--all-pages-button',
+        ),
+      ),
+      '#value' => t('Select all !row_count on all pages', array('!row_count' => $all_pages_count)),
+      '#prefix' => '<span class="views-select-all-pages--this-page">' . $this_page . ' &nbsp;',
+      '#suffix' => '</span>',
+    );
+    $build_array['select_all_pages_wrapper']['select_this_page'] = array(
+      '#type' => 'button',
+      '#attributes' => array(
+        'class' => array(
+          'views-select-all-pages--this-page-button',
+        ),
+      ),
+      '#value' => t('Select only !row_count on this page', array('!row_count' => $this_page_count)),
+      '#prefix' => '<span class="views-select-all-pages--all-pages" style="display: none">' . $all_pages . ' &nbsp;',
+      '#suffix' => '</span>',
+    );
+  }
+  else {
+    $this_page_count = format_plural(count($view->result), '1 item', '@count items');
+    $all_pages_count = format_plural($view->total_rows, '1 item', '@count items');
+    $build_array['select_all_pages'] = array(
+      '#type' => 'fieldset',
+      '#attributes' => array(
+        'class' => array(
+          'views-select-all-pages--fieldset',
+          'views-select-all-pages--wrapper'
+        ),
+      ),
+    );
+    $build_array['select_all_pages']['this_page'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Select !this_page_count on this page', array('!this_page_count' => $this_page_count)),
+      '#default_value' => '',
+      '#attributes' => array(
+        'class' => array(
+          'views-select-all-pages--this-page-checkbox',
+        ),
+      ),
+      // Since this build array is not form-processed, we supply a unique id so
+      // that the label contains a "for" attribute, making it clickable.
+      '#id' => backdrop_html_id('views-select-all-pages--this-page-checkbox'),
+    );
+
+    if ($enable_select_all_pages) {
+      $build_array['select_all_pages']['or'] = array(
+        '#type' => 'markup',
+        '#markup' => '<em>' . t('or') . '</em>',
+      );
+      $build_array['select_all_pages']['all_pages'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Select @count on all pages', array('@count' => $all_pages_count)),
+        '#default_value' => '',
+        '#attributes' => array(
+          'class' => array(
+            'views-select-all-pages--all-pages-checkbox',
+          ),
+        ),
+        // Since this build array is not form-processed, we supply a unique id so
+        // that the label contains a "for" attribute, making it clickable.
+        '#id' => backdrop_html_id('views-select-all-pages--all-pages-checkbox'),
+      );
+    }
+  }
+
+  return backdrop_render($build_array);
+}
 /**
  * @defgroup views_templates Views template files
  * @{

@@ -693,16 +693,20 @@ function hook_field_prepare_translation($entity_type, $entity, $field, $instance
 /**
  * Define what constitutes an empty item for a field type.
  *
- * @param $item
+ * @param array $item
  *   An item that may or may not be empty.
- * @param $field
+ * @param array $field
  *   The field to which $item belongs.
+ * @param array $instance
+ *   Field API instance definition.
  *
- * @return
+ * @return bool
  *   TRUE if $field's type considers $item not to contain any data;
  *   FALSE otherwise.
+ *
+ * @since 1.33.0 Added parameter $instance.
  */
-function hook_field_is_empty($item, $field) {
+function hook_field_is_empty($item, $field, $instance) {
   if (empty($item['value']) && (string) $item['value'] !== '0') {
     return TRUE;
   }
@@ -842,8 +846,8 @@ function hook_field_widget_info_alter(&$info) {
  * Examples: mono-value widget even if the field is multi-valued, non-required
  * widget even if the field is 'required'...
  *
- * Therefore, the FAPI element callbacks (such as #process, #element_validate,
- * #value_callback...) used by the widget cannot use the field_info_field()
+ * Therefore, the Form API element callbacks (such as #process, #value_callback,
+ * #element_validate...) used by the widget cannot use the field_info_field()
  * or field_info_instance() functions to retrieve the $field or $instance
  * definitions they should operate on. The field_widget_field() and
  * field_widget_instance() functions should be used instead to fetch the

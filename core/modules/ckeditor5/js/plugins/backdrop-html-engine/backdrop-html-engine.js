@@ -14,7 +14,7 @@
  * @see https://github.com/ckeditor/ckeditor5/issues/15293
  * @see https://github.com/backdrop-contrib/ckeditor5/issues/68
  */
-class BackdropHtmlEngine extends CKEditor5.core.Plugin {
+class BackdropHtmlEngine extends CKEditor5.Plugin {
   /**
    * @inheritdoc
    */

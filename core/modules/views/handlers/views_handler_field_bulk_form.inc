@@ -18,6 +18,7 @@ class views_handler_field_bulk_form extends views_handler_field {
    */
   function option_definition() {
     $options = parent::option_definition();
+    $options['enable_select_all_pages'] = array('default' => TRUE);
     $options['include_exclude'] = array(
       'default' => 'exclude',
     );
@@ -33,6 +34,12 @@ class views_handler_field_bulk_form extends views_handler_field {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
+    $form['enable_select_all_pages'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable "Select all items on all pages"'),
+      '#default_value' => $this->options['enable_select_all_pages'],
+      '#description' => t('Check this box to enable the ability to select all items on all pages.'),
+    );
     $form['include_exclude'] = array(
       '#type' => 'radios',
       '#title' => t('Available actions'),
@@ -115,26 +122,54 @@ class views_handler_field_bulk_form extends views_handler_field {
     );
 
     // Build the bulk operations action widget for the header.
-    // Allow themes to apply .container-inline on this separate container.
-    $form['header'][$this->options['id']] = array(
-      '#type' => 'container',
-      '#attributes' => array('class' => array('views-bulk-form')),
-    );
-    $form['header'][$this->options['id']]['action'] = array(
-      '#title' => t('Action'),
-      '#title_display' => 'none',
-      '#type' => 'select',
-      '#options' => $this->get_bulk_options(),
-      '#empty_option' => '- ' . t('Choose an action') . ' -',
-      '#required' => TRUE,
-    );
+    $bulk_options = $this->get_bulk_options();
+    if (!empty($bulk_options)) {
+      // Allow themes to apply .container-inline on this separate container.
+      $form['header'][$this->options['id']] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('views-bulk-form')),
+      );
 
-    // Set the form actions container in the header.
-    $actions['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Execute'),
-    );
-    $form['header'][$this->options['id']]['actions'] = $actions;
+      $form['header'][$this->options['id']]['action'] = array(
+        '#title' => t('Action'),
+        '#title_display' => 'none',
+        '#type' => 'select',
+        '#options' => $bulk_options,
+        '#empty_option' => '- ' . t('Choose an action') . ' -',
+        '#required' => TRUE,
+      );
+
+      // Set the form actions container in the header.
+      $actions['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Execute'),
+      );
+      $form['header'][$this->options['id']]['actions'] = $actions;
+
+      // If the view has results, add the form element and markup to select all.
+      if (!empty($this->view->result)) {
+        $form['#attached']['js'][] = backdrop_get_path('module', 'views') . '/js/bulk_form.js';
+        // Set by JS to indicate that all rows on all pages are selected.
+        $form['select_all_pages'] = array(
+          '#type' => 'hidden',
+          '#attributes' => array('class' => 'views-select-all-pages--value'),
+          '#default_value' => FALSE,
+        );
+        $enable_select_all_pages = FALSE;
+        // If the view is paginated, and "select all items on all pages" is
+        // enabled, tell that to the theme function.
+        if ($this->options['enable_select_all_pages'] && isset($this->view->total_rows) && count($this->view->result) != $this->view->total_rows) {
+          $enable_select_all_pages = TRUE;
+        }
+        $form['select_all_pages_markup'] = array(
+          '#type' => 'markup',
+          '#markup' => theme('views_select_all_pages', array(
+            'view' => $this->view,
+            'enable_select_all_pages' => $enable_select_all_pages,
+          )),
+        );
+      }
+    }
   }
 
   /**
@@ -151,8 +186,33 @@ class views_handler_field_bulk_form extends views_handler_field {
       $action_info = actions_get_info($form_state['values']['action']);
       $count = 0;
 
-      // Filter only selected checkboxes.
-      $selected = array_filter($form_state['values'][$this->options['id']]);
+      // If the flag to select all results in all pages is true, retrieve all
+      // entity IDs.
+      if ($form_state['values']['select_all_pages'] && ($this->view->query->pager->has_more_records() || $this->view->query->pager->get_current_page() > 0)) {
+        // We need to build a new view with the same parameters, but without a
+        // pager.
+        $new_view = views_get_view($this->view->name);
+        $new_view->set_exposed_input($this->view->get_exposed_input());
+        $new_view->set_arguments($this->view->args);
+        $new_view->set_display($this->view->current_display);
+        // Remove the pager to get all results.
+        $new_view->display_handler->set_option('pager', array(
+          'type' => 'none',
+          'options' => array(),
+        ));
+        $new_view->build();
+        $new_view->execute($this->view->current_display);
+        $selected = array();
+        // Retrieve all entity IDs.
+        foreach ($new_view->result as $result) {
+          $selected[] = $result->{$this->real_field};
+        }
+      }
+      else {
+        // Filter only selected checkboxes.
+        $selected = array_filter($form_state['values'][$this->options['id']]);
+      }
+
       if (!empty($selected)) {
         $entity_type = $this->get_entity_type();
         $entities = entity_load($entity_type, $selected);

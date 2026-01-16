@@ -17,7 +17,7 @@
  * - Extends the editor.execute('link') function to take a 3rd parameter to
  *   apply attributes such as id, rel, and class to links.
  */
-class BackdropLink extends CKEditor5.core.Plugin {
+class BackdropLink extends CKEditor5.Plugin {
   /**
    * @inheritdoc
    */
@@ -106,7 +106,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
     linkCommand.on('execute', (evt, args) => {
       // Custom handling is only required if an extra attribute was passed into
       // editor.execute('link', ...).
-      if (args.length < 3) {
+      if (args.length < 4) {
         return;
       }
       if (linkCommandExecuting) {
@@ -199,7 +199,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
           let ranges;
 
           if (selection.isCollapsed) {
-            ranges = [CKEditor5.typing.findAttributeRange(
+            ranges = [CKEditor5.findAttributeRange(
               selection.getFirstPosition(),
               modelName,
               selection.getAttribute( modelName ),
@@ -245,11 +245,11 @@ class BackdropLink extends CKEditor5.core.Plugin {
     // Add the backdropLink button for use in the main toolbar. This can
     // insert a new link or edit an existing one if selected.
     editor.ui.componentFactory.add('backdropLink', (locale) => {
-      const buttonView = new CKEditor5.ui.ButtonView(locale);
+      const buttonView = new CKEditor5.ButtonView(locale);
 
       buttonView.set({
         label: insertLabel,
-        icon: backdropLinkIcon,
+        icon: CKEditor5.IconLink,
         tooltip: true
       });
 
@@ -280,13 +280,13 @@ class BackdropLink extends CKEditor5.core.Plugin {
     // Add the backdropLinkImage button for use in the image toolbar. This can
     // insert a new link or edit an existing one if selected.
     editor.ui.componentFactory.add('backdropLinkImage', (locale) => {
-      const buttonView = new CKEditor5.ui.ButtonView(locale);
+      const buttonView = new CKEditor5.ButtonView(locale);
       const backdropLinkCommand = editor.commands.get('backdropLink');
       buttonView.set( {
         isEnabled: true,
         // Translation provided by CKEditor link plugin:
         label: editor.t('Link image'),
-        icon: backdropLinkIcon,
+        icon: CKEditor5.IconLink,
         keystroke: 'Ctrl+K',
         tooltip: true,
         isToggleable: true
@@ -306,7 +306,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
           // This is not ideal to call an internal method to show the balloon,
           // but this is the same approach used by LinkImageUI.
           // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkimageui.ts
-          linkUI._addActionsView();
+          linkUI._addToolbarView();
         }
         // For new links, open the link dialog directly.
         else {
@@ -337,16 +337,17 @@ class BackdropLink extends CKEditor5.core.Plugin {
 
     // Bind to the balloon being shown and check for the link UI.
     this.listenTo(contextualBalloonPlugin, 'change:visibleView', (evt, name, visibleView) => {
-      const actionsView = linkUI.actionsView;
-      if (actionsView && visibleView === actionsView) {
+      const toolbarView = linkUI.toolbarView;
+      if (toolbarView && visibleView === toolbarView) {
         if (!linkUiModified) {
           linkUiModified = true;
           // Turn off the normal link editing action.
-          // See LinkUI::_createActionsView().
-          linkUI.stopListening(actionsView, 'edit');
+          // See LinkUI::_registerComponents().
+          const linkButtonView = toolbarView.items.get(2);
+          linkUI.stopListening(linkButtonView, 'execute');
           // Replace with firing the backdropLink action instead.
-          this.listenTo(actionsView, 'edit', () => {
-            contextualBalloonPlugin.remove(actionsView);
+          this.listenTo(linkButtonView, 'execute', () => {
+            contextualBalloonPlugin.remove(toolbarView);
             backdropLinkCommand.execute();
           });
         }
@@ -363,7 +364,7 @@ CKEditor5.backdropLink = {
 /**
  * CKEditor command that opens the Backdrop link editing dialog.
  */
-class BackdropLinkCommand extends CKEditor5.core.Command {
+class BackdropLinkCommand extends CKEditor5.Command {
   /**
    * @inheritdoc
    */
@@ -383,7 +384,6 @@ class BackdropLinkCommand extends CKEditor5.core.Command {
     const selection = editor.model.document.selection;
     const linkCommand = editor.commands.get('link');
     const imageUtils = editor.plugins.get('ImageUtils');
-    const linkUI = editor.plugins.get('LinkUI');
 
     const closestImage = imageUtils.getClosestSelectedImageElement(selection);
     const extraAttributes = new Map(Object.entries(config.extraAttributes));
@@ -391,9 +391,9 @@ class BackdropLinkCommand extends CKEditor5.core.Command {
       dialogClass: 'editor-link-dialog'
     };
 
-    // Pull in existing values from the model to be sent to the dialog.
+    // Pull in existing value from linkCommand to be sent to the dialog.
     let existingValues = {
-      'href': linkUI.formView ? linkUI.formView.urlInputView.fieldView.value : '',
+      'href': linkCommand.value
     };
 
     // Images store link values in a special 'htmlLinkAttributes' attribute.
@@ -428,21 +428,17 @@ class BackdropLinkCommand extends CKEditor5.core.Command {
         delete returnValues.attributes['text'];
       }
 
-      // The normal link command does not support a 3rd argument natively.
+      // The normal link command does not support a 4th argument natively.
       // This has been extended in _addExtraAttributeOnLinkCommandExecute()
       // to also accept an array of attributes to be saved.
       // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkcommand.ts
       // There is also a feature request to make this native to CKEditor
       // here: https://github.com/ckeditor/ckeditor5/issues/9730
-      linkCommand.execute(newHref, {}, returnValues.attributes);
+      linkCommand.execute(newHref, {}, null, returnValues.attributes);
     }
 
     Backdrop.ckeditor5.openDialog(editor, config.dialogUrl, existingValues, saveCallback, dialogSettings);
   }
 }
-
-// The CKEditor core link icon is not in a reusable location, so this is a
-// duplicated version for Backdrop use.
-const backdropLinkIcon = '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="m11.077 15 .991-1.416a.75.75 0 1 1 1.229.86l-1.148 1.64a.748.748 0 0 1-.217.206 5.251 5.251 0 0 1-8.503-5.955.741.741 0 0 1 .12-.274l1.147-1.639a.75.75 0 1 1 1.228.86L4.933 10.7l.006.003a3.75 3.75 0 0 0 6.132 4.294l.006.004zm5.494-5.335a.748.748 0 0 1-.12.274l-1.147 1.639a.75.75 0 1 1-1.228-.86l.86-1.23a3.75 3.75 0 0 0-6.144-4.301l-.86 1.229a.75.75 0 0 1-1.229-.86l1.148-1.64a.748.748 0 0 1 .217-.206 5.251 5.251 0 0 1 8.503 5.955zm-4.563-2.532a.75.75 0 0 1 .184 1.045l-3.155 4.505a.75.75 0 1 1-1.229-.86l3.155-4.506a.75.75 0 0 1 1.045-.184z"/></svg>';
 
 })(Backdrop, CKEditor5);

@@ -6,7 +6,7 @@
 
     attach: function (element, format) {
       // Bail out if the editor has already been attached to the element.
-      if (typeof element.ckeditor5AttachedEditor != 'undefined') {
+      if (typeof element.ckeditor5Processed !== 'undefined') {
         return;
       }
 
@@ -34,7 +34,7 @@
       // The source element value is managed manually to apply code formatting.
       editorSettings.updateSourceElementOnDestroy = false;
 
-      editorSettings.licenseKey = '';
+      editorSettings.licenseKey = 'GPL';
 
       // If filter_html is turned on, and the htmlSupport plugin is available,
       // we prevent on* attributes.
@@ -58,35 +58,43 @@
         }
       }
 
-      // Convert the plugin list from strings to variable names. Each CKEditor
-      // plugin is located under "CKEditor5.[packageName].[moduleName]". So
-      // we convert the list of strings to match the expected variable name.
+      // Convert the plugin list from strings to variable names.
       editorSettings.plugins = [];
       editorSettings.pluginList.forEach(function(pluginItem) {
         const [packageName,moduleName] = pluginItem.split('.');
-        if (typeof CKEditor5[packageName] != 'undefined') {
+        // In UMD builds, native plugins are direct children of the global
+        // CKEditor object, this has changed compared to DLL.
+        if (typeof CKEditor5[moduleName] != 'undefined' && CKEditor5[moduleName].hasOwnProperty('pluginName')) {
+          editorSettings.plugins.push(CKEditor5[moduleName]);
+        }
+        // Backwards compatible to how plugins were defined for DLL - and how
+        // existing custom plugins still define it.
+        else if (typeof CKEditor5[packageName] != 'undefined') {
           editorSettings.plugins.push(CKEditor5[packageName][moduleName]);
         }
       });
 
-      // Hide the resizable grippie while CKEditor is active.
-      $(element).siblings('.grippie').hide();
+      // Indicate that this element is about to receive an editor. This prevents
+      // double-binding if the .attach() method is called twice very quickly.
+      element.ckeditor5Processed = true;
 
       const beforeAttachValue = element.value;
-      CKEditor5.editorClassic.ClassicEditor
+      CKEditor5.ClassicEditor
         .create(element, editorSettings)
         .then(editor => {
           Backdrop.ckeditor5.setEditorOffset(editor);
           Backdrop.ckeditor5.instances.set(editor.id, editor);
           Backdrop.ckeditor5.watchEditorChanges(editor, element);
+          Backdrop.ckeditor5.trackActiveEditor(editor);
           element.ckeditor5AttachedEditor = editor;
-          const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData());
+          const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData({ skipListItemIds: true }));
           if (valueModified && !Backdrop.ckeditor5.bypassContentWarning) {
             Backdrop.ckeditor5.detachWithWarning(element, format, beforeAttachValue);
           }
           return true;
         })
         .catch(error => {
+          element.ckeditor5Processed = false;
           console.error('The CKEditor instance could not be initialized.');
           console.error(error);
           return false;
@@ -108,7 +116,7 @@
 
       // CKEditor 5 does not pretty-print HTML source. Format the source
       // before saving it into the source field.
-      let newData = editor.getData();
+      let newData = editor.getData({ skipListItemIds: true });
       newData = Backdrop.ckeditor5.formatHtml(newData);
 
       // Destroy the instance if fully detaching.
@@ -116,14 +124,13 @@
         editor.destroy();
         Backdrop.ckeditor5.instances.delete(editor.id);
         delete element.ckeditor5AttachedEditor;
+        delete element.ckeditor5Processed;
       }
 
       // Save formatted value after destroying the editor, which can also
       // update the element value.
       element.value = newData;
 
-      // Restore the resize grippie.
-      $(element).siblings('.grippie').show();
       return !!editor;
     },
 
@@ -132,7 +139,7 @@
       if (editor) {
         const debouncedCallback = Backdrop.debounce(callback, 400);
         editor.model.document.on('change:data', function() {
-          debouncedCallback(editor.getData());
+          debouncedCallback(editor.getData({ skipListItemIds: true }));
         });
       }
       return !!editor;
@@ -149,6 +156,11 @@
      * Key-value map of all active instances of CKEditor 5.
      */
     instances: new Map(),
+
+    /**
+     * The last-active CKEditor 5 instance.
+     */
+    activeEditor: null,
 
     /**
      * Boolean indicating if CKEditor instances should be attached even if they
@@ -270,14 +282,37 @@
       // Create a debounced callback that only fires intermittently, since
       // editor changes can happen on every key up.
       const updateValue = Backdrop.debounce(() => {
-        const newData = editor.getData();
+        const newData = editor.getData({ skipListItemIds: true });
         element.value = Backdrop.ckeditor5.formatHtml(newData);
       }, 1000);
       editor.model.document.on('change:data', updateValue);
     },
 
     /**
-     * Compare the data before CKEditor 5 is attached and after attachment.
+     * Binds an on change event to the editor to watch for focus changes.
+     *
+     * The Backdrop.ckeditor5.activeEditor variable can be used by other modules
+     * to insert content into the editor, or provide other outside integrations.
+     *
+     * @param editor
+     *   The CKEditor 5 instance.
+     */
+    trackActiveEditor: function (editor) {
+      // If no editor has been set yet, set the first one as the active.
+      if (!Backdrop.ckeditor5.activeEditor) {
+        Backdrop.ckeditor5.activeEditor = editor;
+      }
+      // Track when focus is set on a new editor.
+      // See https://ckeditor.com/docs/ckeditor5/latest/framework/deep-dive/ui/focus-tracking.html#a-note-about-the-global-focus-tracker
+      editor.ui.focusTracker.on('change:isFocused', (evt, data, isFocused) => {
+        if (isFocused) {
+          Backdrop.ckeditor5.activeEditor = editor;
+        }
+      });
+    },
+
+    /**
+     * Compare the data before CKEditor 5 is attached vs. after it is attached.
      *
      * This comparison reformats both the before and after values to the same
      * consistent format before doing a string comparison.
@@ -291,20 +326,67 @@
      *   Returns true if values have been modified, false if unchanged.
      */
     checkValueModified: function (beforeAttachValue, afterAttachValue) {
+      // Create a sandboxed document within an iframe.
+      const sandboxIframe = document.createElement('iframe');
+      sandboxIframe.setAttribute('sandbox', 'allow-same-origin');
+      sandboxIframe.srcdoc = "<!doctype html>";
+      document.body.append(sandboxIframe);
+      const sandboxDocument = sandboxIframe.contentDocument;
+
       // Pass the before value through elementGetHtml() to standardize
       // attribute order and self-closing tags. For example, two <img> tags with
       // src, width, and height attributes should be equal, even if one uses the
       // order height, src, width. Similarly, <hr /> and <hr> should be
       // considered the same. Passing in an out of the DOM makes these two
       // values use the same order and tag closing.
-      const beforeElement = document.createElement('template');
+      const beforeElement = sandboxDocument.createElement('template');
       beforeElement.innerHTML = beforeAttachValue;
       beforeAttachValue = Backdrop.ckeditor5.elementGetHtml(beforeElement.content);
 
-      // Then run both strings through the same whitespace formatting.
-      const formattedBeforeValue = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
-      const formattedAfterValue = Backdrop.ckeditor5.formatHtml(afterAttachValue);
-      return formattedBeforeValue !== formattedAfterValue;
+      // Then run both strings through the same whitespace formatting, using
+      // formatHtml(). Wrap both strings with a temporary <div> tag, to allow
+      // childNodes (which is used later when comparing the two strings) to work
+      // on them.
+      const formattedBeforeValue = sandboxDocument.createElement('div');
+      formattedBeforeValue.innerHTML = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
+      const formattedAfterValue = sandboxDocument.createElement('div');
+      formattedAfterValue.innerHTML = Backdrop.ckeditor5.formatHtml(afterAttachValue);
+
+      // Get all Nodes for each string.
+      let formattedBeforeValueNodes = formattedBeforeValue.childNodes;
+      let formattedAfterValueNodes = formattedAfterValue.childNodes;
+
+      // If the number of Nodes differs, then the values have been modified.
+      // Bail early in that case.
+      if (formattedBeforeValueNodes.length !== formattedAfterValueNodes.length) {
+        sandboxIframe.remove();
+        return true;
+      }
+
+      // If the number of Nodes is the same between the two strings, start
+      // comparing each pair of respective Nodes one-by-one.
+      for (let i = 0; i < formattedBeforeValueNodes.length; i++) {
+        // Check if each pair of Nodes is identical between the two strings.
+        if (formattedBeforeValueNodes[i] !== formattedAfterValueNodes[i]) {
+          // The respective Nodes are not the same. This may be because despite
+          // all attributes being the same, they are in a different order. Do a
+          // final check about that, to determine whether they are really
+          // different. isEqualNode() doesn't care about the order of attributes
+          // each Node has - it only expects the same attributes with the same
+          // values.
+          if (!formattedBeforeValueNodes[i].isEqualNode(formattedAfterValueNodes[i])) {
+            // Bail on the first pair of Nodes that is found to have different
+            // attributes/values regardless of their order.
+            sandboxIframe.remove();
+            return true;
+          }
+        }
+      }
+
+      // If all previous checks for modified values failed, assume that the two
+      // strings have not been modified.
+      sandboxIframe.remove();
+      return false;
     },
 
     /**

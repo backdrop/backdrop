@@ -52,7 +52,7 @@ function node_mass_update($nodes, $updates) {
       ),
       'finished' => '_node_mass_update_batch_finished',
       'title' => t('Processing'),
-      // We use a single multi-pass operation, so the default
+      // We use a single multipass operation, so the default
       // 'Remaining x of y operations' message will be confusing here.
       'progress_message' => '',
       'error_message' => t('The update has encountered an error.'),

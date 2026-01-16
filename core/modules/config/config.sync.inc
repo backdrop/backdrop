@@ -9,6 +9,9 @@ function config_sync_batch($config_statuses = NULL) {
   }
   $operations[] = array('_config_sync_start', array($config_statuses));
   $operations[] = array('_config_sync_validate', array());
+  $operations[] = array('_config_sync_system_extensions', array());
+  // Validate the config a second time after modules have been enabled.
+  $operations[] = array('_config_sync_validate', array());
   $operations[] = array('_config_sync_import', array());
   $batch = array(
     'operations' => $operations,
@@ -29,6 +32,10 @@ function _config_sync_start($config_statuses, &$context) {
 
   // The complete list of changes are stored in the results array. This makes
   // these values available in all subsequent batch callbacks.
+  $context['results']['system_extensions'] = NULL;
+  if (isset($config_statuses['system.extensions']) && $config_statuses['system.extensions'] === 'update') {
+    $context['results']['system_extensions'] = config('system.extensions', 'staging')->load()->getData();
+  }
   $context['results']['all_configs'] = $config_statuses;
   $context['results']['pending_changes'] = array_filter($config_statuses);
   $context['results']['completed_changes'] = array();
@@ -36,6 +43,7 @@ function _config_sync_start($config_statuses, &$context) {
 
 /**
  * Batch API callback. Validate the changes before attempting to sync.
+ *
  * Reports all discovered issues in a message.
  */
 function _config_sync_validate(&$context) {
@@ -60,6 +68,27 @@ function _config_sync_validate(&$context) {
 }
 
 /**
+ * Batch API callback. Sync the "system.extensions" config in its own request.
+ */
+function _config_sync_system_extensions(&$context) {
+  // Bail if any errors have been set during validation.
+  if (isset($context['results']['errors'])) {
+    $context['finished'] = 1;
+    return;
+  }
+  // If the system.extensions config file is being changed, it needs to be
+  // run first and in its own request. This will make it so that the other batch
+  // requests have any new modules enabled, allowing for full validation of
+  // the new config. If disabling modules via config sync is supported later,
+  // this would be called a second time after syncing config.
+  if (isset($context['results']['system_extensions'])) {
+    $config_contents = $context['results']['system_extensions'];
+    config_sync_file('system.extensions', 'update', $config_contents);
+  }
+}
+
+
+/**
  * Batch API callback. Import the individual config files.
  */
 function _config_sync_import(&$context) {
@@ -77,7 +106,11 @@ function _config_sync_import(&$context) {
 
   $config_files = array_slice($context['results']['pending_changes'], 0, $context['sandbox']['batch_size']);
   foreach ($config_files as $config_file => $config_change_type) {
-    config_sync_file($config_file, $config_change_type);
+    // The system.extensions config is synced separately, so skip it in this
+    // part of the batch process. See _config_sync_system_extensions().
+    if ($config_file !== 'system.extensions') {
+      config_sync_file($config_file, $config_change_type);
+    }
     unset($context['results']['pending_changes'][$config_file]);
     $context['results']['completed_changes'][$config_file] = $config_change_type;
     $context['sandbox']['current_index']++;
@@ -153,8 +186,28 @@ function config_sync_validate_file($config_name, $config_change_type, $all_chang
   // be managed at all, because hooks may need to be fired when performing any
   // kind of change (e.g. a deleted config might need to remove database
   // tables).
+  $module_exists_for_config = FALSE;
   $config_info = config_get_info($config_name);
-  if (empty($config_info)) {
+  if (!empty($config_info)) {
+    $module_exists_for_config = TRUE;
+  }
+
+  // If creating config AND the dependent module is also being enabled as part of
+  // this config sync, allow the config to be created. The config will be
+  // revalidated after enabling its parent module.
+  if (!$module_exists_for_config && $config_change_type === 'create') {
+    $config_name_parts = explode('.', $config_name);
+    $config_module_name = reset($config_name_parts);
+    if (isset($all_changes['system.extensions']) && $all_changes['system.extensions'] === 'update') {
+      $staging_system_extensions_config = config('system.extensions', 'staging')->load();
+      $staging_module_list = $staging_system_extensions_config->get('modules');
+      if (!empty($staging_module_list[$config_module_name])) {
+        $module_exists_for_config = TRUE;
+      }
+    }
+  }
+
+  if (!$module_exists_for_config) {
     if ($config_change_type === 'delete') {
       $message = t('The configuration "@name" is not owned by any enabled module, so it cannot be deleted. If you have disabled this module, either <a href="!enable">enable the module</a> and try the import again, or <a href="!uninstall">uninstall the module entirely</a> to clean up left-over configuration.', array('@name' => $config_name, '!enable' => url('admin/modules'), '!uninstall' => url('admin/modules/uninstall')));
     }
@@ -192,14 +245,14 @@ function config_sync_validate_file($config_name, $config_change_type, $all_chang
  * @param string $config_change_type
  *   The type of change occurring to this config file. Must be one of the
  *   following values: "create", "update", or "delete".
- * @param string $config_contents
+ * @param array|NULL $config_contents
  *   The configuration file's contents.
  *
  * @see hook_config_create().
  * @see hook_config_update().
  * @see hook_config_delete().
  */
-function config_sync_file($config_file, $config_change_type, $config_contents = NULL) {
+function config_sync_file($config_file, $config_change_type, ?array $config_contents = NULL) {
   $active_config = config($config_file, 'active');
 
   // Read the config data from staging if contents are not provided.

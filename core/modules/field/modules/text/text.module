@@ -203,7 +203,7 @@ function text_field_load($entity_type, $entities, $field, $instances, $langcode,
     foreach ($items[$id] as $delta => $item) {
       // Only process items with a cacheable format, the rest will be handled
       // by formatters if needed.
-      if (empty($instances[$id]['settings']['text_processing']) || filter_format_allowcache($item['format'])) {
+      if (empty($instances[$id]['settings']['text_processing']) || ($item['format'] && filter_format_allowcache($item['format']))) {
         $items[$id][$delta]['safe_value'] = isset($item['value']) ? _text_sanitize($instances[$id], $langcode, $item, 'value') : '';
         if ($field['type'] == 'text_with_summary') {
           $items[$id][$delta]['safe_summary'] = isset($item['summary']) ? _text_sanitize($instances[$id], $langcode, $item, 'summary') : '';
@@ -216,9 +216,9 @@ function text_field_load($entity_type, $entities, $field, $instances, $langcode,
 /**
  * Implements hook_field_is_empty().
  */
-function text_field_is_empty($item, $field) {
+function text_field_is_empty($item, $field, $instance) {
   if (!isset($item['value']) || $item['value'] === '') {
-    if (isset($item['format']) && $item['format'] !== '' && $item['format'] != filter_default_format()) {
+    if (isset($item['format']) && $item['format'] !== '' && !_text_field_uses_default_format($item, $instance)) {
       // If this text field has a text format setting, save it regardless of
       // empty value to keep the format. Unless it's the default format.
       return FALSE;
@@ -226,6 +226,35 @@ function text_field_is_empty($item, $field) {
     elseif (!isset($item['summary']) || $item['summary'] === '') {
       // Neither value nor summary nor format are set,
       // no need to save to database.
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Utility to determine whether the default format is in use.
+ *
+ * @param array $item
+ *   Values from text field.
+ * @param array $instance
+ *   Field API instance definition.
+ *
+ * @return bool
+ */
+function _text_field_uses_default_format($item, $instance) {
+  if (isset($item['format'])) {
+    // The global default value for current account.
+    if ($item['format'] == filter_default_format()) {
+      return TRUE;
+    }
+    // Instance default value setting.
+    if (!empty($instance['default_value']) && $instance['default_value'][0]['format'] == $item['format']) {
+      return TRUE;
+    }
+    // There's a format restriction and this is the first, possibly only
+    // available format for this field instance.
+    if (!empty($instance['settings']['allowed_formats']) && $instance['settings']['allowed_formats'][0] == $item['format']) {
       return TRUE;
     }
   }
@@ -427,7 +456,11 @@ function text_summary($text, $format_id = NULL, $size = 600) {
     return substr($text, 0, $delimiter);
   }
 
-  $format = filter_format_load($format_id);
+  // Only attempt to load a format, if $format_id is not NULL, anyway.
+  $format = FALSE;
+  if ($format_id) {
+    $format = filter_format_load($format_id);
+  }
 
   // If we have a short body, the entire body is the summary.
   if (backdrop_strlen($text) <= $size) {
@@ -463,7 +496,7 @@ function text_summary($text, $format_id = NULL, $size = 600) {
   $line_breaks = array('<br />' => 6, '<br>' => 4);
   // Newline only indicates a line break if line break converter
   // filter is enabled.
-  if (isset($format->filters['filter_autop']) && $format->filters['filter_autop']->status) {
+  if ($format && isset($format->filters['filter_autop']) && $format->filters['filter_autop']->status) {
     $line_breaks["\n"] = 1;
   }
   $break_points[] = $line_breaks;

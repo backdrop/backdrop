@@ -60,6 +60,7 @@ function filter_element_info() {
     '#process' => array('filter_process_format'),
     '#base_type' => 'textarea',
     '#theme_wrappers' => array('text_format_wrapper'),
+    '#description_display' => 'before',
   );
   return $type;
 }
@@ -231,7 +232,7 @@ function filter_config_info() {
 /**
  * Implements hook_config_data_validate().
  */
-function filter_config_data_validate(Config $config, array $config_info) {
+function filter_config_data_validate(Config $config, ?array $config_info) {
   if (strpos($config->getName(), 'filter.format.') === 0) {
     $filters = $config->get('filters');
     $all_filter_info = filter_get_filters();
@@ -315,6 +316,13 @@ function filter_format_build_format($format) {
   }
   $all_filter_info = filter_get_filters();
   foreach ($format->filters as $name => $filter) {
+    if (!array_key_exists($name, $all_filter_info)) {
+      // Remove filters that don't exist anymore, for example from uninstalled
+      // modules, so they don't get saved again.
+      unset($format->filters[$name]);
+      continue;
+    }
+
     $filter_info = $all_filter_info[$name];
 
     // Ensure the $filter variable is an object. In Drupal 7, it was an array on
@@ -802,7 +810,7 @@ function filter_formats($account = NULL, $include_disabled = FALSE) {
           $filter_format->filters[$filter_name] = (object) $filter;
         }
         // Populate defaults for the editor associated with this format.
-        if (isset($all_editor_info[$filter_format->editor]['default settings'])) {
+        if (!empty($filter_format->editor) && isset($all_editor_info[$filter_format->editor]['default settings'])) {
           $filter_format->editor_settings += $all_editor_info[$filter_format->editor]['default settings'];
         }
 
@@ -815,6 +823,7 @@ function filter_formats($account = NULL, $include_disabled = FALSE) {
 
   // Build a list of enabled formats based on the full list.
   if (!isset($formats['enabled'])) {
+    $formats['enabled'] = array();
     foreach ($formats['all'] as $format) {
       if ($format->status) {
         $formats['enabled'][$format->format] = $format;
@@ -1281,8 +1290,6 @@ function filter_process_format($element) {
     // Do not copy this #process function to prevent form_builder() from
     // recursing infinitely.
     '#process',
-    // Description is handled by theme_text_format_wrapper().
-    '#description',
     // Ensure proper ordering of children.
     '#weight',
     // Properties already processed for the parent element.
@@ -1292,6 +1299,16 @@ function filter_process_format($element) {
     '#processed',
     '#theme_wrappers',
   );
+
+  // If the #description is set to be placed after the element (which is the
+  // default), let theme_text_format_wrapper() handle it. Otherwise, if the
+  // #description is set to be placed before the element, or set to invisible,
+  // then it would be rendered between the text-format-enabled area and the
+  // "Formatting options" fieldset.
+  if ($element['#description_display'] == 'after') {
+    $denylist[] = '#description';
+  }
+
   // Move this element into sub-element 'value'.
   unset($element['value']);
   foreach (element_properties($element) as $key) {
@@ -1307,6 +1324,15 @@ function filter_process_format($element) {
   $formats = filter_formats($user);
   $fallback_format = filter_fallback_format();
 
+  // Turn original element into a text format wrapper. Settings for all
+  // available formats are added to make them available for all fields.
+  if (isset($element['#attached'])) {
+    $element['#attached'] = array_merge_recursive($element['#attached'], filter_get_attached($formats));
+  }
+  else {
+    $element['#attached'] = filter_get_attached($formats);
+  }
+
   // Reduce the list if a list of allowed formats was provided.
   if (!empty($element['#allowed_formats'])) {
     foreach ($formats as $format) {
@@ -1315,14 +1341,6 @@ function filter_process_format($element) {
         unset($formats[$format->format]);
       }
     }
-  }
-
-  // Turn original element into a text format wrapper.
-  if (isset($element['#attached'])) {
-    $element['#attached'] = array_merge_recursive($element['#attached'], filter_get_attached($formats));
-  }
-  else {
-    $element['#attached'] = filter_get_attached($formats);
   }
 
   // Specify if uploads are allowed by using a data attribute.

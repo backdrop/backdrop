@@ -1,0 +1,52 @@
+<?php
+/**
+ * @file
+ * Basic simpletests to test basic link fields in a custom form.
+ */
+
+require_once(__DIR__ . '/link.test');
+
+/**
+ * Testing that the basics work for link fields on custom forms.
+ */
+class LinkCustomFormTest extends LinkBaseTestClass {
+  /**
+   * Test the output of a custom form with link fields.
+   */
+  public function testCustomLinkFields() {
+    $group = 'Link field custom form';
+
+    // Test form.
+    $this->backdropGet('link-field-custom-form');
+    $this->assertRaw('<label for="edit-link-test-defaults-title">Title', "Defaults include default title label", $group);
+    $this->assertRaw('name="link_test_title_changes[title]" value="" size="60" maxlength="16"', "Title has maxlength set (title_maxlength: 16)", $group);
+    $this->assertRaw('<label class="element-invisible" for="edit-link-test-title-changes">Link with title changed', "Changed title is used; main label not shown (title_label_use_field_label: true)", $group);
+    $this->assertNoRaw('name="link_test_internal_no_title[title]"', "Title not shown (title_mode: none)", $group);
+    $this->backdropPost(NULL, array('link_test_internal_no_title[url]' => 'https://backdropcms.org'), t('Submit'));
+    $this->assertText('Only internal URLs are allowed in Link without title', "External link not allowed (link_type: internal)", $group);
+    $this->backdropPost(NULL, array('link_test_validate_url[url]' => ''), t('Submit'));
+    $this->assertText('URL field is required', "Empty URL submission flagged when URL is required (url_mode: required)", $group);
+    $this->backdropPost(NULL, array('link_test_validate_url[url]' => 'https://backdropcms'), t('Submit'));
+    $this->assertText('The value https://backdropcms provided for Required link with URL validation is not a valid URL', "Invalid URL submission flagged when URL validation is active (validate_url: true)", $group);
+    $this->assertRaw('<label for="edit-configurable-title-and-class-attributes-title">Link "title" attribute ', "Link title attribute is configurable (configurable_title: true)", $group);
+    $this->assertRaw('<label for="edit-configurable-title-and-class-attributes-class">Custom link class ', "Link class attribute is configurable (configurable_class: true)", $group);
+
+    // Test submitted form.
+    $good_submission_data = array(
+      'link_test_defaults[title]' => 'Backdrop CMS Demo',
+      'link_test_defaults[url]' => 'https://backdropcms.org/demo',
+      'link_test_title_changes[title]' => 'Upgrade',
+      'link_test_title_changes[url]' => 'https://backdropcms.org/drupal-alternative',
+      'link_test_internal_no_title[url]' => 'about',
+      'link_test_validate_url[title]' => 'Add-ons',
+      'link_test_validate_url[url]' => 'https://backdropcms.org/add-ons',
+      'configurable_title_and_class[title]' => 'Backdrop User Guide',
+      'configurable_title_and_class[url]' => 'https://docs.backdropcms.org/documentation/user-guide',
+      'configurable_title_and_class[attributes][title]' => 'Learn more about using Backdrop CMS',
+      'configurable_title_and_class[attributes][class]' => 'help',
+    );
+    $expected_result = '[link_test_defaults] => Array ( [title] => Backdrop CMS Demo [url] => https://backdropcms.org/demo ) [link_test_title_changes] => Array ( [title] => Upgrade [url] => https://backdropcms.org/drupal-alternative ) [link_test_internal_no_title] => Array ( [url] => about ) [link_test_validate_url] => Array ( [title] => Add-ons [url] => https://backdropcms.org/add-ons ) [configurable_title_and_class] => Array ( [title] => Backdrop User Guide [url] => https://docs.backdropcms.org/documentation/user-guide [attributes] => Array (  [title] => Learn more about using Backdrop CMS  [class] => help ) )';
+    $this->backdropPost('link-field-custom-form', $good_submission_data, t('Submit'));
+    $this->assertRaw($expected_result, "Form submission successful", $group);
+  }
+}

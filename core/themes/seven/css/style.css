@@ -562,13 +562,16 @@ th.active a {
 [dir="rtl"] table th.active a {
   padding: 0 0 0 25px;
 }
-th.active img {
+th.active .tablesort {
   position: absolute;
-  top: 3px;
-  right: 3px; /* LTR */
+  color: #ffffff;
+  height: 1.6em;
+  width: 1.6em;
+  top: 0;
+  right: 0; /* LTR */
 }
-[dir="rtl"] th.active img {
-  left: 3px;
+[dir="rtl"] th.active .tablesort {
+  left: 0;
   right: auto;
 }
 td {
@@ -781,7 +784,6 @@ details {
   margin: 1em 0;
   overflow: hidden;
   background-color: #ffffff;
-  display: table-cell;
 }
 details summary span {
   color: #0074bd;
@@ -1320,6 +1322,9 @@ div.filter-options select {
 .system-themes-list-enabled .theme-selector h3 {
   margin-top: 0;
 }
+.theme-selector .icon {
+  vertical-align: text-bottom;
+}
 
 /**
  * Layout configuration.
@@ -1360,7 +1365,9 @@ div.filter-options select {
 /**
  * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
  */
-:not(#foo) > .layout-settings-form .layout-options .form-type-radio input, .form-item-region-style .form-type-radio input {
+:not(#foo) > .layout-settings-form .layout-options .form-type-radio input,
+.layout-entity-admin-add-form .layout-options .form-type-radio input,
+.form-item-region-style .form-type-radio input {
   /* Hide radios from visuals but not screen-readers */
   position: absolute;
   width: 1px;
@@ -1371,6 +1378,7 @@ div.filter-options select {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+.layout-entity-admin-add-form .layout-options .form-type-radio label,
 .form-item-region-style .form-type-radio label,
 .layout-settings-page .layout-options .form-type-checkbox label,
 .layout-settings-form .layout-options .form-type-radio label {
@@ -1387,10 +1395,13 @@ div.filter-options select {
 .form-item-region-style .form-type-radio label {
   min-height: inherit;
 }
+.layout-entity-admin-add-form .layout-options.no-flexbox .form-type-radio label,
 .layout-settings-page .layout-options.no-flexbox .form-type-checkbox label,
 .layout-settings-form .layout-options.no-flexbox .form-type-radio label {
   min-height: 150px;
 }
+.layout-entity-admin-add-form .layout-options .form-type-radio:active label,
+.layout-entity-admin-add-form .layout-options .form-type-radio input:checked + label,
 .form-item-region-style .form-type-radio:active label,
 .form-item-region-style .form-type-radio input:checked + label,
 .layout-settings-page .layout-options .form-type-checkbox:active label,
@@ -1400,6 +1411,9 @@ div.filter-options select {
   background-color: #ffffff;
   border-color: #d0d0d0;
 }
+.layout-entity-admin-add-form .layout-options .form-type-radio input:focus + label,
+.layout-entity-admin-add-form .layout-options .form-type-radio input:hover + label,
+.layout-entity-admin-add-form .layout-options .form-type-radio:hover input:checked + label,
 .form-item-region-style .form-type-radio input:focus + label,
 .form-item-region-style .form-type-radio input:hover + label,
 .form-item-region-style .form-type-radio:hover input:checked + label,
@@ -1412,6 +1426,7 @@ div.filter-options select {
   background-color: #ffffff;
   border-color: #43afe4;
 }
+.layout-entity-admin-add-form .layout-options .layout-options .form-type-radio img,
 .layout-settings-page .layout-options .form-type-checkbox img,
 .layout-settings-form .layout-options .form-type-radio img {
   position: relative;
@@ -1486,11 +1501,13 @@ table.update {
 }
 
 /* Maintenance page styles */
-body.maintenance-page {
+body.maintenance-page,
+.user-simplified-page-body {
   background: #E8E6E5;
   padding: 1em;
 }
-body.maintenance-page #page {
+body.maintenance-page #page,
+.user-simplified-page-wrapper {
   padding: 2em;
   max-width: 770px;
   min-width: 255px;
@@ -1498,7 +1515,8 @@ body.maintenance-page #page {
   background: white;
   position: relative;
 }
-body.maintenance-page #page:after {
+body.maintenance-page #page:after,
+.user-simplified-page-wrapper:after {
   left: 100%; /* LTR */
   border: solid transparent;
   border-color: rgba(255, 255, 255, 0);
@@ -1572,6 +1590,7 @@ body.maintenance-page #logo {
   max-width: 120px;
   margin: 0 auto;
 }
+
 ol.task-list {
   margin: 0;
   padding-left: 0; /* LTR */
@@ -1769,16 +1788,35 @@ div.add-or-remove-shortcuts {
     height: 100%;
     width: 100%;
   }
-  .maintenance-page-wrapper {
+  .maintenance-page-wrapper,
+  .user-simplified-page-body  {
+    width: 100%;
     display: table;
   }
-  body.maintenance-page {
+  .user-simplified-page-body  {
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .user-simplified-page-body .user-simplified-page {
     height: 100%;
     width: 100%;
     display: table-cell;
     vertical-align: middle;
   }
-  body.maintenance-page #page {
+  .user-simplified-page-wrapper  {
+    width: 75%;
+    margin: 0 auto;
+    max-width: 500px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    overflow: auto;
+  }
+  body.maintenance-page {
+    height: 100%;
+    width: 100%;
+    vertical-align: middle;
+    display: table-cell;
+  }
+  body.maintenance-page #page  {
     width: 75%;
     margin: 0 auto;
     max-width: 770px;

@@ -1181,7 +1181,7 @@ function user_update_1013() {
 }
 
 /**
- * Fixes system email linebreaks.
+ * Fixes system email line breaks.
  */
 function user_update_1014() {
   $emails = array(

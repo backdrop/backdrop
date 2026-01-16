@@ -576,6 +576,12 @@ function field_config_create(Config $staging_config) {
     }
 
     if (!$field_data_table_exists) {
+      if (!field_info_field_types($field['type'])) {
+        // If there is no available cached information about the field type (for
+        // example if we enabled a dependency that defines a new type), reset
+        // the field type cache.
+        _field_info_collate_types_reset();
+      }
       field_create_field($field);
     }
   }
@@ -762,20 +768,22 @@ function field_get_values(Entity $entity, $field_name, $value_key = 'value', $la
 /**
  * Helper function to filter out empty field values.
  *
- * @param $field
+ * @param array $field
  *   The field definition.
- * @param $items
+ * @param array $items
  *   The field values to filter.
+ * @param array $instance
+ *   The field API instance definition.
  *
- * @return
+ * @return array
  *   The array of items without empty field values. The function also renumbers
  *   the array keys to ensure sequential deltas.
  */
-function _field_filter_items($field, $items) {
+function _field_filter_items($field, $items, $instance) {
   $function = $field['module'] . '_field_is_empty';
   foreach ((array) $items as $delta => $item) {
     // Explicitly break if the function is undefined.
-    if ($function($item, $field)) {
+    if ($function($item, $field, $instance)) {
       unset($items[$delta]);
     }
   }
@@ -1174,6 +1182,8 @@ function field_view_field($entity_type, $entity, $field_name, $display = array()
     // Invoke prepare_view steps if needed.
     if (empty($entity->_field_view_prepared)) {
       list($id) = entity_extract_ids($entity_type, $entity);
+      // It is null for newly created, but we need it as array key.
+      $id = (string) $id;
 
       // First let the field types do their preparation.
       _field_invoke_multiple('prepare_view', $entity_type, array($id => $entity), $display, $null, $options);

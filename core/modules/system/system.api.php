@@ -218,19 +218,29 @@ function callback_queue_worker($queue_item_data) {
  *  An associative array describing the element types being defined. The array
  *  contains a sub-array for each element type, with the machine-readable type
  *  name as the key. Each sub-array has a number of possible attributes:
- *  - "#input": boolean indicating whether or not this element carries a value
- *    (even if it's hidden).
- *  - "#process": array of callback functions taking $element, $form_state,
- *    and $complete_form.
- *  - "#after_build": array of callback functions taking $element and $form_state.
- *  - "#validate": array of callback functions taking $form and $form_state.
- *  - "#element_validate": array of callback functions taking $element and
- *    $form_state.
- *  - "#pre_render": array of callback functions taking $element and $form_state.
- *  - "#post_render": array of callback functions taking $element and $form_state.
- *  - "#submit": array of callback functions taking $form and $form_state.
- *  - "#title_display": optional string indicating if and how #title should be
- *    displayed, see theme_form_element() and theme_form_element_label().
+ *   - "#input": boolean indicating whether or not this element carries a value
+ *     (even if it's hidden).
+ *   - "#process": array of callback functions taking $element, $form_state,
+ *     and $complete_form.
+ *   - "#after_build": array of callback functions taking $element and
+ *     $form_state.
+ *   - "#validate": array of callback functions taking $form and $form_state.
+ *   - "#element_validate": array of callback functions taking $element and
+ *     $form_state.
+ *   - "#pre_render": array of callback functions taking $element and
+ *     $form_state.
+ *   - "#post_render": array of callback functions taking $element and
+ *     $form_state.
+ *   - "#submit": array of callback functions taking $form and $form_state.
+ *   - "#title_display": optional string indicating if and how #title should be
+ *     displayed, see theme_form_element() and theme_form_element_label().
+ *   - "#description_display": Description display setting. It can have these
+ *     values:
+ *     - before: The description is output before the element.
+ *     - after: The description is output after the element. This is the default
+ *       value.
+ *     - invisible: The description is output after the element, hidden visually
+ *       but available to screen readers.
  *
  * @see hook_element_info_alter()
  * @see system_element_info()
@@ -269,7 +279,7 @@ function hook_element_info_alter(&$type) {
  * the browser.
  *
  * This hook by default is not called on pages served by the default page cache,
- * but can be enabled through the $settings['page_cache_invoke_hook'] option in
+ * but can be enabled through the $settings['page_cache_invoke_hooks'] option in
  * settings.php.
  *
  * @param $destination
@@ -1215,6 +1225,29 @@ function hook_menu_contextual_links_alter(&$links, $router_item, $root_path) {
 }
 
 /**
+ * Modify a menu structure before it is rendered in a menu block.
+ *
+ * The tree contains an array of menu links in the order they should be
+ * rendered. menu_tree_page_data() explains the data structure in more detail.
+ *
+ * @param array $tree
+ *   An array of menu links.
+ * @param array $config
+ *   The settings for a menu block.
+ *
+ * @see system_menu_tree_block_data()
+ * @see menu_tree_page_data()
+ */
+function hook_menu_block_tree_alter(&$tree, &$config) {
+
+  // Trim to the active path regardless of block settings.
+  system_menu_tree_trim_active_path($tree);
+
+  // Force the style to be a tree.
+  $config['style'] = 'tree';
+}
+
+/**
  * Perform alterations before a form is rendered.
  *
  * One popular use of this hook is to add form elements to the node form. When
@@ -1452,7 +1485,7 @@ function hook_forms($form_id, $args) {
  * hook_init() instead. In hook_boot(), only the most basic APIs are available
  * and not all modules have been loaded. This hook by default is not called on
  * pages served by the default page cache, but can be enabled through the
- * $settings['page_cache_invoke_hook'] option in settings.php.
+ * $settings['page_cache_invoke_hooks'] option in settings.php.
  *
  * @see hook_init()
  */
@@ -1783,6 +1816,9 @@ function hook_permission() {
  *   - base hook: A string declaring the base theme hook if this theme
  *     implementation is actually implementing a suggestion for another theme
  *     hook.
+ *   - attached: If specified, the designated library, icons, CSS, or JS file
+ *     will be attached to the page when this theme implementation is used. This
+ *     is intended as an alternative to adding these in preprocess functions.
  *   - pattern: A regular expression pattern to be used to allow this theme
  *     implementation to have a dynamic name. The convention is to use __ to
  *     differentiate the dynamic portion of the theme. For example, to allow
@@ -1810,6 +1846,8 @@ function hook_permission() {
  *     module, so that it doesn't need to be looked up.
  *
  * @see hook_theme_registry_alter()
+ *
+ * @since 1.31.0 Added optional "attached" key.
  */
 function hook_theme($existing, $type, $theme, $path) {
   return array(
@@ -1819,6 +1857,24 @@ function hook_theme($existing, $type, $theme, $path) {
     'status_report' => array(
       'render element' => 'requirements',
       'file' => 'system.admin.inc',
+    ),
+    'my_module_item' => array(
+      'template' => 'templates/my-module-item',
+      'file' => 'my_module.theme.inc',
+      'attached' => array(
+        'library' => array(
+          array('my_module', 'library-name'),
+        ),
+        'js' => array(
+          'core/misc/ajax.js' => array(),
+        ),
+        'css' => array(
+          'css/my-module.css' => array(),
+        ),
+        'icons' => array(
+          'acorn-fill' => array(),
+        ),
+      ),
     ),
   );
 }
@@ -2975,8 +3031,8 @@ function hook_install() {
  * loaded by that one, including, for example, autoload information) will not
  * have been loaded.
  *
- * During database updates the schema of any module could be out of date. For
- * this reason, caution is needed when using any API function within an update
+ * During site updates the schema of any module could be out of date. For this
+ * reason, caution is needed when using any API function within an update
  * function - particularly CRUD functions, functions that depend on the schema
  * (for example by using backdrop_write_record()), and any functions that invoke
  * hooks. See @link update_api Update versions of API functions @endlink for
@@ -3027,7 +3083,7 @@ function hook_update_N(&$sandbox) {
   // its default value exists in `config/my_module.settings.json`.
   config_set('my_module.settings', 'three', '3.33');
 
-  // For most database updates, the following is sufficient.
+  // For most site updates, the following is sufficient.
   db_add_field('mytable1', 'newcol', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
 
   // However, for more complex operations that may take a long time, you may
@@ -3106,7 +3162,7 @@ function hook_update_dependencies() {
   // the 'yet_another_module' module. (Note that declaring dependencies in this
   // direction should be done only in rare situations, since it can lead to the
   // following problem: If a site has already run the yet_another_module
-  // module's database updates before it updates its codebase to pick up the
+  // module's site update(s) before it updates its codebase to pick up the
   // newest my_module code, then the dependency declared here will be ignored.)
   $dependencies['yet_another_module'][1004] = array(
     'my_module' => 1001,
@@ -3137,7 +3193,7 @@ function hook_update_dependencies() {
  * @see hook_update_N()
  */
 function hook_update_last_removed() {
-  // We've removed the 1.x-1.x version of my_module, including database updates.
+  // We've removed the 1.x-1.x version of my_module, including site updates.
   // For the 1.x-2.x version of the module, the next update function would be
   // my_module_update_1200().
   return 1103;
@@ -4174,8 +4230,8 @@ function hook_filetransfer_info_alter(&$filetransfer_info) {
  * These simplified versions of core API functions are provided for use by
  * update functions (hook_update_N() implementations).
  *
- * During database updates the schema of any module could be out of date. For
- * this reason, caution is needed when using any API function within an update
+ * During site updates the schema of any module could be out of date. For this
+ * reason, caution is needed when using any API function within an update
  * function - particularly CRUD functions, functions that depend on the schema
  * (for example by using backdrop_write_record()), and any functions that invoke
  * hooks.

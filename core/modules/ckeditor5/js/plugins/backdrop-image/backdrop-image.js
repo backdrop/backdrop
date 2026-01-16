@@ -20,7 +20,7 @@
  * likely be split into multiple plugins and files. Backdrop does not use a
  * compilation step, so what is normally 5-8 files is all done in a single file.
  */
-class BackdropImage extends CKEditor5.core.Plugin {
+class BackdropImage extends CKEditor5.Plugin {
   /**
    * @inheritdoc
    */
@@ -88,7 +88,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
     conversion
       .for('dataDowncast')
       // Pull out the caption if present. This needs to be done before other
-      // conversions because afterward the caption element is eleminated.
+      // conversions because afterward the caption element is eliminated.
       .add(viewCaptionToCaptionAttribute(editor))
       // Create a blank image element, removing any wrapping figure element.
       .elementToElement({
@@ -119,10 +119,10 @@ class BackdropImage extends CKEditor5.core.Plugin {
     // This button has a different icon than the main toolbar button.
     editor.ui.componentFactory.add('editBackdropImage', (locale) => {
       const command = editor.commands.get('backdropImage');
-      const buttonView = new CKEditor5.ui.ButtonView(locale);
+      const buttonView = new CKEditor5.ButtonView(locale);
       buttonView.set({
         label: editLabel,
-        icon: CKEditor5.core.icons.pencil,
+        icon: CKEditor5.IconPencil,
         tooltip: true
       });
 
@@ -138,12 +138,12 @@ class BackdropImage extends CKEditor5.core.Plugin {
     // Add the backdropImage button for use in the main toolbar. This can
     // insert a new image or edit an existing one if selected.
     editor.ui.componentFactory.add('backdropImage', (locale) => {
-      const buttonView = new CKEditor5.ui.ButtonView(locale);
+      const buttonView = new CKEditor5.ButtonView(locale);
       const command = editor.commands.get('backdropImage');
 
       buttonView.set({
         label: insertLabel,
-        icon: CKEditor5.core.icons.image,
+        icon: CKEditor5.IconImage,
         tooltip: true
       });
 
@@ -797,7 +797,7 @@ function downcastBlockImageLink() {
 /**
  * CKEditor command that opens the Backdrop image editing dialog.
  */
-class BackdropImageCommand extends CKEditor5.core.Command {
+class BackdropImageCommand extends CKEditor5.Command {
   /**
    * @inheritdoc
    */
@@ -849,11 +849,10 @@ class BackdropImageCommand extends CKEditor5.core.Command {
       // The image caption is stored outside the imageElement model and must
       // be retrieved to get its value.
       const imageCaption = ImageCaptionUtils.getCaptionFromImageModelElement(imageElement);
+      // Inform the image dialog, that there is a caption and the checkbox in
+      // the form should be ticked. The value for data-caption isn't relevant.
+      // @see filter_format_editor_image_form()
       existingValues['data-has-caption'] = !!imageCaption;
-      if (imageCaption && imageCaption.childCount) {
-        const captionValue = editor.data.processor.toData(imageCaption.getChild(0));
-        existingValues['data-caption'] = captionValue;
-      }
     }
 
     const saveCallback = (dialogValues) => {

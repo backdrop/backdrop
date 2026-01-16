@@ -30,7 +30,11 @@ function _backdrop_maintenance_theme() {
   unicode_check();
 
   // Install and update pages are treated differently to prevent theme overrides.
-  if (defined('MAINTENANCE_MODE') && (MAINTENANCE_MODE == 'install' || MAINTENANCE_MODE == 'update')) {
+  if (defined('MAINTENANCE_MODE') && in_array(MAINTENANCE_MODE, array(
+    'install',
+    'update',
+    'restore',
+  ))) {
     $custom_theme = settings_get('maintenance_theme', 'seven');
   }
   else {
@@ -118,7 +122,7 @@ function theme_task_list($variables) {
   $items = $variables['items'];
   $active = $variables['active'];
 
-  $done = isset($items[$active]) || $active == NULL;
+  $done = $active == NULL || isset($items[$active]);
   $total = count($items);
   $count = 0;
   $current = 0;
@@ -177,6 +181,20 @@ function theme_install_page($variables) {
  *     FALSE can be useful to postpone the messages to a subsequent page.
  */
 function theme_update_page($variables) {
+  backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
+  return theme('maintenance_page', $variables);
+}
+
+/**
+ * Returns HTML for the restore page.
+ *
+ * Note: this function is not themeable.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - content: The page content to show.
+ */
+function theme_restore_page($variables) {
   backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
   return theme('maintenance_page', $variables);
 }
