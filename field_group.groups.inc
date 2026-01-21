@@ -33,7 +33,7 @@ function field_group_field_group_formatter_info() {
         'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
-        'default_formatter' => 'collapsible',
+        'default_formatter' => 'open',
       ),
       'details' => array(
         'label' => t('Details'),
@@ -102,7 +102,7 @@ function field_group_field_group_formatter_info() {
         'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'id' => ''),
-        'default_formatter' => 'collapsible',
+        'default_formatter' => 'open',
       ),
       'html5' => array(
         'label' => t('HTML5'),
@@ -114,7 +114,7 @@ function field_group_field_group_formatter_info() {
         'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array('description' => '', 'classes' => '', 'id' => ''),
-        'default_formatter' => 'collapsible',
+        'default_formatter' => 'open',
       ),
       'details' => array(
         'label' => t('Details'),
