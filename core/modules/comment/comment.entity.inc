@@ -409,7 +409,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
         ':nid' => $nid,
         ':status' => COMMENT_PUBLISHED,
       ))->fetchObject();
-      db_update('node_comment_statistics')
+      db_merge('node_comment_statistics')
         ->fields(array(
           'cid' => $last_reply->cid,
           'comment_count' => $count,
@@ -417,7 +417,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
           'last_comment_name' => $last_reply->uid ? '' : $last_reply->name,
           'last_comment_uid' => $last_reply->uid,
         ))
-        ->condition('nid', $nid)
+        ->key(array('nid' => $nid))
         ->execute();
     }
     else {
