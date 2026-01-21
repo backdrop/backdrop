@@ -17,12 +17,32 @@ tr.field-group input.form-submit {
   float: none;
 }
 
+.field-ui-overview tr.field-group .field-formatter-settings-edit-wrapper {
+  float: none;
+}
+
 #field-display-overview .field-formatter-settings-edit-wrapper a {
   display: block;
 }
 
-#field-overview input.field-formatter-settings-edit {
-  margin: 0;
+#field-overview input.field-group-formatter-settings-edit,
+#field-overview a.field-group-formatter-settings-delete,
+#field-display-overview input.field-group-formatter-settings-edit,
+#field-display-overview a.field-group-formatter-settings-delete {
+  margin: 0 0.2em;
   padding: 0.4em 1em;
   line-height: 1.2;
+  float: left;
+  clear: both;
+}
+#field-overview a.field-group-formatter-settings-delete,
+#field-display-overview a.field-group-formatter-settings-delete {
+  margin-top: 0.2em;
+}
+#field-overview a.field-group-formatter-settings-delete:hover,
+#field-display-overview a.field-group-formatter-settings-delete:hover,
+#field-overview a.field-group-formatter-settings-delete:focus,
+#field-display-overview a.field-group-formatter-settings-delete:focus {
+  color: white;
+  background-color: #97979e;
 }

@@ -254,21 +254,23 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#type' => 'submit',
         '#name' => $name . '_group_settings_edit',
         '#value' => t('Configure'),
-        '#attributes' => array('class' => array('field-formatter-settings-edit button-secondary'), 'alt' => t('Configure')),
+        '#attributes' => array('class' => array('field-formatter-settings-edit field-group-formatter-settings-edit button-secondary'), 'alt' => t('Configure')),
         '#op' => 'edit',
         // Do not check errors for the 'Configure' button.
         '#limit_validation_errors' => array(),
       );
+      $table[$name]['settings_edit']['delete'] = array(
+        '#type' => 'link',
+        '#title' => t('Delete'),
+        '#href' => '',
+        '#attributes' => array('class' => array('field-formatter-settings-edit field-group-formatter-settings-delete button')),
+      );
       if ($display_overview) {
-        $table[$name]['settings_edit']['delete'] = array(
-          '#markup' => l(t('Delete'), $params->admin_path . '/groups/' . $name . '/delete/' . $params->mode),
-        );
+        $table[$name]['settings_edit']['delete']['#href'] = $params->admin_path . '/groups/' . $name . '/delete/' . $params->mode;
       }
     }
     if (!$display_overview) {
-      $table[$name]['settings_edit']['delete'] = array(
-        '#markup' => l(t('Delete'), $params->admin_path . '/groups/' . $name . '/delete/form'),
-      );
+      $table[$name]['settings_edit']['delete']['#href'] = $params->admin_path . '/groups/' . $name . '/delete/form';
     }
   }
 
