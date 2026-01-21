@@ -1163,3 +1163,23 @@ function _field_group_get_default_formatter_settings($format_type, $mode) {
     'instance_settings' => $formatter['instance_settings']
   );
 }
+
+/**
+ * Preserve instance settings that are shared when switching the format type.
+ *
+ * @param array $new_instances
+ *   The default instance settings of the new format type.
+ * @param array $original_instances
+ *   The original instance settings.
+ *
+ * @return array
+ *   Updated instance settings
+ */
+function _field_group_preserve_shared_instance_settings($new_instances, $original_instances) {
+  foreach ($new_instances as $new_instance_key => $new_instance) {
+    if (empty($new_instance) && !empty($original_instances[$new_instance_key])) {
+      $new_instances[$new_instance_key] = $original_instances[$new_instance_key];
+    }
+  }
+  return $new_instances;
+}

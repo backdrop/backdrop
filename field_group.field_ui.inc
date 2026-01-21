@@ -518,8 +518,24 @@ function field_group_formatter_settings_update(&$group, $settings) {
 
   // For format changes we load the defaults.
   if (empty($settings['format_settings']['settings'])) {
+    $original_formatter_settings = $group->format_settings;
     $mode = $group->mode == 'form' ? 'form' : 'display';
     $group->format_settings = _field_group_get_default_formatter_settings($group->format_type, $mode);
+    // If the format type is changed, make sure we carry over the unique
+    // changes such as classes, ids.
+    $group->format_settings['instance_settings'] = _field_group_preserve_shared_instance_settings($group->format_settings['instance_settings'], $original_formatter_settings['instance_settings']);
+    // Classes are a special case. Need to parse and change "field-group-TYPE"
+    // to the new format type.
+    if (!empty($group->format_settings['instance_settings']['classes'])) {
+      $classes = explode(' ', $group->format_settings['instance_settings']['classes']);
+      foreach ($classes as $class_key => $class) {
+        if (substr($class, 0, 12) === 'field-group-') {
+          $classes[$class_key] = 'field-group-' . $group->format_type;
+        }
+      }
+      $group->format_settings['instance_settings']['classes'] = implode(' ', $classes);
+    }
+
   }
   else {
     $group->format_type = $settings['format']['type'];
