@@ -50,7 +50,9 @@ Backdrop.behaviors.horizontalTabs = {
       if (!tab_focus) {
         // If the current URL has a fragment and one of the tabs contains an
         // element that matches the URL fragment, activate that tab.
-        var hash = window.location.hash.replace(/[=%;,\/]/g, "");
+        // Before we filter out all unwanted characters that might crash with
+        // jQuery
+        var hash = window.location.hash.replace(/[^a-zA-Z0-9-_]/g, "");
         if (hash !== '#' && $(hash, this).length) {
           tab_focus = $(window.location.hash, this).closest('.horizontal-tabs-pane');
         }

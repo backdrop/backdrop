@@ -138,14 +138,14 @@ function field_group_permission() {
  */
 function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_pos, $map) {
 
+  $args = func_get_args();
+  $args_pop = array_pop($args);
+  $mode = array_pop($args_pop);
+
   if ($bundle_pos > 0) {
     $bundle = $map[$bundle_pos];
     $bundle_name = field_extract_bundle($entity_type, $bundle);
   }
-
-  $args = func_get_args();
-  $args_pop = array_pop($args);
-  $mode = array_pop($args_pop);
 
   $group = field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode);
   return empty($group) ? FALSE : $group;
@@ -1036,10 +1036,10 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
  * @see field_group_fields_nest()
  */
 function field_group_pre_render(&$element, $group, &$form) {
-
-  // Only run the pre_render function if the group has elements.
-  // $group->group_name
-  if ($element == array()) {
+  // Only run the pre_render function if the group has elements. All groups
+  // have #array_parents & #field_parents set by field_group_fields_nest()
+  // regardless of emptiness.
+  if ($element == array() || !array_diff(array_keys($element), array('#array_parents', '#field_parents'))) {
     return;
   }
 

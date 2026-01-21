@@ -638,7 +638,8 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
     // Create the fieldgroup element.
     $add['#parents'] = array('additional_settings');
     $add['#group'] = 'additional_settings';
-    $add['#weight'] = -30 + $group->weight; // hardcoded to bring our extra additional vtabs on top.
+    $add['#weight'] = -30 + $group->weight;
+    // Hardcoded to bring our extra additional vtabs on top.
 
     // Check if the additional_settings exist for this type of form.
     if (isset($form['additional_settings']['group']['#groups']['additional_settings'])) {
@@ -970,8 +971,6 @@ function field_group_field_group_build_pre_render_alter(&$element) {
   // Note that multipages MUST be in the root of the form.
   foreach (element_children($element) as $name) {
     if (isset($element[$name]['#type']) && $element[$name]['#type'] == 'multipage' && isset($element['additional_settings'])) {
-      $parent_group = $element['#groups'][$name];
-      $move_additional = isset($parent_group->format_settings['instance_settings']['move_additional']) ? $parent_group->format_settings['instance_settings']['move_additional'] : 1;
       $last_pane = NULL;
       foreach (element_children($element[$name], TRUE) as $pane) {
         $last_pane = $pane;
