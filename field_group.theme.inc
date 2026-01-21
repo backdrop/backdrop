@@ -119,7 +119,7 @@ function theme_multipage_pane($variables) {
   // Add a page counter if needed.
   // counter array(0 => t('No'), 1 => t('Format 1 / 10'), 2 => t('The count number only'));
   $page_counter_format = isset($parent_group->format_settings['instance_settings']['page_counter']) ? $parent_group->format_settings['instance_settings']['page_counter'] : 1;
-  $multipage_element['#page_counter_rendered'] = '';
+
   if ($page_counter_format == 1) {
     $output .= t('<span class="multipage-counter">%count / %total</span>', array('%count' => $multipages[$parent_group->group_name], '%total' => count($parent_group->children)));
   } elseif ($page_counter_format == 2) {
