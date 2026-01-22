@@ -3469,13 +3469,21 @@ function system_header_block_form($settings) {
     'site_slogan' => TRUE,
   );
 
-  $form['menu'] = array(
-    '#title' => t('Menu'),
-    '#type' => 'select',
-    '#options' => menu_get_menus(),
-    '#empty_option' => '- ' . t('None') . ' -',
-    '#default_value' => $settings['menu'],
-  );
+  if (module_exists('menu')) {
+    $form['menu'] = array(
+      '#title' => t('Menu'),
+      '#type' => 'select',
+      '#options' => menu_get_menus(),
+      '#empty_option' => '- ' . t('None') . ' -',
+      '#default_value' => $settings['menu'],
+    );
+  }
+  else {
+    $form['menu_disabled'] = array(
+      '#type' => 'markup',
+      '#markup' => t('The Menu module is disabled. Enable the Menu module to select a menu for the header block.'),
+    );
+  }
   $form['components'] = array(
     '#type' => 'fieldset',
     '#title' => t('Site information'),
@@ -3513,8 +3521,11 @@ function system_header_block($settings) {
     'site_name' => TRUE,
     'site_slogan' => TRUE,
   );
-
-  $menu = $settings['menu'] ? menu_navigation_links($settings['menu']) : NULL;
+  
+  $menu = NULL;
+  if (module_exists('menu') && $settings['menu']) {
+    $menu = menu_navigation_links($settings['menu']);
+  }
   $site_config = config('system.core');
   $variables['logo']        = $settings['logo'] ? backdrop_get_logo() : NULL;
   $variables['logo_attributes'] = $settings['logo'] ? array_diff_key(backdrop_get_logo_info(), array('path' => '')) : array();
