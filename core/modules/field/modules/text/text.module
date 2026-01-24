@@ -218,7 +218,7 @@ function text_field_load($entity_type, $entities, $field, $instances, $langcode,
  */
 function text_field_is_empty($item, $field, $instance = NULL) {
   if (!isset($item['value']) || $item['value'] === '') {
-    if (!empty($instance) && isset($item['format']) && $item['format'] !== '' && !_text_field_uses_default_format($item, $instance)) {
+    if (isset($instance) && isset($item['format']) && $item['format'] !== '' && !_text_field_uses_default_format($item, $instance)) {
       // If this text field has a text format setting, save it regardless of
       // empty value to keep the format. Unless it's the default format.
       return FALSE;
