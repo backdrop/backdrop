@@ -121,17 +121,18 @@ function layout_list_page() {
 
       if (isset($layout->additional_paths)) {
         foreach ($layout->additional_paths as $additional_path) {
-          $additional_row = _layout_build_group_row($additional_path, $group, $page_callbacks);
+          $additional_row = array(
+            'data' => _layout_build_group_row($additional_path, $group, $page_callbacks),
+            'class' => array('layout-group', 'additional'),
+          );
 
           // Add the heading row to the non-default layout path groups.
           if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
-            $stand_alone_rows[] = array(
-              'data' => $additional_row,
-              'class' => array('layout-group', 'hidden-row'),
-            );
+            $stand_alone_rows[] = $additional_row;
           }
           elseif ($path !== '') {
-            $override_rows[] = array('data' => $additional_row, 'class' => array('layout-group', 'hidden-row hidden'));
+            $additional_row['class'][] = 'hidden';
+            $override_rows[] = $additional_row;
           }
         }
       }
@@ -249,14 +250,17 @@ function _layout_build_group_row(string $path, array $group, array $page_callbac
     }
     $menu_item = layout_menu_item_load_multiple_by_path($path);
     $row[] = array('data' => $path_link, 'class' => $class);
-    // Empty columns are intentional so that they may be hidden with
+    // Some empty columns are intentional so that they may be hidden with
     // priority-low class on the $header array.
     $row[] = '';
-    $row[] = theme('layout_condition_info', array(
-      'layout' => $menu_item,
-      'show_empty' => FALSE,
-    ));
-    $row[] = '';
+    // This row spans two columns.
+    $row[] = array(
+      'colspan' => 2,
+      'data' => theme('layout_condition_info', array(
+        'layout' => $menu_item,
+        'show_empty' => FALSE,
+      )),
+    );
 
     if (count($operations['#links']) !== 0) {
       $row[] = backdrop_render($operations);
