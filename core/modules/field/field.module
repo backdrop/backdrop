@@ -433,9 +433,14 @@ function field_config_info() {
 function field_config_label_instance($instance, $config_name) {
   list($entity_type_name, $bundle, $field_name) = explode('.', str_replace('field.instance.', '', $config_name));
   $entity_type = entity_get_info($entity_type_name);
-  $entity_label = $entity_type['label'];
-  $bundle_label = isset($entity_type['bundles'][$bundle]['label']) ? $entity_type['bundles'][$bundle]['label'] : $bundle;
-  return $entity_label . ' - ' . $bundle_label . ' - ' . $instance['label'];
+  if (isset($entity_type['label'])) {
+    $entity_label = $entity_type['label'];
+    $bundle_label = isset($entity_type['bundles'][$bundle]['label']) ? $entity_type['bundles'][$bundle]['label'] : $bundle;
+    return $entity_label . ' - ' . $bundle_label . ' - ' . $instance['label'];
+  }
+  else {
+    backdrop_set_message(t('The configuration file for the deleted field @field_name has been found. Consider removing it.', array('@field_name' => $config_name)), 'warning');
+  }
 }
 
 /**
