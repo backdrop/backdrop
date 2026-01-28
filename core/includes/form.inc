@@ -3598,7 +3598,6 @@ function form_process_actions($element, &$form_state) {
   $element['#attributes']['class'][] = 'form-actions';
 
   $first_button = NULL;
-  $danger_button = NULL;
   $primary_set = FALSE;
   foreach (element_children($element, TRUE) as $key) {
     // Don't add automatic classes to non-buttons.
@@ -3610,17 +3609,9 @@ function form_process_actions($element, &$form_state) {
     if (!$first_button && $button['#type'] === 'submit') {
       $first_button = $key;
     }
-    // Record the danger button if found.
-    if (isset($button['#attributes']['class']) && in_array('button-danger', $button['#attributes']['class'])) {
-      $danger_button = $key;
-    }
     // Record the primary button if found.
-    elseif (isset($button['#attributes']['class']) && (in_array('button-primary', $button['#attributes']['class']))) {
+    if (isset($button['#attributes']['class']) && (in_array('button-primary', $button['#attributes']['class']))) {
       $primary_set = TRUE;
-      // In case only danger class was added, make sure it has the primary.
-      if (!in_array('button-primary', $button['#attributes']['class'])) {
-        $element[$key]['#attributes']['class'][] = 'button-primary';
-      }
     }
     // Add the secondary button class otherwise.
     elseif (!isset($button['#attributes']['class']) || !in_array('button-secondary', $button['#attributes']['class'])) {
@@ -3628,14 +3619,9 @@ function form_process_actions($element, &$form_state) {
     }
   }
   // Add the primary class to the first button found if no others are primary.
-  if (!$primary_set && !$danger_button && $first_button) {
+  if (!$primary_set && $first_button) {
     $element[$first_button]['#attributes']['class'][] = 'button-primary';
     $element[$first_button]['#attributes']['class'] = array_diff($element[$first_button]['#attributes']['class'], array('button-secondary'));
-  }
-  // Add the primary class to the danger button if present.
-  elseif (!$primary_set && $danger_button && !in_array('button-primary', $element[$danger_button]['#attributes']['class'])) {
-    $element[$danger_button]['#attributes']['class'][] = 'button-primary';
-    $element[$danger_button]['#attributes']['class'] = array_diff($element[$danger_button]['#attributes']['class'], array('button-secondary'));
   }
 
   return $element;
