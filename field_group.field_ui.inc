@@ -981,6 +981,7 @@ function field_group_field_ui_clone_field_groups_validate($form, &$form_state) {
   }
 
   // Check for types are not known in current mode.
+  $non_existing_types = array('div');
   if ($form_state['field_group_params']->mode != 'form') {
     $non_existing_types = array('multipage', 'multipage-group');
   }
@@ -989,7 +990,7 @@ function field_group_field_ui_clone_field_groups_validate($form, &$form_state) {
     $field_instances = field_info_instances($form_state['field_group_params']->entity_type, $form_state['field_group_params']->bundle);
     $visible_fields = array();
     foreach ($field_instances as $field_name => $field_instance) {
-      if ($field_instance['display'][$form_state['field_group_params']->mode]['type'] != 'hidden') {
+      if ($form_state['field_group_params']->mode == 'form' || $field_instance['display'][$form_state['field_group_params']->mode]['type'] != 'hidden') {
         $visible_fields[] = $field_name;
       }
     }
