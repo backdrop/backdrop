@@ -14,7 +14,7 @@ function field_group_field_group_formatter_info() {
       'html-element' => array(
         'label' => t('HTML element'),
         'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
-        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array('wrapper' => '', 'wrapper_other' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
       ),
       'div' => array(
         'label' => t('Div'),
@@ -22,11 +22,6 @@ function field_group_field_group_formatter_info() {
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'required_fields' => 1, 'id' => ''),
         'default_formatter' => 'open',
-      ),
-      'html5' => array(
-        'label' => t('HTML5'),
-        'description' => t('This fieldgroup renders the inner content in a semantic HTML5 wrapper'),
-        'instance_settings' => array('wrapper' => '', 'classes' => '', 'id' => ''),
       ),
       'fieldset' => array(
         'label' => t('Fieldset'),
@@ -95,7 +90,7 @@ function field_group_field_group_formatter_info() {
       'html-element' => array(
         'label' => t('HTML element'),
         'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
-        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array('wrapper' => '', 'wrapper_other' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
       ),
       'div' => array(
         'label' => t('Div'),
@@ -103,11 +98,6 @@ function field_group_field_group_formatter_info() {
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'id' => ''),
         'default_formatter' => 'open',
-      ),
-      'html5' => array(
-        'label' => t('HTML5'),
-        'description' => t('This fieldgroup renders the inner content in a semantic HTML5 wrapper'),
-        'instance_settings' => array('wrapper' => '', 'classes' => '', 'id' => ''),
       ),
       'fieldset' => array(
         'label' => t('Fieldset'),
@@ -250,7 +240,11 @@ function field_group_pre_render_details(&$element, $group, &$form) {
  *   The root element or form.
  */
 function field_group_pre_render_html_element(&$element, $group, &$form) {
-  $html_element = isset($group->format_settings['instance_settings']['element']) ? $group->format_settings['instance_settings']['element'] : 'div';
+  $html_element = isset($group->format_settings['instance_settings']['wrapper_other']) ? $group->format_settings['instance_settings']['wrapper_other'] : 'div';
+  $wrapper = $group->format_settings['instance_settings']['wrapper'];
+  if (!empty($wrapper) && $wrapper != 'other') {
+    $html_element = $wrapper;
+  }
   $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
   $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'div';
   $configured_attributes = isset($group->format_settings['instance_settings']['attributes']) ? ' ' . $group->format_settings['instance_settings']['attributes'] : '';
@@ -340,27 +334,6 @@ function field_group_pre_render_div(&$element, $group, &$form) {
     $element['#attached']['library'][] = array('system', 'effects.blind');
   }
 
-}
-
-/**
- * Implements field_group_pre_render_<format-type>.
- * Format type: HTML5.
- *
- * @param array $element
- *   The field group form element.
- * @param object $group
- *   The Field group object prepared for pre_render.
- * @param array $form
- *   The root element or form.
- */
-function field_group_pre_render_html5(&$element, $group, &$form) {
-  $id = !empty($element['#id']) ? ' id="' . $element['#id'] . '"' : '';
-  $class = !empty($group->classes) ? ' class="' . $group->classes . '"' : '';
-  $element += array(
-    '#type' => 'markup',
-    '#prefix' => '<' . $group->format_settings['instance_settings']['wrapper'] . $id . $class . '>',
-    '#suffix' => '</' . $group->format_settings['instance_settings']['wrapper'] . '>',
-  );
 }
 
 /**
@@ -825,12 +798,24 @@ function field_group_field_group_format_settings_alter(&$form, &$group) {
   // Add optional instance_settings.
   switch ($group->format_type) {
     case 'html-element':
-      $form['instance_settings']['element'] = array(
-        '#title' => t('Element'),
+      $form['instance_settings']['wrapper'] = array(
+        '#title' => t('Wrapper tag'),
+        '#type' => 'select',
+        '#options' => array('section' => t('Section'), 'article' => t('Article'), 'header' => t('Header'), 'footer' => t('Footer'), 'aside' => t('Aside'), 'div' => t('Div'), 'other' => t('Other')),
+        '#default_value' => isset($group->format_settings['instance_settings']['wrapper']) ? $group->format_settings['instance_settings']['wrapper'] : 'section',
+      );
+
+      $form['instance_settings']['wrapper_other'] = array(
+        '#title' => t('Other'),
         '#type' => 'textfield',
-        '#default_value' => isset($group->format_settings['instance_settings']['element']) ? $group->format_settings['instance_settings']['element'] : $formatter['instance_settings']['element'],
-        '#description' => t('E.g. div, section, aside etc.'),
+        '#default_value' => isset($group->format_settings['instance_settings']['wrapper_other']) ? $group->format_settings['instance_settings']['wrapper_other'] : $formatter['instance_settings']['wrapper_other'],
+        '#description' => t('For example: p, span'),
         '#weight' => 1,
+        '#states' => array(
+          'visible' => array(
+            'select[name="fields[' . $group->group_name . '][format_settings][settings][instance_settings][wrapper]"]' => array('value' => 'other'),
+          ),
+        ),
       );
 
       $form['instance_settings']['show_label'] = array(
@@ -846,6 +831,11 @@ function field_group_field_group_format_settings_alter(&$form, &$group) {
         '#type' => 'textfield',
         '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
         '#weight' => 3,
+        '#states' => array(
+          'visible' => array(
+            'select[name="fields[' . $group->group_name . '][format_settings][settings][instance_settings][show_label]"]' => array('value' => 1),
+          ),
+        ),
       );
 
       $form['instance_settings']['attributes'] = array(
@@ -870,29 +860,26 @@ function field_group_field_group_format_settings_alter(&$form, &$group) {
         '#type' => 'select',
         '#options' => array('h2' => t('Header 2'), 'h3' => t('Header 3')),
         '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
-        '#weight' => 2,
+        '#weight' => 3,
+        '#states' => array(
+          'visible' => array(
+            'select[name="fields[' . $group->group_name . '][format_settings][settings][instance_settings][show_label]"]' => array('value' => 1),
+          ),
+        ),
       );
       $form['instance_settings']['effect'] = array(
         '#title' => t('Effect'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'blind' => t('Blind')),
         '#default_value' => isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : $formatter['instance_settings']['effect'],
-        '#weight' => 3,
+        '#weight' => 4,
       );
       $form['instance_settings']['speed'] = array(
         '#title' => t('Speed'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast')),
         '#default_value' => isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : $formatter['instance_settings']['speed'],
-        '#weight' => 3,
-      );
-      break;
-    case 'html5':
-      $form['instance_settings']['wrapper'] = array(
-        '#title' => t('HTML5 wrapper'),
-        '#type' => 'select',
-        '#options' => array('section' => t('Section'), 'article' => t('Article'), 'header' => t('Header'), 'footer' => t('Footer'), 'aside' => t('Aside')),
-        '#default_value' => isset($group->format_settings['instance_settings']['wrapper']) ? $group->format_settings['instance_settings']['wrapper'] : 'section',
+        '#weight' => 5,
       );
       break;
     case 'fieldset':

@@ -37,3 +37,31 @@ function field_group_update_1000() {
     db_drop_table('field_group');
   }
 }
+
+/**
+ * Merge HTML5 format type into the HTML Element format type.
+ */
+function field_group_update_1001() {
+  $config_names = config_get_names_with_prefix('field_group.field_group.');
+  foreach ($config_names as $config_name) {
+    $field_group_config = config($config_name);
+    if ($field_group_config->get('format_type') == 'html5') {
+      $field_group_config->set('format_type', 'html-element');
+      $wrapper = $field_group_config->get('format_settings.instance_settings.wrapper');
+      if (!$wrapper) {
+        $wrapper = 'section';
+      }
+      $field_group_config->set('format_settings.instance_settings.wrapper', $wrapper);
+      $field_group_config->set('format_settings.instance_settings.wrapper_other', '');
+      $field_group_config->set('format_settings.instance_settings.show_label', 0);
+      $field_group_config->set('format_settings.instance_settings.label_element', 'div');
+      $field_group_config->set('format_settings.instance_settings.required_fields', 1);
+    }
+    if ($field_group_config->get('format_type') == 'html-element') {
+      $field_group_config->set('format_settings.instance_settings.wrapper', 'other');
+      $element = $field_group_config->get('format_settings.instance_settings.element');
+      $field_group_config->set('format_settings.instance_settings.wrapper_other', $element);
+    }
+    $field_group_config->save();
+  }
+}
