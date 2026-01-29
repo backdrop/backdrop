@@ -955,7 +955,7 @@ function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params
   );
   $form['additional_settings']['field_group']['help'] = array(
     '#type' => 'help',
-    '#markup' => t('<p>Fields can be dragged into groups with unlimited nesting. Each Fieldgroup format comes with a configuration form, specific for that format type.</p><p>Some formats come in pairs. These types have an HTML wrapper to nest its fieldgroup children. For example, place accordion items into the accordion; vertical tabs into the vertical tab group; and horizontal tabs into the horizontal tab group. There is one exception to this rule: you can use a vertical tab without a wrapper when the additional settings tabs are available, such as with content type forms.</p>'),
+    '#markup' => t('<p>Fields can be dragged into groups with unlimited nesting. Each Fieldgroup format comes with a configuration form, specific for that format type.</p><p>Some formats come in pairs. These types have an HTML wrapper to nest its fieldgroup children. For example, place vertical tabs into the vertical tab group. There is one exception to this rule: you can use a vertical tab without a wrapper when the additional settings tabs are available, such as with content type forms.</p>'),
   );
 
 }
@@ -982,9 +982,7 @@ function field_group_field_ui_clone_field_groups_validate($form, &$form_state) {
 
   // Check for types are not known in current mode.
   $non_existing_types = array('div');
-  if ($form_state['field_group_params']->mode != 'form') {
-    $non_existing_types = array('multipage', 'multipage-group');
-  }
+  backdrop_alter('field_group_mode_types_excluded', $non_existing_types, $form_state['field_group_params']->mode);
 
   if (!empty($form_state['#source_groups'])) {
     $field_instances = field_info_instances($form_state['field_group_params']->entity_type, $form_state['field_group_params']->bundle);
