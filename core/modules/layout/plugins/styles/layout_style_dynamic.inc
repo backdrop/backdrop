@@ -31,6 +31,7 @@ class LayoutStyleDynamic extends LayoutStyle {
         'section' => 'SECTION',
         'nav' => 'NAV',
         'p' => 'P',
+        'details' => 'DETAILS,
         '' => t('No wrapper'),
       );
       $form['wrapper_tag'] = array(
@@ -56,6 +57,7 @@ class LayoutStyleDynamic extends LayoutStyle {
           'h6' => 'H6',
           'div' => 'DIV',
           'p' => 'P',
+          'summary' => 'Details summary',
         ),
         '#default_value' => $this->settings['title_tag'],
         '#weight' => 2,
