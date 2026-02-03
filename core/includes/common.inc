@@ -8228,6 +8228,15 @@ function backdrop_common_theme() {
         'empty' => NULL,
       ),
     ),
+    'inline_list' => array(
+      'variables' => array(
+        'items' => array(),
+        'separator' => ', ',
+        'wrapper_attributes' => array(),
+        'wrapper_element' => 'span',
+        'empty' => NULL,
+      ),
+    ),
     'more_help_link' => array(
       'variables' => array('url' => NULL),
     ),
