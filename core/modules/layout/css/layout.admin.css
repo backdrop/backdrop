@@ -285,7 +285,8 @@ input.layout-additional-path-remove.form-submit {
   mask-size: contain;
   mask-repeat: no-repeat;
   display: inline-block;
-  background-color: #9f9f9f;
+  background-color: currentColor;
+  opacity: 0.65;
   height: 1em;
   width: 1em;
   margin: 0 .5em;
