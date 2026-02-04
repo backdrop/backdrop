@@ -130,7 +130,8 @@ a.tabledrag-handle .handle {
   mask-size: contain;
   mask-repeat: no-repeat;
   display: inline-block;
-  background-color: #9f9f9f;
+  background-color: currentColor;
+  opacity: 0.65;
   height: 1em;
   width: 1em;
   margin-block: .35em;
@@ -142,7 +143,7 @@ a.tabledrag-handle-y .handle {
   mask-image: url(../../../misc/icons/arrows-out-line-vertical-fill.svg);
 }
 a.tabledrag-handle-hover .handle {
-  background-color: #000;
+  opacity: 1;
 }
 div.indentation {
   float: left; /* LTR */

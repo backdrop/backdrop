@@ -262,7 +262,7 @@ input.layout-additional-path-remove.form-submit {
   cursor: move;
 }
 .ui-sortable .layout-editor-block:hover .handle {
-  background-color: #000;
+  opacity: 1;
 }
 .layout-editor-block {
   margin: -1px 1px 15px -1px;
