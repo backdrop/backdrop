@@ -6694,7 +6694,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
     'templates',
     'node_modules',
     'bower_components',
-    'library',
+    'libraries',
     'vendor',
   );
   $no_mask = '/^((\..*)|' . implode('|', $ignore_directories) .  ')$/';
