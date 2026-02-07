@@ -579,7 +579,7 @@ function file_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Protect against repeat rendering'),
     '#default_value' => $config->get('protect_repeated_render'),
-    '#description' => t('Avoid rendering the same file more than 10 times. This can be a sign of an image getting caught in a recursive render, but it can also be triggered when the same image is rendered more than 20 times, e.g. in an long content list or data feed.'),
+    '#description' => t('Avoid rendering the same file more than 10 times. This can be a sign of an image getting caught in a recursive render, but it can also be triggered when the same image is rendered more than 20 times, e.g. in a long content list or data feed.'),
   );
 
   return system_settings_form($form);
