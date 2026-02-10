@@ -113,6 +113,7 @@ body.drag {
   margin-left: -1em; /* LTR */
   overflow: hidden;
   text-decoration: none;
+  color: currentColor;
 }
 [dir="rtl"] .draggable a.tabledrag-handle {
   float: right;
