@@ -179,7 +179,7 @@ function config_sync_validate_file($config_name, $config_change_type, $all_chang
   // not actually written to disk, so it should not affect any existing staged
   // configuration files when performing a single import.
   else {
-    $staging_config = config($config_name, 'staging')->setData($config_data);
+    $staging_config = config($config_name, 'staging')->setData($config_data, FALSE);
   }
 
   // First check that a module claims this config file. Unclaimed configs cannot
@@ -263,7 +263,7 @@ function config_sync_file($config_file, $config_change_type, ?array $config_cont
   // not actually written to disk, so it should not affect any existing staged
   // configuration files when performing a single import.
   else {
-    $staging_config = config($config_file, 'staging')->setData($config_contents);
+    $staging_config = config($config_file, 'staging')->setData($config_contents, FALSE);
   }
 
   switch ($config_change_type) {
@@ -275,7 +275,7 @@ function config_sync_file($config_file, $config_change_type, ?array $config_cont
     case 'update':
       $active_config->load();
       module_invoke_all('config_update', $staging_config, $active_config);
-      $active_config->setData($staging_config->get())->save();
+      $active_config->setData($staging_config->get(), FALSE)->save();
       break;
     case 'delete':
       $active_config->load();
