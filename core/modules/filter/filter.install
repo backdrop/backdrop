@@ -15,6 +15,19 @@ function filter_schema() {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function filter_update_dependencies() {
+  // Ensure that roles have been converted to config before updating
+  // the user role configuration files.
+  $dependencies['filter'][1001] = array(
+    'user' => 1007,
+  );
+  return $dependencies;
+}
+
+
+/**
  * @addtogroup updates-7.x-to-1.x
  * @{
  */
@@ -59,7 +72,12 @@ function filter_update_1000() {
  * Add a separate permission for image upload access.
  */
 function filter_update_1001() {
-  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('upload editor images'));
+  // This update assumes the role table has already been replaced by config.
+  $config = config('user.role.authenticated');
+  $permissions = $config->get('permissions');
+  $permissions[] = 'upload editor images';
+  $config->set('permissions', $permissions);
+  $config->save();
 
   // Enable uploading on existing text formats. Access previously was not
   // checked previously, so all formats had uploading enabled.
@@ -487,7 +505,7 @@ function filter_update_1004() {
   $config = config('views.view.image_library');
 
   // Only update if view isn't overridden
-  if ($config->get('storage') == VIEWS_STORAGE_DEFAULT) {
+  if ($config->get('storage') == 4) {
     $view_config = $config->get();
     $view_config['display']['default']['display_options']['exposed_form'] = array(
       'type' => 'basic',
