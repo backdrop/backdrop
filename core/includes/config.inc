@@ -301,7 +301,7 @@ function config_install_default_config($project, $config_name = NULL) {
       $config = config($default_config_name);
       // We only create new configs, and do not overwrite existing ones.
       if ($config->isNew()) {
-        $config->setData($data);
+        $config->setData($data, FALSE);
         module_invoke_all('config_create', $config);
         $config->save();
       }
@@ -888,7 +888,7 @@ class Config {
    * @param array $data
    *   The new configuration data.
    * @param bool $preserve_order
-   *   Preserve the original order of the data
+   *   Preserve the original order of the data.
    *
    * @return Config
    *   The configuration object.
