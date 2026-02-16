@@ -266,6 +266,7 @@ abstract class Entity extends stdClass implements EntityInterface {
     foreach ($values as $key => $value) {
       $this->$key = $value;
     }
+    $this->langcode();
   }
 
   /**

@@ -287,7 +287,6 @@ class FileStorageController extends EntityDatabaseStorageController {
   protected function preSave(EntityInterface $entity) {
     $entity->timestamp = REQUEST_TIME;
     $entity->filesize = filesize($entity->uri);
-    $entity->langcode();
     if (!isset($entity->langcode) || $entity->langcode == NULL) {
       // Default the file's language code to none, because files are language
       // neutral more often than language dependent.
