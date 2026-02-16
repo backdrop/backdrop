@@ -58,7 +58,7 @@ interface EntityInterface {
   /**
    * Returns the langcode for the entity.
    *
-   * @return
+   * @return string
    *   The langcode for the entity or NULL as a default.
    *
    */
