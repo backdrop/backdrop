@@ -270,6 +270,36 @@ class TranslationTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests entity class 'langcode callback' property
+   */
+  function testLangcodeCallback() {
+    $node_none = $this->createPage($this->randomName(), $this->randomName(), LANGUAGE_NONE);
+    $node_none_test = $this->createPage($this->randomName(), $this->randomName(), LANGUAGE_NONE);
+    $node_es = $this->createPage($this->randomName(), $this->randomName(), 'es');
+    $node_es_test = $this->createPage($this->randomName(), $this->randomName(), 'es');
+    $this->resetCaches();
+
+    $langcode_alter = &backdrop_static('translation_test_langcode_callback', array());
+
+    $node_none = node_load($node_none->nid, NULL, TRUE);
+    $this->assertEqual($node_none->langcode(), LANGUAGE_NONE, t('Langcode is LANGUAGE_NONE'));
+
+    $node_none_test_langcode = 'zh';
+    $langcode_alter[$node_none_test->nid] = $node_none_test_langcode;
+    $node_none_test = node_load($node_none_test->nid, NULL, TRUE);
+    $this->assertEqual($node_none_test->langcode(), $node_none_test_langcode, t('Langcode is altered by langcode callback and is @langcode', ['@langcode' => $node_none_test_langcode]));
+
+
+    $node_es = node_load($node_es->nid, NULL, TRUE);
+    $this->assertEqual($node_es->langcode(), 'es', t('Langcode is unaltered and is @langcode', ['@langcode' => 'es']));
+
+    $node_es_test_langcode = 'en';
+    $langcode_alter[$node_es_test->nid] = $node_es_test_langcode;
+    $node_es_test = node_load($node_es_test->nid, NULL, TRUE);
+    $this->assertEqual($node_es_test->langcode(), $node_es_test_langcode, t('Langcode is altered by langcode callback and is @langcode', ['@langcode' => $node_es_test_langcode]));
+  }
+
+  /**
    * Resets static caches to make the test code match the client-side behavior.
    */
   function resetCaches() {
