@@ -99,56 +99,8 @@ textarea.resize-both {
 }
 
 /**
- * TableDrag behavior.
- *
- * @see tabledrag.js
+ * Form API indentations, used with #indentation property.
  */
-body.drag {
-  cursor: move;
-}
-.draggable a.tabledrag-handle {
-  cursor: move;
-  float: left; /* LTR */
-  height: 1.7em;
-  margin-left: -1em; /* LTR */
-  overflow: hidden;
-  text-decoration: none;
-}
-[dir="rtl"] .draggable a.tabledrag-handle {
-  float: right;
-  margin-right: -1em;
-  margin-left: 0;
-}
-a.tabledrag-handle:hover {
-  text-decoration: none;
-}
-a.tabledrag-handle .handle {
-  background: url(../../../misc/draggable.png) no-repeat 6px 9px;
-  height: 13px;
-  margin: -0.4em 0.5em; /* LTR */
-  padding: 0.42em 0.5em; /* LTR */
-  width: 13px;
-  box-sizing: content-box;
-}
-[dir="rtl"] a.tabledrag-handle .handle {
-  margin: -0.4em 0.5em;
-  padding: 0.42em 0.5em;
-}
-a.tabledrag-handle-hover .handle {
-  background-position: 6px -11px;
-}
-div.indentation {
-  float: left; /* LTR */
-  height: 1.7em;
-  margin: -1em 0.2em -1em -0.4em; /* LTR */
-  padding: 1em 0 1em 0.6em; /* LTR */
-  width: 20px;
-}
-[dir="rtl"] div.indentation {
-  float: right;
-  margin: -1em -0.4em -1em 0.2em;
-  padding: 1em 0.6em 1em 0;
-}
 div.form-item-indentation-0 {
   margin-left: 0;
 }
@@ -184,27 +136,6 @@ div.form-item-indentation-5 {
 }
 [dir="rtl"] div.form-item-indentation-5 {
   margin-right: 5em;
-}
-div.tree-child {
-  background: url(../../../misc/tree.png) no-repeat 11px center; /* LTR */
-}
-[dir="rtl"] div.tree-child {
-  background-position: -65px center;
-}
-div.tree-child-last {
-  background: url(../../../misc/tree-bottom.png) no-repeat 11px center; /* LTR */
-}
-[dir="rtl"] div.tree-child-last {
-  background-position: -65px center;
-}
-div.tree-child-horizontal {
-  background: url(../../../misc/tree.png) no-repeat -11px center;
-}
-.tabledrag-toggle-weight-wrapper {
-  text-align: right; /* LTR */
-}
-[dir="rtl"] .tabledrag-toggle-weight-wrapper {
-  text-align: left;
 }
 
 /**
