@@ -3119,6 +3119,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     // though each individual link is not expanded.
     $edit = array(
       'block_settings[style]' => 'dropdown',
+      'block_settings[level]' => 1,
     );
     $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -3130,6 +3131,17 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $this->assertLink($item4['link_title']);
     $this->assertLink($item5['link_title']);
     $this->assertLink($item6['link_title']);
+
+    // Verify Dropdown style respects starting level 2.
+    $edit = array(
+      'block_settings[level]' => 2,
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $node1->nid);
+    $this->assertNoLink($item1['link_title']); // Level 1 link should be hidden.
+    $this->assertLink($item2['link_title']);   // Level 2 link should be visible.
   }
 
   /**
