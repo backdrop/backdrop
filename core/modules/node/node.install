@@ -477,8 +477,8 @@ function node_update_1005() {
       'revision_enabled' => TRUE,
       'revision_default' => in_array('revision', $options),
       'node_preview' => update_variable_get('node_preview_' . $node_type->type, BACKDROP_OPTIONAL),
-      'node_submitted' => update_variable_get('node_submitted_' . $node_type->type, FALSE),
-      'node_user_picture' => update_variable_get('node_user_picture_' . $node_type->type, FALSE),
+      'node_submitted' => update_variable_get('node_submitted_' . $node_type->type, TRUE),
+      'node_user_picture' => update_variable_get('node_user_picture_' . $node_type->type, TRUE),
       'language' => update_variable_get('node_type_language_' . $node_type->type),
     );
     node_type_save($node_type);
