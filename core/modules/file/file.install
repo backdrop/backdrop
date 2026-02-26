@@ -1287,3 +1287,20 @@ function file_update_1011() {
     return $message;
   }
 }
+
+/**
+ * Update file_entity_inline settings to core versions of settings.
+ */
+function file_update_1012() {
+  $config_names = config_get_names_with_prefix('field.instance.');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    if ($inline_fields_option = $config->get('widget.settings.file_entity_inline')) {
+      $config->set('widget.settings.inline_fields_option', $inline_fields_option);
+      $config->set('widget.settings.inline_fields', $config->get('widget.settings.file_entity_inline_fields'));
+      $config->clear('widget.settings.file_entity_inline');
+      $config->clear('widget.settings.file_entity_inline_fields');
+      $config->save();
+    }
+  }
+}
