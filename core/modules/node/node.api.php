@@ -977,7 +977,7 @@ function hook_node_type_delete($info) {
 function hook_node_type_list_permissions($type) {
   $perms = array();
   foreach (node_type_get_names() as $node_type => $name) {
-    if ($type && $type != $node_type) {
+    if ($type != $node_type) {
       continue;
     }
     $perms += array(
