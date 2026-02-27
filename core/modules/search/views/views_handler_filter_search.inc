@@ -165,7 +165,7 @@ class views_handler_filter_search extends views_handler_filter {
         $this->search_score = $this->query->add_field('', "$search_index.score * $search_total.count", 'score', array('aggregate' => TRUE, 'function' => 'sum'));
       }
 
-      if (empty($this->query->relationships[$this->relationship])) {
+      if (empty($this->relationship) || empty($this->query->relationships[$this->relationship])) {
         $base_table = $this->query->base_table;
       }
       else {
