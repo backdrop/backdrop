@@ -4,6 +4,18 @@
  */
 (function ($) {
 
+// Keep to check if there are extra parameters in the original URL.
+var original = {
+  path: window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '') + window.location.pathname,
+  query: window.location.search || ''
+};
+
+window.onpageshow = function (event) {
+  if (event.persisted) {
+    window.location.reload()
+  }
+};
+
 /**
  * Attaches the AJAX behavior to Views exposed filter forms and key View links.
  */
@@ -58,6 +70,14 @@ Backdrop.views.ajaxView = function(settings) {
       // If there is a '?' in ajax_path, clean url are on and & should be used to add parameters.
       queryString = ((/\?/.test(ajax_path)) ? '&' : '?') + queryString;
     }
+  }
+
+  // Init the current page too, because the first loaded pager element do
+  // not have loadable history and will not work the back button.
+  var $body = $('body').once('views-ajax-history-first-page-load');
+
+  if ($body.length) {
+    settings.onload_page_item = settings.render_page_item;
   }
 
   this.element_settings = {
@@ -167,5 +187,171 @@ Backdrop.ajax.prototype.commands.viewsScrollTop = function (ajax, response) {
     $(scrollTarget).animate({scrollTop: (offset.top - 10)}, 500);
   }
 };
+
+/**
+ * Override beforeSerialize to handle click on pager links.
+ *
+ * @param $element
+ *   jQuery DOM element
+ * @param options
+ */
+Backdrop.ajax.prototype.beforeSerialize = function (element, options) {
+  if (options.data.enable_ajax_history && options.data.view_name) {
+    // If restoring a previous state the dummy element will have this class,
+    // don't need to go through all this processing.
+    if ($(element).hasClass('ajax-history-trigger')) {
+      return;
+    }
+  }
+
+  // Check that we handle a click on a link, not a form submission.
+  if (options.data.view_name && element && $(element).is('a')) {
+    // Strip the view base path so it isn't treated as a parameter.
+    let params = new URLSearchParams($(element).attr('href').replace('/' + options.data.view_base_path + '?', ''));
+    if (!$.isEmptyObject(options.data.exclude_ajax_args)) {
+      var keysToRemove = [];
+      $.each(options.data.exclude_ajax_args, function (index, pathToExclude) {
+        params.forEach(function (value, key, parent) {
+          if (key.startsWith(pathToExclude)) {
+            keysToRemove.push(key);
+          }
+        });
+      });
+      keysToRemove.forEach(function (key) {
+        params.delete(key)
+      });
+    }
+    Backdrop.Views.addState(options, '?' + params.toString());
+  }
+
+  // Call the original Backdrop method with the right context.
+  Backdrop.Views.beforeSerialize.apply(this, arguments);
+};
+
+/**
+ * Override beforeSubmit to handle exposed form submissions.
+ *
+ * @param form_values
+ *   Object with all field values.
+ * @param element
+ *   jQuery DOM form element.
+ * @param options
+ *   Object containing AJAX options.
+ */
+Backdrop.ajax.prototype.beforeSubmit = function (form_values, element, options) {
+  if (options.data.enable_ajax_history && options && options.data && options.data.view_name) {
+    var url = original.path + '?' + new URLSearchParams(new FormData(element.get(0))).toString();
+    var currentQuery = Backdrop.Views.parseQueryString(window.location.href);
+
+    // Prepare ajax url
+    var ajaxUrl = options.url.split('?')[0];
+    var ajaxQuery = Backdrop.Views.parseQueryString(options.url);
+
+    // Remove the page number from the query string, as a new filter has been
+    // applied and should return new results.
+    if ($.inArray("page", Object.keys(currentQuery)) !== -1) {
+      delete currentQuery.page;
+      delete ajaxQuery.page;
+    }
+
+    // Copy selected values in history state.
+    $.each(form_values, function () {
+      // Field name ending with [] is a multi value field.
+      if (/\[\]$/.test(this.name)) {
+        if (!options.data[this.name]) {
+          options.data[this.name] = [];
+        }
+        options.data[this.name].push(this.value);
+      }
+      // Regular field.
+      else {
+        options.data[this.name] = this.value;
+      }
+    });
+    // Remove exposed data from the current query to leave behind any
+    // non exposed form related query vars.
+    element.find('[name]').each(function () {
+      let name = this.name ?? this.getAttribute('name');
+      if (currentQuery[name]) {
+        delete currentQuery[name];
+        delete ajaxQuery[name];
+      }
+    });
+
+    // If the exposed form has checkboxes, we need to check if these are
+    // unchecked and if so, remove them from the url
+    element.find('input[type="checkbox"]').each(function (key, value) {
+      if (!form_values[this.name]) {
+        if (currentQuery[this.name]) {
+          delete currentQuery[this.name];
+        }
+        else if (options.data[this.name]) {
+          delete options.data[this.name];
+        }
+        if (ajaxQuery[this.name]) {
+          delete ajaxQuery[this.name];
+        }
+      }
+    });
+
+    // Helper function to remove multi-value query keys that match a given
+    // name
+    let removeMultiValueQueryKeys = function (multiValueParamToRemove, queryParams) {
+      Object.getOwnPropertyNames(queryParams).forEach(function (queryKey) {
+        let queryKeyWithoutBracket = queryKey.replace(/\[\d+]$/, '');
+        if (multiValueParamToRemove === queryKeyWithoutBracket) {
+          delete queryParams[queryKey];
+        }
+      });
+      return queryParams;
+    };
+
+    // If the exposed form has a multiple select.
+    element.find('select[multiple]').each(function (key, value) {
+      if ($(value).val().length === 0) {
+        delete options.data[this.name];
+        delete currentQuery[this.name];
+        delete ajaxQuery[this.name];
+      }
+      // Pagers creates query params that are indexed like this:
+      // ?some_param[0]=123,some_param[1]=456
+      // instead of this:
+      // ?some_param[]=123&some_param[]=456
+      // We need to clear them out. The submitted form values will use the
+      // non-indexed versions, and we can't have the indexed versions creating
+      // a conflict.
+      let nameWithoutBracket = this.name.replace(/\[]$/, '');
+      currentQuery = removeMultiValueQueryKeys(nameWithoutBracket, currentQuery);
+      ajaxQuery = removeMultiValueQueryKeys(nameWithoutBracket, ajaxQuery);
+    });
+
+    url += (/\?/.test(url) ? '&' : '?') + $.param(currentQuery);
+    // Update options with updated ajax url.
+    options.url = ajaxUrl + '?' + $.param(ajaxQuery);
+    Backdrop.Views.addState(options, url);
+  }
+
+  // Call the original Backdrop method with the right context.
+  Backdrop.Views.beforeSubmit.apply(this, arguments);
+};
+
+/**
+ * Override beforeSend to clean up the Ajax submission URL.
+ *
+ * @param {XMLHttpRequest} jqXHR
+ *   Native Ajax object.
+ * @param {object} options
+ *   jQuery.ajax options.
+ */
+Backdrop.ajax.prototype.beforeSend = function (jqXHR, options) {
+  var data = (typeof options.data === 'string') ? Backdrop.Views.parseQuery(options.data) : {};
+
+  if (data.enable_ajax_history && data.view_name && options.type !== 'GET') {
+    // Override the URL to not contain any fields that were submitted.
+    options.url = Backdrop.settings.views.ajax_path;
+  }
+  // Call the original Backdrop method with the right context.
+  Backdrop.Views.beforeSend.apply(this, arguments);
+}
 
 })(jQuery);

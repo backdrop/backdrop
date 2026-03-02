@@ -214,6 +214,29 @@ function views_update_1008() {
 }
 
 /**
+ * Enable Ajax History for all Views using AJAX.
+ */
+function views_update_1009() {
+  $views = config_get_names_with_prefix('views.view');
+  foreach ($views as $view_name) {
+    $config = config($view_name);
+    $use_ajax_default = $config->get('display.default.display_options.use_ajax');
+    $displays = $config->get('display');
+    foreach ($displays as $display_name => $display_config) {
+      if (isset($display_config['display_options']['use_ajax']) && $display_config['display_options']['use_ajax'] == FALSE) {
+        continue;
+      }
+      if ($use_ajax_default || !empty($display_config['display_options']['use_ajax'])) {
+        $config->set('display.' . $display_name . '.display_options.enable_ajax_history', TRUE);
+        $config->set('display.' . $display_name . '.display_options.exclude_ajax_args', '');
+      }
+    }
+
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
