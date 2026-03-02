@@ -408,21 +408,35 @@ class views_plugin_display extends views_plugin {
       'cache_options' => array('cache', 'cache_options'),
       'title' => array('title'),
       'css_class' => array('css_class'),
-      'use_ajax' => array('use_ajax', 'enable_ajax_history', 'exclude_ajax_args'),
+      'use_ajax' => array(
+        'use_ajax', 'enable_ajax_history', 'exclude_ajax_args',
+      ),
       'hide_attachment_summary' => array('hide_attachment_summary'),
       'hide_admin_links' => array('hide_admin_links'),
       'group_by' => array('group_by'),
       'query' => array('query'),
-      'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
-      'use_more_always' => array('use_more', 'use_more_always', 'use_more_text'),
+      'use_more' => array(
+        'use_more', 'use_more_always', 'use_more_text',
+      ),
+      'use_more_always' => array(
+        'use_more', 'use_more_always', 'use_more_text',
+      ),
       'use_more_text' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display', 'link_url'),
 
       // Force these to cascade properly.
-      'style_plugin' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
-      'style_options' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
-      'row_plugin' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
-      'row_options' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
+      'style_plugin' => array(
+        'style_plugin', 'style_options', 'row_plugin', 'row_options',
+      ),
+      'style_options' => array(
+        'style_plugin', 'style_options', 'row_plugin', 'row_options',
+      ),
+      'row_plugin' => array(
+        'style_plugin', 'style_options', 'row_plugin', 'row_options',
+      ),
+      'row_options' => array(
+        'style_plugin', 'style_options', 'row_plugin', 'row_options',
+      ),
 
       'pager' => array('pager', 'pager_options'),
       'pager_options' => array('pager', 'pager_options'),
