@@ -119,10 +119,6 @@ function template_preprocess_views_view(&$variables) {
   // If using AJAX, send identifying data about this view.
   if ($view->use_ajax && empty($view->is_attachment) && empty($view->live_preview)) {
 
-    if ($view->display_handler->get_option('exclude_ajax_args')) {
-      $arguments_to_exclude = preg_split('/[\n\r\s]+/', $view->display_handler->get_option('exclude_ajax_args') ?? '');
-    }
-
     $settings = array(
       'views' => array(
         'ajax_path' => url('views/ajax'),
@@ -140,13 +136,17 @@ function template_preprocess_views_view(&$variables) {
             'pager_element' => isset($view->query->pager) ? $view->query->pager->get_pager_id() : 0,
             'exposed_form_in_block' => $view->display_handler->get_option('exposed_block'),
             'enable_ajax_history' => $view->display_handler->get_option('enable_ajax_history'),
-            // Filter empty lines.
-            'exclude_ajax_args' => array_filter($arguments_to_exclude, 'strlen'),
             'render_page_item' => isset($_GET['page']) ? $_GET['page'] : 0,
           ),
         ),
       ),
     );
+
+    if ($view->display_handler->get_option('exclude_ajax_args')) {
+      $arguments_to_exclude = preg_split('/[\n\r\s]+/', $view->display_handler->get_option('exclude_ajax_args') ?? '');
+      // Filter empty lines and add to settings.
+      $settings['views']['ajaxViews']['views_dom_id:' . $variables['dom_id']]['exclude_ajax_args'] = $arguments_to_exclude;
+    }
 
     if (backdrop_is_html()) {
       $exposed = $view->get_exposed_input();
