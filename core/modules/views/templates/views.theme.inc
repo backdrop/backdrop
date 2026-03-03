@@ -149,7 +149,7 @@ function template_preprocess_views_view(&$variables) {
     }
 
     if (backdrop_is_html()) {
-      $exposed = $view->exposed_input;
+      $exposed = $view->get_exposed_input();
       $dom_id = $view->dom_id;
       foreach ($exposed as $key => $value) {
         $settings['initial_ajax_exposed_input']['views_dom_id:' . $dom_id][$key] = $value;
