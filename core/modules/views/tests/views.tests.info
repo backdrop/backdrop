@@ -262,6 +262,12 @@ description = Tests overriding options for block displays.
 group = Views Plugins
 file = plugins/views_plugin_display_block.test
 
+[ViewsPluginDisplayEmbedTestCase]
+name = Embed display tests
+description = Tests the embed display plugin and its exposed forms.
+group = Views Plugins
+file = plugins/views_plugin_display_embed.test
+
 [ViewsPluginStyleJumpMenuTest]
 name = Jump menu
 description = Test jump menu style functionality.
