@@ -2550,7 +2550,7 @@ function theme_item_list($variables) {
 /**
  * Returns HTML for an list of items with a defined separator.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - items: A list of items to render.
  *   - separator: The string which separates the items. Defaults to ", ".
