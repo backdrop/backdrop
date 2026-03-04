@@ -518,12 +518,22 @@ function node_type_form($form, &$form_state, $type = NULL) {
 
   if ($type->module === 'node' && !empty($type->type)) {
     $form['actions']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete content type'),
+      '#type' => 'link',
+      '#title' => t('Delete content type'),
       '#weight' => 45,
-      '#limit_validation_errors' => array(),
-      '#validate' => array(),
-      '#submit' => array('node_type_form_delete'),
+      '#href' => 'admin/structure/types/manage/' . $type->type . '/delete',
+      '#attributes' => array(
+        'class' => array('button', 'button-danger', 'use-ajax'),
+        'data-dialog' => TRUE,
+        'data-dialog-options' => json_encode(array(
+          'width' => 880,
+        )),
+      ),
+      '#attached' => array(
+        'library' => array(
+          array('system', 'backdrop.ajax'),
+        ),
+      ),
     );
   }
 
@@ -750,13 +760,6 @@ function node_type_form_permissions($type) {
   $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
 
   return $form;
-}
-
-/**
- * Form submission handler for node_type_form().
- */
-function node_type_form_delete($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/types/manage/' . str_replace('_', '-', $form['#node_type']->type) . '/delete';
 }
 
 /**

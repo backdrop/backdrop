@@ -107,7 +107,8 @@ class PathTestCase extends BackdropWebTestCase {
     )), 'Attempt to move alias was rejected.');
 
     // Delete alias.
-    $this->backdropPost('admin/config/urls/path/edit/' . $pid, array(), t('Delete'));
+    $this->backdropGet('admin/config/urls/path/edit/' . $pid);
+    $this->clickLink(t('Delete'));
     $this->backdropPost(NULL, array(), t('Confirm'));
 
     // Confirm that the alias no longer works.

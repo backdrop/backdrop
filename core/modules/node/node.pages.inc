@@ -465,7 +465,7 @@ function node_form($form, &$form_state, Node $node) {
       '#href' => "node/{$node->nid}/delete",
       '#options' => array(
         'query' => isset($_GET['destination']) ? backdrop_get_destination() : array(),
-        'attributes' => array('class' => array('button', 'button-secondary', 'form-delete'))
+        'attributes' => array('class' => array('button', 'button-danger'))
       ),
       '#weight' => 15,
     );
