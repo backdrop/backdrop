@@ -62,13 +62,13 @@ file = views_glossary.test
 name = Group by
 description = Tests aggregate functionality of views, for example count.
 group = Views
-file = views_groupby.test
+file = views_group_by.test
 
-[viewsUiGroupbyTestCase]
+[ViewsUiGroupByTestCase]
 name = Group by UI
 description = Tests UI of aggregate functionality.
 group = Views UI
-file = views_groupby.test
+file = views_group_by.test
 
 [ViewsHandlerAreaTextTest]
 name = Area: Text
