@@ -16,7 +16,10 @@ class views_plugin_display_embed extends views_plugin_display {
    */
   protected $has_override_options = FALSE;
 
-  function option_definition() {
+  /**
+   * Overrides views_plugin_display::option_definition().
+   */
+  public function option_definition() {
     $options = parent::option_definition();
 
     $options['inherit_path'] = array('default' => 1);
@@ -27,7 +30,7 @@ class views_plugin_display_embed extends views_plugin_display {
   /**
    * Returns the structure necessary for a block.
    */
-  function execute() {
+  public function execute() {
     $output = NULL;
     // Prior to this being called, the $view should already be set to this
     // display, and arguments should be set on the view.
@@ -46,7 +49,7 @@ class views_plugin_display_embed extends views_plugin_display {
    *
    * This output is returned as an array.
    */
-  function options_summary(&$categories, &$options) {
+  public function options_summary(&$categories, &$options) {
     // It is very important to call the parent function here:
     parent::options_summary($categories, $options);
 
@@ -67,7 +70,7 @@ class views_plugin_display_embed extends views_plugin_display {
   /**
    * Provide the default form for setting options.
    */
-  function options_form(&$form, &$form_state) {
+  public function options_form(&$form, &$form_state) {
     // It is very important to call the parent function here:
     parent::options_form($form, $form_state);
 
@@ -98,7 +101,7 @@ class views_plugin_display_embed extends views_plugin_display {
    * Perform any necessary changes to the form values prior to storage.
    * There is no need for this function to actually store the data.
    */
-  function options_submit(&$form, &$form_state) {
+  public function options_submit(&$form, &$form_state) {
     // It is very important to call the parent function here:
     parent::options_submit($form, $form_state);
     switch ($form_state['section']) {
@@ -109,21 +112,30 @@ class views_plugin_display_embed extends views_plugin_display {
     }
   }
 
-  function get_path() {
+  /**
+   * Returns the path to the current page if inherit_path is set.
+   */
+  public function get_path() {
     if ($this->get_option('inherit_path')) {
       return $_GET['q'];
     }
     return '';
   }
 
-  function get_url() {
+  /**
+   * Returns the URL for this display.
+   */
+  public function get_url() {
     if ($this->get_option('inherit_path')) {
       return $this->get_path();
     }
     return parent::get_url();
   }
 
-  function uses_exposed_form_in_block() {
+  /**
+   * Check to see if the display can put the exposed form in a block.
+   */
+  public function uses_exposed_form_in_block() {
     return (bool) $this->get_option('inherit_path');
   }
 }

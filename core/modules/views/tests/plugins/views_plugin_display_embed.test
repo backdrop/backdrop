@@ -14,6 +14,9 @@ class ViewsPluginDisplayEmbedTestCase extends ViewsSqlTest {
   protected $admin_user;
   protected $test_content = array();
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
