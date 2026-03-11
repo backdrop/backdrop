@@ -143,7 +143,11 @@ class date_views_filter_handler extends date_views_filter_handler_simple {
     $widget_options = $this->widget_options();
     // If the filter is exposed, display the granularity.
     if ($this->options['exposed']) {
-      $summary = t('(@field) <strong>Exposed</strong> @widget @format', array('@field' => $field, '@format' => $parts[$handler->granularity], '@widget' => $widget_options[$this->options['form_type']]));
+      $summary = t('(@field) <strong>Exposed</strong> @widget @format', array(
+        '@field' => $field,
+        '@format' => $parts[$handler->granularity],
+        '@widget' => $widget_options[$this->options['form_type']],
+      ));
       if (!empty($this->options['value']['type']) && $this->options['value']['type'] == 'relative') {
         $summary .= ' ' . t('(Relative)');
       }
