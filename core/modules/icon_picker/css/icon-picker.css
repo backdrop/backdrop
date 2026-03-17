@@ -1,0 +1,129 @@
+/**
+ * @file
+ * Styles for the icon picker dialog.
+ *
+ * The dialog chrome (title bar, overlay) is provided by Backdrop's dialog
+ * system. These styles cover the picker content area and its footer.
+ */
+
+/* jQuery UI adds .ui-dialog-content to our element. Remove default padding
+ * and use flex so the results grid scrolls independently of the filter and
+ * footer, which remain always visible. Height is set dynamically in JS. */
+.icon-picker-dialog .ui-dialog-content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Filter section: bordered box matching the media library style. */
+.icon-picker-filter {
+  margin: 16px;
+  padding: 12px 16px;
+  border: 1px solid #ccc;
+}
+
+.icon-picker-filter-label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.icon-picker-filter-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.icon-picker-search {
+  width: 240px;
+}
+
+/* Status and error messages. */
+.icon-picker-message {
+  padding: 4px 16px;
+  font-size: 13px;
+  color: #555;
+}
+
+/* Icon grid: grows to fill all available height, scrolls within that space.
+ * min-height: 0 is required for a flex child to shrink below its content.
+ * align-content: start prevents rows from stretching when fewer than a full
+ * page of results are shown. */
+.icon-picker-results {
+  padding: 0 16px 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  align-content: start;
+  gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Individual icon button: icon above, name below (portrait orientation). */
+.icon-picker-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  cursor: pointer;
+  text-align: center;
+}
+
+.icon-picker-result:hover,
+.icon-picker-result:focus {
+  border-color: #888;
+  outline: none;
+}
+
+.icon-picker-result.is-selected {
+  border-color: #0075b8;
+  background: #e8f4fb;
+}
+
+.icon-picker-swatch .icon {
+  width: 32px;
+  height: 32px;
+  display: block;
+}
+
+.icon-picker-name {
+  font-size: 11px;
+  color: #444;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Pagination bar. */
+.icon-picker-pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  justify-content: center;
+}
+
+.icon-picker-page-status {
+  font-size: 13px;
+}
+
+/* Ensure the launch button renders identically to input.form-submit across
+ * all browsers by resetting UA appearance overrides. */
+input.icon-picker-launch {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Footer: mirrors the jQuery UI dialog buttonpane style. */
+.icon-picker-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid #e5e5e5;
+}

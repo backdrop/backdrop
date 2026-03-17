@@ -1,0 +1,117 @@
+<?php
+/**
+ * @file
+ * Provides a reusable icon select form element for choosing Backdrop icons.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function icon_picker_menu() {
+  // @todo Remove this test route before committing the final PR.
+  $items['admin/icon/test'] = array(
+    'title' => 'Icon picker test',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('icon_picker_test_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_CALLBACK,
+    'file' => 'icon_picker.admin.inc',
+  );
+
+  $items['admin/icon/picker-json'] = array(
+    'page callback' => 'icon_picker_json',
+    'access callback' => 'user_access',
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_CALLBACK,
+    'delivery callback' => 'backdrop_json_output',
+    'file' => 'icon_picker.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_element_info().
+ */
+function icon_picker_element_info() {
+  $path = backdrop_get_path('module', 'icon_picker');
+  $types['icon_select'] = array(
+    '#input' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#autocomplete_path' => FALSE,
+    '#process' => array('icon_picker_select_process', 'ajax_process_form'),
+    '#element_validate' => array('icon_picker_select_validate'),
+    '#theme' => 'textfield',
+    '#theme_wrappers' => array('form_element'),
+    '#attached' => array(
+      'js' => array($path . '/js/icon-picker.js'),
+      'css' => array($path . '/css/icon-picker.css'),
+      'library' => array(
+        array('system', 'backdrop.dialog'),
+      ),
+    ),
+  );
+  return $types;
+}
+
+/**
+ * Process callback for the icon_select element.
+ *
+ * Appends a "Browse icons" button as a field suffix and passes the JSON
+ * endpoint URL to the picker JavaScript via Backdrop.settings.
+ *
+ * @see form_process_machine_name()
+ */
+function icon_picker_select_process($element, &$form_state, $form) {
+  $endpoint = url('admin/icon/picker-json');
+
+  // Append an "or Browse icons" suffix matching the file module's pattern:
+  // both the "or" text and the button are inside a single js-show span, so
+  // the entire control is hidden when JavaScript is unavailable.
+  // Use <input type="button"> to match the UA stylesheet of <input type="submit">,
+  // ensuring theme CSS applies identically to the file module's browse button.
+  $element['#field_suffix'] = '<span class="icon-browse-text js-show">'
+    . ' ' . t('or') . ' '
+    . '<input type="button"'
+    . ' class="button form-submit icon-picker-launch"'
+    . ' value="' . check_plain(t('Browse icons')) . '"'
+    . ' data-target="' . check_plain($element['#id']) . '"'
+    . ' data-endpoint="' . check_plain($endpoint) . '"'
+    . ' />'
+    . '</span>';
+
+  // Pass the endpoint URL to JavaScript.
+  $element['#attached']['js'][] = array(
+    'type' => 'setting',
+    'data' => array(
+      'iconPicker' => array(
+        'endpoint' => $endpoint,
+      ),
+    ),
+  );
+
+  return $element;
+}
+
+/**
+ * Form element validation handler for icon_select elements.
+ *
+ * Checks that the submitted value is a valid icon name string and that the
+ * named icon actually exists in core, the active theme, or an enabled module.
+ */
+function icon_picker_select_validate($element, &$form_state) {
+  $value = trim($element['#value']);
+  if ($value === '') {
+    return;
+  }
+
+  if (!preg_match('/^[A-Za-z0-9_-]+$/', $value)) {
+    form_error($element, t('Icon names may only contain letters, numbers, hyphens, and underscores.'));
+    return;
+  }
+
+  if (!icon_get_path($value)) {
+    form_error($element, t('The icon %name was not found.', array('%name' => $value)));
+  }
+}
