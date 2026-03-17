@@ -5,10 +5,21 @@
  */
 
 /**
+ * Implements hook_permission().
+ */
+function icon_picker_permission() {
+  return array(
+    'access icon picker' => array(
+      'title' => t('Access icon picker'),
+      'description' => t('Use the icon picker dialog to browse and select icons in forms.'),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function icon_picker_menu() {
-  // @todo Remove this test route before committing the final PR.
   $items['admin/icon/test'] = array(
     'title' => 'Icon picker test',
     'page callback' => 'backdrop_get_form',
@@ -19,10 +30,10 @@ function icon_picker_menu() {
     'file' => 'icon_picker.admin.inc',
   );
 
-  $items['admin/icon/picker-json'] = array(
+  $items['icon-picker/json'] = array(
     'page callback' => 'icon_picker_json',
     'access callback' => 'user_access',
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('access icon picker'),
     'type' => MENU_CALLBACK,
     'delivery callback' => 'backdrop_json_output',
     'file' => 'icon_picker.admin.inc',
@@ -64,7 +75,7 @@ function icon_picker_element_info() {
  * @see form_process_machine_name()
  */
 function icon_picker_select_process($element, &$form_state, $form) {
-  $endpoint = url('admin/icon/picker-json');
+  $endpoint = url('icon-picker/json');
 
   // Append an "or Browse icons" suffix matching the file module's pattern:
   // both the "or" text and the button are inside a single js-show span, so

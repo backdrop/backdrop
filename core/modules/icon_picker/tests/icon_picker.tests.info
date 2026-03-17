@@ -1,0 +1,11 @@
+[IconPickerElementTestCase]
+name = Icon picker element
+description = Tests the icon_select form element rendering and validation.
+group = Icon Picker
+file = icon_picker.test
+
+[IconPickerJsonTestCase]
+name = Icon picker JSON endpoint
+description = Tests the icon picker JSON endpoint for listing and filtering icons.
+group = Icon Picker
+file = icon_picker.test

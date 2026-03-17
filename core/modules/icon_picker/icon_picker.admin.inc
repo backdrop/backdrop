@@ -7,7 +7,6 @@
 /**
  * Form constructor: Simple test form for the icon_select element.
  *
- * @todo Remove before final PR.
  */
 function icon_picker_test_form($form, &$form_state) {
   $form['my_icon'] = array(
@@ -27,7 +26,6 @@ function icon_picker_test_form($form, &$form_state) {
 /**
  * Submit handler for the icon_select test form.
  *
- * @todo Remove before final PR.
  */
 function icon_picker_test_form_submit($form, &$form_state) {
   backdrop_set_message(t('Selected icon: %icon', array('%icon' => $form_state['values']['my_icon'])));

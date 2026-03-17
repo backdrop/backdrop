@@ -1,0 +1,218 @@
+<?php
+/**
+ * @file
+ * Tests for icon_picker module.
+ */
+
+/**
+ * Base class providing shared setup for icon picker tests.
+ */
+class IconPickerTestHelper extends BackdropWebTestCase {
+  protected $admin_user;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp('icon_picker');
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'access icon picker',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+}
+
+/**
+ * Tests the icon_select form element.
+ */
+class IconPickerElementTestCase extends IconPickerTestHelper {
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Icon picker element',
+      'description' => 'Tests the icon_select form element rendering and validation.',
+      'group' => 'Icon Picker',
+    );
+  }
+
+  /**
+   * Tests that the icon_select element renders a text field and browse button.
+   */
+  public function testElementRenders() {
+    $this->backdropGet('admin/icon/test');
+
+    // The text input for the icon name should be present.
+    $this->assertFieldByName('my_icon', '', 'Icon name text field is present.');
+
+    // The "Browse icons" button should be present.
+    $this->assertRaw('icon-picker-launch', 'Browse icons button is present.');
+    $this->assertRaw('Browse icons', 'Browse icons button label is present.');
+
+    // The browse button wrapper uses js-show so it is hidden without JS.
+    $this->assertRaw('js-show', 'Browse button is wrapped in js-show span.');
+  }
+
+  /**
+   * Tests that a valid icon name can be submitted successfully.
+   */
+  public function testValidIconSubmit() {
+    $edit = array('my_icon' => 'star');
+    $this->backdropPost('admin/icon/test', $edit, t('Save'));
+    $this->assertText('Selected icon: star', 'Valid icon name accepted and saved.');
+  }
+
+  /**
+   * Tests that an empty icon name is accepted (field is optional).
+   */
+  public function testEmptyIconSubmit() {
+    $edit = array('my_icon' => '');
+    $this->backdropPost('admin/icon/test', $edit, t('Save'));
+    $this->assertNoText('Icon names may only contain', 'Empty icon value accepted without error.');
+  }
+
+  /**
+   * Tests that an icon name with invalid characters is rejected.
+   */
+  public function testInvalidCharsRejected() {
+    $edit = array('my_icon' => 'icon with spaces');
+    $this->backdropPost('admin/icon/test', $edit, t('Save'));
+    $this->assertText(
+      'Icon names may only contain letters, numbers, hyphens, and underscores.',
+      'Invalid characters in icon name are rejected.'
+    );
+  }
+
+  /**
+   * Tests that a non-existent icon name is rejected.
+   */
+  public function testNonExistentIconRejected() {
+    $edit = array('my_icon' => 'this-icon-does-not-exist-xyz');
+    $this->backdropPost('admin/icon/test', $edit, t('Save'));
+    $this->assertText(
+      'The icon this-icon-does-not-exist-xyz was not found.',
+      'Non-existent icon name is rejected with an error.'
+    );
+  }
+
+  /**
+   * Tests that the picker JS settings are attached to the page.
+   */
+  public function testJsSettingsAttached() {
+    $this->backdropGet('admin/icon/test');
+    $this->assertRaw('iconPicker', 'Icon picker JS settings are present on the page.');
+    $this->assertRaw('icon-picker/json', 'JSON endpoint URL is present in JS settings.');
+  }
+}
+
+/**
+ * Tests the icon picker JSON endpoint.
+ */
+class IconPickerJsonTestCase extends IconPickerTestHelper {
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Icon picker JSON endpoint',
+      'description' => 'Tests the icon picker JSON endpoint for listing and filtering icons.',
+      'group' => 'Icon Picker',
+    );
+  }
+
+  /**
+   * Tests that the JSON endpoint returns a valid response structure.
+   */
+  public function testJsonEndpointStructure() {
+    $response = $this->backdropGetAjax('icon-picker/json');
+    $data = json_decode($this->backdropGetContent(), TRUE);
+
+    $this->assertResponse(200, 'JSON endpoint returns HTTP 200.');
+    $this->assertTrue(isset($data['total']), 'Response includes total count.');
+    $this->assertTrue(isset($data['count']), 'Response includes page count.');
+    $this->assertTrue(isset($data['page']), 'Response includes page number.');
+    $this->assertTrue(isset($data['limit']), 'Response includes limit.');
+    $this->assertTrue(isset($data['results']), 'Response includes results array.');
+    $this->assertTrue(is_array($data['results']), 'Results is an array.');
+  }
+
+  /**
+   * Tests that the endpoint returns icons and each has name and markup keys.
+   */
+  public function testJsonResultsFormat() {
+    $this->backdropGet('icon-picker/json');
+    $data = json_decode($this->backdropGetContent(), TRUE);
+
+    $this->assertTrue($data['total'] > 0, 'At least one icon is available.');
+    $this->assertTrue(count($data['results']) > 0, 'At least one result is returned.');
+
+    // Check the first result has the expected keys.
+    $first = reset($data['results']);
+    $this->assertTrue(isset($first['name']), 'Result item has a name key.');
+    $this->assertTrue(isset($first['markup']), 'Result item has a markup key.');
+    $this->assertFalse(empty($first['name']), 'Result item name is not empty.');
+    $this->assertFalse(empty($first['markup']), 'Result item markup is not empty.');
+  }
+
+  /**
+   * Tests that the search parameter filters results by name.
+   */
+  public function testJsonSearchFilter() {
+    // Search for icons whose name contains "star".
+    $this->backdropGet('icon-picker/json', array('query' => array('search' => 'star')));
+    $data = json_decode($this->backdropGetContent(), TRUE);
+
+    $this->assertResponse(200, 'Filtered JSON endpoint returns HTTP 200.');
+    $this->assertTrue(isset($data['results']), 'Filtered response includes results.');
+
+    foreach ($data['results'] as $item) {
+      $this->assertTrue(
+        strpos(strtolower($item['name']), 'star') !== FALSE,
+        format_string('Result "@name" contains the search term.', array('@name' => $item['name']))
+      );
+    }
+  }
+
+  /**
+   * Tests that pagination parameters are respected.
+   */
+  public function testJsonPagination() {
+    // Request only 5 results per page.
+    $this->backdropGet('icon-picker/json', array('query' => array('limit' => 5, 'page' => 0)));
+    $data = json_decode($this->backdropGetContent(), TRUE);
+
+    $this->assertEqual($data['limit'], 5, 'Limit parameter is reflected in response.');
+    $this->assertEqual($data['page'], 0, 'Page parameter is reflected in response.');
+    $this->assertTrue(count($data['results']) <= 5, 'Number of results respects the limit.');
+  }
+
+  /**
+   * Tests that the limit parameter is clamped to a safe range.
+   */
+  public function testJsonLimitClamping() {
+    // Request an absurdly large limit.
+    $this->backdropGet('icon-picker/json', array('query' => array('limit' => 9999)));
+    $data = json_decode($this->backdropGetContent(), TRUE);
+    $this->assertTrue($data['limit'] <= 100, 'Limit is clamped to a maximum of 100.');
+
+    // Request a zero limit.
+    $this->backdropGet('icon-picker/json', array('query' => array('limit' => 0)));
+    $data = json_decode($this->backdropGetContent(), TRUE);
+    $this->assertTrue($data['limit'] >= 1, 'Limit is clamped to a minimum of 1.');
+  }
+
+  /**
+   * Tests that a search returning no results gives an empty results array.
+   */
+  public function testJsonNoResults() {
+    $this->backdropGet('icon-picker/json', array('query' => array('search' => 'zzz-no-match-xyzzy')));
+    $data = json_decode($this->backdropGetContent(), TRUE);
+
+    $this->assertEqual($data['total'], 0, 'Total is 0 when no icons match the search.');
+    $this->assertEqual(count($data['results']), 0, 'Results array is empty when nothing matches.');
+  }
+}

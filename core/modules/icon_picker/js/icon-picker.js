@@ -241,9 +241,9 @@
       return;
     }
 
-    var $prev = $('<button type="button" class="button button-small">'
+    var $prev = $('<button type="button" class="button">'
       + Backdrop.t('Prev') + '</button>');
-    var $next = $('<button type="button" class="button button-small">'
+    var $next = $('<button type="button" class="button">'
       + Backdrop.t('Next') + '</button>');
 
     $prev.prop('disabled', page <= 0);
