@@ -1,5 +1,6 @@
+type = module
 name = Icon Picker
 description = Provides a reusable icon select form element for choosing Backdrop icons.
 package = System
 version = BACKDROP_VERSION
-type = module
+backdrop = 1.x
