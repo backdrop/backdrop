@@ -74,7 +74,8 @@ function file_add_form($form, &$form_state, $options = array()) {
  */
 function file_add_upload_step_filetype($form, &$form_state, array $options = array()) {
   backdrop_set_title(t('Configure file type'));
-  $file = file_load($form_state['storage']['upload'][0]);
+  $upload_fids = (array) $form_state['storage']['upload'];
+  $file = file_load($upload_fids[0]);
   $selected_files = $form['#options']['types'];
 
   $form['type'] = array(
@@ -104,7 +105,8 @@ function file_add_upload_step_filetype($form, &$form_state, array $options = arr
  */
 function file_add_upload_step_scheme($form, &$form_state, array $options = array()) {
   backdrop_set_title(t('Configure file scheme'));
-  $file = file_load($form_state['storage']['upload'][0]);
+  $upload_fids = (array) $form_state['storage']['upload'];
+  $file = file_load($upload_fids[0]);
 
   $schemes = array();
   foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
@@ -155,7 +157,8 @@ function file_add_upload_step_scheme($form, &$form_state, array $options = array
 function file_add_upload_step_fields($form, &$form_state, array $options = array()) {
   backdrop_set_title(t('Configure file fields'));
   // Load the file and overwrite the filetype set on the previous screen.
-  $file = file_load($form_state['storage']['upload'][0]);
+  $upload_fids = (array) $form_state['storage']['upload'];
+  $file = file_load($upload_fids[0]);
   $file->type = $form_state['storage']['type'];
 
   // Let users modify the filename here.
@@ -230,9 +233,13 @@ function file_get_filetype_candidates(File $file, $selected_files = array()) {
  * Submit handler for the add file form.
  */
 function file_add_form_submit($form, &$form_state) {
-  $fids = (array) $form_state['values']['upload'];
   if ($form['#step'] === 1) {
+    $fids = (array) $form_state['values']['upload'];
     $form_state['storage']['file_count'] = count($fids);
+  }
+  else {
+    // On steps 2+, the upload element is not in the form; use stored FIDs.
+    $fids = (array) $form_state['storage']['upload'];
   }
 
   // Only use the wizard if only one file was uploaded.
@@ -262,7 +269,8 @@ function file_add_form_submit($form, &$form_state) {
     foreach ($steps_to_check as $step) {
       // Check if we can skip step 2 and 3.
       if (($form['#step'] == $step - 1 && $triggered_next) || ($form['#step'] == $step + 1 && $triggered_previous)) {
-        $file = file_load($form_state['values']['upload']);
+        $upload_fids = (array) $form_state['storage']['upload'];
+        $file = file_load($upload_fids[0]);
         if ($step == 2) {
           // Check if we can skip step 2.
           $candidates = file_get_filetype_candidates($file, $selected_files);
@@ -318,7 +326,8 @@ function file_add_form_submit($form, &$form_state) {
 
     // We have the filetype, check if we can skip step 4.
     if ($form['#step'] == 3 && $triggered_next) {
-      $file = file_load($form_state['storage']['upload']);
+      $upload_fids = (array) $form_state['storage']['upload'];
+      $file = file_load($upload_fids[0]);
       $form_state['file'] = $file;
       if (!field_info_instances('file', $form_state['storage']['type'])) {
         // This filetype doesn't have fields, save the file.

@@ -1543,7 +1543,19 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
     // If a FID was submitted, load the file (and check access if it's not a
     // public file) to confirm it exists and that the current user has access
     // to it.
-    $input_fids = !empty($input['fid']) ? (array) $input['fid'] : array();
+    // Parse the input FID value, which may be a comma-separated string for
+    // multiple file elements.
+    if (!empty($input['fid'])) {
+      if ($element['#multiple'] && is_string($input['fid'])) {
+        $input_fids = array_filter(explode(',', $input['fid']));
+      }
+      else {
+        $input_fids = (array) $input['fid'];
+      }
+    }
+    else {
+      $input_fids = array();
+    }
     if (!empty($input_fids) && ($files = file_load_multiple($input_fids))) {
       foreach ($files as $file) {
         if ((file_uri_scheme($file->uri) != 'public') && !file_download_access($file->uri)) {
@@ -1560,7 +1572,7 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
           // the same form, so to allow that, check for the token added by
           // file_managed_file_process().
           elseif (!$GLOBALS['user']->uid) {
-            $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array('fid_token')));
+            $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array('file_' . $file->fid, 'fid_token')));
             if ($token !== backdrop_hmac_base64('file-' . $file->fid, backdrop_get_private_key() . backdrop_get_hash_salt())) {
               $force_default = TRUE;
             }
@@ -1588,8 +1600,11 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
 
     // Confirm that the file exists when used as a default value.
     if (!empty($default_fid)) {
-      if ($file = file_load($default_fid)) {
-        $fids[] = $file->fid;
+      $default_fids = is_array($default_fid) ? $default_fid : array($default_fid);
+      foreach ($default_fids as $dfid) {
+        if ($file = file_load($dfid)) {
+          $fids[] = $file->fid;
+        }
       }
     }
   }
@@ -1617,7 +1632,10 @@ function file_managed_file_validate(&$element, &$form_state) {
   // item were to be deleted.
   $clicked_button = end($form_state['triggering_element']['#parents']);
   if ($clicked_button != 'remove_button' && !empty($element['fid']['#value'])) {
-    $fids = $element['#multiple'] ? $element['fid']['#value'] : (array) $element['fid']['#value'];
+    // Use the parent element's processed #value to get a proper array of FIDs,
+    // since $element['fid']['#value'] may be a comma-separated string for
+    // multiple file elements.
+    $fids = (array) $element['#value']['fid'];
     foreach ($fids as $fid) {
       if ($file = file_load($fid)) {
         if ($file->status == FILE_STATUS_PERMANENT) {
@@ -1676,7 +1694,7 @@ function file_managed_file_submit($form, &$form_state) {
         }
       }
       $fids = array_diff($fids, $remove_fids);
-      $fids = implode(' ', $fids);
+      $fids = implode(',', $fids);
     }
     else {
       $remove_fids = $fids;

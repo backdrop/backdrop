@@ -792,7 +792,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
     $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
     $this->assertFieldByXpath('//input[@type="submit"]', t('Upload'), 'After uploading a file that exceeds the maximum file size, the "Upload" button is displayed.');
     $this->backdropPost($path, array(), t('Save'));
-    $this->assertRaw(t('The file id is %fid.', array('%fid' => 0)), 'Submitted without a file.');
+    $this->assertRaw(t('The file ids are %fids.', array('%fids' => '')), 'Submitted without a file.');
   }
 
   /**
