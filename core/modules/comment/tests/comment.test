@@ -24,6 +24,7 @@ class CommentHelperCase extends BackdropWebTestCase {
       'type' => 'post',
       'name' => 'Post',
       'settings' => array(
+        'comment_enabled' => TRUE,
         'comment_default' => COMMENT_NODE_OPEN,
       ),
       'is_new' => TRUE,
@@ -171,7 +172,7 @@ class CommentHelperCase extends BackdropWebTestCase {
       $regex .= $comment->comment . '(.*?)'; // Match comment.
       $regex .= '/s';
 
-      return (boolean)preg_match($regex, $this->backdropGetContent());
+      return (bool) preg_match($regex, $this->backdropGetContent());
     }
     else {
       return FALSE;
@@ -2134,7 +2135,13 @@ class CommentFieldsTest extends CommentHelperCase {
    */
   function testCommentEnable() {
     // Create a user to do module administration.
-    $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'administer modules'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer modules',
+      'administer fields',
+      'administer content types',
+      'administer comment settings',
+    ));
     $this->backdropLogin($this->admin_user);
 
     // Disable the comment module.
@@ -2156,6 +2163,20 @@ class CommentFieldsTest extends CommentHelperCase {
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->resetAll();
     $this->assertTrue(module_exists('comment'), 'Comment module enabled.');
+
+    // Check that comments are not enabled by default.
+    $this->backdropGet('admin/structure/types/manage/book');
+    $this->assertNoFieldChecked('edit-comment-enabled', 'Comments not enabled on a new content type by default.');
+    $this->assertNoLink(t('Comment fields'));
+    $this->assertNoLink(t('Comment display'));
+
+    // Enable comments on the book content type.
+    $edit = array('comment_enabled' => TRUE);
+    $this->backdropPost(NULL, $edit, t('Save content type'));
+    $this->backdropGet('admin/structure/types/manage/book');
+    $this->assertFieldChecked('edit-comment-enabled', 'Comments are enabled after updating content type.');
+    $this->assertLink(t('Comment fields'));
+    $this->assertLink(t('Comment display'));
 
     // Create nodes of each type.
     $book_node = $this->backdropCreateNode(array('type' => 'book'));

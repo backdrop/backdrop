@@ -28,17 +28,20 @@ function system_requirements($phase) {
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
-      // If a version has been specified, append it to the profile.
-      $profile .= !empty($info['version']) ? '-' . $info['version'] : '';
-      $requirements['install_profile'] = array(
-        'title' => $t('Install profile'),
-        'value' => $t('%profile_name (%profile)', array(
-          '%profile_name' => $info['name'],
-          '%profile' => $profile,
-        )),
-        'severity' => REQUIREMENT_INFO,
-        'weight' => -9,
-      );
+      // Profiles might not ship with modules.
+      if (!empty($info)) {
+        // If a version has been specified, append it to the profile.
+        $profile .= !empty($info['version']) ? '-' . $info['version'] : '';
+        $requirements['install_profile'] = array(
+          'title' => $t('Install profile'),
+          'value' => $t('%profile_name (%profile)', array(
+            '%profile_name' => $info['name'],
+            '%profile' => $profile,
+          )),
+          'severity' => REQUIREMENT_INFO,
+          'weight' => -9,
+        );
+      }
     }
 
     // Report the configuration storage being used.
@@ -479,19 +482,29 @@ function system_requirements($phase) {
     );
 
     // Check installed modules.
+    $modules_update_required = array();
     foreach (module_list() as $module) {
       $updates = backdrop_get_schema_versions($module);
       if ($updates !== FALSE) {
         $current_schema = backdrop_get_installed_schema_version($module);
+        // Special case: modules installed in Drupal 6, that did not receive any
+        // update in Drupal 7, but have updates available in Backdrop.
+        if ($current_schema >= 6000 && $current_schema < 7000) {
+          $current_schema = 0;
+        }
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
-          $update_link = base_path() . 'core/update.php';
-          $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
-          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link));
-          break;
+          // Add the module with the latest schema to a list.
+          $modules_update_required[] = $module . ' (' . $current_schema . ' → ' . $latest_schema . ')';
         }
       }
+    }
+    if (!empty($modules_update_required)) {
+      $update_link = base_path() . 'core/update.php';
+      $requirements['update']['severity'] = REQUIREMENT_ERROR;
+      $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
+      $modules_update_required_list = theme('item_list', array('items' => $modules_update_required));
+      $requirements['update']['description'] = $t('The modules listed below have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link)) . $modules_update_required_list;
     }
   }
 
@@ -851,7 +864,8 @@ function _system_check_db_utf8mb4_requirements($phase) {
  * Implements hook_install().
  */
 function system_install() {
-  // Create tables.
+  // As an exception from other modules, the System module needs to explicitly
+  // call backdrop_install_schema('system') or its tables won't be created.
   backdrop_install_schema('system');
   $versions = backdrop_get_schema_versions('system');
   $version = $versions ? max($versions) : SCHEMA_INSTALLED;
@@ -1211,7 +1225,7 @@ function system_schema() {
   $schema['menu_links'] = array(
     'description' => 'Contains the individual links within a menu.',
     'fields' => array(
-     'menu_name' => array(
+      'menu_name' => array(
         'description' => "The menu name. All links with the same menu name (such as 'main-menu') are part of the same menu.",
         'type' => 'varchar',
         'length' => 32,
@@ -1246,7 +1260,7 @@ function system_schema() {
         'default' => '',
       ),
       'link_title' => array(
-      'description' => 'The text displayed for the link, which may be modified by a title callback stored in {menu_router}.',
+        'description' => 'The text displayed for the link, which may be modified by a title callback stored in {menu_router}.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -1484,7 +1498,7 @@ function system_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-     ),
+    ),
     'primary key' => array('value'),
   );
 
@@ -2099,7 +2113,7 @@ function system_update_1018() {
   $config = config('system.authorize');
   $config->set('filetransfer_default', update_variable_get('authorize_filetransfer_default', ''));
   $settings = db_query("SELECT name, value FROM {variable} WHERE name LIKE 'authorize_filetransfer_connection_settings_%'");
-  foreach ($settings as $row)  {
+  foreach ($settings as $row) {
     $row = unserialize($row);
     $config->set('authorize_filetransfer_connection_settings_' . $row[0], $row[1]);
   }
@@ -2410,7 +2424,7 @@ function system_update_1025() {
     ),
     'content' => array(
       '84c43df4-1165-4faf-8700-c362a7153c0b' => array(
-      'plugin' => 'system:header',
+        'plugin' => 'system:header',
         'data' => array(
           'module' => 'system',
           'delta' => 'header',
@@ -3409,9 +3423,14 @@ function system_update_1078() {
 
 /**
  * Clear the cache to reset allowlist settings.
+ *
+ * This update has been removed because it causes a regression when later update
+ * hooks create cache tables.
+ *
+ * @see https://github.com/backdrop/backdrop-issues/issues/6974
  */
 function system_update_1079() {
-  backdrop_flush_all_caches();
+  // This update has been removed.
 }
 
 /**
@@ -3836,6 +3855,17 @@ function system_update_1103() {
   $config->set('modules', $modules);
   $config->set('themes', $themes);
   $config->save();
+}
+
+/**
+ * Ensure system.core uses _config_static for better performance.
+ */
+function system_update_1104() {
+  $config = config('system.core');
+  if ($config->get('_config_static') === NULL) {
+    $config->set('_config_static', TRUE);
+    $config->save();
+  }
 }
 
 /**

@@ -1803,7 +1803,7 @@ class view {
     }
     $config_data += array(
       'tag' => $this->tag,
-      'disabled' => (boolean) $this->disabled,
+      'disabled' => (bool) $this->disabled,
       'base_table' => $this->base_table,
       'human_name' => $this->human_name,
       'core' => $this->core,

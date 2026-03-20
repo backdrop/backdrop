@@ -176,7 +176,7 @@ define('BACKDROP_CACHE_GLOBAL', 0x0008);
  * installation state. At all other times, the standard Backdrop system.core
  * config file contains the name of the current profile.
  *
- * @return $profile
+ * @return string
  *   The name of the installation profile.
  */
 function backdrop_get_profile() {
@@ -189,7 +189,8 @@ function backdrop_get_profile() {
     try {
       $profile = config_get('system.core', 'install_profile');
     }
-    catch (ConfigException $e) {}
+    catch (ConfigException $e) {
+    }
   }
   if (empty($profile)) {
     $profile = 'standard';
@@ -201,14 +202,14 @@ function backdrop_get_profile() {
 /**
  * Sets the breadcrumb trail for the current page.
  *
- * @param array $breadcrumb
+ * @param array|null $breadcrumb
  *   Array of links, starting with "home" and proceeding up to but not including
  *   the current page.
  *
  * @return array
  *   The current breadcrumb trail array.
  */
-function backdrop_set_breadcrumb($breadcrumb = NULL) {
+function backdrop_set_breadcrumb(?array $breadcrumb = NULL) {
   $stored_breadcrumb = &backdrop_static(__FUNCTION__);
 
   if (isset($breadcrumb)) {
@@ -219,6 +220,8 @@ function backdrop_set_breadcrumb($breadcrumb = NULL) {
 
 /**
  * Gets the breadcrumb trail for the current page.
+ *
+ * @return array
  */
 function backdrop_get_breadcrumb() {
   $breadcrumb = backdrop_set_breadcrumb();
@@ -286,7 +289,7 @@ function backdrop_get_logo_info() {
  *
  * Falls back to none (empty string) if not defined or theme provided.
  *
- * @return (string) $logo
+ * @return string
  *   URL to the logo file to use for the site.
  *
  * @see backdrop_get_logo_properties()
@@ -306,7 +309,7 @@ function backdrop_get_logo() {
  *
  * Falls back to the Backdrop favicon if not defined or theme provided.
  *
- * @return (array) $favicon
+ * @return array
  *   Information about the favicon to use for the site.  Keys include:
  *   - path: Relative path to the file to be used.
  *   - type: mime type for the icon being used.
@@ -351,19 +354,19 @@ function backdrop_get_favicon() {
  * This function can be called as long as the headers aren't sent. Pass no
  * arguments (or NULL for both) to retrieve the currently stored elements.
  *
- * @param $data
+ * @param array|null $data
  *   A renderable array. If the '#type' key is not set then 'head_tag' will be
  *   added as the default '#type'.
- * @param $key
+ * @param string|null $key
  *   A unique string key to allow implementations of hook_html_head_alter() to
  *   identify the element in $data. Required if $data is not NULL.
  *
- * @return
+ * @return array
  *   An array of all stored HEAD elements.
  *
  * @see theme_head_tag()
  */
-function backdrop_add_html_head($data = NULL, $key = NULL) {
+function backdrop_add_html_head(?array $data = NULL, $key = NULL) {
   $stored_head = &backdrop_static(__FUNCTION__);
 
   if (!isset($stored_head)) {
@@ -382,6 +385,8 @@ function backdrop_add_html_head($data = NULL, $key = NULL) {
 
 /**
  * Returns elements that are always displayed in the HEAD tag of the HTML page.
+ *
+ * @return array
  */
 function _backdrop_default_html_head() {
   // Add default elements. Make sure the Content-Type comes first because the
@@ -408,12 +413,17 @@ function _backdrop_default_html_head() {
     ),
   );
   // Also send the generator in the HTTP header.
-  $elements['system_meta_generator']['#attached']['backdrop_add_http_header'][] = array('X-Generator', $elements['system_meta_generator']['#attributes']['content']);
+  $elements['system_meta_generator']['#attached']['backdrop_add_http_header'][] = array(
+    'X-Generator',
+    $elements['system_meta_generator']['#attributes']['content'],
+  );
   return $elements;
 }
 
 /**
  * Retrieves output to be displayed in the HEAD tag of the HTML page.
+ *
+ * @return string
  */
 function backdrop_get_html_head() {
   $elements = backdrop_add_html_head();
@@ -437,16 +447,21 @@ function backdrop_get_html_head() {
  *
  * This function can be called as long the HTML header hasn't been sent.
  *
- * @param $url
+ * @param string|null $url
  *   An internal system path or a fully qualified external URL of the feed.
- * @param $title
+ * @param string $title
  *   The title of the feed.
+ *
+ * @return array
  */
 function backdrop_add_feed($url = NULL, $title = '') {
   $stored_feed_links = &backdrop_static(__FUNCTION__, array());
 
   if (isset($url)) {
-    $stored_feed_links[$url] = theme('feed_icon', array('url' => $url, 'title' => $title));
+    $stored_feed_links[$url] = theme('feed_icon', array(
+      'url' => $url,
+      'title' => $title,
+    ));
 
     backdrop_add_html_head_link(array(
       'rel' => 'alternate',
@@ -528,10 +543,10 @@ function backdrop_get_query_parameters(?array $query = NULL, array $exclude = ar
 /**
  * Splits a URL-encoded query string into an array.
  *
- * @param $query
+ * @param string $query
  *   The query string to split.
  *
- * @return
+ * @return array
  *   An array of URL decoded couples $param_name => $value.
  */
 function backdrop_get_query_array($query) {
@@ -553,7 +568,7 @@ function backdrop_get_query_array($query) {
  *   partial URL without the protocol, such as www.example.co.uk, as would be
  *   provided by $_SERVER['SERVER_NAME'].
  *
- * @return string|FALSE
+ * @return string|false
  *   The bare domain of the starting URL like example.com or example.co.uk.
  */
 function backdrop_get_bare_domain($url) {
@@ -603,12 +618,12 @@ function backdrop_get_bare_domain($url) {
  * This differs from http_build_query() as we need to rawurlencode() (instead of
  * urlencode()) all query parameters.
  *
- * @param $query
+ * @param array $query
  *   The query parameter array to be processed, e.g. $_GET.
- * @param $parent
+ * @param string $parent
  *   Internal use only. Used to build the $query array key for nested items.
  *
- * @return
+ * @return string
  *   A rawurlencoded string which can be used as or appended to the URL query
  *   string.
  *
@@ -648,6 +663,8 @@ function backdrop_http_build_query(array $query, $parent = '') {
  * By default the current URL is returned. If a destination exists in the
  * previous request, that destination is returned. As such, a destination can
  * persist across multiple pages.
+ *
+ * @return array
  *
  * @see backdrop_goto()
  */
@@ -692,10 +709,10 @@ function backdrop_get_destination() {
  * needs to be parsed into an associative query parameter array in
  * $options['query'] and the fragment into $options['fragment'].
  *
- * @param $url
+ * @param string $url
  *   The URL string to parse, f.e. $_GET['destination'].
  *
- * @return
+ * @return array
  *   An associative array containing the keys:
  *   - 'path': The path of the URL. If the given $url is external, this includes
  *     the scheme and host.
@@ -788,7 +805,10 @@ function backdrop_encode_path($path) {
  * @since 1.5.0
  */
 function backdrop_goto_deprecated($path = '', array $options = array(), $http_response_code = 302) {
-  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', array('%path' => $_GET['q'], '%referrer' => $_SERVER['HTTP_REFERER']), WATCHDOG_DEPRECATED);
+  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', array(
+    '%path' => $_GET['q'],
+    '%referrer' => $_SERVER['HTTP_REFERER'],
+  ), WATCHDOG_DEPRECATED);
   backdrop_goto($path, $options, $http_response_code);
 }
 
@@ -814,20 +834,20 @@ function backdrop_goto_deprecated($path = '', array $options = array(), $http_re
  * This function ends the request; use it instead of a return in your menu
  * callback.
  *
- * @param $path
+ * @param string|null $path
  *   (optional) A Backdrop path or a full URL, which will be passed to url() to
  *   compute the redirect for the URL.
- * @param $options
+ * @param array $options
  *   (optional) An associative array of additional URL options to pass to url().
- * @param $http_response_code
+ * @param int $http_response_code
  *   (optional) The HTTP status code to use for the redirection, defaults to
  *   302. The valid values for 3xx redirection status codes are defined in
  *   @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3 RFC 2616 @endlink
  *   and the
  *   @link http://tools.ietf.org/html/draft-reschke-http-status-308-07 draft for the new HTTP status codes: @endlink
  *   - 301: Moved Permanently (the recommended value for most redirects).
- *   - 302: Found (default in Backdrop and PHP, sometimes used for spamming search
- *     engines).
+ *   - 302: Found (default in Backdrop and PHP, sometimes used for spamming
+ *     search engines).
  *   - 303: See Other.
  *   - 304: Not Modified.
  *   - 305: Use Proxy.
@@ -838,7 +858,8 @@ function backdrop_goto_deprecated($path = '', array $options = array(), $http_re
  */
 function backdrop_goto($path = '', array $options = array(), $http_response_code = 302) {
   // A destination in $_GET always overrides the function arguments.
-  // We do not allow absolute URLs to be passed via $_GET, as this can be an attack vector.
+  // We do not allow absolute URLs to be passed via $_GET, as this can be an
+  // attack vector.
   if (isset($_GET['destination']) && !url_is_external($_GET['destination'])) {
     $destination = backdrop_parse_url($_GET['destination']);
     // Double check the path derived by backdrop_parse_url() is not external.
@@ -879,7 +900,8 @@ function backdrop_goto($path = '', array $options = array(), $http_response_code
  * Page callback functions wanting to report a "site offline" message should
  * return MENU_SITE_OFFLINE instead of calling backdrop_site_offline(). However,
  * functions that are invoked in contexts where that return value might not
- * bubble up to menu_execute_active_handler() should call backdrop_site_offline().
+ * bubble up to menu_execute_active_handler() should call
+ * backdrop_site_offline().
  */
 function backdrop_site_offline() {
   backdrop_deliver_page(MENU_SITE_OFFLINE);
@@ -901,9 +923,9 @@ function backdrop_not_found() {
  * Delivers an "access denied" error to the browser.
  *
  * Page callback functions wanting to report an "access denied" message should
- * return MENU_ACCESS_DENIED instead of calling backdrop_access_denied(). However,
- * functions that are invoked in contexts where that return value might not
- * bubble up to menu_execute_active_handler() should call
+ * return MENU_ACCESS_DENIED instead of calling backdrop_access_denied().
+ * However, functions that are invoked in contexts where that return value might
+ * not bubble up to menu_execute_active_handler() should call
  * backdrop_access_denied().
  */
 function backdrop_access_denied() {
@@ -916,7 +938,7 @@ function backdrop_access_denied() {
  * This is a flexible and powerful HTTP client implementation. Correctly
  * handles GET, POST, PUT or any other HTTP requests. Handles redirects.
  *
- * @param $url
+ * @param string $url
  *   A string containing a fully qualified URI.
  * @param array $options
  *   (optional) An array that can have one or more of the following elements:
@@ -1117,12 +1139,12 @@ function backdrop_http_request($url, array $options = array()) {
     $options['headers']['Authorization'] = 'Basic ' . base64_encode($uri['user'] . (isset($uri['pass']) ? ':' . $uri['pass'] : ':'));
   }
 
-  // If the database prefix is being used by SimpleTest to run the tests in a copied
-  // database then set the user-agent header to the database prefix so that any
-  // calls to other Backdrop pages will run the SimpleTest prefixed database. The
-  // user-agent is used to ensure that multiple testing sessions running at the
-  // same time won't interfere with each other as they would if the database
-  // prefix were stored statically in a file or database variable.
+  // If the database prefix is being used by SimpleTest to run the tests in a
+  // copied database then set the user-agent header to the database prefix so
+  // that any calls to other Backdrop pages will run the SimpleTest prefixed
+  // database. The user-agent is used to ensure that multiple testing sessions
+  // running at the same time won't interfere with each other as they would if
+  // the database prefix were stored statically in a file or database variable.
   $test_info = &$GLOBALS['backdrop_test_info'];
   if (!empty($test_info['test_run_id'])) {
     $options['headers']['User-Agent'] = backdrop_generate_test_ua($test_info['test_run_id']);
@@ -1247,18 +1269,18 @@ function backdrop_http_request($url, array $options = array()) {
   $result->code = $code;
 
   switch ($code) {
-    case 200: // OK
-    case 201: // Created
-    case 202: // Accepted
-    case 203: // Non-Authoritative Information
-    case 204: // No Content
-    case 205: // Reset Content
-    case 206: // Partial Content
-    case 304: // Not modified
+    case 200: // OK.
+    case 201: // Created.
+    case 202: // Accepted.
+    case 203: // Non-Authoritative Information.
+    case 204: // No Content.
+    case 205: // Reset Content.
+    case 206: // Partial Content.
+    case 304: // Not modified.
       break;
-    case 301: // Moved permanently
-    case 302: // Moved temporarily
-    case 307: // Moved temporarily
+    case 301: // Moved permanently.
+    case 302: // Moved temporarily.
+    case 307: // Moved temporarily.
       $location = $result->headers['location'];
       $options['timeout'] -= timer_read(__FUNCTION__) / 1000;
       if ($options['timeout'] <= 0) {
@@ -1305,7 +1327,7 @@ function backdrop_http_request($url, array $options = array()) {
  * @param string $location
  *   The location to which the request has been redirected.
  *
- * @return boolean
+ * @return bool
  *   Whether sensitive headers should be stripped from the request before
  *   following the redirect.
  */
@@ -1334,7 +1356,7 @@ function _backdrop_should_strip_sensitive_headers_on_http_redirect($url, $locati
  * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html Status line definition @endlink
  *
  * @param string $response
- *   The response status line, e.g. 'HTTP/1.1 500 Internal Server Error'
+ *   The response status line, e.g. 'HTTP/1.1 500 Internal Server Error'.
  *
  * @return array
  *   Keyed array containing the component parts. If the response is malformed,
@@ -1361,11 +1383,17 @@ function _backdrop_parse_response_status($response) {
 /**
  * Helper function for determining hosts excluded from needing a proxy.
  *
- * @return
+ * @param string $host
+ *   The host IP address.
+ *
+ * @return bool
  *   TRUE if a proxy should be used for this host.
  */
 function _backdrop_http_use_proxy($host) {
-  $proxy_exceptions = settings_get('proxy_exceptions', array('localhost', '127.0.0.1'));
+  $proxy_exceptions = settings_get('proxy_exceptions', array(
+    'localhost',
+    '127.0.0.1',
+  ));
   return !in_array(strtolower($host), $proxy_exceptions, TRUE);
 }
 
@@ -1378,7 +1406,7 @@ function _backdrop_http_use_proxy($host) {
  *
  * Callback for array_walk() within fix_gpx_magic().
  *
- * @param $item
+ * @param string|string[] $item
  *   An individual string or array of strings from superglobals.
  */
 function _fix_gpc_magic(&$item) {
@@ -1398,9 +1426,9 @@ function _fix_gpc_magic(&$item) {
  * The tmp_name key is skipped keys since PHP generates single backslashes for
  * file paths on Windows systems.
  *
- * @param $item
+ * @param array|string $item
  *   An item from $_FILES.
- * @param $key
+ * @param string $key
  *   The key for the item within $_FILES.
  *
  * @see http://php.net/manual/features.file-upload.php#42280
@@ -1445,14 +1473,14 @@ function fix_gpc_magic() {
  *
  * See @link http://tools.ietf.org/html/rfc5321 RFC 5321 @endlink for details.
  *
- * @param $mail
+ * @param string $mail
  *   A string containing an email address.
  *
- * @return
+ * @return bool
  *   TRUE if the address is in a valid format.
  */
 function valid_email_address($mail) {
-  return (bool)filter_var($mail, FILTER_VALIDATE_EMAIL);
+  return (bool) filter_var($mail, FILTER_VALIDATE_EMAIL);
 }
 
 /**
@@ -1461,17 +1489,17 @@ function valid_email_address($mail) {
  * This function should only be used on actual URLs. It should not be used for
  * Backdrop menu paths, which can contain arbitrary characters.
  * Valid values per RFC 3986.
- * @param $url
+ * @param string $url
  *   The URL to verify.
- * @param $absolute
+ * @param bool $absolute
  *   Whether the URL is absolute (beginning with a scheme such as "http:").
  *
- * @return
+ * @return bool
  *   TRUE if the URL is in a valid format.
  */
 function valid_url($url, $absolute = FALSE) {
   if ($absolute) {
-    return (bool)preg_match("
+    return (bool) preg_match("
       /^                                                      # Start at the beginning of the text
       (?:ftp|https?|feed):\/\/                                # Look for ftp, http, https or feed schemes
       (?:                                                     # Userinfo (optional) which is typically
@@ -1489,7 +1517,7 @@ function valid_url($url, $absolute = FALSE) {
     $/xi", $url);
   }
   else {
-    return (bool)preg_match("/^(?:[\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})+$/i", $url);
+    return (bool) preg_match("/^(?:[\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})+$/i", $url);
   }
 }
 
@@ -1573,14 +1601,14 @@ function valid_number_step($value, $step, $offset = 0.0) {
 /**
  * Registers an event for the current visitor to the flood control mechanism.
  *
- * @param $name
+ * @param string $name
  *   The name of an event.
- * @param $window
+ * @param int $window
  *   Optional number of seconds before this event expires. Defaults to 3600 (1
  *   hour). Typically uses the same value as the flood_is_allowed() $window
  *   parameter. Expired events are purged on cron run to prevent the flood table
  *   from growing indefinitely.
- * @param $identifier
+ * @param string|null $identifier
  *   Optional identifier (defaults to the current user's IP address).
  */
 function flood_register_event($name, $window = 3600, $identifier = NULL) {
@@ -1600,9 +1628,9 @@ function flood_register_event($name, $window = 3600, $identifier = NULL) {
 /**
  * Makes the flood control mechanism forget an event for the current visitor.
  *
- * @param $name
+ * @param string $name
  *   The name of an event.
- * @param $identifier
+ * @param string|null $identifier
  *   Optional identifier (defaults to the current user's IP address).
  */
 function flood_clear_event($name, $identifier = NULL) {
@@ -1622,17 +1650,17 @@ function flood_clear_event($name, $identifier = NULL) {
  * a certain number of times in a time window. This function verifies that the
  * current user has not exceeded this threshold.
  *
- * @param $name
+ * @param string $name
  *   The unique name of the event.
- * @param $threshold
+ * @param string $threshold
  *   The maximum number of times each user can do this event per time window.
- * @param $window
+ * @param int $window
  *   Number of seconds in the time window for this event (default is 3600
  *   seconds, or 1 hour).
- * @param $identifier
+ * @param string|null $identifier
  *   Unique identifier of the current user. Defaults to their IP address.
  *
- * @return
+ * @return bool
  *   TRUE if the user is allowed to proceed. FALSE if they have exceeded the
  *   threshold and should not be allowed to proceed.
  */
@@ -1673,11 +1701,14 @@ function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL)
  * @param string $name
  *   The name of the object being stored. Must be less than 128 characters.
  *
- * @return
+ * @return mixed
  *   The data that was stored.
  */
 function tempstore_get($collection, $name) {
-  $data = db_query('SELECT * FROM {tempstore} WHERE collection = :collection AND name = :name', array(':collection' => $collection, ':name' => $name))->fetchObject();
+  $data = db_query('SELECT * FROM {tempstore} WHERE collection = :collection AND name = :name', array(
+    ':collection' => $collection,
+    ':name' => $name,
+  ))->fetchObject();
   if ($data) {
     $data = unserialize($data->value);
   }
@@ -1745,8 +1776,8 @@ function tempstore_clear_all($collection) {
  * @{
  * Functions to sanitize values.
  *
- * See https://docs.backdropcms.org/documentation/writing-secure-code for information
- * on writing secure code.
+ * See https://docs.backdropcms.org/documentation/writing-secure-code for
+ * information on writing secure code.
  */
 
 /**
@@ -1759,10 +1790,10 @@ function tempstore_clear_all($collection) {
  * be a plain-text string for passing to t(), l(), backdrop_attributes(), or
  * another function that will call check_plain() separately.
  *
- * @param $uri
+ * @param string $uri
  *   A plain-text URI that might contain dangerous protocols.
  *
- * @return
+ * @return string
  *   A plain-text URI stripped of dangerous protocols. As with all plain-text
  *   strings, this return value must not be output to an HTML page without
  *   check_plain() being called on it. However, it can be passed to functions
@@ -1774,7 +1805,10 @@ function backdrop_strip_dangerous_protocols($uri) {
   static $allowed_protocols;
 
   if (!isset($allowed_protocols)) {
-    $allowed_protocols = array_flip(settings_get('filter_allowed_protocols', array('ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp', 'rtsp', 'sftp', 'ssh', 'tel', 'telnet', 'webcal')));
+    $allowed_protocols = array_flip(settings_get('filter_allowed_protocols', array(
+      'ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp',
+      'rtsp', 'sftp', 'ssh', 'tel', 'telnet', 'webcal',
+    )));
   }
 
   // Iteratively remove any invalid protocol found.
@@ -1804,15 +1838,15 @@ function backdrop_strip_dangerous_protocols($uri) {
 /**
  * Strips dangerous protocols from a URI and encodes it for output to HTML.
  *
- * @param $uri
+ * @param string $uri
  *   A plain-text URI that might contain dangerous protocols.
  *
- * @return
+ * @return string
  *   A URI stripped of dangerous protocols and encoded for output to an HTML
  *   attribute value. Because it is already encoded, it should not be set as a
  *   value within a $attributes array passed to backdrop_attributes(), because
- *   backdrop_attributes() expects those values to be plain-text strings. To pass
- *   a filtered URI to backdrop_attributes(), call
+ *   backdrop_attributes() expects those values to be plain-text strings. To
+ *   pass a filtered URI to backdrop_attributes(), call
  *   backdrop_strip_dangerous_protocols() instead.
  *
  * @see backdrop_strip_dangerous_protocols()
@@ -1830,9 +1864,24 @@ function check_url($uri) {
  *
  * Allows all tags that can be used inside an HTML body, save
  * for scripts and styles.
+ *
+ * @param string $string
+ *   The HTML string.
+ *
+ * @return string
  */
 function filter_xss_admin($string) {
-  return filter_xss($string, array('a', 'abbr', 'acronym', 'address', 'article', 'aside', 'b', 'bdi', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'dd', 'del', 'details', 'dfn', 'div', 'dl', 'dt', 'em', 'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'i', 'img', 'ins', 'kbd', 'li', 'mark', 'menu', 'meter', 'nav', 'ol', 'output', 'p', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'section', 'small', 'span', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'time', 'tr', 'tt', 'u', 'ul', 'var', 'wbr'));
+  return filter_xss($string, array(
+    'a', 'abbr', 'acronym', 'address', 'article', 'aside', 'b', 'bdi', 'bdo',
+    'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup',
+    'command', 'dd', 'del', 'details', 'dfn', 'div', 'dl', 'dt', 'em',
+    'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'header', 'hgroup', 'hr', 'i', 'img', 'ins', 'kbd', 'li', 'mark', 'menu',
+    'meter', 'nav', 'ol', 'output', 'p', 'pre', 'progress', 'q', 'rp', 'rt',
+    'ruby', 's', 'samp', 'section', 'small', 'span', 'strong', 'sub', 'summary',
+    'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'time', 'tr', 'tt',
+    'u', 'ul', 'var', 'wbr',
+  ));
 }
 
 /**
@@ -1848,20 +1897,20 @@ function filter_xss_admin($string) {
  * - Makes sure no HTML tags contain URLs with a disallowed protocol (e.g.
  *   javascript:).
  *
- * @param $string
+ * @param string $string
  *   The string with raw HTML in it. It will be stripped of everything that can
  *   cause an XSS attack.
- * @param $allowed_tags
+ * @param array|null $allowed_tags
  *   An array of allowed tags. Defaults to the array returned by
  *   _filter_xss_allowed_tags().
  *
- * @return
+ * @return string
  *   An XSS safe version of $string, or an empty string if $string is not
  *   valid UTF-8.
  *
  * @see backdrop_validate_utf8()
  */
-function filter_xss($string, $allowed_tags = NULL) {
+function filter_xss($string, ?array $allowed_tags = NULL) {
   if ($allowed_tags === NULL) {
     $allowed_tags = _filter_xss_allowed_tags();
   }
@@ -1963,14 +2012,21 @@ function filter_xss_attributes(array $attributes) {
 
 /**
  * List of the default tags allowed by filter_xss().
+ *
+ * @return array
  */
 function _filter_xss_allowed_tags() {
-  return array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd');
+  return array(
+    'a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol',
+    'li', 'dl', 'dt', 'dd',
+  );
 }
 
 /**
  * Human-readable list of the default tags allowed by filter_xss(), for display
  * in help texts.
+ *
+ * @return string
  */
 function _filter_xss_display_allowed_tags() {
   return '<' . implode('> <', _filter_xss_allowed_tags()) . '>';
@@ -1979,18 +2035,18 @@ function _filter_xss_display_allowed_tags() {
 /**
  * Processes an HTML tag.
  *
- * @param $m
+ * @param array $m
  *   An array with various meaning depending on the value of $store.
  *   If $store is TRUE then the array contains the allowed tags.
  *   If $store is FALSE then the array has one element, the HTML tag to process.
- * @param $store
+ * @param bool $store
  *   Whether to store $m.
  *
  * @return string
  *   If the element isn't allowed, an empty string. Otherwise, the cleaned up
  *   version of the HTML element.
  */
-function _filter_xss_split($m, $store = FALSE) {
+function _filter_xss_split(array $m, $store = FALSE) {
   static $allowed_html;
 
   if ($store) {
@@ -2078,13 +2134,11 @@ function _filter_xss_attributes($attributes) {
         // Attribute name, href for instance.
         if (preg_match('/^([-a-zA-Z]+)/', $attributes, $match)) {
           $attribute_name = strtolower($match[1]);
-          $skip = (
-            $attribute_name == 'style' ||
+          $skip = ($attribute_name == 'style' ||
             substr($attribute_name, 0, 2) == 'on' ||
             substr($attribute_name, 0, 1) == '-' ||
             // Ignore long attributes to avoid unnecessary processing overhead.
-            strlen($attribute_name) > 96
-          );
+            strlen($attribute_name) > 96);
           // Values for attributes of type URI should be filtered for
           // potentially malicious protocols (for example, an href-attribute
           // starting with "javascript:"). However, for some non-URI
@@ -2200,20 +2254,22 @@ function _filter_xss_attributes($attributes) {
 /**
  * Processes an HTML attribute value and strips dangerous protocols from URLs.
  *
- * @param $string
+ * @param string $string
  *   The string with the attribute value.
- * @param $decode
+ * @param bool $decode
  *   (deprecated) Whether to decode entities in the $string. Set to FALSE if the
  *   $string is in plain text, TRUE otherwise. Defaults to TRUE. This parameter
  *   is deprecated and will be removed. To process a plain-text URI,
  *   call backdrop_strip_dangerous_protocols() or check_url() instead.
  *
- * @return
+ * @return string
  *   Cleaned up and HTML-escaped version of $string.
  */
 function filter_xss_bad_protocol($string, $decode = TRUE) {
-  // Get the plain text representation of the attribute value (i.e. its meaning).
-  // @todo Remove the $decode parameter and always assume an HTML string that needs decoding.
+  // Get the plain text representation of the attribute value (i.e. its
+  // meaning).
+  // @todo Remove the $decode parameter and always assume an HTML string that
+  // needs decoding.
   if ($decode) {
     if (!function_exists('decode_entities')) {
       require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
@@ -2238,8 +2294,24 @@ function filter_xss_bad_protocol($string, $decode = TRUE) {
  * Formats an RSS channel.
  *
  * Arbitrary elements may be added using the $args associative array.
+ *
+ * @param string $title
+ *   RSS title.
+ * @param string $link
+ *   RSS URL.
+ * @param string $description
+ *   RSS description.
+ * @param string $items
+ *   RSS items.
+ * @param string|null $langcode
+ *   Language code.
+ * @param array $args
+ *   Array of arbitrary elements.
+ *
+ * @return string
+ *   RSS channel
  */
-function format_rss_channel($title, $link, $description, $items, $langcode = NULL, $args = array()) {
+function format_rss_channel($title, $link, $description, $items, $langcode = NULL, array $args = array()) {
   global $language_content;
   $langcode = $langcode ? $langcode : $language_content->langcode;
 
@@ -2263,8 +2335,20 @@ function format_rss_channel($title, $link, $description, $items, $langcode = NUL
  * Formats a single RSS item.
  *
  * Arbitrary elements may be added using the $args associative array.
+ *
+ * @param string $title
+ *   RSS title.
+ * @param string $link
+ *   RSS URL.
+ * @param string $description
+ *   RSS description.
+ * @param array $args
+ *   Array of arbitrary elements.
+ *
+ * @return string
+ *   RSS item
  */
-function format_rss_item($title, $link, $description, $args = array()) {
+function format_rss_item($title, $link, $description, array $args = array()) {
   $output = "<item>\n";
   $output .= ' <title>' . check_plain($title) . "</title>\n";
   $output .= ' <link>' . check_url($link) . "</link>\n";
@@ -2373,26 +2457,26 @@ function format_xml_elements(array $array, $indentation_level = 0) {
  *     array('%old-type' => $info->old_type, '%new-type' => $info->new_type));
  * @endcode
  *
- * @param $count
+ * @param int $count
  *   The item count to display.
- * @param $singular
+ * @param string $singular
  *   The string for the singular case. Make sure it is clear this is singular,
  *   to ease translation (e.g. use "1 new comment" instead of "1 new"). Do not
  *   use @count in the singular string.
- * @param $plural
+ * @param string $plural
  *   The string for the plural case. Make sure it is clear this is plural, to
  *   ease translation. Use @count in place of the item count, as in
  *   "@count new comments".
- * @param $args
+ * @param array $args
  *   An associative array of replacements to make after translation. Instances
  *   of any key in this array are replaced with the corresponding value.
  *   Based on the first character of the key, the value is escaped and/or
  *   themed. See format_string(). Note that you do not need to include @count
  *   in this array; this replacement is done automatically for the plural case.
- * @param $options
+ * @param array $options
  *   An associative array of additional options. See t() for allowed keys.
  *
- * @return
+ * @return string
  *   A translated string.
  *
  * @see t()
@@ -2428,18 +2512,21 @@ function format_plural($count, $singular, $plural, array $args = array(), array 
 /**
  * Parses a given byte count.
  *
- * @param $size
+ * @param string $size
  *   A size expressed as a number of bytes with optional SI or IEC binary unit
  *   prefix (e.g. 2, 3K, 5MB, 10G, 6GiB, 8 bytes, 9mbytes).
  *
- * @return
+ * @return int
  *   An integer representation of the size in bytes.
  */
 function parse_size($size) {
-  $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Remove the non-unit characters from the size.
-  $size = (float) preg_replace('/[^0-9\.]/', '', $size); // Remove the non-numeric characters from the size.
+  // Remove the non-unit characters from the size.
+  $unit = preg_replace('/[^bkmgtpezy]/i', '', $size);
+  // Remove the non-numeric characters from the size.
+  $size = (float) preg_replace('/[^0-9\.]/', '', $size);
   if ($unit) {
-    // Find the position of the unit in the ordered string which is the power of magnitude to multiply a kilobyte by.
+    // Find the position of the unit in the ordered string which is the power of
+    // magnitude to multiply a kilobyte by.
     return round($size * pow(BACKDROP_KILOBYTE, stripos('bkmgtpezy', $unit[0])));
   }
   else {
@@ -2450,13 +2537,13 @@ function parse_size($size) {
 /**
  * Generates a string representation for the given byte count.
  *
- * @param $size
+ * @param int $size
  *   A size in bytes.
- * @param $langcode
+ * @param string|null $langcode
  *   Optional language code to translate to a language other than what is used
  *   to display the page.
  *
- * @return
+ * @return string
  *   A translated string representation of the size.
  */
 function format_size($size, $langcode = NULL) {
@@ -2491,15 +2578,15 @@ function format_size($size, $langcode = NULL) {
 /**
  * Formats a time interval with the requested granularity.
  *
- * @param $interval
+ * @param int $interval
  *   The length of the interval in seconds.
- * @param $granularity
+ * @param int $granularity
  *   How many different units to display in the string.
- * @param $langcode
+ * @param string|null $langcode
  *   Optional language code to translate to a language other than
  *   what is used to display the page.
  *
- * @return
+ * @return string
  *   A translated string representation of the interval.
  */
 function format_interval($interval, $granularity = 2, $langcode = NULL) {
@@ -2510,7 +2597,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
     '1 day|@count days' => 86400,
     '1 hour|@count hours' => 3600,
     '1 min|@count min' => 60,
-    '1 sec|@count sec' => 1
+    '1 sec|@count sec' => 1,
   );
   $output = '';
   foreach ($units as $key => $value) {
@@ -2531,9 +2618,9 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
 /**
  * Formats a date, using a date type or a custom date format string.
  *
- * @param $timestamp
+ * @param int $timestamp
  *   A UNIX timestamp to format.
- * @param $date_format_name
+ * @param string $date_format_name
  *   (optional) The format to use, one of:
  *   - One of the built-in formats: 'short', 'medium', 'long', 'html_datetime',
  *     'html_date', 'html_time', 'html_yearless_date', 'html_week',
@@ -2541,23 +2628,24 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
  *   - The machine name of an administrator-defined date format.
  *   - 'custom', to use $format.
  *   Defaults to 'medium'.
- * @param $pattern
+ * @param string $pattern
  *   (optional) If $date_format_name is 'custom', a PHP date format string
  *   suitable for input to date(). Use a backslash to escape ordinary text, so
  *   it does not get interpreted as date format characters.
- * @param $timezone
+ * @param string|null $timezone
  *   (optional) Time zone identifier, as described at
  *   http://php.net/manual/timezones.php Defaults to the time zone used to
  *   display the page.
- * @param $langcode
+ * @param string|null $langcode
  *   (optional) Language code to translate to. Defaults to the language used to
  *   display the page.
  *
- * @return
+ * @return string
  *   A translated date string in the requested format.
  */
 function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $timezone = NULL, $langcode = NULL) {
-  // Use the advanced backdrop_static() pattern, since this is called very often.
+  // Use the advanced backdrop_static() pattern, since this is called very
+  // often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
     $backdrop_static_fast['timezones'] = &backdrop_static(__FUNCTION__);
@@ -2603,7 +2691,11 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
   // input string.
   // Paired backslashes are isolated to prevent errors in read-ahead evaluation.
   // The read-ahead expression ensures that A matches, but not \A.
-  $pattern = preg_replace(array('/\\\\\\\\/', '/(?<!\\\\)([AaeDlMTF])/'), array("\xEF\\\\\\\\\xFF", "\xEF\\\\\$1\$1\xFF"), $pattern);
+  $pattern = preg_replace(array(
+    '/\\\\\\\\/',
+    '/(?<!\\\\)([AaeDlMTF])/'),
+    array("\xEF\\\\\\\\\xFF", "\xEF\\\\\$1\$1\xFF"),
+    $pattern);
 
   // Call date_format().
   $formatted_date_time = date_format($date_time, $pattern);
@@ -2670,7 +2762,7 @@ function _format_date_callback(?array $matches = NULL, $new_langcode = NULL) {
  * When creating links in modules, consider whether l() could be a better
  * alternative than url().
  *
- * @param $path
+ * @param string|null $path
  *   (optional) The internal path or external URL being linked to, such as
  *   "node/34" or "http://example.com/foo". The default value is equivalent to
  *   passing in '<front>'. A few notes:
@@ -2688,7 +2780,7 @@ function _format_date_callback(?array $matches = NULL, $new_langcode = NULL) {
  *     then you can either URL encode the query keys and values yourself and
  *     include them in $path, or use $options['query'] to let this function
  *     URL encode them.
- * @param $options
+ * @param array $options
  *   (optional) An associative array of additional options, with the following
  *   elements:
  *   - 'query': An array of query key/value-pairs (without any URL-encoding) to
@@ -2728,7 +2820,7 @@ function _format_date_callback(?array $matches = NULL, $new_langcode = NULL) {
  *   - 'entity': The entity object (such as a node) for which the URL is being
  *     generated. Only set if url() is invoked by entity_uri().
  *
- * @return
+ * @return string
  *   A string containing a URL to the given path.
  */
 function url($path = NULL, array $options = array()) {
@@ -2738,7 +2830,7 @@ function url($path = NULL, array $options = array()) {
     'query' => array(),
     'absolute' => FALSE,
     'alias' => FALSE,
-    'prefix' => ''
+    'prefix' => '',
   );
 
   // Determine whether this is an external link, but ensure that the current
@@ -2881,11 +2973,11 @@ function url($path = NULL, array $options = array()) {
  * If a path cannot be assessed by Backdrop's menu handler, then we must
  * treat it as potentially insecure.
  *
- * @param $path
+ * @param string|null $path
  *   The internal path or external URL being linked to, such as "node/34" or
  *   "http://example.com/foo".
  *
- * @return
+ * @return bool
  *   Boolean TRUE or FALSE, where TRUE indicates an external path.
  */
 function url_is_external($path) {
@@ -2911,10 +3003,10 @@ function url_is_external($path) {
 /**
  * Formats an attribute string for an HTTP header.
  *
- * @param $attributes
+ * @param array $attributes
  *   An associative array of attributes such as 'rel'.
  *
- * @return
+ * @return string
  *   A ; separated string ready for insertion in a HTTP header. No escaping is
  *   performed for HTML entities, so this string is not safe to be printed.
  *
@@ -2958,10 +3050,10 @@ function backdrop_http_header_attributes(array $attributes = array()) {
  *   backdrop_attributes(array('onmouseout' => 'window.location="http://malicious.com/";')));
  * @endcode
  *
- * @param $attributes
+ * @param array $attributes
  *   An associative array of key-value pairs to be converted to attributes.
  *
- * @return
+ * @return string
  *   A string ready for insertion in a tag (starts with a space).
  *
  * @ingroup sanitization
@@ -3092,11 +3184,11 @@ function l($text, $path, array $options = array()) {
  * this function is to determine the most appropriate 'delivery callback'
  * function to route the content to. The delivery callback function then
  * sends the content to the browser in the needed format. The default delivery
- * callback is backdrop_deliver_html_page(), which delivers the content as an HTML
- * page, complete with blocks in addition to the content. This default can be
- * overridden on a per menu router item basis by setting 'delivery callback' in
- * hook_menu() or hook_menu_alter(), and can also be overridden on a per request
- * basis in hook_page_delivery_callback_alter().
+ * callback is backdrop_deliver_html_page(), which delivers the content as an
+ * HTML page, complete with blocks in addition to the content. This default can
+ * be overridden on a per menu router item basis by setting 'delivery callback'
+ * in hook_menu() or hook_menu_alter(), and can also be overridden on a per
+ * request basis in hook_page_delivery_callback_alter().
  *
  * For example, the same page callback function can be used for an HTML
  * version of the page and an Ajax version of the page. The page callback
@@ -3118,13 +3210,13 @@ function l($text, $path, array $options = array()) {
  * backdrop_deliver_html_page() for an example of a delivery callback that
  * respects security.
  *
- * @param $page_callback_result
+ * @param array|string|int|null $page_callback_result
  *   The result of a page callback. Can be one of:
  *   - NULL: to indicate no content.
  *   - An integer menu status constant: to indicate an error condition.
  *   - A string of HTML content.
  *   - A renderable array of content.
- * @param $default_delivery_callback
+ * @param string|null $default_delivery_callback
  *   (Optional) If given, it is the name of a delivery function most likely
  *   to be appropriate for the page request as determined by the calling
  *   function (e.g., menu_execute_active_handler()). If not given, it is
@@ -3150,14 +3242,17 @@ function backdrop_deliver_page($page_callback_result, $default_delivery_callback
     // If a delivery callback is specified, but doesn't exist as a function,
     // something is wrong, but don't print anything, since it's not known
     // what format the response needs to be in.
-    watchdog('delivery callback not found', 'callback %callback not found: %q.', array('%callback' => $delivery_callback, '%q' => $_GET['q']), WATCHDOG_ERROR);
+    watchdog('delivery callback not found', 'callback %callback not found: %q.', array(
+      '%callback' => $delivery_callback,
+      '%q' => $_GET['q'],
+    ), WATCHDOG_ERROR);
   }
 }
 
 /**
  * Packages and sends the result of a page callback to the browser as HTML.
  *
- * @param $page_callback_result
+ * @param array|string|int|null $page_callback_result
  *   The result of a page callback. Can be one of:
  *   - NULL: to indicate no content.
  *   - An integer menu status constant: to indicate an error condition.
@@ -3332,11 +3427,11 @@ function backdrop_page_footer() {
 /**
  * Performs end-of-request tasks.
  *
- * In some cases page requests need to end without calling backdrop_page_footer().
- * In these cases, call backdrop_exit() instead. There should rarely be a reason
- * to call exit instead of backdrop_exit();
+ * In some cases page requests need to end without calling
+ * backdrop_page_footer(). In these cases, call backdrop_exit() instead. There
+ * should rarely be a reason to call exit instead of backdrop_exit();
  *
- * @param $destination
+ * @param string|null $destination
  *   If this function is called from backdrop_goto(), then this argument
  *   will be a fully-qualified URL that is the destination of the redirect.
  *   This should be passed along to hook_exit() implementations.
@@ -3360,15 +3455,15 @@ function backdrop_exit($destination = NULL) {
  * specified, in which case the output of the function is used for the values
  * instead.
  *
- * @param $array
+ * @param array $array
  *   A linear array.
- * @param $function
+ * @param string|null $function
  *   A name of a function to apply to all values before output.
  *
- * @return
+ * @return array
  *   An associative array.
  */
-function backdrop_map_assoc($array, $function = NULL) {
+function backdrop_map_assoc(array $array, $function = NULL) {
   // array_combine() fails with empty arrays:
   // http://bugs.php.net/bug.php?id=34857.
   $array = !empty($array) ? array_combine($array, $array) : array();
@@ -3459,7 +3554,7 @@ function base_path() {
  * @param bool $header
  *   Optional flag to determine if a HTTP 'Link:' header should be sent.
  */
-function backdrop_add_html_head_link($attributes, $header = FALSE) {
+function backdrop_add_html_head_link(array $attributes, $header = FALSE) {
   $element = array(
     '#tag' => 'link',
     '#attributes' => $attributes,
@@ -3470,7 +3565,10 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
     // Also add a HTTP header "Link:".
     $href = '<' . check_plain($attributes['href']) . '>;';
     unset($attributes['href']);
-    $element['#attached']['backdrop_add_http_header'][] = array('Link',  $href . backdrop_http_header_attributes($attributes));
+    $element['#attached']['backdrop_add_http_header'][] = array(
+      'Link',
+      $href . backdrop_http_header_attributes($attributes),
+    );
   }
 
   backdrop_add_html_head($element, 'backdrop_add_html_head_link:' . $attributes['rel'] . ':' . $href);
@@ -3646,8 +3744,8 @@ function backdrop_add_css($data = NULL, $options = NULL) {
   // Preprocess can only be set if no attributes are set.
   $options['preprocess'] = empty($options['attributes']) ? $options['preprocess'] : FALSE;
 
-  // Create an array of CSS files for each media type first, since each type needs to be served
-  // to the browser differently.
+  // Create an array of CSS files for each media type first, since each type
+  // needs to be served to the browser differently.
   if (isset($data)) {
     $options['browsers'] += array(
       'IE' => TRUE,
@@ -3695,20 +3793,20 @@ function backdrop_add_css($data = NULL, $options = NULL) {
  * modules/system/system-menus.css. This allows themes to override complete
  * CSS files, rather than specific selectors, when necessary.
  *
- * @param $css
+ * @param array|null $css
  *   (optional) An array of CSS files. If no array is provided, the default
  *   stylesheets array is used instead.
- * @param $skip_alter
+ * @param bool $skip_alter
  *   (optional) If set to TRUE, this function skips calling backdrop_alter() on
  *   $css, useful when the calling function passes a $css array that has already
  *   been altered.
  *
- * @return
+ * @return string
  *   A string of XHTML CSS tags.
  *
  * @see backdrop_add_css()
  */
-function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
+function backdrop_get_css(?array $css = NULL, $skip_alter = FALSE) {
   if (!isset($css)) {
     $css = backdrop_add_css();
   }
@@ -3760,7 +3858,10 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
     '#items' => $css,
   );
   if (!empty($setting)) {
-    $styles['#attached']['js'][] = array('type' => 'setting', 'data' => $setting);
+    $styles['#attached']['js'][] = array(
+      'type' => 'setting',
+      'data' => $setting,
+    );
   }
 
   return backdrop_render($styles);
@@ -3787,11 +3888,11 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
  * same type, media, and browsers, if needed to accommodate other items in
  * between.
  *
- * @param $css
+ * @param array $css
  *   An array of CSS items, as returned by backdrop_add_css(), but after
  *   alteration performed by backdrop_get_css().
  *
- * @return
+ * @return array
  *   An array of CSS groups. Each group contains the same keys (e.g., 'media',
  *   'data', etc.) as a CSS item from the $css parameter, with the value of
  *   each key applying to the group as a whole. Each group also contains an
@@ -3800,7 +3901,7 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
  * @see backdrop_pre_render_styles()
  * @see system_element_info()
  */
-function backdrop_group_css($css) {
+function backdrop_group_css(array $css) {
   $groups = array();
   // If a group can contain multiple items, we track the information that must
   // be the same for each item in the group, so that when we iterate the next
@@ -3834,7 +3935,13 @@ function backdrop_group_css($css) {
         // Help ensure maximum reuse of aggregate files by only grouping
         // together items that share the same 'group' value and 'every_page'
         // flag. See backdrop_add_css() for details about that.
-        $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['media'], $item['browsers']) : FALSE;
+        $group_keys = $item['preprocess'] ? array(
+          $item['type'],
+          $item['group'],
+          $item['every_page'],
+          $item['media'],
+          $item['browsers'],
+        ) : FALSE;
         break;
       case 'inline':
         // Always group inline items.
@@ -3876,7 +3983,7 @@ function backdrop_group_css($css) {
  * other unnecessary content. Additionally, this functions aggregates inline
  * content together, regardless of the site-wide aggregation setting.
  *
- * @param $css_groups
+ * @param array $css_groups
  *   An array of CSS groups as returned by backdrop_group_css(). This function
  *   modifies the group's 'data' property for each group that is aggregated.
  *
@@ -3884,7 +3991,7 @@ function backdrop_group_css($css) {
  * @see backdrop_pre_render_styles()
  * @see system_element_info()
  */
-function backdrop_aggregate_css(&$css_groups) {
+function backdrop_aggregate_css(array &$css_groups) {
   $preprocess_css = !defined('MAINTENANCE_MODE') && config_get('system.core', 'preprocess_css');
 
   // For each group that needs aggregation, aggregate its items.
@@ -3954,7 +4061,7 @@ function backdrop_aggregate_css(&$css_groups) {
  * this function to work correctly even if modules have implemented custom
  * logic for grouping and aggregating files.
  *
- * @param $element
+ * @param array $elements
  *   A render array containing:
  *   - '#items': The CSS items as returned by backdrop_add_css() and altered by
  *     backdrop_get_css().
@@ -3964,12 +4071,12 @@ function backdrop_aggregate_css(&$css_groups) {
  *   - '#aggregate_callback': A function to call to aggregate the items within
  *     the groups arranged by the #group_callback function.
  *
- * @return
+ * @return array
  *   A render array that will render to a string of XHTML CSS tags.
  *
  * @see backdrop_get_css()
  */
-function backdrop_pre_render_styles($elements) {
+function backdrop_pre_render_styles(array $elements) {
   // Group and aggregate the items.
   if (isset($elements['#group_callback'])) {
     $elements['#groups'] = $elements['#group_callback']($elements['#items']);
@@ -4149,13 +4256,13 @@ function backdrop_pre_render_styles($elements) {
  * period by backdrop_delete_file_if_stale(). This ensures that files referenced
  * by a cached page will still be available.
  *
- * @param $css
+ * @param array $css
  *   An array of CSS files to aggregate and compress into one file.
  *
- * @return
+ * @return string|false
  *   The URI of the CSS cache file, or FALSE if the file could not be saved.
  */
-function backdrop_build_css_cache($css) {
+function backdrop_build_css_cache(array $css) {
   $data = '';
   $uri = '';
   $map = state_get('css_cache_files', array());
@@ -4188,7 +4295,8 @@ function backdrop_build_css_cache($css) {
         }
 
         _backdrop_build_css_path(NULL, $css_base_url . '/');
-        // Anchor all paths in the CSS with its base URL, ignoring external and absolute paths.
+        // Anchor all paths in the CSS with its base URL, ignoring external and
+        // absolute paths.
         $data .= preg_replace_callback('/url\(\s*[\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\s*\)/i', '_backdrop_build_css_path', $contents);
       }
     }
@@ -4229,8 +4337,15 @@ function backdrop_build_css_cache($css) {
 
 /**
  * Prefixes all paths within a CSS file for backdrop_build_css_cache().
+ *
+ * @param array|null $matches
+ *   Array of matches of CSS files.
+ * @param string|null $base
+ *   Base path.
+ *
+ * @return string
  */
-function _backdrop_build_css_path($matches, $base = NULL) {
+function _backdrop_build_css_path(?array $matches, $base = NULL) {
   $_base = &backdrop_static(__FUNCTION__);
   // Store base path for preg_replace_callback.
   if (isset($base)) {
@@ -4263,14 +4378,14 @@ function _backdrop_build_css_path($matches, $base = NULL) {
  * when CSS aggregation is enabled. This optimization will not apply for
  * color.module enabled themes with CSS aggregation turned off.
  *
- * @param $file
+ * @param string $file
  *   Name of the stylesheet to be processed.
- * @param $optimize
+ * @param bool|null $optimize
  *   Defines if CSS contents should be compressed or not.
- * @param $reset_basepath
+ * @param bool $reset_basepath
  *   Used internally to facilitate recursive resolution of @import commands.
  *
- * @return
+ * @return string
  *   Contents of the stylesheet, including any resolved @import commands.
  */
 function backdrop_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRUE) {
@@ -4279,8 +4394,8 @@ function backdrop_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRU
   if ($reset_basepath) {
     $basepath = '';
   }
-  // Store the value of $optimize for preg_replace_callback with nested
-  // @import loops.
+  // Store the value of $optimize for preg_replace_callback with nested @import
+  // loops.
   if (isset($optimize)) {
     $_optimize = $optimize;
   }
@@ -4312,17 +4427,18 @@ function backdrop_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRU
 /**
  * Processes the contents of a stylesheet for aggregation.
  *
- * @param $contents
+ * @param string $contents
  *   The contents of the stylesheet.
- * @param $optimize
+ * @param bool $optimize
  *   (optional) Boolean whether CSS contents should be minified. Defaults to
  *   FALSE.
  *
- * @return
+ * @return string
  *   Contents of the stylesheet including the imported stylesheets.
  */
 function backdrop_load_stylesheet_content($contents, $optimize = FALSE) {
-  // Remove multiple charset declarations for standards compliance (and fixing Safari problems).
+  // Remove multiple charset declarations for standards compliance (and fixing
+  // Safari problems).
   $contents = preg_replace('/^@charset\s+[\'"](\S*?)\b[\'"];/i', '', $contents);
 
   if ($optimize) {
@@ -4376,8 +4492,13 @@ function backdrop_load_stylesheet_content($contents, $optimize = FALSE) {
  *
  * This function is used for recursive loading of stylesheets and
  * returns the stylesheet content with all url() paths corrected.
+ *
+ * @param array $matches
+ *   Array of matches of the file names.
+ *
+ * @return string
  */
-function _backdrop_load_stylesheet($matches) {
+function _backdrop_load_stylesheet(array $matches) {
   $filename = $matches[1];
   // Load the imported stylesheet and replace @import commands in there as well.
   $file = backdrop_load_stylesheet($filename, NULL, FALSE);
@@ -4408,6 +4529,9 @@ function backdrop_clear_css_cache() {
  * Callback for file_scan_directory() within:
  * - backdrop_clear_css_cache()
  * - backdrop_clear_js_cache()
+ *
+ * @param string $uri
+ *   The file URI.
  */
 function backdrop_delete_file_if_stale($uri) {
   // Default stale file threshold is 30 days.
@@ -4422,15 +4546,21 @@ function backdrop_delete_file_if_stale($uri) {
  * http://www.w3.org/TR/CSS21/syndata.html#characters shows the syntax for valid
  * CSS identifiers (including element names, classes, and IDs in selectors.)
  *
- * @param $identifier
+ * @param string $identifier
  *   The identifier to clean.
- * @param $filter
+ * @param array $filter
  *   An array of string replacements to use on the identifier.
  *
- * @return
+ * @return string
  *   The cleaned identifier.
  */
-function backdrop_clean_css_identifier($identifier, $filter = array(' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '')) {
+function backdrop_clean_css_identifier($identifier, array $filter = array(
+  ' ' => '-',
+  '_' => '-',
+  '/' => '-',
+  '[' => '-',
+  ']' => '',
+)) {
   // By default, we filter using Backdrop's coding standards.
   $identifier = strtr($identifier, $filter);
 
@@ -4444,8 +4574,15 @@ function backdrop_clean_css_identifier($identifier, $filter = array(' ' => '-', 
   // We strip out any character not in the above list.
   $identifier = preg_replace('/[^\x{002D}\x{0030}-\x{0039}\x{0041}-\x{005A}\x{005F}\x{0061}-\x{007A}\x{00A1}-\x{FFFF}]/u', '', $identifier);
 
-  // Identifiers cannot start with a digit, two hyphens, or a hyphen followed by a digit.
-  $identifier = preg_replace(array('/^[0-9]/', '/^(-[0-9])|^(--)/'), array('_', '__') , $identifier);
+  // Identifiers cannot start with a digit, two hyphens, or a hyphen followed by
+  // a digit.
+  $identifier = preg_replace(array(
+    '/^[0-9]/',
+    '/^(-[0-9])|^(--)/',
+  ), array(
+    '_',
+    '__',
+  ), $identifier);
 
   return $identifier;
 }
@@ -4456,10 +4593,10 @@ function backdrop_clean_css_identifier($identifier, $filter = array(' ' => '-', 
  * Do not pass one string containing multiple classes as they will be
  * incorrectly concatenated with dashes, i.e. "one two" will become "one-two".
  *
- * @param $class
+ * @param string $class
  *   The class name to clean.
  *
- * @return
+ * @return string
  *   The cleaned class name.
  */
 function backdrop_html_class($class) {
@@ -4494,10 +4631,10 @@ function backdrop_html_class($class) {
  * To allow reverse-parsing of IDs submitted via Ajax, any multiple consecutive
  * hyphens in the originally passed $id are replaced with a single hyphen.
  *
- * @param $id
+ * @param string $id
  *   The ID to clean.
  *
- * @return
+ * @return string
  *   The cleaned ID.
  */
 function backdrop_html_id($id) {
@@ -4559,7 +4696,12 @@ function backdrop_html_id($id) {
   }
   $seen_ids = &$backdrop_static_fast['seen_ids'];
 
-  $id = strtr(backdrop_strtolower($id), array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+  $id = strtr(backdrop_strtolower($id), array(
+    ' ' => '-',
+    '_' => '-',
+    '[' => '-',
+    ']' => '',
+  ));
 
   // As defined in http://www.w3.org/TR/html4/types.html#type-name, HTML IDs can
   // only contain letters, digits ([0-9]), hyphens ("-"), underscores ("_"),
@@ -4577,7 +4719,7 @@ function backdrop_html_id($id) {
   // return unique IDs and also helps us re-create the $seen_ids array during
   // Ajax requests.
   if (isset($seen_ids[$id])) {
-    $id = $id . '--' . ++$seen_ids[$id];
+    $id = $id . '--' . (++$seen_ids[$id]);
   }
   else {
     $seen_ids[$id] = 1;
@@ -4590,15 +4732,15 @@ function backdrop_html_id($id) {
  * Provides a standard HTML class name that identifies a page region.
  *
  * It is recommended that template preprocess functions apply this class to any
- * page region that is output by the theme (Backdrop core already handles this in
- * the standard template preprocess implementation). Standardizing the class
+ * page region that is output by the theme (Backdrop core already handles this
+ * in the standard template preprocess implementation). Standardizing the class
  * names in this way allows modules to implement certain features, such as
  * drag-and-drop or dynamic Ajax loading, in a theme-independent way.
  *
- * @param $region
+ * @param string $region
  *   The name of the page region (for example, 'page_bottom' or 'content').
  *
- * @return
+ * @return string
  *   An HTML class that identifies the region (for example, 'region-page-top'
  *   or 'region-content').
  *
@@ -4664,7 +4806,7 @@ function backdrop_region_class($region) {
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
  *
- * @param string|null $data
+ * @param string|array|null $data
  *   (optional) If given, the value depends on the $options parameter, or
  *   $options['type'] if $options is passed as an associative array:
  *   - 'file': Path to the file relative to base_path().
@@ -4726,12 +4868,12 @@ function backdrop_region_class($region) {
  *     and 'every_page' value. In some cases, the order in which the JavaScript
  *     is presented on the page is very important. jQuery, for example, must be
  *     added to the page before any jQuery code is run, so jquery.js uses the
- *     JS_LIBRARY group and a weight of -20, jquery.once.js (a library backdrop.js
- *     depends on) uses the JS_LIBRARY group and a weight of -19, backdrop.js uses
- *     the JS_LIBRARY group and a weight of -1, other libraries use the
- *     JS_LIBRARY group and a weight of 0 or higher, and all other scripts use
- *     one of the other group constants. The exact ordering of JavaScript is as
- *     follows:
+ *     JS_LIBRARY group and a weight of -20, jquery.once.js (a library
+ *     backdrop.js depends on) uses the JS_LIBRARY group and a weight of -19,
+ *     backdrop.js uses the JS_LIBRARY group and a weight of -1, other libraries
+ *     use the JS_LIBRARY group and a weight of 0 or higher, and all other
+ *     scripts use one of the other group constants. The exact ordering of
+ *     JavaScript is as follows:
  *     - First by scope, with 'header' first, 'footer' last, and any other
  *       scopes provided by a custom theme coming in between, as determined by
  *       the theme.
@@ -4739,9 +4881,9 @@ function backdrop_region_class($region) {
  *     - Then by the 'every_page' flag, with TRUE coming before FALSE.
  *     - Then by weight.
  *     - Then by the order in which the JavaScript was added. For example, all
- *       else being the same, JavaScript added by a call to backdrop_add_js() that
- *       happened later in the page request gets added to the page after one for
- *       which backdrop_add_js() happened earlier in the page request.
+ *       else being the same, JavaScript added by a call to backdrop_add_js()
+ *       that happened later in the page request gets added to the page after
+ *       one for which backdrop_add_js() happened earlier in the page request.
  *   - defer: If set to TRUE, the defer attribute is set on the <script>
  *     tag. Defaults to FALSE. Note that setting this to TRUE will disable
  *     preprocessing as though the 'preprocess' option was set to FALSE.
@@ -4873,7 +5015,7 @@ function backdrop_add_js($data = NULL, $options = NULL) {
 /**
  * Constructs an array of the defaults that are used for JavaScript items.
  *
- * @param $data
+ * @param string|array|null $data
  *   (optional) The default data parameter for the JavaScript item array.
  *
  * @return array
@@ -4914,25 +5056,25 @@ function backdrop_js_defaults($data = NULL) {
  * is to add another element to the $javascript array, deriving from
  * backdrop_js_defaults(). See locale_js_alter() for an example of this.
  *
- * @param $scope
+ * @param string $scope
  *   (optional) The scope for which the JavaScript rules should be returned.
  *   Defaults to 'header'.
- * @param $javascript
+ * @param array|null $javascript
  *   (optional) An array with all JavaScript code. Defaults to the default
  *   JavaScript array for the given scope.
- * @param $skip_alter
+ * @param bool $skip_alter
  *   (optional) If set to TRUE, this function skips calling backdrop_alter() on
  *   $javascript, useful when the calling function passes a $javascript array
  *   that has already been altered.
  *
- * @return
+ * @return string
  *   All JavaScript code segments and includes for the scope as HTML tags.
  *
  * @see backdrop_add_js()
  * @see locale_js_alter()
  * @see backdrop_js_defaults()
  */
-function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FALSE) {
+function backdrop_get_js($scope = 'header', ?array $javascript = NULL, $skip_alter = FALSE) {
   if (!isset($javascript)) {
     $javascript = backdrop_add_js();
   }
@@ -4970,11 +5112,12 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
   backdrop_add_js($setting, 'setting');
 
   // If we're outputting the header scope, then this might be the final time
-  // that backdrop_get_js() is running, so add the setting to this output as well
-  // as to the backdrop_add_js() cache. If $items['settings'] doesn't exist, it's
-  // because backdrop_get_js() was intentionally passed a $javascript argument
-  // stripped of settings, potentially in order to override how settings get
-  // output, so in this case, do not add the setting to this output.
+  // that backdrop_get_js() is running, so add the setting to this output as
+  // well as to the backdrop_add_js() cache. If $items['settings'] doesn't
+  // exist, it's because backdrop_get_js() was intentionally passed a
+  // $javascript argument stripped of settings, potentially in order to override
+  // how settings get output, so in this case, do not add the setting to this
+  // output.
   if ($scope == 'header' && isset($items['settings'])) {
     $items['settings']['data'][] = $setting;
   }
@@ -4989,7 +5132,8 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
 }
 
 /**
- * #pre_render callback to add the elements needed for JavaScript tags to be rendered.
+ * #pre_render callback to add the elements needed for JavaScript tags to be
+ * rendered.
  *
  * This function evaluates the aggregation enabled/disabled condition on a group
  * by group basis by testing whether an aggregate file has been made for the
@@ -4997,7 +5141,7 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
  * this function to work correctly even if modules have implemented custom
  * logic for grouping and aggregating files.
  *
- * @param $element
+ * @param array $elements
  *   A render array containing:
  *   - #items: The JavaScript items as returned by backdrop_add_js() and
  *     altered by backdrop_get_js().
@@ -5007,12 +5151,12 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
  *   - #aggregate_callback: A function to call to aggregate the items within
  *     the groups arranged by the #group_callback function.
  *
- * @return
+ * @return array
  *   A render array that will render to a string of JavaScript tags.
  *
  * @see backdrop_get_js()
  */
-function backdrop_pre_render_scripts($elements) {
+function backdrop_pre_render_scripts(array $elements) {
   // Group and aggregate the items.
   if (isset($elements['#group_callback'])) {
     $elements['#groups'] = $elements['#group_callback']($elements['#items']);
@@ -5110,11 +5254,11 @@ function backdrop_pre_render_scripts($elements) {
  * same type and browsers, if needed to accommodate other items in
  * between.
  *
- * @param $javascript
+ * @param array $javascript
  *   An array of JavaScript items, as returned by backdrop_add_js(), but after
  *   alteration performed by backdrop_get_js().
  *
- * @return
+ * @return array
  *   An array of JavaScript groups. Each group contains the same keys (e.g.,
  *   'data', etc.) as a JavaScript item from the $javascript parameter, with the
  *   value of each key applying to the group as a whole. Each group also
@@ -5123,7 +5267,7 @@ function backdrop_pre_render_scripts($elements) {
  *
  * @see backdrop_pre_render_scripts()
  */
-function backdrop_group_js($javascript) {
+function backdrop_group_js(array $javascript) {
   $groups = array();
   // If a group can contain multiple items, we track the information that must
   // be the same for each item in the group, so that when we iterate the next
@@ -5145,7 +5289,12 @@ function backdrop_group_js($javascript) {
         // Help ensure maximum reuse of aggregate files by only grouping
         // together items that share the same 'group' value and 'every_page'
         // flag. See backdrop_add_js() for details about that.
-        $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['browsers']) : FALSE;
+        $group_keys = $item['preprocess'] ? array(
+          $item['type'],
+          $item['group'],
+          $item['every_page'],
+          $item['browsers'],
+        ) : FALSE;
         break;
 
       case 'external':
@@ -5186,7 +5335,7 @@ function backdrop_group_js($javascript) {
  * download, it also compresses the aggregate files by removing comments,
  * whitespace, and other unnecessary content.
  *
- * @param $js_groups
+ * @param array $js_groups
  *   An array of JavaScript groups as returned by backdrop_group_js(). For each
  *   group that is aggregated, this function sets the value of the group's
  *   'data' key to the URI of the aggregate file.
@@ -5194,7 +5343,7 @@ function backdrop_group_js($javascript) {
  * @see backdrop_group_js()
  * @see backdrop_pre_render_scripts()
  */
-function backdrop_aggregate_js(&$js_groups) {
+function backdrop_aggregate_js(array &$js_groups) {
   if (!defined('MAINTENANCE_MODE') && config_get('system.core', 'preprocess_js')) {
     foreach ($js_groups as $key => $group) {
       if ($group['type'] == 'file' && $group['preprocess']) {
@@ -5237,22 +5386,22 @@ function backdrop_aggregate_js(&$js_groups) {
  * );
  * @endcode
  *
- * @param $elements
+ * @param array $elements
  *   The structured array describing the data being rendered.
- * @param $group
+ * @param int $group
  *   The default group of JavaScript and CSS being added. This is only applied
  *   to the stylesheets and JavaScript items that don't have an explicit group
  *   assigned to them.
- * @param $dependency_check
+ * @param bool $dependency_check
  *   When TRUE, will exit if a given library's dependencies are missing. When
  *   set to FALSE, will continue to add the libraries, even though one or more
  *   dependencies are missing. Defaults to FALSE.
- * @param $every_page
+ * @param bool|null $every_page
  *   Set to TRUE to indicate that the attachments are added to every page on the
  *   site. Only attachments with the every_page flag set to TRUE can participate
  *   in JavaScript/CSS aggregation.
  *
- * @return
+ * @return bool
  *   FALSE if there were any missing library dependencies; TRUE if all library
  *   dependencies were met.
  *
@@ -5262,8 +5411,9 @@ function backdrop_aggregate_js(&$js_groups) {
  * @see backdrop_add_icon()
  * @see backdrop_render()
  */
-function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_check = FALSE, $every_page = NULL) {
-  // Add defaults to the special attached structures that should be processed differently.
+function backdrop_process_attached(array $elements, $group = JS_DEFAULT, $dependency_check = FALSE, ?bool $every_page = NULL) {
+  // Add defaults to the special attached structures that should be processed
+  // differently.
   $elements['#attached'] += array(
     'library' => array(),
     'js' => array(),
@@ -5489,12 +5639,12 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *   ),
  * @endcode
  *
- * @param $elements
+ * @param array $elements
  *   A renderable array element having a #states property as described above.
  *
  * @see form_example_states_form()
  */
-function backdrop_process_states(&$elements) {
+function backdrop_process_states(array &$elements) {
   $elements['#attached']['library'][] = array('system', 'backdrop.states');
   $elements['#attached']['js'][] = array(
     'type' => 'setting',
@@ -5512,15 +5662,15 @@ function backdrop_process_states(&$elements) {
  * depending module, without having to add all files of the library separately.
  * Each library is only loaded once.
  *
- * @param $module
+ * @param string $module
  *   The name of the module that registered the library.
- * @param $name
+ * @param string $name
  *   The name of the library to add.
- * @param $every_page
+ * @param bool|null $every_page
  *   Set to TRUE if this library is added to every page on the site. Only items
  *   with the every_page flag set to TRUE can participate in aggregation.
  *
- * @return
+ * @return bool
  *   TRUE if the library was successfully added; FALSE if the library or one of
  *   its dependencies could not be added.
  *
@@ -5528,7 +5678,7 @@ function backdrop_process_states(&$elements) {
  * @see hook_library_info()
  * @see hook_library_info_alter()
  */
-function backdrop_add_library($module, $name, $every_page = NULL) {
+function backdrop_add_library($module, $name, ?bool $every_page = NULL) {
   $added = &backdrop_static(__FUNCTION__, array());
 
   // Only process the library if it exists and it was not added already.
@@ -5565,13 +5715,13 @@ function backdrop_add_library($module, $name, $every_page = NULL) {
  * - Two (or more) modules can still register the same library and use it
  *   without conflicts in case the libraries are loaded on certain pages only.
  *
- * @param $module
+ * @param string $module
  *   The name of a module that registered a library.
- * @param $name
+ * @param string|null $name
  *   (optional) The name of a registered library to retrieve. By default, all
  *   libraries registered by $module are returned.
  *
- * @return
+ * @return array|false
  *   The definition of the requested library, if $name was passed and it exists,
  *   or FALSE if it does not exist. If no $name was passed, an associative array
  *   of libraries registered by $module is returned (which may be empty).
@@ -5731,34 +5881,34 @@ function backdrop_add_icons(array $icon_names) {
  * clean and readable. It also prevents tabledrag.js from being added twice
  * accidentally.
  *
- * @param $table_id
+ * @param string $table_id
  *   String containing the target table's id attribute. If the table does not
  *   have an id, one will need to be set, such as <table id="my-module-table">.
- * @param $action
+ * @param string $action
  *   String describing the action to be done on the form item. Either 'match'
  *   'depth', or 'order'. Match is typically used for parent relationships.
  *   Order is typically used to set weights on other form elements with the same
  *   group. Depth updates the target element with the current indentation.
- * @param $relationship
+ * @param string $relationship
  *   String describing where the $action variable should be performed. Either
  *   'parent', 'sibling', 'group', or 'self'. Parent will only look for fields
  *   up the tree. Sibling will look for fields in the same group in rows above
  *   and below it. Self affects the dragged row itself. Group affects the
  *   dragged row, plus any children below it (the entire dragged group).
- * @param $group
+ * @param string $group
  *   A class name applied on all related form elements for this action.
- * @param $subgroup
+ * @param string|null $subgroup
  *   (optional) If the group has several subgroups within it, this string should
  *   contain the class name identifying fields in the same subgroup.
- * @param $source
+ * @param string|null $source
  *   (optional) If the $action is 'match', this string should contain the class
  *   name identifying what field will be used as the source value when matching
  *   the value in $subgroup.
- * @param $hidden
+ * @param bool $hidden
  *   (optional) The column containing the field elements may be entirely hidden
  *   from view dynamically when the JavaScript is loaded. Set to FALSE if the
  *   column should not be hidden.
- * @param $limit
+ * @param int $limit
  *   (optional) Limit the maximum amount of parenting in this table.
  * @see block-admin-display-form.tpl.php
  * @see theme_menu_overview_form()
@@ -5806,13 +5956,13 @@ function backdrop_add_tabledrag($table_id, $action, $relationship, $group, $subg
  * period by backdrop_delete_file_if_stale(). This ensures that files referenced
  * by a cached page will still be available.
  *
- * @param $files
+ * @param array $files
  *   An array of JavaScript files to aggregate and compress into one file.
  *
- * @return
+ * @return string|false
  *   The URI of the cache file, or FALSE if the file could not be saved.
  */
-function backdrop_build_js_cache($files) {
+function backdrop_build_js_cache(array $files) {
   $contents = '';
   $uri = '';
   $map = state_get('js_cache_files', array());
@@ -5831,7 +5981,8 @@ function backdrop_build_js_cache($files) {
     // Build aggregate JS file.
     foreach ($files as $info) {
       if ($info['preprocess']) {
-        // Append a ';' and a newline after each JS file to prevent them from running together.
+        // Append a ';' and a newline after each JS file to prevent them from
+        // running together.
         $contents .= file_get_contents($info['data']) . ";\n";
       }
     }
@@ -5886,7 +6037,7 @@ function backdrop_clear_js_cache() {
  *   readable by humans, or emulates this functionality if running an older
  *   version of PHP.
  *
- * @return string|FALSE
+ * @return string|false
  *   The given $var encoded as a JSON string or FALSE on failure.
  *
  * @see backdrop_json_decode()
@@ -5905,6 +6056,11 @@ function backdrop_json_encode($var, $pretty_print = FALSE) {
 /**
  * Converts an HTML-safe JSON string into its PHP equivalent.
  *
+ * @param string $var
+ *   The JSON string.
+ *
+ * @return mixed
+ *
  * @see backdrop_json_encode()
  * @ingroup php_wrappers
  */
@@ -5918,7 +6074,8 @@ function backdrop_json_decode($var) {
  * This function is no longer used directly in core. Use backdrop_json_encode()
  * to format JSON.
  *
- * @param $json
+ * @param string $json
+ *
  *   A string of JSON text.
  * @return string
  *   A formatted string of JSON text.
@@ -5992,6 +6149,11 @@ function backdrop_json_format($json) {
  * This function is no longer used directly in core. Use backdrop_json_encode()
  * to format JSON.
  *
+ * @param array|string $json
+ *   The JSON as an array or a string.
+ *
+ * @return string
+ *
  * @deprecated since 1.22.0
  */
 function backdrop_json_decode_unicode($json) {
@@ -6025,7 +6187,7 @@ function backdrop_json_decode_unicode($json) {
  * This function should be used for JavaScript callback functions returning
  * data in JSON format. It sets the header for JavaScript output.
  *
- * @param $var
+ * @param mixed $var
  *   (optional) If set, the variable will be converted to JSON and output.
  */
 function backdrop_json_output($var = NULL) {
@@ -6040,7 +6202,7 @@ function backdrop_json_output($var = NULL) {
 /**
  * Packages and sends the result of a page callback to the browser as JSON.
  *
- * @param $page_callback_result
+ * @param array|int|null $page_callback_result
  *   The result of a page callback. Can be one of:
  *   - NULL: to indicate no content.
  *   - An integer menu status constant: to indicate an error condition.
@@ -6090,7 +6252,7 @@ function backdrop_json_deliver($page_callback_result) {
 /**
  * Gets a salt useful for hardening against SQL injection.
  *
- * @return
+ * @return string
  *   A salt based on information in settings.php, not in the database.
  */
 function backdrop_get_hash_salt() {
@@ -6105,7 +6267,7 @@ function backdrop_get_hash_salt() {
 /**
  * Ensures the private key variable used to generate tokens is set.
  *
- * @return
+ * @return string
  *   The private key.
  */
 function backdrop_get_private_key() {
@@ -6119,13 +6281,13 @@ function backdrop_get_private_key() {
 /**
  * Generates a token based on $value, the user session, and the private key.
  *
- * @param $value
- *   An additional value to base the token on.
- *
  * The generated token is based on the session ID of the current user. Normally,
  * anonymous users do not have a session, so the generated token will be
  * different on every page request. To generate a token for users without a
  * session, manually start a session prior to calling this function.
+ *
+ * @param string $value
+ *   An additional value to base the token on.
  *
  * @return string
  *   A 43-character URL-safe token for validation,based on the user session ID,
@@ -6139,14 +6301,14 @@ function backdrop_get_token($value = '') {
 /**
  * Validates a token based on $value, the user session, and the private key.
  *
- * @param $token
+ * @param string $token
  *   The token to be validated.
- * @param $value
+ * @param string $value
  *   An additional value to base the token on.
- * @param $skip_anonymous
+ * @param bool $skip_anonymous
  *   Set to true to skip token validation for anonymous users.
  *
- * @return
+ * @return bool
  *   True for a valid token, false for an invalid token. When $skip_anonymous
  *   is true, the return value will always be true for anonymous users.
  */
@@ -6155,6 +6317,9 @@ function backdrop_valid_token($token, $value = '', $skip_anonymous = FALSE) {
   return (($skip_anonymous && $user->uid == 0) || ($token === backdrop_get_token($value)));
 }
 
+/**
+ * Full bootstrap
+ */
 function _backdrop_bootstrap_full() {
   static $called = FALSE;
 
@@ -6179,11 +6344,11 @@ function _backdrop_bootstrap_full() {
   require_once BACKDROP_ROOT . '/core/includes/token.inc';
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
 
-  // Detect string handling method
+  // Detect string handling method.
   unicode_check();
-  // Undo magic quotes
+  // Undo magic quotes.
   fix_gpc_magic();
-  // Load all enabled modules
+  // Load all enabled modules.
   module_load_all();
   // Reset backdrop_alter() and module_implements() static caches as these
   // include implementations for vital modules only when called early on
@@ -6254,10 +6419,10 @@ function backdrop_page_set_cache() {
  * Page compression requires the PHP zlib extension
  * (http://php.net/manual/ref.zlib.php).
  *
- * @param $page_content
+ * @param string $page_content
  *   The page content (HTML) that should be entered into a cache entry.
  *
- * @return stdClass|FALSE
+ * @return stdClass|false
  *   A cache entry ready to be written to the cache backend. If the page is not
  *   cacheable, FALSE will be returned.
  *
@@ -6329,7 +6494,7 @@ function backdrop_page_create_cache($page_content) {
  * @param stdClass $cache
  *   A cache entry object to be written to the cache backend.
  */
-function backdrop_page_save_cache($cache) {
+function backdrop_page_save_cache(stdClass $cache) {
   if ($cache->data['body']) {
     cache('page')->set($cache->cid, $cache->data, $cache->expire);
   }
@@ -6394,7 +6559,7 @@ function backdrop_cron_run() {
     // Release cron lock.
     lock_release('cron');
 
-    // Return TRUE so other functions can check if it did run successfully
+    // Return TRUE so other functions can check if it did run successfully.
     $return = TRUE;
   }
 
@@ -6451,8 +6616,8 @@ function backdrop_cron_run() {
  * = 'name'), or the full file stream URI ($key = 'uri'). If you use a key of
  * 'filename' or 'name', files found later in the search will take precedence
  * over files found earlier (unless they belong to a module or theme not
- * compatible with Backdrop core); if you choose a key of 'uri', you will get all
- * files found.
+ * compatible with Backdrop core); if you choose a key of 'uri', you will get
+ * all files found.
  *
  * @param string $mask
  *   The preg_match() regular expression for the files to find.
@@ -6537,7 +6702,11 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
     require_once BACKDROP_ROOT . '/core/includes/file.inc';
   }
   foreach ($searchdir as $dir) {
-    $files_to_add = file_scan_directory($dir, $mask, array('key' => $key, 'min_depth' => $min_depth, 'nomask' => $no_mask));
+    $files_to_add = file_scan_directory($dir, $mask, array(
+      'key' => $key,
+      'min_depth' => $min_depth,
+      'nomask' => $no_mask,
+    ));
 
     // Duplicate files found in later search directories take precedence over
     // earlier ones, so we want them to overwrite keys in our resulting
@@ -6570,7 +6739,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
 /**
  * Pre-render callback: Provides backwards-compatibility for #browsers property.
  *
- * @param $elements
+ * @param array $elements
  *   A render array with a '#browsers' property. This property formerly provided
  *   the ability target IE vs. non-IE browsers. However, it no longer provides
  *   this functionality as this has not been supported since IE10. Now if the
@@ -6587,7 +6756,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
  *
  * @since 1.27.0 Conditional comments are no longer rendered.
  */
-function backdrop_pre_render_conditional_comments($elements) {
+function backdrop_pre_render_conditional_comments(array $elements) {
   $browsers = isset($elements['#browsers']) ? $elements['#browsers'] : array();
   $browsers += array(
     'IE' => TRUE,
@@ -6610,16 +6779,16 @@ function backdrop_pre_render_conditional_comments($elements) {
  *
  * Doing so during pre_render gives modules a chance to alter the link parts.
  *
- * @param $elements
+ * @param array $element
  *   A structured array whose keys form the arguments to l():
  *   - #title: The link text to pass as argument to l().
  *   - #href: The URL path component to pass as argument to l().
  *   - #options: (optional) An array of options to pass to l().
  *
- * @return
+ * @return array
  *   The passed-in elements containing a rendered link in '#markup'.
  */
-function backdrop_pre_render_link($element) {
+function backdrop_pre_render_link(array $element) {
   // By default, link options to pass to l() are normally set in #options.
   $element += array('#options' => array());
   // However, within the scope of renderable elements, #attributes is a valid
@@ -6670,9 +6839,9 @@ function backdrop_pre_render_link($element) {
  *
  * The purpose of this is to allow links to be logically grouped into related
  * categories, so that each child group can be rendered as its own list of
- * links if backdrop_render() is called on it, but calling backdrop_render() on the
- * parent element will still produce a single list containing all the remaining
- * links, regardless of what group they were in.
+ * links if backdrop_render() is called on it, but calling backdrop_render() on
+ * the parent element will still produce a single list containing all the
+ * remaining links, regardless of what group they were in.
  *
  * A typical example comes from node links, which are stored in a renderable
  * array similar to this:
@@ -6733,8 +6902,14 @@ function backdrop_pre_render_link($element) {
  * group is rendered on its own. When the group is rendered together with other
  * children, these child-specific properties are ignored, and only the overall
  * properties of the parent are used.
+ *
+ * @param array $element
+ *   The element array.
+ *
+ * @return array
+ *   Child links collected into a single array.
  */
-function backdrop_pre_render_links($element) {
+function backdrop_pre_render_links(array $element) {
   $element += array('#links' => array());
   foreach (element_children($element) as $key) {
     $child = &$element[$key];
@@ -6758,23 +6933,29 @@ function backdrop_pre_render_links($element) {
  * Note that if also a #theme is defined for the element, then the result of
  * the theme callback will override #children.
  *
- * @param $elements
+ * @param array $elements
  *   A structured array using the #markup key.
  *
- * @return
+ * @return array
  *   The passed-in elements, but #markup appended to #children.
  *
  * @see backdrop_render()
  */
-function backdrop_pre_render_markup($elements) {
+function backdrop_pre_render_markup(array $elements) {
   $elements['#children'] = $elements['#markup'];
   return $elements;
 }
 
 /**
  * Pre-render callback: Attaches the dropbutton library and required markup.
+ *
+ * @param array $element
+ *   The element array for the dropbutton.
+ *
+ * @return array
+ *   Element array with dropbutton library and markup attached.
  */
-function backdrop_pre_render_dropbutton($element) {
+function backdrop_pre_render_dropbutton(array $element) {
   $element['#attached']['library'][] = array('system', 'backdrop.dropbutton');
   $element['#attributes']['class'][] = 'dropbutton';
   if (!isset($element['#theme_wrappers'])) {
@@ -6796,6 +6977,7 @@ function backdrop_pre_render_dropbutton($element) {
  *
  * @param string|array $page
  *   A string or renderable array representing the content of a page.
+ *
  * @return string
  *   The rendered full HTML page.
  */
@@ -6844,17 +7026,18 @@ function backdrop_render_page($page) {
  * the form markup itself.
  *
  * backdrop_render() can optionally cache the rendered output of elements to
- * improve performance. To use backdrop_render() caching, set the element's #cache
- * property to an associative array with one or several of the following keys:
+ * improve performance. To use backdrop_render() caching, set the element's
+ * #cache property to an associative array with one or several of the following
+ * keys:
  * - 'keys': An array of one or more keys that identify the element. If 'keys'
  *   is set, the cache ID is created automatically from these keys. See
  *   backdrop_render_cid_create().
  * - 'granularity' (optional): Define the cache granularity using binary
  *   combinations of the cache granularity constants, e.g.
  *   BACKDROP_CACHE_PER_USER to cache for each user separately or
- *   BACKDROP_CACHE_PER_PAGE | BACKDROP_CACHE_PER_ROLE to cache separately for each
- *   page and role. If not specified the element is cached globally for each
- *   theme and language.
+ *   BACKDROP_CACHE_PER_PAGE | BACKDROP_CACHE_PER_ROLE to cache separately for
+ *   each page and role. If not specified the element is cached globally for
+ *   each theme and language.
  * - 'cid': Specify the cache ID directly. Either 'keys' or 'cid' is required.
  *   If 'cid' is set, 'keys' and 'granularity' are ignored. Use only if you
  *   have special requirements.
@@ -6867,14 +7050,15 @@ function backdrop_render_page($page) {
  * elements to backdrop_render(), for example from a database query, set
  * $elements['#sorted'] = TRUE to avoid sorting them a second time.
  *
- * backdrop_render() flags each element with a '#printed' status to indicate that
- * the element has been rendered, which allows individual elements of a given
- * array to be rendered independently and prevents them from being rendered
- * more than once on subsequent calls to backdrop_render() (e.g., as part of a
- * larger array). If the same array or element is passed more than once to
- * backdrop_render(), every use beyond the first will return an empty string.
+ * backdrop_render() flags each element with a '#printed' status to indicate
+ * that the element has been rendered, which allows individual elements of a
+ * given array to be rendered independently and prevents them from being
+ * rendered more than once on subsequent calls to backdrop_render() (e.g., as
+ * part of a larger array). If the same array or element is passed more than
+ * once to backdrop_render(), every use beyond the first will return an empty
+ * string.
  *
- * @param array $elements
+ * @param array|string|null $elements
  *   The structured array describing the data to be rendered.
  *
  * @return string
@@ -6993,7 +7177,7 @@ function backdrop_render(&$elements) {
  *
  * @param array $element
  *   The structured array whose children shall be rendered.
- * @param array $children_keys
+ * @param array|null $children_keys
  *   (optional) If the keys of the element's children are already known, they
  *   can be passed in to save another run of element_children().
  *
@@ -7002,7 +7186,7 @@ function backdrop_render(&$elements) {
  *
  * @see backdrop_render()
  */
-function backdrop_render_children(&$element, $children_keys = NULL) {
+function backdrop_render_children(array &$element, ?array $children_keys = NULL) {
   if ($children_keys === NULL) {
     $children_keys = element_children($element);
   }
@@ -7022,10 +7206,10 @@ function backdrop_render_children(&$element, $children_keys = NULL) {
  * element is shown with show() before rendering, so it will always be rendered
  * even if hide() had been previously used on it.
  *
- * @param $element
+ * @param array|string $element
  *   The element to be rendered.
  *
- * @return
+ * @return string
  *   The rendered element.
  *
  * @see backdrop_render()
@@ -7050,9 +7234,9 @@ function render(&$element) {
  * The first time render() or backdrop_render() is called on an element tree,
  * as each element in the tree is rendered, it is marked with a #printed flag
  * and the rendered children of the element are cached. Subsequent calls to
- * render() or backdrop_render() will not traverse the child tree of this element
- * again: they will just use the cached children. So if you want to hide an
- * element, be sure to call hide() on the element before its parent tree is
+ * render() or backdrop_render() will not traverse the child tree of this
+ * element again: they will just use the cached children. So if you want to hide
+ * an element, be sure to call hide() on the element before its parent tree is
  * rendered for the first time, as it will have no effect on subsequent
  * renderings of the parent tree.
  *
@@ -7065,10 +7249,10 @@ function render(&$element) {
  * $element['#access'] = FALSE
  * @endcode
  *
- * @param $element
+ * @param array|null $element
  *   The element to be hidden.
  *
- * @return
+ * @return array
  *   The element.
  *
  * @see render()
@@ -7088,22 +7272,22 @@ function hide(&$element) {
  * The first time render() or backdrop_render() is called on an element tree,
  * as each element in the tree is rendered, it is marked with a #printed flag
  * and the rendered children of the element are cached. Subsequent calls to
- * render() or backdrop_render() will not traverse the child tree of this element
- * again: they will just use the cached children. So if you want to show an
- * element, be sure to call show() on the element before its parent tree is
+ * render() or backdrop_render() will not traverse the child tree of this
+ * element again: they will just use the cached children. So if you want to show
+ * an element, be sure to call show() on the element before its parent tree is
  * rendered for the first time, as it will have no effect on subsequent
  * renderings of the parent tree.
  *
- * @param $element
+ * @param array $element
  *   The element to be shown.
  *
- * @return
+ * @return array
  *   The element.
  *
  * @see render()
  * @see hide()
  */
-function show(&$element) {
+function show(array &$element) {
   $element['#printed'] = FALSE;
   return $element;
 }
@@ -7111,17 +7295,17 @@ function show(&$element) {
 /**
  * Gets the rendered output of a renderable element from the cache.
  *
- * @param $elements
+ * @param array $elements
  *   A renderable array.
  *
- * @return
+ * @return string|false
  *   A markup string containing the rendered content of the element, or FALSE
  *   if no cached copy of the element is available.
  *
  * @see backdrop_render()
  * @see backdrop_render_cache_set()
  */
-function backdrop_render_cache_get($elements) {
+function backdrop_render_cache_get(array $elements) {
   if (!in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD')) || !$cid = backdrop_render_cid_create($elements)) {
     return FALSE;
   }
@@ -7145,9 +7329,9 @@ function backdrop_render_cache_get($elements) {
  * This is called by backdrop_render() if the #cache property is set on an
  * element.
  *
- * @param $markup
+ * @param string $markup
  *   The rendered output string of $elements.
- * @param $elements
+ * @param array $elements
  *   A renderable array.
  *
  * @return bool
@@ -7155,7 +7339,7 @@ function backdrop_render_cache_get($elements) {
  *
  * @see backdrop_render_cache_get()
  */
-function backdrop_render_cache_set(&$markup, $elements) {
+function backdrop_render_cache_set(&$markup, array $elements) {
   // Create the cache ID for the element.
   if (!in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD')) || !$cid = backdrop_render_cid_create($elements)) {
     return FALSE;
@@ -7184,20 +7368,20 @@ function backdrop_render_cache_set(&$markup, $elements) {
  *
  * When caching elements, it is necessary to collect all libraries, JavaScript
  * and CSS into a single array, from both the element itself and all child
- * elements. This allows backdrop_render() to add these back to the page when the
- * element is returned from cache.
+ * elements. This allows backdrop_render() to add these back to the page when
+ * the element is returned from cache.
  *
- * @param $elements
+ * @param array $elements
  *   The element to collect #attached from.
- * @param $return
+ * @param bool $return
  *   Whether to return the attached elements and reset the internal static.
  *
- * @return array|NULL
+ * @return array|null
  *   If $return is TRUE, the #attached array for this element and its
  *   descendants. If $return is FALSE, the collected attachments are stored
  *   internally so they do not have to be collected again.
  */
-function backdrop_render_collect_attached($elements, $return = FALSE) {
+function backdrop_render_collect_attached(array $elements, $return = FALSE) {
   $attached = &backdrop_static(__FUNCTION__, array());
 
   // Collect all #attached for this element.
@@ -7230,8 +7414,8 @@ function backdrop_render_collect_attached($elements, $return = FALSE) {
 /**
  * Prepares an element for caching based on a query.
  *
- * This smart caching strategy saves Backdrop from querying and rendering to HTML
- * when the underlying query is unchanged.
+ * This smart caching strategy saves Backdrop from querying and rendering to
+ * HTML when the underlying query is unchanged.
  *
  * Expensive queries should use the query builder to create the query and then
  * call this function. Executing the query and formatting results should happen
@@ -7245,19 +7429,22 @@ function backdrop_render_collect_attached($elements, $return = FALSE) {
  *   backdrop_render_cache_set() and backdrop_render_cache_get().
  * @param int $expire
  *   The cache expire time, passed eventually to cache()->set().
- * @param int $granularity
+ * @param int|null $granularity
  *   One or more granularity constants passed to backdrop_render_cid_parts().
  *
- * @return
+ * @return array
  *   A renderable array with the following keys and values:
  *   - #query: The passed-in $query.
  *   - #pre_render: $function with a _pre_render suffix.
  *   - #cache: An associative array prepared for backdrop_render_cache_set().
  */
-function backdrop_render_cache_by_query($query, $function, $expire = CACHE_TEMPORARY, $granularity = NULL) {
+function backdrop_render_cache_by_query(SelectQuery $query, $function, $expire = CACHE_TEMPORARY, $granularity = NULL) {
   $cache_keys = array_merge(array($function), backdrop_render_cid_parts($granularity));
   $query->preExecute();
-  $cache_keys[] = hash('sha256', serialize(array((string) $query, $query->getArguments())));
+  $cache_keys[] = hash('sha256', serialize(array(
+    (string) $query,
+    $query->getArguments(),
+  )));
   return array(
     '#query' => $query,
     '#pre_render' => array($function . '_pre_render'),
@@ -7271,7 +7458,7 @@ function backdrop_render_cache_by_query($query, $function, $expire = CACHE_TEMPO
 /**
  * Returns cache ID parts for building a cache ID.
  *
- * @param int $granularity
+ * @param int|null $granularity
  *   One or more cache granularity constants. For example, to cache separately
  *   for each user, use BACKDROP_CACHE_PER_USER. To cache separately for each
  *   page and role, use the expression:
@@ -7279,7 +7466,7 @@ function backdrop_render_cache_by_query($query, $function, $expire = CACHE_TEMPO
  *   BACKDROP_CACHE_PER_PAGE | BACKDROP_CACHE_PER_ROLE
  *   @endcode
  *
- * @return
+ * @return array
  *   An array of cache ID parts, always containing the active theme. If the
  *   locale module is enabled it also contains the active language. If
  *   $granularity was passed in, more parts are added.
@@ -7331,19 +7518,20 @@ function backdrop_render_cid_parts($granularity = NULL) {
  * property if present or by building the cache ID out of the #cache['keys']
  * and, optionally, the #cache['granularity'] properties.
  *
- * @param $elements
+ * @param array $elements
  *   A renderable array.
  *
- * @return
+ * @return string|false
  *   The cache ID string, or FALSE if the element may not be cached.
  */
-function backdrop_render_cid_create($elements) {
+function backdrop_render_cid_create(array $elements) {
   if (isset($elements['#cache']['cid'])) {
     return $elements['#cache']['cid'];
   }
   elseif (isset($elements['#cache']['keys'])) {
     $granularity = isset($elements['#cache']['granularity']) ? $elements['#cache']['granularity'] : NULL;
-    // Merge in additional cache ID parts based provided by backdrop_render_cid_parts().
+    // Merge in additional cache ID parts based provided by
+    // backdrop_render_cid_parts().
     $cid_parts = array_merge($elements['#cache']['keys'], backdrop_render_cid_parts($granularity));
     return implode(':', $cid_parts);
   }
@@ -7353,14 +7541,15 @@ function backdrop_render_cid_create($elements) {
 /**
  * Retrieves the default properties for the defined element type.
  *
- * @param $type
+ * @param string $type
  *   An element type as defined by hook_element_info().
  *
  * @return array
  *   The element information array from hook_element_info().
  */
 function element_info($type) {
-  // Use the advanced backdrop_static() pattern, since this is called very often.
+  // Use the advanced backdrop_static() pattern, since this is called very
+  // often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
     $backdrop_static_fast['cache'] = &backdrop_static(__FUNCTION__);
@@ -7382,11 +7571,11 @@ function element_info($type) {
 /**
  * Retrieves a single property for the defined element type.
  *
- * @param $type
+ * @param string $type
  *   An element type as defined by hook_element_info().
- * @param $property_name
+ * @param string $property_name
  *   The property within the element type that should be returned.
- * @param $default
+ * @param mixed $default
  *   (Optional) The value to return if the element type does not specify a
  *   value for the property. Defaults to NULL.
  *
@@ -7400,15 +7589,6 @@ function element_info_property($type, $property_name, $default = NULL) {
 /**
  * Sort an array based on user-provided keys within that array.
  *
- * @param array $array
- *   The input array to be sorted.
- * @param array $keys
- *   An array of keys to sort by. Values must be PHP sorting type flags,
- *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an
- *   unindexed array is passed in.
- * @param string $dir
- *   The sort direction. Values must be either SORT_ASC or SORT_DESC.
- *
  * Example usage:
  * @code
  * // Sort by a single numeric key:
@@ -7420,6 +7600,15 @@ function element_info_property($type, $property_name, $default = NULL) {
  * // Sort by numeric and string keys.
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC, 'title' => SORT_STRING));
  * @endcode
+ *
+ * @param array $array
+ *   The input array to be sorted.
+ * @param array $keys
+ *   An array of keys to sort by. Values must be PHP sorting type flags,
+ *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an
+ *   unindexed array is passed in.
+ * @param int $dir
+ *   The sort direction. Values must be either SORT_ASC or SORT_DESC.
  *
  * @since 1.9.0 The $dir parameter was added.
  */
@@ -7494,6 +7683,11 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
 
 /**
  * Checks if the key is a property.
+ *
+ * @param string $key
+ *   The key.
+ *
+ * @return bool
  */
 function element_property($key) {
   return substr($key, 0, 1) == '#';
@@ -7501,13 +7695,23 @@ function element_property($key) {
 
 /**
  * Gets properties of a structured array element (keys beginning with '#').
+ *
+ * @param array $element
+ *   The element array whose properties are to be identified.
+ *
+ * @return array
  */
-function element_properties($element) {
-  return array_filter(array_keys((array) $element), 'element_property');
+function element_properties(array $element) {
+  return array_filter(array_keys($element), 'element_property');
 }
 
 /**
  * Checks if the key is a child.
+ *
+ * @param string $key
+ *   The key.
+ *
+ * @return bool
  */
 function element_child($key) {
   return empty($key) || substr($key, 0, 1) != '#';
@@ -7519,15 +7723,15 @@ function element_child($key) {
  * The children of a element array are those key/value pairs whose key does
  * not start with a '#'. See backdrop_render() for details.
  *
- * @param $elements
+ * @param array $elements
  *   The element array whose children are to be identified.
- * @param $sort
+ * @param bool $sort
  *   Boolean to indicate whether the children should be sorted by weight.
  *
- * @return
+ * @return array
  *   The array keys of the element's children.
  */
-function element_children(&$elements, $sort = FALSE) {
+function element_children(array &$elements, $sort = FALSE) {
   // Do not attempt to sort elements which have already been sorted.
   $sort = isset($elements['#sorted']) ? !$elements['#sorted'] : $sort;
 
@@ -7568,10 +7772,10 @@ function element_children(&$elements, $sort = FALSE) {
 /**
  * Returns the visible children of an element.
  *
- * @param $elements
+ * @param array $elements
  *   The parent element.
  *
- * @return
+ * @return array
  *   The array keys of the element's visible children.
  */
 function element_get_visible_children(array $elements) {
@@ -7586,7 +7790,10 @@ function element_get_visible_children(array $elements) {
     }
 
     // Skip value and hidden elements, since they are not rendered.
-    if (isset($child['#type']) && in_array($child['#type'], array('value', 'hidden'))) {
+    if (isset($child['#type']) && in_array($child['#type'], array(
+      'value',
+      'hidden',
+    ))) {
       continue;
     }
 
@@ -7599,9 +7806,9 @@ function element_get_visible_children(array $elements) {
 /**
  * Sets HTML attributes based on element properties.
  *
- * @param $element
+ * @param array $element
  *   The renderable element to process.
- * @param $map
+ * @param array $map
  *   An associative array whose keys are element property names and whose values
  *   are the HTML attribute names to set for corresponding the property; e.g.,
  *   array('#propertyname' => 'attributename'). If both names are identical
@@ -7659,15 +7866,15 @@ function element_set_attributes(array &$element, array $map) {
  * $value = $form['signature_settings']['signature'];
  * @endcode
  *
- * @param $array
+ * @param array $array
  *   The array from which to get the value.
- * @param $parents
+ * @param array $parents
  *   An array of parent keys of the value, starting with the outermost key.
- * @param $key_exists
+ * @param bool|null $key_exists
  *   (optional) If given, an already defined variable that is altered by
  *   reference.
  *
- * @return
+ * @return mixed
  *   The requested nested value. Possibly NULL if the value is NULL or not all
  *   nested parent keys exist. $key_exists is altered by reference and is a
  *   Boolean that indicates whether all nested parent keys exist (TRUE) or not
@@ -7708,7 +7915,7 @@ function &backdrop_array_get_nested_value(array &$array, array $parents, &$key_e
  *   Returns an array containing all the values from array1 that are not present
  *   in array2.
  */
-function backdrop_array_diff_assoc_recursive($array1, $array2) {
+function backdrop_array_diff_assoc_recursive(array $array1, array $array2) {
   $difference = array();
 
   foreach ($array1 as $key => $value) {
@@ -7777,13 +7984,13 @@ function backdrop_array_diff_assoc_recursive($array1, $array2) {
  * $form['signature_settings']['signature'] = $element;
  * @endcode
  *
- * @param $array
+ * @param array $array
  *   A reference to the array to modify.
- * @param $parents
+ * @param array $parents
  *   An array of parent keys, starting with the outermost key.
- * @param $value
+ * @param mixed $value
  *   The value to set.
- * @param $force
+ * @param bool $force
  *   (Optional) If TRUE, the value is forced into the structure even if it
  *   requires the deletion of an already existing non-array parent value. If
  *   FALSE, PHP throws an error if trying to add into a value that is not an
@@ -7851,12 +8058,12 @@ function backdrop_array_set_nested_value(array &$array, array $parents, $value, 
  * unset($form['signature_settings']['signature']);
  * @endcode
  *
- * @param $array
+ * @param array $array
  *   A reference to the array to modify.
- * @param $parents
+ * @param array $parents
  *   An array of parent keys, starting with the outermost key and including the
  *   key to be unset.
- * @param $key_existed
+ * @param bool|null $key_existed
  *   (optional) If given, an already defined variable that is altered by
  *   reference.
  *
@@ -7893,12 +8100,12 @@ function backdrop_array_unset_nested_value(array &$array, array $parents, &$key_
  * $key_exists = array_key_exists('signature', $form['signature_settings']);
  * @endcode
  *
- * @param $array
+ * @param array $array
  *   The array with the value to check for.
- * @param $parents
+ * @param array $parents
  *   An array of parent keys of the value, starting with the outermost key.
  *
- * @return
+ * @return bool
  *   TRUE if all the parent keys exist, FALSE otherwise.
  *
  * @see backdrop_array_get_nested_value()
@@ -7913,6 +8120,8 @@ function backdrop_array_nested_key_exists(array $array, array $parents) {
 
 /**
  * Provides theme registration for themes across .inc files.
+ *
+ * @return array
  */
 function backdrop_common_theme() {
   return array(
@@ -8026,7 +8235,7 @@ function backdrop_common_theme() {
       'variables' => array('url' => NULL, 'title' => NULL),
     ),
     'more_link' => array(
-      'variables' => array('url' => NULL, 'title' => NULL)
+      'variables' => array('url' => NULL, 'title' => NULL),
     ),
     'progress_bar' => array(
       'variables' => array('percent' => NULL, 'message' => NULL),
@@ -8270,7 +8479,7 @@ function backdrop_common_theme() {
  * hook_schema_alter(). The module's tables will be created exactly as the
  * module defines them.
  *
- * @param $module
+ * @param string $module
  *   The module for which the tables will be created.
  */
 function backdrop_install_schema($module) {
@@ -8289,10 +8498,10 @@ function backdrop_install_schema($module) {
  * hook_schema_alter(). The module's tables will be created exactly as the
  * module defines them.
  *
- * @param $module
+ * @param string $module
  *   The module for which the tables will be removed.
  *
- * @return
+ * @return array
  *   An array of arrays with the following key/value pairs:
  *    - success: a boolean indicating whether the query succeeded.
  *    - query: the SQL query(s) executed, passed through check_plain().
@@ -8327,9 +8536,9 @@ function backdrop_uninstall_schema($module) {
  * created exactly as specified without any changes introduced by a
  * module that implements hook_schema_alter().
  *
- * @param $module
+ * @param string $module
  *   The module to which the table belongs.
- * @param $table
+ * @param string|null $table
  *   The name of the table. If not given, the module's complete schema
  *   is returned.
  *
@@ -8353,17 +8562,17 @@ function backdrop_get_schema_unprocessed($module, $table = NULL) {
 /**
  * Fills in required default values for table definitions from hook_schema().
  *
- * @param $schema
+ * @param array $schema
  *   The schema definition array as it was returned by the module's
  *   hook_schema().
- * @param $module
+ * @param string $module
  *   The module for which hook_schema() was invoked.
- * @param $remove_descriptions
+ * @param bool $remove_descriptions
  *   (optional) Whether to additionally remove 'description' keys of all tables
  *   and fields to improve performance of serialize() and unserialize().
  *   Defaults to TRUE.
  */
-function _backdrop_schema_initialize(&$schema, $module, $remove_descriptions = TRUE) {
+function _backdrop_schema_initialize(array &$schema, $module, $remove_descriptions = TRUE) {
   // Set the name and module key for all tables.
   foreach ($schema as $name => &$table) {
     if (empty($table['module'])) {
@@ -8388,7 +8597,7 @@ function _backdrop_schema_initialize(&$schema, $module, $remove_descriptions = T
  *
  * @param string $table
  *   The name of the table from which to retrieve fields.
- * @param string $prefix
+ * @param string|null $prefix
  *   An optional prefix to to all fields.
  *
  * @return array An array of fields.
@@ -8411,27 +8620,27 @@ function backdrop_schema_fields_sql($table, $prefix = NULL) {
 /**
  * Saves (inserts or updates) a record to the database based upon the schema.
  *
- * Do not use backdrop_write_record() within hook_update_N() functions, since the
- * database schema cannot be relied upon when a user is running a series of
+ * Do not use backdrop_write_record() within hook_update_N() functions, since
+ * the database schema cannot be relied upon when a user is running a series of
  * updates. Instead, use db_insert() or db_update() to save the record.
  *
- * @param $table
+ * @param string $table
  *   The name of the table; this must be defined by a hook_schema()
  *   implementation.
- * @param $record
+ * @param object|array $record
  *   An object or array representing the record to write, passed in by
  *   reference. If inserting a new record, values not provided in $record will
  *   be populated in $record and in the database with the default values from
  *   the schema, as well as a single serial (auto-increment) field (if present).
  *   If updating an existing record, only provided values are updated in the
  *   database, and $record is not modified.
- * @param $primary_keys
+ * @param array|string $primary_keys
  *   To indicate that this is a new record to be inserted, omit this argument.
  *   If this is an update, this argument specifies the primary keys' field
  *   names. If there is only 1 field in the key, you may pass in a string; if
  *   there are multiple fields in the key, pass in an array.
  *
- * @return
+ * @return int|false
  *   If the record insert or update failed, returns FALSE. If it succeeded,
  *   returns SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
  */
@@ -8611,12 +8820,12 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  *
  * See bartik.info for an example of a theme .info file.
  *
- * @param $filename
+ * @param string $filename
  *   The file we are parsing. Accepts file with relative or absolute path.
  * @param bool $process_sections
  *   Flag indicating if sections should be parsed.
  *
- * @return
+ * @return array
  *   The info array.
  *
  * @see backdrop_parse_info_format()
@@ -8670,7 +8879,7 @@ function backdrop_parse_info_file($filename, $process_sections = FALSE) {
  * @param bool $process_sections
  *   Flag indicating if sections should be parsed.
  *
- * @return
+ * @return array
  *   The info array.
  *
  * @see backdrop_parse_info_file()
@@ -8835,6 +9044,11 @@ function watchdog_severity_levels($return = 'label') {
 /**
  * Explodes a string of tags into an array.
  *
+ * @param string $tags
+ *   A string containing tags.
+ *
+ * @return array
+ *
  * @see backdrop_implode_tags()
  */
 function backdrop_explode_tags($tags) {
@@ -8842,7 +9056,7 @@ function backdrop_explode_tags($tags) {
     return array();
   }
   // This regexp allows the following types of user input:
-  // this, "some company, llc", "and ""this"" w,o.rks", foo bar
+  // this, "some company, llc", "and ""this"" w,o.rks", foo bar.
   $regexp = '%(?:^|,\ *)("(?>[^"]*)(?>""[^"]* )*"|(?: [^",]*))%x';
   preg_match_all($regexp, $tags, $matches);
   $typed_tags = array_unique($matches[1]);
@@ -8864,9 +9078,14 @@ function backdrop_explode_tags($tags) {
 /**
  * Implodes an array of tags into a string.
  *
+ * @param array $tags
+ *   Array of tags.
+ *
+ * @return string
+ *
  * @see backdrop_explode_tags()
  */
-function backdrop_implode_tags($tags) {
+function backdrop_implode_tags(array $tags) {
   $encoded_tags = array();
   foreach ($tags as $tag) {
     // Commas and quotes in tag names are special cases, so encode them.
@@ -8933,17 +9152,18 @@ function _backdrop_flush_css_js() {
  * The debug information is passed on to trigger_error() after being converted
  * to a string.
  *
- * @param $data
+ * @param mixed $data
  *   Data to be output.
- * @param $label
+ * @param string|null $label
  *   Label to prefix the data.
- * @param $print_r
+ * @param bool $print_r
  *   Flag to switch between print_r() and var_export() for data conversion to
  *   string. Set $print_r to TRUE when dealing with a recursive data structure
  *   as var_export() will generate an error.
  */
 function debug($data, $label = NULL, $print_r = FALSE) {
   // Print $data contents to string.
+  // phpcs:ignore
   $string = check_plain($print_r ? print_r($data, TRUE) : var_export($data, TRUE));
 
   // Display values with pre-formatting to increase readability.
@@ -8955,15 +9175,15 @@ function debug($data, $label = NULL, $print_r = FALSE) {
 /**
  * Parses a dependency for comparison by backdrop_check_incompatibility().
  *
- * @param $dependency
+ * @param string $dependency
  *   A dependency string, which specifies a module dependency, and optionally
  *   the project it comes from and versions that are supported. Supported
  *   formats include:
  *   - 'module'
  *   - 'project:module'
- *   - 'project:module (>=version, version)'
+ *   - 'project:module (>=version, version)'.
  *
- * @return
+ * @return array
  *   An associative array with three keys:
  *   - 'project' includes the name of the project containing the module.
  *   - 'name' includes the name of the module to depend on.
@@ -9011,7 +9231,10 @@ function backdrop_parse_dependency($dependency) {
           }
           // Equivalence can be checked by adding two restrictions.
           if ($op == '=' || $op == '==') {
-            $value['versions'][] = array('op' => '<', 'version' => ($matches['major'] + 1) . '.x');
+            $value['versions'][] = array(
+              'op' => '<',
+              'version' => ($matches['major'] + 1) . '.x',
+            );
             $op = '>=';
           }
         }
@@ -9049,7 +9272,7 @@ function backdrop_parse_dependency($dependency) {
  * @param string $current_version
  *   The version to check against (like 4.2 or 1.10.0-beta4).
  *
- * @return string|NULL
+ * @return string|null
  *   NULL if compatible, otherwise the original dependency version string that
  *   caused the incompatibility.
  *
@@ -9109,6 +9332,8 @@ function _backdrop_version_compare_convert($version_string) {
 /**
  * Retrieves a list of all available archivers.
  *
+ * @return array
+ *
  * @see hook_archiver_info()
  * @see hook_archiver_info_alter()
  */
@@ -9135,7 +9360,7 @@ function archiver_get_info() {
 /**
  * Returns a string of supported archive extensions.
  *
- * @return
+ * @return string
  *   A space-separated string of extensions suitable for use by the file
  *   validation system.
  */
@@ -9156,7 +9381,7 @@ function archiver_get_extensions() {
 /**
  * Creates the appropriate archiver for the specified file.
  *
- * @param $file
+ * @param string $file
  *   The full path of the archive file. Note that stream wrapper paths are
  *   supported, but not remote ones.
  *
@@ -9168,7 +9393,7 @@ function archiver_get_extensions() {
  * @throws Exception
  */
 function archiver_get_archiver($file) {
-  // Archivers can only work on local paths
+  // Archivers can only work on local paths.
   $filepath = backdrop_realpath($file);
   if (!is_file($filepath)) {
     throw new Exception(t('Archivers can only operate on local files: %file not supported', array('%file' => $file)));
@@ -9199,7 +9424,7 @@ function archiver_get_archiver($file) {
  * file system, for example to update modules that have newer releases, or to
  * install a new theme.
  *
- * @return
+ * @return array
  *   The Backdrop Updater class registry.
  *
  * @see hook_updater_info()
@@ -9218,7 +9443,7 @@ function backdrop_get_updaters() {
 /**
  * Assembles the Backdrop FileTransfer registry.
  *
- * @return
+ * @return array
  *   The Backdrop FileTransfer class registry.
  *
  * @see FileTransfer

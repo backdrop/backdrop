@@ -1968,7 +1968,7 @@ function menu_get_custom_theme($initialize = FALSE) {
     $router_item = menu_get_item();
     if (!empty($router_item['access']) && !empty($router_item['theme_callback'])) {
       $theme_name = call_user_func_array($router_item['theme_callback'], $router_item['theme_arguments']);
-      if (backdrop_theme_access($theme_name)) {
+      if ($theme_name && backdrop_theme_access($theme_name)) {
         $custom_theme = $theme_name;
       }
     }

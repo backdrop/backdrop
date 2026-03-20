@@ -95,7 +95,7 @@ function filter_admin_overview($form) {
       $roles_markup = $roles ? implode(', ', $roles) : t('No roles may use this format');
     }
     $form['formats'][$id]['editor'] = array(
-      '#markup' => isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
+      '#markup' => $format->editor && isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
     );
     $form['formats'][$id]['roles'] = array(
       '#markup' => $roles_markup,
@@ -195,8 +195,8 @@ function filter_admin_format_page($format = NULL) {
  * @ingroup forms
  */
 function filter_admin_format_form($form, &$form_state, $format) {
-  // Use a format stored in tempstore if available.
-  if ($stored_format = filter_get_format_tempstore($format->format)) {
+  // Use a format stored in tempstore if available, unless creating a new one.
+  if (!isset($format->is_new) && $stored_format = filter_get_format_tempstore($format->format)) {
     filter_admin_set_message($stored_format);
     $format = $stored_format;
   }
