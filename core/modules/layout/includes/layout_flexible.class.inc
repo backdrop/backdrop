@@ -30,6 +30,13 @@ class LayoutFlexibleTemplate {
   var $description;
 
   /**
+   * The module providing the layout template.
+   *
+   * @var string
+   */
+  var $module = 'layout';
+
+  /**
    * Configuration of the rows for this layout template.
    *
    * Each row contains the following values:
