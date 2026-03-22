@@ -840,7 +840,7 @@ class Layout {
    *   one to the other. To discard the contents of a region, set the value
    *   to FALSE.
    */
-  public function setLayoutTemplate($layout_template_name, $region_mapping = array()) {
+  public function setLayoutTemplate($layout_template_name, array $region_mapping = array()) {
     // If not changing anything, return as a no-op.
     if ($layout_template_name === $this->layout_template && empty($region_mapping)) {
       return;

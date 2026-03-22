@@ -56,7 +56,7 @@ class LayoutFlexibleTemplate {
   /**
    * @var string
    */
-  public $layout_template_type;
+  public $layout_template_type = 'flexible';
 
   /**
    * Whether this layout is a full page layout (for example, with a header and
@@ -80,7 +80,6 @@ class LayoutFlexibleTemplate {
       $this->is_full_page = TRUE;
     }
 
-    $this->layout_template_type = ($this->layout_template_type === NULL) ? 'flexible' : $this->layout_template_type;
     _layout_check_template_type($this->layout_template_type);
 
     if (empty($this->rows)) {
