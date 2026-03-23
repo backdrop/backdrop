@@ -1579,7 +1579,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
         backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $name)), 'error');
         $files[$i] = FALSE;
         break;
- 
+
       case UPLOAD_ERR_OK:
         // Final check that this is a valid upload, if it isn't, use the
         // default error handler.
@@ -1592,8 +1592,8 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
         backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $name)), 'error');
         $files[$i] = FALSE;
         break;
-
     }
+
     // Begin building file entity.
     $values = array(
       'uid' => $user->uid,
@@ -1730,9 +1730,16 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     }
 
     // If we made it this far it's safe to record this file in the database.
-    $file->save();
-    $files[$i] = $file;
-
+    if ($file->save()) {
+      // Track non-public files in the session if they were uploaded by an
+      // anonymous user. This allows modules such as the File module to only
+      // grant view access to the specific anonymous user who uploaded the file.
+      // See file_file_download().
+      if (!$user->uid && $destination_scheme === 'private') {
+        $_SESSION['anonymous_allowed_file_ids'][$file->fid] = $file->fid;
+      }
+      $files[$i] = $file;
+    }
   }
 
   // Add files to the cache.
