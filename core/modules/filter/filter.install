@@ -70,6 +70,7 @@ function filter_update_1000() {
  * Add a separate permission for image upload access.
  */
 function filter_update_1001() {
+  backdrop_static_reset('user_roles');
   user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('upload editor images'));
 
   // Enable uploading on existing text formats. Access previously was not
