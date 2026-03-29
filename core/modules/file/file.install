@@ -292,6 +292,10 @@ function file_requirements($phase) {
  * Implements hook_update_dependencies().
  */
 function file_update_dependencies() {
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['file'][1002] = array(
+    'user' => 1007,
+  );
   // Ensure that the text filters have been converted to config prior to
   // updating the "No results" format on the file admin View.
   $dependencies['file'][1009] = array(
@@ -769,6 +773,7 @@ function file_update_1001() {
  * Switch the 'edit files' permission to 'manage files'.
  */
 function file_update_1002() {
+  backdrop_static_reset('user_roles');
   $roles = user_roles(FALSE, 'edit files');
   foreach ($roles as $role_name => $role_label) {
     $config = config('user.role.' . $role_name);
@@ -865,6 +870,7 @@ function file_update_1003() {
   }
 
   // Set permission to view files.
+  backdrop_static_reset('user_roles');
   $roles = user_roles();
   foreach ($roles as $rid => $role) {
     user_role_grant_permissions($rid, array('view files'));
