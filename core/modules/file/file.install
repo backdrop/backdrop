@@ -773,6 +773,7 @@ function file_update_1001() {
  * Switch the 'edit files' permission to 'manage files'.
  */
 function file_update_1002() {
+  backdrop_static_reset('user_roles');
   $roles = user_roles(FALSE, 'edit files');
   foreach ($roles as $role_name => $role_label) {
     $config = config('user.role.' . $role_name);
