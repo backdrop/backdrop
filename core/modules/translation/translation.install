@@ -28,8 +28,6 @@ function translation_update_1000() {
   $config = config('translation.settings');
   $config->set('language_type', update_variable_get('translation_language_type', 'language'));
   $config->save();
-
-  update_variable_del('translation_language_type');
 }
 
 /**
@@ -74,6 +72,18 @@ function translation_update_1002() {
       $config->save();
     }
   }
+}
+
+/**
+ * Fix missing translation_language_type.
+ */
+function translation_update_1003() {
+  // This duplicates translation_update_1000() intentionally.
+  $config = config('translation.settings');
+  $config->set('language_type', update_variable_get('translation_language_type', 'language'));
+  $config->save();
+
+  update_variable_del('translation_language_type');
 }
 
 /**

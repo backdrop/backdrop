@@ -1747,6 +1747,17 @@ function system_update_last_removed() {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function system_update_dependencies() {
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['system'][1071] = array(
+    'user' => 1007,
+  );
+  return $dependencies;
+}
+
+/**
  * @defgroup updates-7.x-to-1.x Updates from 7.x to 1.x
  * @{
  * Update functions from Drupal 7.x to Backdrop CMS 1.x.
