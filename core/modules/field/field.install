@@ -15,6 +15,18 @@ function field_schema() {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function field_update_dependencies() {
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['field'][1002] = array(
+    'user' => 1007,
+  );
+
+  return $dependencies;
+}
+
+/**
  * Convert fields to configuration files.
  */
 function field_update_1000() {
