@@ -322,6 +322,11 @@ function comment_update_dependencies() {
   $dependencies['comment'][1001] = array(
     'node' => 1005,
   );
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['comment'][1007] = array(
+    'user' => 1007,
+  );
+
   return $dependencies;
 }
 
