@@ -101,3 +101,54 @@ function theme_locale_date_format_form($variables) {
   return $output;
 }
 
+/**
+ * Returns themed HTML for the language switcher block.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - links: (object) The output of language_negotiation_get_switch_links():
+ *     - links: An associativearray of language links to be rendered.
+ *     - provider: ???
+ *   - settings: An associative array with the display settings for the language
+ *     switcher block:
+ *     - language_list_display: either "vertical" or "inline".
+ *     - language_link_label_display: either "name" or "code".
+ *     - custom_delimiter: either completely omitted (falls back to "|"), or a
+ *     single character, to be used as a delimiter when the language links are
+ *     to be rendered inline. This is added to the list items as a
+ *     data-list-delimiter attribute, and can be used in CSS via a 'content'
+ *     property. For example:
+ *     @code
+ *     .language-switcher.links.inline li:after {
+ *       content: attr(data-list-delimiter);
+ *       padding: 0 0.6em;
+ *       color: gray;
+ *     }
+ *     @endcode
+ *
+ * @ingroup themeable
+ */
+function theme_locale_block($variables) {
+  backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
+  $settings = $variables['settings'];
+  $links = $variables['links'];
+  $links_variables = array();
+
+  if ($settings['language_link_label_display'] == 'code') {
+    foreach ($links->links as $code => $link) {
+      $links->links[$code]['title'] = $code;
+    }
+  }
+  $links_variables['links'] = $links->links;
+
+  $classes = array('language-switcher', "language-switcher-{$links->provider}");
+  if ($settings['language_list_display'] == 'inline') {
+    $classes[] = 'links';
+    $classes[] = 'inline';
+
+    $links_variables['li_attributes']['data-list-delimiter'] = isset($settings['custom_delimiter']) ? $settings['custom_delimiter'] : '|';
+  }
+  $links_variables['attributes']['class'] = $classes;
+
+  return theme('links', $links_variables);
+}
