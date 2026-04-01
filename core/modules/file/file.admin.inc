@@ -553,7 +553,7 @@ function file_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Skip scheme selection.'),
     '#default_value' => $config->get('upload_wizard_skip_scheme'),
-    '#description' => t('The scheme selection step is only available if two or more file destinations, such as public local files served by the webserver and private local files served by Drupal, are available. If this step is skipped, files will automatically be saved using the default download method.'),
+    '#description' => t('The scheme selection step is only available if two or more file destinations, such as public local files served by the webserver and private local files served by Backdrop, are available. If this step is skipped, files will automatically be saved using the default download method.'),
   );
   $form['file_upload_wizard']['upload_wizard_skip_fields'] = array(
     '#type' => 'checkbox',
