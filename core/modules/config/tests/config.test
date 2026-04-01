@@ -668,7 +668,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
       'b' => 'Bar',
     );
     $config = config($config_name);
-    $config->setData($content);
+    $config->setData($content, FALSE);
     $config->save();
 
     // Copy all configuration to staging before modification.
@@ -678,7 +678,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
     krsort($content);
 
     // Store the reversed config.
-    $config->setData($content);
+    $config->setData($content, FALSE);
     $config->save();
 
     // Verify that the file appears as ready to import.

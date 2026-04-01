@@ -301,7 +301,7 @@ function config_install_default_config($project, $config_name = NULL) {
       $config = config($default_config_name);
       // We only create new configs, and do not overwrite existing ones.
       if ($config->isNew()) {
-        $config->setData($data);
+        $config->setData($data, FALSE);
         module_invoke_all('config_create', $config);
         $config->save();
       }
@@ -887,15 +887,44 @@ class Config {
    *
    * @param array $data
    *   The new configuration data.
+   * @param bool $preserve_order
+   *   Preserve the original order of the data.
    *
    * @return Config
    *   The configuration object.
    */
-  public function setData(array $data) {
+  public function setData(array $data, bool $preserve_order = TRUE) {
+    if (!$this->isNew() && $preserve_order) {
+      $data = $this->preserveConfigOrder($this->data, $data);
+    }
     $this->replaceData($data);
     // A load would destroy the data just set (for example on import).
     $this->isLoaded = TRUE;
     return $this;
+  }
+
+  /**
+   * @param array $original_data
+   *   The original configuration data.
+   * @param array $new_data
+   *   The new configuration data.
+   *
+   * @return array
+   *   The new configuration data that preserves the order.
+   */
+  protected function preserveConfigOrder(array $original_data, array $new_data) {
+    $data = array();
+    foreach ($original_data as $key => $datum) {
+      if (array_key_exists($key, $new_data)) {
+        if (is_array($new_data[$key]) && is_array($datum)) {
+          $new_data[$key] = $this->preserveConfigOrder($datum, $new_data[$key]);
+        }
+        $data[$key] = $new_data[$key];
+        unset($new_data[$key]);
+      }
+    }
+    // If there are any new items add them to the end.
+    return $data += $new_data;
   }
 
   /**

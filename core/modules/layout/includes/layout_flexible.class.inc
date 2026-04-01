@@ -93,7 +93,7 @@ class LayoutFlexibleTemplate {
     );
 
     config('layout.flexible.' . $this->name)
-      ->setData($data)
+      ->setData($data, FALSE)
       ->save();
 
     if (isset($this->is_new)) {
