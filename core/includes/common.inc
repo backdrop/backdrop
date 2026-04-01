@@ -8192,6 +8192,7 @@ function backdrop_common_theme() {
         'alt' => '',
         'title' => NULL,
         'attributes' => array(),
+        'timestamp' => NULL,
       ),
     ),
     'breadcrumb' => array(
