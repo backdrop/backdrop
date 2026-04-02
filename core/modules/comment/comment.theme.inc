@@ -12,7 +12,7 @@
 function theme_comment_block($variables) {
   $items = array();
   foreach ($variables['comments'] as $comment) {
-    $items[] = l($comment->subject, 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)) . '&nbsp;<span>' . t('@time ago', array('@time' => format_interval(REQUEST_TIME - $comment->changed))) . '</span>';
+    $items[] = l($comment->subject, 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)) . '&nbsp;<span>' . t('@time ago', array('@time' => format_time_diff_since($comment->changed))) . '</span>';
   }
 
   if ($items) {

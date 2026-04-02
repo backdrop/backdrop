@@ -30,7 +30,7 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
 
     $target  = check_plain($node->title);
     $target .= check_plain($account->name);
-    $target .= format_interval(REQUEST_TIME - $node->created, 2, $language->langcode);
+    $target .= format_time_diff_since($node->created, array('granularity' => 2, 'langcode' => $language->langcode));
     $target .= check_plain($user->name);
     $target .= format_date(REQUEST_TIME, 'short', '', NULL, $language->langcode);
 
@@ -147,7 +147,7 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
     $tests['[date:medium]'] = format_date($date, 'medium', '', NULL, $language->langcode);
     $tests['[date:long]'] = format_date($date, 'long', '', NULL, $language->langcode);
     $tests['[date:custom:m/j/Y]'] = format_date($date, 'custom', 'm/j/Y', NULL, $language->langcode);
-    $tests['[date:since]'] = format_interval((REQUEST_TIME - $date), 2, $language->langcode);
+    $tests['[date:since]'] = format_time_diff_since($date, array('granularity' => 2, 'langcode' =>$language->langcode));
     $tests['[date:raw]'] = filter_xss($date);
 
     // Test to make sure that we generated something for each token.
