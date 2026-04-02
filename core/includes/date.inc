@@ -732,9 +732,11 @@ function date_format_interval($date, $granularity = 2, $display_ago = TRUE) {
     'strict' => FALSE,
   ));
   if ($interval > 0) {
-    return $display_ago
-      ? t('!time ago', array('!time' => $format_interval))
-      : t('!time', array('!time' => $format_interval));
+    return $display_ago ? t('!time ago', array(
+      '!time' => $format_interval,
+    )) : t('!time', array(
+      '!time' => $format_interval,
+    ));
   }
   else {
     return $format_interval;

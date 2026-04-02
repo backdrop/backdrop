@@ -529,7 +529,10 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'since':
-          $replacements[$original] = format_time_diff_since($date, array('granularity' => 2, 'langcode' => $language_code));
+          $replacements[$original] = format_time_diff_since($date, array(
+            'granularity' => 2,
+            'langcode' => $language_code,
+          ));
           break;
 
         case 'raw':
