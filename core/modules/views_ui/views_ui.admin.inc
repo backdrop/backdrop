@@ -1073,7 +1073,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['locked'] = array(
       '#theme_wrappers' => array('container'),
       '#attributes' => array('class' => array('view-locked', 'messages', 'warning')),
-      '#markup' => t('This view is being configured by user !user, and is therefore locked from configuring by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array('!user' => theme('username', array('account' => user_load($view->locked->uid))), '!age' => format_time_diff_since($view->locked->updated), '!break' => url('admin/structure/views/view/' . $view->name . '/break-lock'))),
+      '#markup' => t('This view is being configured by user !user, and is therefore locked from configuring by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array(
+        '!user' => theme('username', array('account' => user_load($view->locked->uid))),
+        '!age' => format_time_diff_since($view->locked->updated),
+        '!break' => url('admin/structure/views/view/' . $view->name . '/break-lock'),
+      )),
     );
   }
   if (isset($view->vid) && $view->vid == 'new') {

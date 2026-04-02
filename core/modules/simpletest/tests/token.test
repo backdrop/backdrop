@@ -30,7 +30,10 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
 
     $target  = check_plain($node->title);
     $target .= check_plain($account->name);
-    $target .= format_time_diff_since($node->created, array('granularity' => 2, 'langcode' => $language->langcode));
+    $target .= format_time_diff_since($node->created, array(
+      'granularity' => 2,
+      'langcode' => $language->langcode,
+    ));
     $target .= check_plain($user->name);
     $target .= format_date(REQUEST_TIME, 'short', '', NULL, $language->langcode);
 
