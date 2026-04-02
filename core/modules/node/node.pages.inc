@@ -528,7 +528,12 @@ function node_form_submit($form, &$form_state) {
   $node_link = l(t('view'), 'node/' . $node->nid);
   $type = node_type_get_name($node);
   $watchdog_args = array('@type' => $node->type, '%title' => $node->title);
-  $t_args = array('@type' => $type, '%title' => $node->title, '@scheduled' => format_date($node->scheduled), '@interval' => format_time_diff_until($node->scheduled));
+  $t_args = array(
+    '@type' => $type,
+    '%title' => $node->title,
+    '@scheduled' => format_date($node->scheduled),
+    '@interval' => format_time_diff_until($node->scheduled),
+  );
   $message = '';
 
   if ($node->scheduled) {
