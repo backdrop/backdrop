@@ -87,12 +87,12 @@ class views_handler_field_date extends views_handler_field {
     $format = $this->options['date_format'];
     if (in_array($format, array('custom', 'raw time ago', 'time ago', 'raw time hence', 'time hence', 'raw time span', 'time span', 'raw time span', 'inverse time span', 'time span'))) {
       $custom_format = $this->options['custom_date_format'];
+      $granularity = is_numeric($custom_format) ? $custom_format : 2;
+      $time_diff = REQUEST_TIME - $value; // will be positive for a datetime in the past (ago), and negative for a datetime in the future (hence)
     }
 
     if ($value) {
       $timezone = !empty($this->options['timezone']) ? $this->options['timezone'] : NULL;
-      $time_diff = REQUEST_TIME - $value; // will be positive for a datetime in the past (ago), and negative for a datetime in the future (hence)
-      $granularity = is_numeric($custom_format) ? $custom_format : 2;
       switch ($format) {
         case 'raw time ago':
           return format_time_diff_since($value, array('granularity' => $granularity));

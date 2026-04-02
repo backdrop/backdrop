@@ -2625,7 +2625,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
 /**
  * Formats the time difference from the current request time to a timestamp.
  *
- * @param string $timestamp
+ * @param int $timestamp
  *   A UNIX timestamp to compare against the current request time.
  * @param array $options
  *   (optional) An associative array with additional options. The following
@@ -2657,7 +2657,7 @@ function format_time_diff_until($timestamp, $options = array()) {
 /**
  * Formats the time difference from a timestamp to the current request time.
  *
- * @param $timestamp
+ * @param int $timestamp
  *   A UNIX timestamp to compare against the current request time.
  * @param array $options
  *   (optional) An associative array with additional options. The following
@@ -2688,25 +2688,25 @@ function format_time_diff_since($timestamp, $options = array()) {
  * Formats a time interval between two timestamps.
  *
  * @param int $from
- * A UNIX timestamp, defining the from date and time.
+ *   A UNIX timestamp, defining the from date and time.
  * @param int $to
- * A UNIX timestamp, defining the to date and time.
+ *   A UNIX timestamp, defining the to date and time.
  * @param array $options
- * (optional) An associative array with additional options. The following
- * keys can be used:
- * - granularity: An integer value that signals how many different units to
- * display in the string. Defaults to 2.
- * - langcode: The language code for the language used to format the date.
- * Defaults to NULL, which results in the user interface language for the
- * page being used.
- * - strict: A Boolean value indicating whether or not the $from timestamp
- * can be after the $to timestamp. If TRUE (default) and $from is after
- * $to, the result string will be "0 seconds". If FALSE and $from is
- * after $to, the result string will be the formatted time difference.
+ *   (optional) An associative array with additional options. The following
+ *   keys can be used:
+ *   - granularity: An integer value that signals how many different units to
+ *     display in the string. Defaults to 2.
+ *   - langcode: The language code for the language used to format the date.
+ *     Defaults to NULL, which results in the user interface language for the
+ *     page being used.
+ *   - strict: A Boolean value indicating whether or not the $from timestamp
+ *     can be after the $to timestamp. If TRUE (default) and $from is after
+ *     $to, the result string will be "0 seconds". If FALSE and $from is
+ *     after $to, the result string will be the formatted time difference.
  *
  * @return string
- * A translated string representation of the interval. This interval is
- * always positive.
+ *   A translated string representation of the interval. This interval is
+ *   always positive.
  *
  * @see format_interval()
  * @see format_time_diff_since()
