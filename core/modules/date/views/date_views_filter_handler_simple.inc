@@ -125,7 +125,9 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     // cannot contain spaces).
 
     // If this is a relative date, we need to convert it to an absolute date.
-    $is_relative = ($this->options['value']['type'] == 'relative');
+    // If this input comes from a group, we then must check if it's a relative
+    // string before sending it to the database.
+    $is_relative = ($this->options['value']['type'] == 'relative' || $this->options['is_grouped']);
 
     if ($is_relative && !empty($input)) {
       if (is_array($input)) {
@@ -162,8 +164,26 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
       }
       elseif ($this->options['is_grouped'] && isset($this->view->exposed_raw_input[$this->options['group_info']['identifier']])) {
         $identifier = $this->view->exposed_raw_input[$this->options['group_info']['identifier']];
-        $options = $this->options['group_info']['group_items'][$identifier]['value'][$prefix . '_group'];
+        $group_item = $this->options['group_info']['group_items'][$identifier];
+        $options = $group_item['value'][$prefix . '_group'];
         $prefix_val = $this->date_default_value($prefix, $options);
+
+        // If the group item is configured as a relative date, resolve it here.
+        $is_item_relative = (isset($options[$prefix . '_choose_input_type']) &&
+          $options[$prefix . '_choose_input_type'] == 'relative');
+        if ($is_item_relative && !empty($prefix_val)) {
+          if (is_array($prefix_val)) {
+            $flattened = array_filter($prefix_val);
+            $prefix_val = !empty($flattened) ? reset($flattened) : '';
+          }
+          if (is_string($prefix_val) && $prefix_val !== '') {
+            $date = date_create($prefix_val, date_default_timezone_object());
+            if ($date) {
+              $prefix_val = $date->format($this->format);
+            }
+          }
+        }
+
         if (is_array($prefix_val)) {
           $prefix_val = reset($prefix_val);
         }
@@ -226,7 +246,8 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         foreach (array('value', 'min', 'max') as $key) {
           $element_input[$key] = '';
           if (!empty($element_input[$key . '_group'])) {
-            $element_input[$key] = $this->date_default_value($key, $element_input[$key . '_group']);
+            $val = $this->date_default_value($key, $element_input[$key . '_group']);
+            $element_input[$key] = $this->get_filter_value($key, $val);
           }
         }
       }
@@ -558,11 +579,17 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         elseif (!empty($default_date)) {
           $form_default_value = $default_date;
         }
+
+        if (is_array($form_default_value)) {
+          $flattened = array_filter($form_default_value);
+          $form_default_value = !empty($flattened) ? reset($flattened) : '';
+        }
+
         $form[$prefix] = array(
           '#title' => check_plain($label),
           '#type' => $type,
           '#size' => 20,
-          '#default_value' => $form_default_value,
+          '#default_value' => (string) $form_default_value,
           '#date_format' => date_limit_format($format, $granularity),
           '#date_label_position' => 'within',
           '#date_year_range' => $this->options['year_range'],
@@ -604,6 +631,12 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         $default_select_date_value = !empty($this->value[$prefix]) ? $this->value[$prefix] : $default_date;
         $default_select_date_type = !empty($relative_value) ? 'relative' : 'date';
       }
+
+      if (is_array($default_select_date_value)) {
+        $flattened = array_filter($default_select_date_value);
+        $default_select_date_value = !empty($flattened) ? reset($flattened) : '';
+      }
+
       $form[$prefix . '_group'] = array(
         '#type' => 'fieldset',
         '#attributes' => array('class' => array('date-views-filter-fieldset')),
