@@ -482,6 +482,7 @@ function system_requirements($phase) {
     );
 
     // Check installed modules.
+    $modules_update_required = array();
     foreach (module_list() as $module) {
       $updates = backdrop_get_schema_versions($module);
       if ($updates !== FALSE) {
@@ -493,13 +494,17 @@ function system_requirements($phase) {
         }
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
-          $update_link = base_path() . 'core/update.php';
-          $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
-          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link));
-          break;
+          // Add the module with the latest schema to a list.
+          $modules_update_required[] = $module . ' (' . $current_schema . ' → ' . $latest_schema . ')';
         }
       }
+    }
+    if (!empty($modules_update_required)) {
+      $update_link = base_path() . 'core/update.php';
+      $requirements['update']['severity'] = REQUIREMENT_ERROR;
+      $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
+      $modules_update_required_list = theme('item_list', array('items' => $modules_update_required));
+      $requirements['update']['description'] = $t('The modules listed below have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link)) . $modules_update_required_list;
     }
   }
 
@@ -859,7 +864,8 @@ function _system_check_db_utf8mb4_requirements($phase) {
  * Implements hook_install().
  */
 function system_install() {
-  // Create tables.
+  // As an exception from other modules, the System module needs to explicitly
+  // call backdrop_install_schema('system') or its tables won't be created.
   backdrop_install_schema('system');
   $versions = backdrop_get_schema_versions('system');
   $version = $versions ? max($versions) : SCHEMA_INSTALLED;
@@ -1738,6 +1744,17 @@ function system_schema() {
 function system_update_last_removed() {
   // Drupal 7.28.
   return 7078;
+}
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function system_update_dependencies() {
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['system'][1071] = array(
+    'user' => 1007,
+  );
+  return $dependencies;
 }
 
 /**
@@ -3301,6 +3318,7 @@ function system_update_1070() {
  * See: https://github.com/backdrop/backdrop-issues/issues/1759
  */
 function system_update_1071() {
+  backdrop_static_reset('user_roles');
   $roles = user_roles(FALSE, 'administer layouts');
   foreach ($roles as $role_name => $role) {
     user_role_grant_permissions($role_name, array('administer flexible templates'));
@@ -3417,10 +3435,10 @@ function system_update_1078() {
 
 /**
  * Clear the cache to reset allowlist settings.
- * 
+ *
  * This update has been removed because it causes a regression when later update
  * hooks create cache tables.
- *  
+ *
  * @see https://github.com/backdrop/backdrop-issues/issues/6974
  */
 function system_update_1079() {
