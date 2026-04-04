@@ -293,7 +293,7 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
     // Submit the form to select all pages and execute unpublish action.
     $data = array(
       'action' => 'node_unpublish_action',
-      'bulk_form_select_all_pages_flag' => 1,
+      'select_all_pages' => 1,
     );
     $this->backdropPost('test-bulk-form', $data, 'Execute');
 
