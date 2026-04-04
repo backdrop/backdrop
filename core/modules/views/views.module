@@ -176,7 +176,7 @@ function views_theme($existing, $type, $theme, $path) {
     'file' => 'templates/views.theme.inc',
   );
 
-  $hooks['bulk_operations_select_all'] = $base + array(
+  $hooks['views_select_all_pages'] = $base + array(
     'variables' => array('view' => NULL, 'enable_select_all_pages' => TRUE),
     'file' => 'views.theme.inc',
   );
