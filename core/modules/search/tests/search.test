@@ -707,6 +707,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
       'type' => 'post',
       'name' => 'Post',
       'settings' => array(
+        'comment_enabled' => TRUE,
         'comment_default' => COMMENT_NODE_OPEN,
         'comment_preview' => BACKDROP_OPTIONAL,
         'comment_title_options' => COMMENT_TITLE_CUSTOM,
