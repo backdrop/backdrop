@@ -421,6 +421,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
   $is_new = isset($layout->is_new) && $layout->is_new;
   $form_state['is_new'] = $is_new;
+  $layout_name = isset($layout->name) ? $layout->name : NULL;
+  $form_state['layout_name'] = $layout_name;
   $form['path'] = array(
     '#title' => t('Path'),
     '#field_prefix' => url('', array('absolute' => TRUE)),
@@ -428,7 +430,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
-    '#suffix' => "<div id='layout-path-description'>" . _layout_path_matches_description($path, $is_new) . '</div>',
+    '#suffix' => "<div id='layout-path-description'>" . _layout_path_matches_description($path, $layout_name, $is_new) . '</div>',
   );
   $form['additional_paths_label'] = array(
     '#type' => 'item',
@@ -446,7 +448,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     $form_state['additional_paths'] = $layout->additional_paths;
   }
   foreach ($form_state['additional_paths'] as $i => $additional_path) {
-    $description = _layout_path_matches_description($additional_path, $is_new);
+    $description = _layout_path_matches_description($additional_path, $layout_name, $is_new);
     $form['additional_paths_wrapper']['additional_paths_container'.$i] = array(
       '#type' => 'container',
       '#attributes' => array(
@@ -859,14 +861,24 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 /**
  * Returns description text for path entry fields, with dynamic information
  * about the entered path and toggleable placeholder examples.
+ *
+ * @param string $path
+ *   The router path.
+ * @param string|null $layout_name
+ *   The name of the layout that is doing the checking.
+ * @param bool $is_new
+ *   Whether this is a new layout.
+ *
+ * @return string
+ *   HTML markup of description text for a path entry field.
  */
-function _layout_path_matches_description($path, $is_new) {
+function _layout_path_matches_description($path, $layout_name, $is_new) {
   $has_placeholder = strpos((string) $path, '%') !== FALSE;
   if (empty($path)) {
     $path_matches_text = t('Please enter a path.');
   }
   else {
-    if (_layout_menu_router_path_exists($path)) {
+    if (_layout_menu_router_path_exists($path, $layout_name)) {
       if ($has_placeholder) {
         if ($is_new) {
           $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
@@ -915,14 +927,40 @@ function _layout_path_matches_description($path, $is_new) {
 /**
  * Helper function to determine whether a layout path is an existing menu router
  * path.
+ *
+ * @param string $path
+ *   The router path.
+ * @param string|null $layout_name
+ *   The name of the layout that is doing the checking.
+ *
+ * @return bool
+ *   TRUE if the path is an existing menu router path and it is not a path that
+ *   is part of the layout that matches the layout name. FALSE otherwise.
  */
-function _layout_menu_router_path_exists($path) {
+function _layout_menu_router_path_exists($path, $layout_name) {
   $path_matches = db_query('
     SELECT path, page_callback
     FROM {menu_router}
     WHERE path = :path
     ', array(':path' => $path))
     ->fetchAll();
+  if (!empty($path_matches)) {
+    if (!empty($layout_name)) {
+      $layout = layout_load($layout_name);
+      foreach ($path_matches as $path_match) {
+        if ($path_match->page_callback == 'layout_path_access' && $layout->getPath() == $path) {
+          return FALSE;
+        }
+        if (!empty($layout->additional_menu_items)) {
+          foreach ($layout->additional_menu_items as $menu_item) {
+            if ($menu_item->path == $path) {
+              return FALSE;
+            }
+          }
+        }
+      }
+    }
+  }
   return !empty($path_matches);
 }
 
@@ -1144,13 +1182,14 @@ function layout_settings_form_path_rebuild($form, &$form_state) {
  */
 function layout_settings_form_path_ajax($form, &$form_state) {
   $is_new = $form_state['is_new'];
+  $layout_name = $form_state['layout_name'];
   $commands[] = ajax_command_remove('.l-messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
-  $commands[] = ajax_command_html('#layout-path-description', _layout_path_matches_description($form['path']['#value'], $is_new));
+  $commands[] = ajax_command_html('#layout-path-description', _layout_path_matches_description($form['path']['#value'], $layout_name, $is_new));
   $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
 
   foreach ($form_state['additional_paths'] as $i => $additional_path) {
-    $description = _layout_path_matches_description($additional_path, $is_new);
+    $description = _layout_path_matches_description($additional_path, $layout_name, $is_new);
     $commands[] = ajax_command_html("#layout-path-description-$i", $description);
   }
 
