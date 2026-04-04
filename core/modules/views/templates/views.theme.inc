@@ -1234,9 +1234,9 @@ function theme_views_container($variables) {
 }
 
 /**
- * Default theme function for the Bulk Operations select all rows in view.
+ * Default theme function for selecting all rows in view for bulk operations.
  */
-function theme_bulk_operations_select_all(&$variables) {
+function theme_views_select_all_pages(&$variables) {
   $view = $variables['view'];
   $enable_select_all_pages = $variables['enable_select_all_pages'];
   $build_array = array();
@@ -1248,84 +1248,84 @@ function theme_bulk_operations_select_all(&$variables) {
     // Provide hidden markup that will be shown as needed on the first row
     // of the table.
     $this_page_count = format_plural(count($view->result), '1 row', '@count rows');
-    $this_page = t('Selected <strong>!row_count</strong> in this page.', array('!row_count' => $this_page_count));
+    $this_page = t('Selected <strong>!row_count</strong> on this page.', array('!row_count' => $this_page_count));
     $all_pages_count = format_plural($view->total_rows, '1 row', '@count rows');
-    $all_pages = t('Selected <strong>!row_count</strong> in this view.', array('!row_count' => $all_pages_count));
-    $build_array['bulk_form_select_all_pages_wrapper'] = array(
+    $all_pages = t('Selected <strong>!row_count</strong> on all pages.', array('!row_count' => $all_pages_count));
+    $build_array['select_all_pages_wrapper'] = array(
       '#type' => 'container',
       '#tree' => FALSE,
       '#attributes' => array(
         'class' => array(
-          'bulk-form-table-select-all-markup'
+          'views-select-all-pages--wrapper'
         ),
       ),
     );
-    $build_array['bulk_form_select_all_pages_wrapper']['bulk_form_select_all_pages'] = array(
+    $build_array['select_all_pages_wrapper']['select_all_pages'] = array(
       '#type' => 'button',
       '#attributes' => array(
         'class' => array(
-          'bulk-form-table-select-all-pages',
+          'views-select-all-pages--all-pages-button',
         ),
       ),
-      '#value' => t('Select all !row_count in this view.', array('!row_count' => $all_pages_count)),
-      '#prefix' => '<span class="bulk-form-table-this-page">' . $this_page . ' &nbsp;',
+      '#value' => t('Select all !row_count on all pages', array('!row_count' => $all_pages_count)),
+      '#prefix' => '<span class="views-select-all-pages--this-page">' . $this_page . ' &nbsp;',
       '#suffix' => '</span>',
     );
-    $build_array['bulk_form_select_all_pages_wrapper']['bulk_form_select_this_page'] = array(
+    $build_array['select_all_pages_wrapper']['select_this_page'] = array(
       '#type' => 'button',
       '#attributes' => array(
         'class' => array(
-          'bulk-form-table-select-this-page',
+          'views-select-all-pages--this-page-button',
         ),
       ),
-      '#value' => t('Select only !row_count in this page.', array('!row_count' => $this_page_count)),
-      '#prefix' => '<span class="bulk-form-table-all-pages" style="display: none">' . $all_pages . ' &nbsp;',
+      '#value' => t('Select only !row_count on this page', array('!row_count' => $this_page_count)),
+      '#prefix' => '<span class="views-select-all-pages--all-pages" style="display: none">' . $all_pages . ' &nbsp;',
       '#suffix' => '</span>',
     );
   }
   else {
     $this_page_count = format_plural(count($view->result), '1 item', '@count items');
     $all_pages_count = format_plural($view->total_rows, '1 item', '@count items');
-    $build_array['bulk_form_select_all'] = array(
+    $build_array['select_all_pages'] = array(
       '#type' => 'fieldset',
       '#attributes' => array(
         'class' => array(
-          'bulk-form-fieldset-select-all',
-          'bulk-form-select-all-markup'
+          'views-select-all-pages--fieldset',
+          'views-select-all-pages--wrapper'
         ),
       ),
     );
-    $build_array['bulk_form_select_all']['this_page'] = array(
+    $build_array['select_all_pages']['this_page'] = array(
       '#type' => 'checkbox',
       '#title' => t('Select !this_page_count on this page', array('!this_page_count' => $this_page_count)),
       '#default_value' => '',
       '#attributes' => array(
         'class' => array(
-          'bulk-form-select-this-page',
+          'views-select-all-pages--this-page-checkbox',
         ),
       ),
       // Since this build array is not form-processed, we supply a unique id so
       // that the label contains a "for" attribute, making it clickable.
-      '#id' => backdrop_html_id('bulk-form-select-this-page'),
+      '#id' => backdrop_html_id('views-select-all-pages--this-page-checkbox'),
     );
 
     if ($enable_select_all_pages) {
-      $build_array['bulk_form_select_all']['or'] = array(
+      $build_array['select_all_pages']['or'] = array(
         '#type' => 'markup',
         '#markup' => '<em>' . t('or') . '</em>',
       );
-      $build_array['bulk_form_select_all']['all_pages'] = array(
+      $build_array['select_all_pages']['all_pages'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Select !all_pages_count on all pages', array('!all_pages_count' => $all_pages_count)),
+        '#title' => t('Select @count on all pages', array('@count' => $all_pages_count)),
         '#default_value' => '',
         '#attributes' => array(
           'class' => array(
-            'bulk-form-select-all-pages',
+            'views-select-all-pages--all-pages-checkbox',
           ),
         ),
         // Since this build array is not form-processed, we supply a unique id so
         // that the label contains a "for" attribute, making it clickable.
-        '#id' => backdrop_html_id('bulk-form-select-all-pages'),
+        '#id' => backdrop_html_id('views-select-all-pages--all-pages-checkbox'),
       );
     }
   }

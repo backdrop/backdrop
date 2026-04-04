@@ -87,6 +87,18 @@ class views_handler_filter_search extends views_handler_filter {
     }
 
     $key = $this->options['expose']['identifier'];
+    // No search terms.
+    if (empty($form_state['values'][$key])) {
+      // The 'optional' property means: show all items if no input is set,
+      // 'required' means that no results should be shown if there's no input.
+      // @see views_handler_filter_search::operator_form()
+      if ($this->operator != 'optional' && empty($this->options['expose']['required'])) {
+        $this->view->built = TRUE;
+        $this->view->executed = TRUE;
+        $this->view->result = array();
+        return;
+      }
+    }
     if (!empty($form_state['values'][$key])) {
       $this->query_parse_search_expression($form_state['values'][$key]);
       if (count($this->search_query->words()) == 0) {
@@ -153,7 +165,7 @@ class views_handler_filter_search extends views_handler_filter {
         $this->search_score = $this->query->add_field('', "$search_index.score * $search_total.count", 'score', array('aggregate' => TRUE, 'function' => 'sum'));
       }
 
-      if (empty($this->query->relationships[$this->relationship])) {
+      if (empty($this->relationship) || empty($this->query->relationships[$this->relationship])) {
         $base_table = $this->query->base_table;
       }
       else {

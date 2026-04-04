@@ -7249,7 +7249,7 @@ function render(&$element) {
  * $element['#access'] = FALSE
  * @endcode
  *
- * @param array $element
+ * @param array|null $element
  *   The element to be hidden.
  *
  * @return array
@@ -7258,7 +7258,7 @@ function render(&$element) {
  * @see render()
  * @see show()
  */
-function hide(array &$element) {
+function hide(&$element) {
   $element['#printed'] = TRUE;
   return $element;
 }
