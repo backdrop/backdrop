@@ -110,8 +110,17 @@
 .layout-placeholder-examples {
   margin-top: 0.5em;
 }
+input.layout-additional-path-remove.form-submit {
+  margin: 0;
+}
+#layout-path-description .description {
+  margin: 0 0 1em;
+}
+.layout-path-description {
+  margin-bottom: 1em;
+}
 
-/* Toggle for the placeholder examples */
+/* Toggle for the path examples */
 .layout-placeholder-examples-toggle {
   white-space: nowrap;
 }
