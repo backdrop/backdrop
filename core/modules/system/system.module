@@ -2676,7 +2676,13 @@ function system_block_view($delta = '', $settings = array()) {
         require_once BACKDROP_ROOT . '/' . $router_item['include_file'];
       }
       $block['subject'] = NULL;
-      $block['content'] = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);
+      // Don't allow the main page content to be rendered twice.
+      if ($router_item['page_callback'] != 'layout_page_callback') {
+        $block['content'] = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);
+      }
+      else {
+        $block['content'] = '';
+      }
       return $block;
     case 'header':
       $block['subject'] = NULL;
