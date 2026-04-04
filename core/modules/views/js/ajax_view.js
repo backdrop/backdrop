@@ -15,6 +15,7 @@ Backdrop.behaviors.ViewsAjaxView.attach = function() {
     });
   }
 };
+
 /**
  * Removes configuration and state from the page when a view is removed.
  */
@@ -28,7 +29,7 @@ Backdrop.behaviors.ViewsAjaxView.attach = function() {
       }
     });
   }
-}
+};
 
 Backdrop.views = {};
 Backdrop.views.instances = {};
