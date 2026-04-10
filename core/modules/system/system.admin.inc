@@ -1147,7 +1147,7 @@ function system_modules_submit($form, &$form_state) {
  * @ingroup forms
  * @see system_modules_uninstall_validate()
  * @see system_modules_uninstall_submit()
- * @param array $form_state['values']
+ * @param array $form_state['storage']
  *   Submitted form values.
  * @return array
  *   A form array representing the currently disabled modules.

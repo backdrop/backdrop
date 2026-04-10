@@ -989,7 +989,8 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
   return theme('item_list', array(
     'items' => $sort_list,
     'type' => 'ul',
-    'attributes' => array('class' => array('installer-browser-sort-list', 'clearfix')),
+    'attributes' => array('class' => array('installer-browser-sort-list',
+      'clearfix')),
   ));
 }
 
