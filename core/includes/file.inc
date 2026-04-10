@@ -1484,9 +1484,9 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  * @param $validators
  *   An optional, associative array of callback functions used to validate the
  *   file. See file_validate() for a full discussion of the array format.
- *   If no extension validator is provided it will default to a limited safe
+ *   If no extension validator is provided, it will default to a limited safe
  *   list of extensions which is as follows: "jpg jpeg gif png txt
- *   doc xls pdf ppt pps odt ods odp". To allow all extensions you must
+ *   doc xls pdf ppt pps odt ods odp". To allow all extensions, you must
  *   explicitly set the 'file_validate_extensions' validator to an empty array
  *   (Beware: this is not safe and should only be allowed for trusted users, if
  *   at all).
@@ -1603,6 +1603,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       'filesize' => $uploaded_files['files']['size'][$form_field_name][$i],
     );
     $values['filemime'] = file_get_mimetype($values['filename']);
+    /** @var File $file */
     $file = entity_create('file', $values);
 
     $extensions = '';
@@ -1677,14 +1678,14 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     }
     $file->destination = file_destination($destination . $file->filename, $replace);
     // If file_destination() returns FALSE then $replace === FILE_EXISTS_ERROR and
-    // there's an existing file so we need to bail.
+    // there's an existing file, so we need to bail.
     if ($file->destination === FALSE) {
       backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
       $files[$i] = FALSE;
       continue;
     }
 
-    // Add in our check of the the file name length.
+    // Add in our check of the file name length.
     $validators['file_validate_name_length'] = array();
 
     // Add in check for valid SVG.
@@ -1702,7 +1703,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       else {
         $message .= ' ' . array_pop($errors);
       }
-      form_set_error($form_field_name, $message);
+      backdrop_set_message($message, 'error');
       $files[$i] = FALSE;
       continue;
     }
@@ -1712,7 +1713,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     // operations.
     $file->uri = $file->destination;
     if (!backdrop_move_uploaded_file($uploaded_files['files']['tmp_name'][$form_field_name][$i], $file->uri)) {
-      form_set_error($form_field_name, t('File upload error. Could not move uploaded file.'));
+      backdrop_set_message(t('File upload error. Could not move uploaded file.'), 'error');
       watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
       $files[$i] = FALSE;
       continue;
