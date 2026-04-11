@@ -1500,10 +1500,11 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *   - FILE_EXISTS_RENAME: Append _{incrementing number} until the filename is
  *     unique.
  *   - FILE_EXISTS_ERROR: Do nothing and return FALSE.
- * @param int $delta
+ * @param int|NULL $delta
  *   If multiple files are uploaded into the same field (via the "multiple"
  *   HTML attribute), an individual file can be saved one at a time by
- *   specifying numeric offset for that file, starting from 0.
+ *   specifying the numeric offset for that file, starting from 0. If left NULL,
+ *   all the files from that field are saved.
  *
  * @return File|File[]|FALSE|NULL
  *   A File object (or array of File objects) containing the file information if
