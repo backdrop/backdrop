@@ -57,6 +57,11 @@ define('EMAIL_MAX_LENGTH', 254);
 define('TOKEN_MAX_DEPTH', 9);
 
 /**
+ * The maximum depth for token tree recursion.
+ */
+define('SYSTEM_ICON_BROWSER_PER_PAGE', 110);
+
+/**
  * Implements hook_theme().
  */
 function system_theme() {
@@ -151,6 +156,9 @@ function system_theme() {
         'machine_name' => NULL,
       ),
     ) + $base,
+    'system_icon_browser_form' => array(
+      'render element' => 'form',
+    ), // todo add $base and move theme function.
   ));
 }
 
@@ -810,6 +818,14 @@ function system_menu() {
     'access arguments' => array('administer site configuration'),
     'weight' => 20,
     'file' => 'system.admin.inc',
+  );
+
+  // Icon browser page.
+  $items['admin/config/media/icon-browser'] = array(
+    'title' => 'Icon browser',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_icon_browser_form'),
+    'access callback' => true, // todo, perms.
   );
 
   // Service settings.
@@ -2156,6 +2172,18 @@ function system_library_info() {
     'css' => array(
       $system_module_path . '/css/jquery.treetable.css' => array(),
       $system_module_path . '/css/jquery.treetable.theme.default.css' => array(),
+    ),
+  );
+
+  // jQuery treeTable plugin.
+  $libraries['icon_browser'] = array(
+    'title' => 'Icon browser',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $system_module_path . '/js/icon_browser.js' => array(),
+    ),
+    'css' => array(
+      $system_module_path . '/css/icon_browser.css' => array(),
     ),
   );
 
@@ -4886,4 +4914,200 @@ function system_transliterate_machine_name($string, $options = array()) {
   }
 
   return $string;
+}
+
+
+/**
+ * Display the page of icons with filters.
+ *
+ * The icons are loaded first from core, then from modules, and then from the
+ * active theme. This way if an icon is overridden, we show the correct one.
+ */
+function system_icon_browser_form($form, &$form_state) {
+  if (isset($form_state['input']['dialogOptions']['target'])) {
+    $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
+  }
+  $config = config('system.core');
+
+  $icons = icon_get_all_details();
+  $params = array('provider', 'style', 'size', 'keyword', 'include_brands');
+
+  foreach ($params as $param) {
+    if (!empty($form_state[$param])) {
+      ${$param} = $form_state[$param];
+      $_GET[$param] =  ${$param};
+      unset($form_state[$param]);
+    }
+    elseif (!empty($_GET[$param])) {
+      ${$param} = $_GET[$param];
+    }
+    else {
+      ${$param} = $config->get('icon_browser_' . $param);
+    }
+  }
+
+  $results = array();
+  foreach ($icons as $icon) {
+    if (!$include_brands && $icon['is_brand']) {
+      continue;
+    }
+    if ($provider != 'any' && $icon['provider'] != $provider) {
+      continue;
+    }
+    if ($style != 'any' && ($icon['style'] != $style)) {
+      continue;
+    }
+    $searchtext = implode(' ', $icon);
+    if ($keyword && strpos($searchtext, $keyword) === FALSE) {
+      continue;
+    }
+    $results[] = $icon;
+  }
+
+  $icon_allowed_styles = $config->get('icon_allowed_styles');
+
+  $form = array(
+    '#theme' => 'system_icon_browser_form',
+    '#icons' => $results,
+    '#provider' => $provider,
+    '#style' => $style,
+    '#size' => $size,
+  );
+  $form['#attached']['library'][] = array('system', 'icon_browser');
+
+  $form['icon_filters'] = array(
+    '#type' => 'container',
+  );
+  $form['icon_filters']['provider'] = array(
+    '#type' => 'select',
+    '#title' => t('Provider'),
+    '#options' => array(
+      'any' => t('Any'),
+      'core' => t('Core'),
+      'module' => t('Module'),
+      'theme' => t('Theme'),
+    ),
+    '#default_value' => $provider,
+  );
+  $form['icon_filters']['style'] = array(
+    '#type' => 'select',
+    '#title' => t('Style'),
+    '#options' => array(
+      'any' => t('Any'),
+    ) + $icon_allowed_styles,
+    '#default_value' => $style,
+  );
+  $form['icon_filters']['keyword'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Keyword'),
+    '#default_value' => $keyword,
+    '#size' => 10,
+  );
+  $form['icon_filters']['size'] = array(
+    '#type' => 'select',
+    '#title' => t('Preview Size'),
+    '#options' => array(
+      'small' => t('Small'),
+      'medium' => t('Medium'),
+      'large' => t('Large'),
+      'xlarge' => t('Extra Large'),
+    ),
+    '#default_value' => $size,
+  );
+  $form['icon_filters']['include_brands'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Include Brand icons'),
+    '#default_value' => $include_brands,
+  );
+  $form['icon_filters']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Filter'),
+  );
+  $form['icon_filters']['reset'] = array(
+    '#type' => 'submit',
+    '#value' => t('Reset'),
+  );
+
+  return $form;
+}
+
+/**
+ * Handles the Icon Browser filter form submit.
+ */
+function system_icon_browser_form_submit($form, &$form_state) {
+  if ($form_state['triggering_element']['#parents'][0] == 'reset') {
+    $form_state['provider'] = '';
+    $form_state['style'] = '';
+    $form_state['keyword'] = '';
+    $form_state['size'] = '';
+    $form_state['include_brands'] = '';
+    unset($_GET['provider']);
+    unset($_GET['style']);
+    unset($_GET['keyword']);
+    unset($_GET['size']);
+    unset($_GET['include_brands']);
+    unset($_GET['page']);
+  }
+  else {
+    $form_state['provider'] = $form_state['values']['provider'];
+    $form_state['style'] = $form_state['values']['style'];
+    $form_state['keyword'] = $form_state['values']['keyword'];
+    $form_state['size'] = $form_state['values']['size'];
+    $form_state['include_brands'] = $form_state['values']['include_brands'];
+    $form_state['rebuild'] = TRUE;
+  }
+}
+
+/**
+ * Theme hook for the icon browser page.
+ */
+function theme_system_icon_browser_form($variables) {
+  $form = $variables['form'];
+
+  $icons = $form['#icons'];
+  $provider = $form['#provider'];
+  $style = $form['#style'];
+  $size = $form['#size'];
+  $keyword = $form['#keyword'];
+  $include_brands = $form['#include_brands'];
+
+  $current_page = pager_default_initialize(count($icons), SYSTEM_ICON_BROWSER_PER_PAGE);
+  $chunks = array_chunk($icons, SYSTEM_ICON_BROWSER_PER_PAGE, TRUE);
+
+  $output = '';
+  $title = t('Icon Browser');
+  backdrop_set_title($title);
+  $output .= '<div class="icon-browser">';
+  // Filters.
+  $output .= '<div class="icon-browser-filters">';
+    $output .= backdrop_render($form['icon_filters']);
+  $output .= '</div>';
+  // Icons.
+  if ($icons) {
+    $output .= "<div class='icon-browser-list' data-icon-provider='$provider' data-icon-style='$style' data-icon-size='$size'>";
+
+    foreach ($chunks[$current_page] as $icon) {
+      $error_class = (!empty($icon['error'])) ? ' icon-error' : '';
+      $output .= '<div class="icon-wrapper' . $error_class . '" data-icon-name="' . $icon['provider_key'] . '" data-icon-active="false">';
+      $output .= '<div class="icon">' . icon($icon['provider_key']) . '</div>';
+      $output .= '<div class="icon-name">' . $icon['name'] . '</div></div>';
+    }
+    $output .= '</div>';
+    $output .= backdrop_render_children($form);
+  }
+  else {
+    $output .= t('No icons match the filter criteria.');
+  }
+  $output .= '</div>';
+  $pager_options = array(
+    'provider' => $form['#provider'],
+    'style' => $form['#style'],
+    'size' => $form['#size'],
+    'keyword' => $form['#keyword'],
+    'include_brands' => $form['#include_brands'],
+  );
+
+  $output .= theme('pager', array('quantity', count($icons), 'parameters' => $pager_options));
+
+  return $output;
 }

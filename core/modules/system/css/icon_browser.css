@@ -1,0 +1,99 @@
+.icon-browser-filters > div {
+  display: flex;
+  align-items: last baseline;
+  gap: 1.5rem;
+}
+
+.icon-browser-list {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 1.5rem;
+}
+
+.icon-browser-list .icon-wrapper {
+  width: 72px;
+  display: inline-block;
+  margin: .25rem;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid transparent;
+  padding: 5px;
+}
+.icon-browser-list .icon-wrapper:hover {
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+}
+
+.icon-browser-list .icon-wrapper .icon-name {
+  color: unset;
+  font-size: .7rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.icon-browser-list .icon-wrapper .icon-name ::after {
+  min-width: 1.25rem;
+}
+
+.icon-browser-list .icon-wrapper .icon {
+  width: 36px;
+  margin: 0 auto;
+}
+
+.icon-browser-list .icon-wrapper .icon  svg {
+  width: 36px;
+  height: 36px;
+}
+
+.icon-browser-list .icon-wrapper .icon-error:before {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin: .5rem auto;
+  background-color: #9C1D0D;
+  mask-image: var(--icon-seal-warning-fill);
+}
+
+.icon-browser-list[data-icon-size="small"] .icon-wrapper .icon,
+.icon-browser-list[data-icon-size="small"] .icon-wrapper .icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.icon-browser-list[data-icon-size="large"] .icon-wrapper .icon,
+.icon-browser-list[data-icon-size="large"] .icon-wrapper .icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.icon-browser-list[data-icon-size="xlarge"] .icon-wrapper .icon,
+.icon-browser-list[data-icon-size="xlarge"] .icon-wrapper .icon svg {
+  width: 64px;
+  height: 64px;
+}
+
+.icon-browser {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.icon-wrapper[data-icon-active="true"] .icon-name::after,
+.icon-browser-ready::after {
+  content: '';
+  display: inline-block;
+  margin-left: .25rem;
+  mask-image: var(--icon-warning-circle-fill);
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  width: 1.25rem;
+  height: 1rem;
+  background-color: #fce400;
+}
+
+.icon-wrapper[data-icon-active="true"] .icon-name::after,
+.icon-browser-ready::after {
+  background-color: #234600;
+  mask-image: var(--icon-check-circle-fill);}
+}

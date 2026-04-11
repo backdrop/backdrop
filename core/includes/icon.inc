@@ -7,6 +7,8 @@
  * https://docs.backdropcms.org/documentation/icon-api
  */
 
+ define ('CORE_ICON_BROWSER_PATH', 'core/misc/icons');
+
 /**
  * Return the markup for outputting an icon by a machine name.
  *
@@ -341,4 +343,127 @@ function theme_icon(array $variables) {
     }
   }
   return '';
+}
+
+/**
+ * Helper function to load icon details.
+ *
+ * @param string $icon_key
+ *   The icon key to load details for. If empty, load all icons.
+ * @return array
+ *   An array of icon details, keyed by icon key:
+ *    - All icons, if no $icon_key was provided
+ *    - The single result if an $icon_key was provided, or
+ *    - An empty array if no icon was found for a provided $icon_key.
+ */
+function icon_get_all_details($icon_key = '') {
+  $icons = &backdrop_static(__FUNCTION__, array());
+
+  if (empty($icons)) {
+    // Icons provided by Backdrop core.
+    $core_icons = scandir(CORE_ICON_BROWSER_PATH);
+    foreach ($core_icons as $icon) {
+      if (substr($icon, -4, 4) == '.svg') {
+        $icon_name = substr($icon, 0, -4);
+        $icons[$icon_name] = array(
+          'provider' => 'core',
+          'provider_detail' => t('Backdrop core'),
+          'provider_key' => $icon_name,
+          'name' => $icon_name,
+          'directory' => CORE_ICON_BROWSER_PATH,
+        ) + icon_get_style($icon_name);
+      }
+    }
+    // Icons provided by modules.
+    $module_icons = icon_get_info();
+    foreach ($module_icons as $key => $icon) {
+      $icon_name = isset($icon['name']) ? $icon['name'] : $key;
+      $icons[$key] = array(
+        'provider' => 'module',
+        'provider_detail' => t('@module (module)', ['@module' => $icon['module']]),
+        'provider_key' => $key,
+        'name' => $icon_name,
+      ) + icon_get_style($icon_name);
+    }
+    // Icons provided by themes.
+    $themes = list_themes();
+    $active_theme = $GLOBALS['theme_key'];
+    foreach ($themes as $theme => $theme_data) {
+      $error = ($theme != $active_theme);
+      // Check if the theme provides a non-default icon path.
+      $theme_icon_directory = theme_get_setting('icon_directory', $theme);
+
+      // Otherwise just check in the theme "icons" directory.
+      if (!$theme_icon_directory) {
+        $theme_icon_directory = 'icons';
+      }
+      $theme_directory = backdrop_get_path('theme', $theme) . '/' . $theme_icon_directory;
+      if (is_dir($theme_directory)) {
+        $theme_icons = scandir($theme_directory);
+        if (!empty($theme_icons)) {
+          foreach ($theme_icons as $key => $icon) {
+            if (substr($icon, -4, 4) == '.svg') {
+              $icon_name = substr($icon, 0, -4);
+              $icons[$icon_name] = array(
+                'provider' => 'theme',
+                'provider_detail' => t('@theme (theme*) <br><br><em>*Theme-provided icons may only be available when the theme is active.</em>', ['@theme' => $theme]),
+                'provider_key' => $icon_name,
+                'name' => $icon_name,
+                'directory' => $theme_directory,
+                'error' => $error,
+              ) + icon_get_style($icon_name);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (empty($icon_key)) {
+    $result = $icons;
+  }
+  elseif (isset($icons[$icon_key])) {
+    $result = $icons[$icon_key];
+  }
+  else {
+    $result = array();
+  }
+
+  return $result;
+}
+
+/**
+ * Helper function to get an icon style based on the last segment of the icon
+ * name. We have some pre-approved suffixes that correspond to style options.
+ *
+ * @param string $icon_name
+ *   The icon name to get the style for.
+ *
+ * @return array
+ *   An array keyed with:
+ *   - 'style': A string containing the style of the icon, or empty for default.
+ *   - 'is_brand': A boolean indicating whether this is a brand icon.
+ */
+function icon_get_style($icon_name) {
+  $icon_data = array(
+    'style' => '',
+    'is_brand' => FALSE,
+  );
+  static $icon_allowed_styles = config_get('system.core', 'icon_allowed_styles');
+  // Split icon name by '-' and get the last segment.
+  $icon_name = explode('-', $icon_name);
+  $icon_style = array_pop($icon_name);
+  $brand_check = array_pop($icon_name);
+
+  if (in_array($icon_style, array_keys($icon_allowed_styles))) {
+    $icon_data['style'] = $icon_style;
+  }
+  else {
+    // Default to outline if no approved style is provided.
+    $icon_data['style'] = 'outline';
+  }
+  if ($icon_style == 'logo' || $brand_check == 'logo') {
+    $icon_data['is_brand'] = TRUE;
+  }
+  return $icon_data;
 }
