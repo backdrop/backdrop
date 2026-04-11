@@ -348,15 +348,15 @@ function theme_icon(array $variables) {
 /**
  * Helper function to load icon details.
  *
- * @param string $icon_key
- *   The icon key to load details for. If empty, load all icons.
+ * @param string $icon_name
+ *   The icon name to load details for. If empty, load all icons.
  * @return array
- *   An array of icon details, keyed by icon key:
- *    - All icons, if no $icon_key was provided
- *    - The single result if an $icon_key was provided, or
- *    - An empty array if no icon was found for a provided $icon_key.
+ *   An array of icon details, keyed by icon name:
+ *    - All icons, if no $icon_name was provided
+ *    - The single result if an $icon_name was provided, or
+ *    - An empty array if no icon was found for a provided $icon_name.
  */
-function icon_get_all_details($icon_key = '') {
+function icon_get_all_details($icon_name = '') {
   $icons = &backdrop_static(__FUNCTION__, array());
 
   if (empty($icons)) {
@@ -364,26 +364,26 @@ function icon_get_all_details($icon_key = '') {
     $core_icons = scandir(CORE_ICON_BROWSER_PATH);
     foreach ($core_icons as $icon) {
       if (substr($icon, -4, 4) == '.svg') {
-        $icon_name = substr($icon, 0, -4);
-        $icons[$icon_name] = array(
+        $icon_key = substr($icon, 0, -4);
+        $icons[$icon_key] = array(
           'provider' => 'core',
           'provider_detail' => t('Backdrop core'),
-          'provider_key' => $icon_name,
-          'name' => $icon_name,
+          'provider_key' => $icon_key,
+          'name' => $icon_key,
           'directory' => CORE_ICON_BROWSER_PATH,
-        ) + icon_get_style($icon_name);
+        ) + icon_get_style($icon_key);
       }
     }
     // Icons provided by modules.
     $module_icons = icon_get_info();
-    foreach ($module_icons as $key => $icon) {
-      $icon_name = isset($icon['name']) ? $icon['name'] : $key;
-      $icons[$key] = array(
+    foreach ($module_icons as $name => $icon) {
+      $icon_key = isset($icon['name']) ? $icon['name'] : $name;
+      $icons[$name] = array(
         'provider' => 'module',
         'provider_detail' => t('@module (module)', ['@module' => $icon['module']]),
-        'provider_key' => $key,
-        'name' => $icon_name,
-      ) + icon_get_style($icon_name);
+        'provider_key' => $name,
+        'name' => $icon_key,
+      ) + icon_get_style($icon_key);
     }
     // Icons provided by themes.
     $themes = list_themes();
@@ -401,17 +401,17 @@ function icon_get_all_details($icon_key = '') {
       if (is_dir($theme_directory)) {
         $theme_icons = scandir($theme_directory);
         if (!empty($theme_icons)) {
-          foreach ($theme_icons as $key => $icon) {
+          foreach ($theme_icons as $name => $icon) {
             if (substr($icon, -4, 4) == '.svg') {
-              $icon_name = substr($icon, 0, -4);
-              $icons[$icon_name] = array(
+              $icon_key = substr($icon, 0, -4);
+              $icons[$icon_key] = array(
                 'provider' => 'theme',
                 'provider_detail' => t('@theme (theme*) <br><br><em>*Theme-provided icons may only be available when the theme is active.</em>', ['@theme' => $theme]),
-                'provider_key' => $icon_name,
-                'name' => $icon_name,
+                'provider_key' => $icon_key,
+                'name' => $icon_key,
                 'directory' => $theme_directory,
                 'error' => $error,
-              ) + icon_get_style($icon_name);
+              ) + icon_get_style($icon_key);
             }
           }
         }
@@ -419,11 +419,11 @@ function icon_get_all_details($icon_key = '') {
     }
   }
 
-  if (empty($icon_key)) {
+  if (empty($icon_name)) {
     $result = $icons;
   }
-  elseif (isset($icons[$icon_key])) {
-    $result = $icons[$icon_key];
+  elseif (isset($icons[$icon_name])) {
+    $result = $icons[$icon_name];
   }
   else {
     $result = array();

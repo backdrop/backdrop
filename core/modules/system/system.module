@@ -4930,6 +4930,7 @@ function system_icon_browser_form($form, &$form_state) {
   $config = config('system.core');
 
   $icons = icon_get_all_details();
+
   $params = array('provider', 'style', 'size', 'keyword', 'include_brands');
 
   foreach ($params as $param) {
