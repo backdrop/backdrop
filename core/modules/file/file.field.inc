@@ -230,6 +230,8 @@ function file_field_prepare_view($entity_type, $entities, $field, $instances, $l
  * Implements hook_field_insert().
  */
 function file_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  $items = file_field_expand_items($items);
+
   // Add a new usage of each uploaded file.
   foreach ($items as $item) {
     if ($file = file_load($item['fid'])) {
@@ -244,6 +246,8 @@ function file_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  * Checks for files that have been removed from the object.
  */
 function file_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  $items = file_field_expand_items($items);
+
   // Check whether the field is defined on the object.
   if (!isset($entity->{$field['field_name']})) {
     // We cannot check for removed files if the field is not defined.
@@ -252,7 +256,7 @@ function file_field_update($entity_type, $entity, $field, $instance, $langcode, 
   $id = $entity->id();
 
   // On new revisions, all files are considered to be a new usage and no
-  // deletion of previous file usages are necessary.
+  // deletion of previous file usages is necessary.
   if (!empty($entity->revision)) {
     foreach ($items as $item) {
       if ($file = file_load($item['fid'])) {
@@ -324,6 +328,46 @@ function file_field_delete_revision($entity_type, $entity, $field, $instance, $l
  */
 function file_field_is_empty($item, $field) {
   return empty($item['fid']);
+}
+
+/**
+ * Expands multiple file IDs within a single item into separate item arrays.
+ *
+ * When using a multiple-value file field, an individual $item['fid'] may
+ * contain an array of file IDs. Before saving values, each $item['fid'] should
+ * only contain an integer. This helper converts multiple file IDs within a
+ * single item into separate items.
+ *
+ * Calling this function is only needed when new files may be added, such as on
+ * insert or update operations.
+ *
+ * @param array $items
+ *
+ * @return array
+ *   The modified list of $items.
+ */
+function file_field_expand_items(array $items) {
+  foreach ($items as $i => $item) {
+    if (is_array($item['fid'])) {
+      $multiple_fids = $item['fid'];
+      $new_items = array();
+      foreach ($multiple_fids as $f => $fid) {
+        // The first item should adopt the first file ID.
+        if ($f === 0) {
+          $items[$i]['fid'] = $fid;
+        }
+        // Subsequent file IDs duplicate the first item's properties.
+        else {
+          $item['fid'] = $fid;
+          $new_items[] = $item;
+        }
+      }
+      // Insert the new items in the array after the original item.
+      array_splice($items, $i + 1, 0, $new_items);
+    }
+  }
+
+  return $items;
 }
 
 /**
@@ -660,7 +704,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     $items = $field_state['items'];
   }
 
-  // Essentially we use the managed_file type, extended with some enhancements.
+  // Essentially, we use the managed_file type, extended with some enhancements.
   $element_info = element_info('managed_file');
   $element += array(
     '#type' => 'managed_file',
@@ -730,7 +774,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
  * @param $field
  *   A field array.
  *
- * @return
+ * @return array
  *   An array suitable for passing to file_save_upload() or the file field
  *   element's '#upload_validators' property.
  */

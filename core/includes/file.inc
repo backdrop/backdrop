@@ -1603,7 +1603,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       'filesize' => $uploaded_files['files']['size'][$form_field_name][$i],
     );
     $values['filemime'] = file_get_mimetype($values['filename']);
-    /** @var File $file */
+    /** @var File|FALSE $file */
     $file = entity_create('file', $values);
 
     $extensions = '';
