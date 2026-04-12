@@ -981,8 +981,10 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
     else {
       $path = backdrop_get_path('module', 'installer') . '/installer.authorize.inc';
       system_authorized_init('installer_authorize_run_install', $path, array(
-        $project, $updater_name, $project_realpath), t('Update manager')
-      );
+        $project,
+        $updater_name,
+        $project_realpath,
+      ), t('Update manager'));
       return array(
         'success' => TRUE,
         'redirect' => system_authorized_get_url(),
