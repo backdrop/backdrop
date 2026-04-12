@@ -12,7 +12,7 @@
  * @param string $name
  *   The short name of the project.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the project is enabled, FALSE otherwise.
  */
 function _installer_browser_is_project_enabled($type, $name) {
@@ -110,7 +110,7 @@ function installer_browser_install_queue_remove($project_name) {
 /**
  * Removes a project from the list of recently installed projects.
  *
- * @param string $project_names
+ * @param string[] $project_names
  *   A list of projects to remove from the installed project list.
  *
  * @since 1.10.1
@@ -252,15 +252,11 @@ function installer_browser_fetch_results($filters) {
     $results = backdrop_json_decode($response->data);
   }
   else {
-    backdrop_set_message(
-      t("Encountered an error when trying to fetch results from @name. Error @code : @message",
-        array(
-          '@name' => $server['name'],
-          '@code' => $response->code,
-          '@message' => $response->error,
-        )
-      )
-    );
+    backdrop_set_message(t("Encountered an error when trying to fetch results from @name. Error @code : @message", array(
+      '@name' => $server['name'],
+      '@code' => $response->code,
+      '@message' => $response->error,
+    )));
     return array();
   }
 
@@ -275,7 +271,7 @@ function installer_browser_fetch_results($filters) {
  *
  * The installer_browser_fetch_results($filters) call returns an array with the
  * following keys:
- * @return array
+ * @return array|null
  *   Returns an array representing the active server with the following keys:
  *     - url: The absolute url to the server without query parameters.
  *     - name: A human-readable name for this server.

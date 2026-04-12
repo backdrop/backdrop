@@ -273,13 +273,14 @@ function installer_browser_installation_select_versions_form($form, &$form_state
       }
       $releases_list[$version] = $release_title;
       if (isset($release['release_link'])) {
-        $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'],
-        array('attributes' => array(
-          'title' => t('Release notes for @project_title', array(
-            '@project_title' => $project['title'],
-          )),
-          'target' => '_blank',
-        ))) . ')';
+        $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'], array(
+          'attributes' => array(
+            'title' => t('Release notes for @project_title', array(
+              '@project_title' => $project['title'],
+            )),
+            'target' => '_blank',
+          )
+        )) . ')';
       }
     }
 
@@ -997,7 +998,7 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
 /**
  * Returns a list of sort options.
  *
- * @param boolean $full
+ * @param bool $full
  *   Set this to TRUE if you want to get all of the supported sort methods.
  *
  * @return array

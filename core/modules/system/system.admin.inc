@@ -270,12 +270,10 @@ function system_themes_page() {
 
   $admin_form = backdrop_get_form('system_themes_admin_form', $admin_theme_options);
 
-  return theme('system_themes_page',
-      array(
-        'theme_groups' => $theme_groups,
-        'theme_group_titles' => $theme_group_titles,
-      )
-    ) . backdrop_render($admin_form);
+  return theme('system_themes_page', array(
+    'theme_groups' => $theme_groups,
+    'theme_group_titles' => $theme_group_titles,
+  )) . backdrop_render($admin_form);
 }
 
 /**
@@ -543,9 +541,9 @@ function system_theme_settings_submit($form, &$form_state) {
  *   incompatible files as the keys, their values being TRUE.
  * @param array $files
  *   The set of files that will be tested.
- * @param string $file
+ * @param File $file
  *   The file at which the check starts.
- * @return TRUE/NULL
+ * @return true|null
  *   Returns TRUE if an incompatible file is found, NULL (no return value)
  *   otherwise.
  */
@@ -885,9 +883,10 @@ function _system_modules_build_row($info, $extra) {
     if (substr_count($info['php'], '.') < 2) {
       $php_required .= '.*';
     }
-    $status_long .= t('This module requires PHP version @php_required and is incompatible with PHP version !php_version.',
-      array('@php_required' => $php_required, '!php_version' => phpversion())
-    ) . ' ';
+    $status_long .= t('This module requires PHP version @php_required and is incompatible with PHP version !php_version.', array(
+      '@php_required' => $php_required,
+      '!php_version' => phpversion(),
+    )) . ' ';
   }
 
   // If this module is compatible, present a checkbox indicating this module
@@ -1094,7 +1093,7 @@ function system_modules_submit($form, &$form_state) {
     }
   }
 
-  // Gets list of modules prior to install process, unsets $form_state['storage']
+  // Gets list of modules prior to install process, unset $form_state['storage']
   // so we don't get redirected back to the confirmation form.
   $pre_install_list = module_list();
   unset($form_state['storage']);
@@ -1229,7 +1228,7 @@ function system_modules_uninstall($form, $form_state = NULL) {
  * @ingroup forms
  * @param array $storage
  *   An associative array of modules selected to be uninstalled.
- * @return array
+ * @return array|void
  *   A form array representing modules to confirm.
  */
 function system_modules_uninstall_confirm_form($storage) {
@@ -1748,8 +1747,7 @@ function system_logging_settings($form, &$form_state) {
 function system_logging_settings_validate($form, &$form_state) {
   // Cleanup enabled severity levels. Form API sets the value of unselected
   // checkboxes to 0.
-  $form_state['values']['watchdog_enabled_severity_levels'] = array_keys(
-    array_filter($form_state['values']['watchdog_enabled_severity_levels'],
+  $form_state['values']['watchdog_enabled_severity_levels'] = array_keys(array_filter($form_state['values']['watchdog_enabled_severity_levels'],
     function($v) {
       return $v !== 0;
     })
