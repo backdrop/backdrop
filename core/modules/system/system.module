@@ -150,6 +150,15 @@ function system_theme() {
         'show_restricted' => FALSE,
       ),
     ) + $base,
+    'icon_browser_link' => array(
+      'variables' => array(
+        'text' => t('Browse available icons.'),
+        'dialog' => TRUE,
+        'options' => array(),
+        'click_insert' => TRUE,
+        'show_restricted' => FALSE,
+      ),
+    ) + $base,
     'label_machine_name' => array(
       'variables' => array(
         'label' => NULL,
@@ -1160,6 +1169,15 @@ function system_menu() {
     'access callback' => 'system_token_browser_access',
     'file' => 'system.pages.inc',
     'type' => MENU_CALLBACK,
+  );
+
+  // AJAX endpoint for the icon browser dialog.
+  $items['icon-browser/dialog'] = array(
+    'page callback' => 'system_icon_browser_ajax_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'system.pages.inc',
+    'theme callback' => 'ajax_base_page_theme',
   );
 
   // Machine names transliteration.
@@ -4928,6 +4946,7 @@ function system_icon_browser_form($form, &$form_state) {
     $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
   }
   $config = config('system.core');
+  backdrop_add_library('system', 'icon_browser');
 
   $icons = icon_get_all_details();
 
@@ -4973,6 +4992,8 @@ function system_icon_browser_form($form, &$form_state) {
     '#provider' => $provider,
     '#style' => $style,
     '#size' => $size,
+    '#include_brands' => $include_brands,
+    '#keyword' => $keyword,
   );
   $form['#attached']['library'][] = array('system', 'icon_browser');
 
