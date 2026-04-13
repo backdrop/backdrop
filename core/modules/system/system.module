@@ -836,7 +836,7 @@ function system_menu() {
     'title' => 'Icon browser',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_icon_browser_form'),
-    'access callback' => true, // todo, perms.
+    'access arguments' => array('access administration pages'),
   );
 
   // Service settings.

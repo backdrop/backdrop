@@ -314,14 +314,3 @@ function system_icon_browser_ajax_output() {
     return $out;
   }
 }
-
-/**
- * Token browser tree access callback.
- *
- * @since 1.30.0 Function added.
- */
-function system_icon_browser_tree_access() {
-  return true;
-  return isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'token-browser');
-}
-
