@@ -10,6 +10,22 @@
   Backdrop.behaviors.iconBrowser = {
   attach: function (context, settings) {
 
+    // Add a class behavior to all icon browser pager links.
+    $('#system-icon-browser-form .pager li a').addClass("icon-browser-pager-link");
+    // Bind AJAX behaviors to all items showing the class.
+    var base_element_settings = {
+      'event': 'click',
+      'progress': { 'type': 'throbber' }
+    };
+    $('a.icon-browser-pager-link', context).once('icon-browser-pager-links').each(function () {
+      var element_settings = base_element_settings;
+      if ($(this).attr('href')) {
+        element_settings.url = $(this).attr('href');
+      }
+      var base = $(this).attr('class');
+      Backdrop.ajax[base] = new Backdrop.ajax(base, this, element_settings);
+    });
+
     /**
      * Selects a token.
      * 
