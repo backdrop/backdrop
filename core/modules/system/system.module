@@ -165,8 +165,10 @@ function system_theme() {
         'machine_name' => NULL,
       ),
     ) + $base,
-    'system_icon_browser_form' => array(
-      'render element' => 'form',
+    'system_icon_browser_form_icons' => array(
+      'variables' => array(
+        'icons' => array(),
+      ),
     ), // todo add $base and move theme function.
   ));
 }
@@ -4987,7 +4989,7 @@ function system_icon_browser_form($form, &$form_state) {
   $icon_allowed_styles = $config->get('icon_allowed_styles');
 
   $form = array(
-    '#theme' => 'system_icon_browser_form',
+    // '#theme' => 'system_icon_browser_form',
     '#icons' => $results,
     '#provider' => $provider,
     '#style' => $style,
@@ -5043,14 +5045,84 @@ function system_icon_browser_form($form, &$form_state) {
   );
   $form['icon_filters']['submit'] = array(
     '#type' => 'submit',
+    '#submit' => array('system_icon_browser_form_submit'),
     '#value' => t('Filter'),
   );
   $form['icon_filters']['reset'] = array(
     '#type' => 'submit',
     '#value' => t('Reset'),
   );
+  //if (backdrop_is_dialog()) {
+    $form['icon_filters']['submit']['#ajax'] = array(
+      'callback' => 'system_icon_browser_ajax_form_open_dialog',
+    );
+    $form['icon_filters']['reset']['#ajax'] = array(
+      'callback' => 'system_icon_browser_ajax_form_open_dialog',
+    );
+  //}
+
+  $current_page = pager_default_initialize(count($icons), SYSTEM_ICON_BROWSER_PER_PAGE);
+  $chunks = array_chunk($results, SYSTEM_ICON_BROWSER_PER_PAGE, TRUE);
+
+  $form['icons'] = array(
+    '#type' => 'container',
+    '#theme' => 'system_icon_browser_form_icons',
+    '#icons' => $chunks[$current_page],
+    '#prefix' => '<div id="system-icon-browser-icons-wrapper">',
+    '#suffix' => '</div>',
+  );
+
+  $form['pager'] = array(
+    '#markup' =>  theme('pager', array('quantity', count($icons))),
+  );
 
   return $form;
+}
+
+/**
+ * Theme hook for the icon browser page.
+ */
+function theme_system_icon_browser_form_icons($variables) {
+  $icons = $variables['icons'];
+  $all_icons = icon_get_all_details();
+
+  // $icons = $form['#icons'];
+  // $provider = $form['#provider'];
+  // $style = $form['#style'];
+  // $size = $form['#size'];
+  // $keyword = $form['#keyword'];
+  // $include_brands = $form['#include_brands'];
+
+
+  $output = '';
+  if ($icons) {
+    // $output .= "<div class='icon-browser-list' data-icon-provider='$provider' data-icon-style='$style' data-icon-size='$size'>";
+    $output .= "<div class='icon-browser-list'>";
+
+    foreach ($icons as $icon) {
+      $error_class = (!empty($icon['error'])) ? ' icon-error' : '';
+      $output .= '<div class="icon-wrapper' . $error_class . '" data-icon-name="' . $icon['provider_key'] . '" data-icon-active="false">';
+      $output .= '<div class="icon">' . icon($icon['provider_key']) . '</div>';
+      $output .= '<div class="icon-name">' . $icon['name'] . '</div></div>';
+    }
+    $output .= '</div>';
+    //$output .= backdrop_render_children($form);
+  }
+  else {
+    $output .= t('No icons match the filter criteria.');
+  }
+  // $output .= '</div>';
+  // $pager_options = array(
+    // 'provider' => $form['#provider'],
+    // 'style' => $form['#style'],
+    // 'size' => $form['#size'],
+    // 'keyword' => $form['#keyword'],
+    // 'include_brands' => $form['#include_brands'],
+  // );
+
+  // $output .= theme('pager', array('quantity', count($icons), 'parameters' => $pager_options));
+
+  return $output;
 }
 
 /**
@@ -5076,60 +5148,20 @@ function system_icon_browser_form_submit($form, &$form_state) {
     $form_state['keyword'] = $form_state['values']['keyword'];
     $form_state['size'] = $form_state['values']['size'];
     $form_state['include_brands'] = $form_state['values']['include_brands'];
-    $form_state['rebuild'] = TRUE;
   }
+    $form_state['rebuild'] = TRUE;
 }
 
 /**
- * Theme hook for the icon browser page.
+ * Handles the Icon Browser filter form submit.
  */
-function theme_system_icon_browser_form($variables) {
-  $form = $variables['form'];
+function system_icon_browser_ajax_form_open_dialog($form, &$form_state) {
+  $commands = array();
+  $commands[] = ajax_command_replace("#system-icon-browser-icons-wrapper", backdrop_render($form['icons']));
 
-  $icons = $form['#icons'];
-  $provider = $form['#provider'];
-  $style = $form['#style'];
-  $size = $form['#size'];
-  $keyword = $form['#keyword'];
-  $include_brands = $form['#include_brands'];
-
-  $current_page = pager_default_initialize(count($icons), SYSTEM_ICON_BROWSER_PER_PAGE);
-  $chunks = array_chunk($icons, SYSTEM_ICON_BROWSER_PER_PAGE, TRUE);
-
-  $output = '';
-  $title = t('Icon Browser');
-  backdrop_set_title($title);
-  $output .= '<div class="icon-browser">';
-  // Filters.
-  $output .= '<div class="icon-browser-filters">';
-    $output .= backdrop_render($form['icon_filters']);
-  $output .= '</div>';
-  // Icons.
-  if ($icons) {
-    $output .= "<div class='icon-browser-list' data-icon-provider='$provider' data-icon-style='$style' data-icon-size='$size'>";
-
-    foreach ($chunks[$current_page] as $icon) {
-      $error_class = (!empty($icon['error'])) ? ' icon-error' : '';
-      $output .= '<div class="icon-wrapper' . $error_class . '" data-icon-name="' . $icon['provider_key'] . '" data-icon-active="false">';
-      $output .= '<div class="icon">' . icon($icon['provider_key']) . '</div>';
-      $output .= '<div class="icon-name">' . $icon['name'] . '</div></div>';
-    }
-    $output .= '</div>';
-    $output .= backdrop_render_children($form);
-  }
-  else {
-    $output .= t('No icons match the filter criteria.');
-  }
-  $output .= '</div>';
-  $pager_options = array(
-    'provider' => $form['#provider'],
-    'style' => $form['#style'],
-    'size' => $form['#size'],
-    'keyword' => $form['#keyword'],
-    'include_brands' => $form['#include_brands'],
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
   );
-
-  $output .= theme('pager', array('quantity', count($icons), 'parameters' => $pager_options));
-
-  return $output;
 }
+
