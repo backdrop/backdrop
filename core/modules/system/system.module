@@ -4948,7 +4948,7 @@ function system_icon_browser_form($form, &$form_state) {
     $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
   }
   $config = config('system.core');
-  backdrop_add_library('system', 'icon_browser');
+  backdrop_add_css(backdrop_get_path('module', 'system') . '/css/icon_browser.css');
 
   $icons = icon_get_all_details();
 
@@ -4997,10 +4997,12 @@ function system_icon_browser_form($form, &$form_state) {
     '#include_brands' => $include_brands,
     '#keyword' => $keyword,
   );
-  $form['#attached']['library'][] = array('system', 'icon_browser');
 
   $form['icon_filters'] = array(
     '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('icon-browser-filters-wrapper'),
+    ),
   );
   $form['icon_filters']['provider'] = array(
     '#type' => 'select',
@@ -5059,6 +5061,7 @@ function system_icon_browser_form($form, &$form_state) {
     $form['icon_filters']['reset']['#ajax'] = array(
       'callback' => 'system_icon_browser_ajax_form_open_dialog',
     );
+    backdrop_add_js(backdrop_get_path('module', 'system') . '/js/icon_browser.js');
   }
 
   $current_page = pager_default_initialize(count($icons), SYSTEM_ICON_BROWSER_PER_PAGE);

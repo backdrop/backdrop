@@ -1,4 +1,4 @@
-.icon-browser-filters > div {
+.icon-browser-filters-wrapper {
   display: flex;
   align-items: last baseline;
   gap: 1.5rem;
