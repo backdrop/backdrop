@@ -1601,8 +1601,8 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
     // Confirm that the file exists when used as a default value.
     if (!empty($default_fid)) {
       $default_fids = is_array($default_fid) ? $default_fid : array($default_fid);
-      foreach ($default_fids as $dfid) {
-        if ($file = file_load($dfid)) {
+      foreach ($default_fids as $default_fid) {
+        if ($file = file_load($default_fid)) {
           $fids[] = $file->fid;
         }
       }
@@ -1842,7 +1842,7 @@ function file_managed_file_browser_open($form, $form_state) {
   // Add JQuery UI selectable to allow drag and drop selection if the field
   // cardinality is set to multple.
   if ($field_cardinality != 1) {
-    Backdrop_add_library('system', 'ui.selectable');
+    backdrop_add_library('system', 'ui.selectable');
   }
 
   $submit_form = backdrop_get_form('file_managed_file_browser_form');

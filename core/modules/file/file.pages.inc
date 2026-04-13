@@ -718,10 +718,6 @@ function file_manage_form_validate($form, &$form_state) {
 function file_manage_form_submit($form, &$form_state) {
   /** @var File $file */
   $file = $form_state['file'];
-/*
-  //* @var File $temporary_upload /
-  $temporary_upload = $form_state['values']['replace_upload'] ? file_load($form_state['values']['replace_upload'][0]) : NULL;
- */
   /** @var File $temporary_upload */
   $temporary_upload = $form_state['values']['replace_upload'] ? file_load($form_state['values']['replace_upload'][0]) : NULL;
   $orphaned_uri = '';

@@ -247,7 +247,6 @@ Backdrop.file = Backdrop.file || {
 
         // Set this hidden FID value to the selected file.
         $fidElement.val(selectedFid);
-        console.log($fidElement.val());
 
         // Then click the "Upload" button, which will utilize the given file.
         $uploadButton
