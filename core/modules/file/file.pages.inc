@@ -234,7 +234,7 @@ function file_get_filetype_candidates(File $file, $selected_files = array()) {
  */
 function file_add_form_submit($form, &$form_state) {
   if ($form['#step'] === 1) {
-    $fids = (array) $form_state['values']['upload'];
+    $fids = array_filter(explode(',', $form_state['values']['upload']));
     $form_state['storage']['file_count'] = count($fids);
   }
   else {
