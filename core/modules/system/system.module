@@ -5052,14 +5052,14 @@ function system_icon_browser_form($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Reset'),
   );
-  //if (backdrop_is_dialog()) {
+  if (backdrop_is_ajax()) {
     $form['icon_filters']['submit']['#ajax'] = array(
       'callback' => 'system_icon_browser_ajax_form_open_dialog',
     );
     $form['icon_filters']['reset']['#ajax'] = array(
       'callback' => 'system_icon_browser_ajax_form_open_dialog',
     );
-  //}
+  }
 
   $current_page = pager_default_initialize(count($icons), SYSTEM_ICON_BROWSER_PER_PAGE);
   $chunks = array_chunk($results, SYSTEM_ICON_BROWSER_PER_PAGE, TRUE);
