@@ -363,7 +363,7 @@ function installer_manager_update_form_submit($form, &$form_state) {
 /**
  * Batch callback: Performs actions when the download batch is completed.
  *
- * @param boolean $success
+ * @param bool $success
  *   TRUE if the batch operation was successful, FALSE if there were errors.
  *
  * @param array $results
@@ -1177,7 +1177,7 @@ function installer_manager_batch_project_get($project, $url, &$context) {
  * it. However, it is supported here because it is a common configuration on
  * shared hosting, and there is nothing Backdrop can do to prevent it.
  *
- * @return boolean
+ * @return bool
  *   TRUE if local file transfers are allowed on this server, or FALSE if not.
  *
  * @see installer_manager_update_ready_form_submit()
