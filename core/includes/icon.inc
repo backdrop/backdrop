@@ -449,7 +449,12 @@ function icon_get_style($icon_name) {
     'style' => '',
     'is_brand' => FALSE,
   );
-  static $icon_allowed_styles = config_get('system.core', 'icon_allowed_styles');
+
+  static $icon_allowed_styles;
+  if (!isset($icon_allowed_styles)) {
+    $icon_allowed_styles = config_get('system.core', 'icon_allowed_styles');
+  }
+
   // Split icon name by '-' and get the last segment.
   $icon_name = explode('-', $icon_name);
   $icon_style = array_pop($icon_name);
