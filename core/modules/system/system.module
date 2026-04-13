@@ -169,7 +169,7 @@ function system_theme() {
       'variables' => array(
         'icons' => array(),
       ),
-    ), // todo add $base and move theme function.
+    ) + $base,
   ));
 }
 
@@ -5080,52 +5080,6 @@ function system_icon_browser_form($form, &$form_state) {
   );
 
   return $form;
-}
-
-/**
- * Theme hook for the icon browser page.
- */
-function theme_system_icon_browser_form_icons($variables) {
-  $icons = $variables['icons'];
-  $all_icons = icon_get_all_details();
-
-  // $icons = $form['#icons'];
-  // $provider = $form['#provider'];
-  // $style = $form['#style'];
-  // $size = $form['#size'];
-  // $keyword = $form['#keyword'];
-  // $include_brands = $form['#include_brands'];
-
-
-  $output = '';
-  if ($icons) {
-    // $output .= "<div class='icon-browser-list' data-icon-provider='$provider' data-icon-style='$style' data-icon-size='$size'>";
-    $output .= "<div class='icon-browser-list'>";
-
-    foreach ($icons as $icon) {
-      $error_class = (!empty($icon['error'])) ? ' icon-error' : '';
-      $output .= '<div class="icon-wrapper' . $error_class . '" data-icon-name="' . $icon['provider_key'] . '" data-icon-active="false">';
-      $output .= '<div class="icon">' . icon($icon['provider_key']) . '</div>';
-      $output .= '<div class="icon-name">' . $icon['name'] . '</div></div>';
-    }
-    $output .= '</div>';
-    //$output .= backdrop_render_children($form);
-  }
-  else {
-    $output .= t('No icons match the filter criteria.');
-  }
-  // $output .= '</div>';
-  // $pager_options = array(
-    // 'provider' => $form['#provider'],
-    // 'style' => $form['#style'],
-    // 'size' => $form['#size'],
-    // 'keyword' => $form['#keyword'],
-    // 'include_brands' => $form['#include_brands'],
-  // );
-
-  // $output .= theme('pager', array('quantity', count($icons), 'parameters' => $pager_options));
-
-  return $output;
 }
 
 /**
