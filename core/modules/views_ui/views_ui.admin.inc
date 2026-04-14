@@ -1534,7 +1534,7 @@ function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
       $tabs[$id]['#link']['localized_options']['attributes']['class'][] = 'views-display-deleted-link';
     }
     if (isset($display->display_options['enabled']) && !$display->display_options['enabled']) {
-      $tabs[$id]['#link']['title'] .= ' (' . t('disabled') . ')';
+      $tabs[$id]['#link']['title'] .= ' ' . t('(disabled)');
       $tabs[$id]['#link']['localized_options']['attributes']['class'][] = 'views-display-disabled-link';
     }
   }
