@@ -979,7 +979,7 @@ function _views_ui_get_displays($view) {
         if ($display->display_plugin != 'default' || $show_default_display) {
           $display_item = $display->display_title;
           if (isset($display->display_options['enabled']) && !$display->display_options['enabled']) {
-            $display_item .= ' (' . t('disabled') . ')';
+            $display_item .= ' ' . t('(disabled)');
           }
           if (!empty($display->handler->options['block_description'])) {
             $display_item .= ': <em>' . $display->handler->options['block_description'] . '</em>';
