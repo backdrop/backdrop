@@ -521,8 +521,7 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
  */
 function installer_browser_add_remove_queue_dialog_link($form, &$form_state, $project_name, $op, $title) {
   form_load_include($form_state, 'inc', 'installer', 'installer.browser');
-  $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
-  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['#attached']['library'][] = array('layout', 'layout.admin');
 
   if (empty($form_state['project_name'])) {
     $form_state['project_name'] = $project_name;

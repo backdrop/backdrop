@@ -281,7 +281,7 @@ input.layout-additional-path-remove.form-submit {
   padding: 0.4em 0.5em;
 }
 .layout-editor-block-title .handle {
-  mask-image: url(../../../misc/icons/arrows-out-cardinal-fill.svg);
+  mask-image: var(--icon-arrows-out-cardinal-fill);
   mask-size: contain;
   mask-repeat: no-repeat;
   display: inline-block;

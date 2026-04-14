@@ -25,8 +25,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
   function addMeta() {
     parent::addMeta();
     backdrop_add_library('system', 'ui.sortable');
-    backdrop_add_js(backdrop_get_path('module', 'layout') . '/js/layout.admin.js');
-    backdrop_add_css(backdrop_get_path('module', 'layout') . '/css/layout.admin.css');
+    backdrop_add_library('layout', 'layout.admin');
   }
 
   /**

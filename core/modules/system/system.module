@@ -1303,6 +1303,22 @@ function system_library_info() {
     ),
   );
 
+  // Backdrop's tabledrag API.
+  $libraries['backdrop.tabledrag'] = array(
+    'title' => 'Backdrop tabledrag API',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/tabledrag.js' => array('group' => JS_LIBRARY),
+    ),
+    'icons' => array(
+      'arrows-out-cardinal-fill' => array(),
+      'arrows-out-line-vertical-fill' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.once'),
+    ),
+  );
+
   // Backdrop's collapsible fieldset.
   $libraries['backdrop.collapse'] = array(
     'title' => 'Backdrop collapsible fieldset',

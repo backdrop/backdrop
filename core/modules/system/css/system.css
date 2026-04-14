@@ -127,7 +127,7 @@ a.tabledrag-handle:hover {
   text-decoration: none;
 }
 a.tabledrag-handle .handle {
-  mask-image: url(../../../misc/icons/arrows-out-cardinal-fill.svg);
+  mask-image: var(--icon-arrows-out-cardinal-fill);
   mask-size: contain;
   mask-repeat: no-repeat;
   display: inline-block;
@@ -141,7 +141,7 @@ a.tabledrag-handle .handle {
   box-sizing: content-box;
 }
 a.tabledrag-handle-y .handle {
-  mask-image: url(../../../misc/icons/arrows-out-line-vertical-fill.svg);
+  mask-image: var(--icon-arrows-out-line-vertical-fill);
 }
 a.tabledrag-handle-hover .handle {
   opacity: 1;
