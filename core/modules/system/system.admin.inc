@@ -1146,7 +1146,7 @@ function system_modules_submit($form, &$form_state) {
  * @ingroup forms
  * @see system_modules_uninstall_validate()
  * @see system_modules_uninstall_submit()
- * @param array $form_state
+ * @param array|null $form_state
  *   Submitted form values.
  * @return array
  *   A form array representing the currently disabled modules.
@@ -1747,11 +1747,7 @@ function system_logging_settings($form, &$form_state) {
 function system_logging_settings_validate($form, &$form_state) {
   // Cleanup enabled severity levels. Form API sets the value of unselected
   // checkboxes to 0.
-  $form_state['values']['watchdog_enabled_severity_levels'] = array_keys(array_filter($form_state['values']['watchdog_enabled_severity_levels'],
-    function($v) {
-      return $v !== 0;
-    })
-  );
+  $form_state['values']['watchdog_enabled_severity_levels'] = array_keys(array_filter($form_state['values']['watchdog_enabled_severity_levels'], function($v){return $v !== 0;}));
 }
 
 /**

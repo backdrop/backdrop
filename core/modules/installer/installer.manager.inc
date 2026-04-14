@@ -1131,9 +1131,10 @@ function installer_manager_batch_project_get($project, $url, &$context) {
 
   // Actually try to download the file.
   if (!($local_cache = installer_manager_file_get($url))) {
-    $context['results']['errors'][$project] = t('Failed to download %project from %url',
-      array('%project' => $project, '%url' => $url)
-    );
+    $context['results']['errors'][$project] = t('Failed to download %project from %url', array(
+      '%project' => $project,
+      '%url' => $url,
+    ));
     return;
   }
 
