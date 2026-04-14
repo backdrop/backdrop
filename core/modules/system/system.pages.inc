@@ -298,7 +298,7 @@ function system_icon_browser_ajax_output() {
       'draggable' => TRUE,
       'resizable' => TRUE,
       'autoResize' => FALSE,
-      'width' => '800',
+      'width' => '1200',
       'height' => '600',
     );
     $commands = array(

@@ -5064,7 +5064,7 @@ function system_icon_browser_form($form, &$form_state) {
     backdrop_add_js(backdrop_get_path('module', 'system') . '/js/icon_browser.js');
   }
 
-  $current_page = pager_default_initialize(count($icons), SYSTEM_ICON_BROWSER_PER_PAGE);
+  $current_page = pager_default_initialize(count($results), SYSTEM_ICON_BROWSER_PER_PAGE);
   $chunks = array_chunk($results, SYSTEM_ICON_BROWSER_PER_PAGE, TRUE);
 
   $form['icons'] = array(
@@ -5076,7 +5076,9 @@ function system_icon_browser_form($form, &$form_state) {
   );
 
   $form['pager'] = array(
-    '#markup' =>  theme('pager', array('quantity', count($icons))),
+    '#prefix' => '<div id="system-icon-browser-pager">',
+    '#suffix' => '</div>',
+    '#markup' =>  theme('pager', array('quantity', count($results), 'attributes' => array('class' => array('icon-browser-pager-link')))),
   );
 
   return $form;
@@ -5121,4 +5123,3 @@ function system_icon_browser_ajax_form_open_dialog($form, &$form_state) {
     '#commands' => $commands,
   );
 }
-
