@@ -203,6 +203,10 @@ function taxonomy_update_dependencies() {
   $dependencies['user'][1007] = array(
     'taxonomy' => 1001,
   );
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['taxonomy'][1009] = array(
+    'user' => 1007,
+  );
 
   return $dependencies;
 }
