@@ -34,7 +34,7 @@ class LayoutFlexibleTemplate {
    *
    * @var string
    */
-  var $module = 'layout';
+  public $module = 'layout';
 
   /**
    * Configuration of the rows for this layout template.
