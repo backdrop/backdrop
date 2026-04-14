@@ -527,6 +527,10 @@ function template_preprocess_views_view_table(&$variables) {
       if (!empty($options['info'][$field]['align'])) {
         $variables['header_classes'][$field][] = backdrop_clean_css_identifier($options['info'][$field]['align']);
       }
+      // Set up responsive header class.
+      if (!empty($options['info'][$field]['responsive'])) {
+        $variables['header_classes'][$field][] = $options['info'][$field]['responsive'];
+      }
       // Add active class.
       if ($active == $field) {
         $variables['header_classes'][$field][] = 'active';

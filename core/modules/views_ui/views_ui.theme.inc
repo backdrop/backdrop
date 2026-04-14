@@ -391,6 +391,10 @@ function theme_views_ui_style_plugin_table($variables) {
       'data' => t('Hide empty column'),
       'align' => 'center',
     ),
+    array(
+      'data' => t('Responsive'),
+      'align' => 'center',
+    ),
   );
   $rows = array();
   foreach (element_children($form['columns']) as $id) {
@@ -420,6 +424,10 @@ function theme_views_ui_style_plugin_table($variables) {
     }
     $row[] = array(
       'data' => backdrop_render($form['info'][$id]['empty_column']),
+      'align' => 'center',
+    );
+    $row[] = array(
+      'data' => backdrop_render($form['info'][$id]['responsive']),
       'align' => 'center',
     );
     $rows[] = $row;
