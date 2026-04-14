@@ -1747,7 +1747,13 @@ function system_logging_settings($form, &$form_state) {
 function system_logging_settings_validate($form, &$form_state) {
   // Cleanup enabled severity levels. Form API sets the value of unselected
   // checkboxes to 0.
-  $form_state['values']['watchdog_enabled_severity_levels'] = array_keys(array_filter($form_state['values']['watchdog_enabled_severity_levels'], function($v){return $v !== 0;}));
+  $form_state['values']['watchdog_enabled_severity_levels'] = array_keys(
+    array_filter($form_state['values']['watchdog_enabled_severity_levels'],
+      function($v){
+        return $v !== 0;
+      }
+    )
+  );
 }
 
 /**
