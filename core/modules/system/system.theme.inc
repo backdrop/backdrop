@@ -738,8 +738,7 @@ function theme_system_icon_browser_form_icons($variables) {
     $output .= "<div class='icon-browser-list'>";
 
     foreach ($icons as $icon) {
-      $error_class = (!empty($icon['error'])) ? ' icon-error' : '';
-      $output .= '<div class="icon-wrapper' . $error_class . '" data-icon-name="' . $icon['provider_key'] . '" data-icon-active="false">';
+      $output .= '<div class="icon-wrapper" data-icon-name="' . $icon['provider_key'] . '">';
       $output .= '<div class="icon">' . icon($icon['provider_key']) . '</div>';
       $output .= '<div class="icon-name">' . $icon['name'] . '</div></div>';
     }

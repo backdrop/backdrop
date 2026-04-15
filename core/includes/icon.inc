@@ -385,11 +385,15 @@ function icon_get_all_details($icon_name = '') {
         'name' => $icon_key,
       ) + icon_get_style($icon_key);
     }
-    // Icons provided by themes.
+    // Icons provided by themes. Only look in the active theme or its base
+    // themes since _icon_from_theme() only checks these.
     $themes = list_themes();
     $active_theme = $GLOBALS['theme_key'];
-    foreach ($themes as $theme => $theme_data) {
-      $error = ($theme != $active_theme);
+    $current_themes = array($active_theme);
+    if (isset($themes->$active_theme['base_themes'])) {
+      $current_themes += array_keys($themes->$active_theme['base_themes']);
+    }
+    foreach ($current_themes as $theme) {
       // Check if the theme provides a non-default icon path.
       $theme_icon_directory = theme_get_setting('icon_directory', $theme);
 
@@ -410,7 +414,6 @@ function icon_get_all_details($icon_name = '') {
                 'provider_key' => $icon_key,
                 'name' => $icon_key,
                 'directory' => $theme_directory,
-                'error' => $error,
               ) + icon_get_style($icon_key);
             }
           }
@@ -418,6 +421,8 @@ function icon_get_all_details($icon_name = '') {
       }
     }
   }
+
+  backdrop_sort($icons, array('provider_key' => SORT_STRING));
 
   if (empty($icon_name)) {
     $result = $icons;
