@@ -2141,6 +2141,7 @@ class CommentFieldsTest extends CommentHelperCase {
       'administer fields',
       'administer content types',
       'administer comment settings',
+      'administer comments',
     ));
     $this->backdropLogin($this->admin_user);
 
@@ -2178,17 +2179,39 @@ class CommentFieldsTest extends CommentHelperCase {
     $this->assertLink(t('Comment fields'));
     $this->assertLink(t('Comment display'));
 
-    // Create nodes of each type.
+    // Create a few test nodes on which comments can be posted.
     $book_node = $this->backdropCreateNode(array('type' => 'book'));
+    $post_node = $this->backdropCreateNode(array('type' => 'post'));
 
     $this->backdropLogout();
 
-    // Try to post a comment on each node. A failure will be triggered if the
-    // comment body is missing on one of these forms, due to postComment()
+    // Try to post a comment on the book node. A failure will be triggered if
+    // the comment body is missing on one of these forms, due to postComment()
     // asserting that the body is actually posted correctly.
     $this->web_user = $this->backdropCreateUser(array('access content', 'access comments', 'post comments', 'skip comment approval'));
     $this->backdropLogin($this->web_user);
-    $this->postComment($book_node, $this->randomName(), '');
+    $book_comment_value = $this->randomName();
+    $this->postComment($book_node, $book_comment_value);
+
+    // Post an additional comment on a "post" node.
+    $post_comment_value = $this->randomName();
+    $this->postComment($post_node, $post_comment_value);
+
+    $this->backdropLogout();
+    $this->backdropLogin($this->admin_user);
+
+    // Verify comments are shown on admin/content/node.
+    $this->backdropGet('admin/content/comment');
+    $this->assertText($book_comment_value, 'Book comment found');
+    $this->assertText($post_comment_value, 'Post comment found');
+
+    // Disable comments on the book content type and verify the comment is
+    // removed from the listing.
+    $edit = array('comment_enabled' => FALSE);
+    $this->backdropPost('admin/structure/types/manage/book', $edit, t('Save content type'));
+    $this->backdropGet('admin/content/comment');
+    $this->assertNoText($book_comment_value, 'Book comment removed when comments are disabled on book content type');
+    $this->assertText($post_comment_value, 'Post comment still present when comments disabled on book content type');
   }
 
   /**
