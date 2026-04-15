@@ -1704,7 +1704,7 @@ function _layout_get_all_info($data_type, $init = array()) {
  * @see hook_layout_info()
  */
 function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE, $layout_template_type = 'layout') {
-  _layout_check_template_type($layout_template_type);
+  _layout_standardize_template_type($layout_template_type);
   $info = &backdrop_static(__FUNCTION__ . ':' . $layout_template_type);
 
   // Try getting a cached list of layout info.
@@ -2422,7 +2422,7 @@ function layout_get_title_description(Layout $layout) {
  *   The type of flexible template to save. Defaults to 'flexible'.
  */
 function layout_flexible_tempstore_set(LayoutFlexibleTemplate $flexible_template, $flexible_template_type = 'flexible') {
-  _layout_check_template_type($flexible_template_type);
+  _layout_standardize_template_type($flexible_template_type);
   tempstore_set('layout.' . $flexible_template_type, $flexible_template->name, $flexible_template, 604800);
 }
 
@@ -2441,7 +2441,7 @@ function layout_flexible_tempstore_set(LayoutFlexibleTemplate $flexible_template
  *   The flexible template object.
  */
 function layout_flexible_tempstore_load($flexible_template_name = NULL, $flexible_template_type = 'flexible') {
-  _layout_check_template_type($flexible_template_type);
+  _layout_standardize_template_type($flexible_template_type);
   if (!$flexible_template_name) {
     return new LayoutFlexibleTemplate();
   }
@@ -2468,7 +2468,7 @@ function layout_flexible_tempstore_load($flexible_template_name = NULL, $flexibl
  * @return LayoutFlexibleTemplate|false
  */
 function layout_flexible_template_load($flexible_template_name = NULL, $flexible_type = 'flexible') {
-  _layout_check_template_type($flexible_type);
+  _layout_standardize_template_type($flexible_type);
   $all_templates = layout_flexible_template_load_all($flexible_type);
   if (isset($all_templates[$flexible_template_name])) {
     return $all_templates[$flexible_template_name];
@@ -2487,7 +2487,7 @@ function layout_flexible_template_load($flexible_template_name = NULL, $flexible
  * @return LayoutFlexibleTemplate[]
  */
 function layout_flexible_template_load_all($flexible_type = 'flexible') {
-  _layout_check_template_type($flexible_type);
+  _layout_standardize_template_type($flexible_type);
   $templates = &backdrop_static(__FUNCTION__ . ':' . $flexible_type, array());
 
   if (empty($templates)) {
@@ -2533,7 +2533,7 @@ function layout_flexible_template_machine_name_exists($value) {
  * Implements hook_layout_template_info().
  */
 function layout_layout_template_info($flexible_template_type = 'flexible') {
-  _layout_check_template_type($flexible_template_type);
+  _layout_standardize_template_type($flexible_template_type);
   $layouts = array();
   $styles = layout_flexible_row_styles();
 
@@ -2597,7 +2597,7 @@ function layout_layout_presave($layout) {
  * Reset all caches provided by Layout module.
  */
 function layout_flexible_reset_caches($flexible_template_type = 'flexible') {
-  _layout_check_template_type($flexible_template_type);
+  _layout_standardize_template_type($flexible_template_type);
   cache()->delete('layout:' . $flexible_template_type . ':config');
 
   backdrop_static_reset('layout_flexible_template_load_all:' . $flexible_template_type);
@@ -2845,7 +2845,7 @@ function layout_field_delete_instance($instance) {
  * @param string $layout_template_type
  *   The custom template type machine name to process, passed by reference.
  */
-function _layout_check_template_type(string &$layout_template_type = 'flexible') {
+function _layout_standardize_template_type(string &$layout_template_type = 'flexible') {
   $reserved_types = array(
     'layout',
     'flexible',
