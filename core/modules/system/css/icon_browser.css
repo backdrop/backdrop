@@ -1,12 +1,18 @@
 .icon-browser-filters-wrapper {
-  display: flex;
   align-items: last baseline;
-  gap: 1.5rem;
-  flex-flow: row wrap;
   margin: 1em 0;
   padding: 7px 13px;
   border: 2px solid #EAEAEA;
   background-color: #fff;
+  gap: 0;
+}
+
+@media (min-width: 48em) {
+  .icon-browser-filters-wrapper {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1.5rem;
+  }
 }
 
 .icon-browser-list {
@@ -47,4 +53,7 @@
 .icon-browser-list .icon-wrapper .icon  svg {
   width: 36px;
   height: 36px;
+}
+.ui-dialog.icon-browser-dialog {
+  max-width:75%;
 }
