@@ -280,7 +280,7 @@ function system_token_browser_build_level($type, array $ancestors, $show_restric
   return $level;
 }
 /**
- * Page callback to output an icon browser as an empty page.
+ * Page callback to output an icon browser.
  */
 function system_icon_browser_ajax_output() {
   $out = backdrop_get_form('system_icon_browser_form');
@@ -308,4 +308,13 @@ function system_icon_browser_ajax_output() {
   else {
     return $out;
   }
+}
+
+/**
+ * Icon browser JSON endpoint access callback.
+ *
+ * @since 1.34.0 Function added.
+ */
+function system_icon_browser_access() {
+  return isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'icon-browser-endpoint');
 }

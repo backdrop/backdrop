@@ -1175,7 +1175,7 @@ function system_menu() {
   // AJAX endpoint for the icon browser dialog.
   $items['icon-browser/dialog'] = array(
     'page callback' => 'system_icon_browser_ajax_output',
-    'access callback' => TRUE,
+    'access callback' => 'system_icon_browser_access',
     'type' => MENU_CALLBACK,
     'file' => 'system.pages.inc',
     'theme callback' => 'ajax_base_page_theme',
@@ -4938,9 +4938,6 @@ function system_transliterate_machine_name($string, $options = array()) {
 
 /**
  * Display the page of icons with filters.
- *
- * The icons are loaded first from core, then from modules, and then from the
- * active theme. This way if an icon is overridden, we show the correct one.
  */
 function system_icon_browser_form($form, &$form_state) {
   if (isset($form_state['input']['dialogOptions']['target'])) {

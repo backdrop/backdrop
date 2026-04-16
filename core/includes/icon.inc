@@ -422,6 +422,8 @@ function icon_get_all_details($icon_name = '') {
     }
   }
 
+  backdrop_alter('icon_get_all_details', $icons);
+
   backdrop_sort($icons, array('provider_key' => SORT_STRING));
 
   if (empty($icon_name)) {
