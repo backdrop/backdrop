@@ -4976,7 +4976,7 @@ function system_icon_browser_form($form, &$form_state) {
       continue;
     }
     $searchtext = implode(' ', $icon);
-    if ($keyword && strpos($searchtext, $keyword) === FALSE) {
+    if ($keyword && stripos($searchtext, $keyword) === FALSE) {
       continue;
     }
     $results[] = $icon;
@@ -5056,13 +5056,16 @@ function system_icon_browser_form($form, &$form_state) {
     backdrop_add_js(backdrop_get_path('module', 'system') . '/js/icon_browser.js');
   }
 
-  $current_page = pager_default_initialize(count($results), SYSTEM_ICON_BROWSER_PER_PAGE);
-  $chunks = array_chunk($results, SYSTEM_ICON_BROWSER_PER_PAGE, TRUE);
+  if ($results) {
+    $current_page = pager_default_initialize(count($results), SYSTEM_ICON_BROWSER_PER_PAGE);
+    $chunks = array_chunk($results, SYSTEM_ICON_BROWSER_PER_PAGE, TRUE);
+    $filter_results = $chunks[$current_page];
+  }
 
   $form['icons'] = array(
     '#type' => 'container',
     '#theme' => 'system_icon_browser_form_icons',
-    '#icons' => $chunks[$current_page],
+    '#icons' => $results ? $filter_results : array(),
   );
 
   $form['pager'] = array(
