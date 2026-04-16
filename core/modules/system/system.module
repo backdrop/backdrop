@@ -4989,13 +4989,9 @@ function system_icon_browser_form($form, &$form_state) {
   $icon_allowed_styles = $config->get('icon_allowed_styles');
 
   $form = array(
-    // '#theme' => 'system_icon_browser_form',
     '#icons' => $results,
-    '#provider' => $provider,
-    '#style' => $style,
-    '#size' => $size,
-    '#include_brands' => $include_brands,
-    '#keyword' => $keyword,
+    '#prefix' => '<div id="system-icon-browser-form-wrapper">',
+    '#suffix' => '</div>',
   );
 
   $form['icon_filters'] = array(
@@ -5071,8 +5067,6 @@ function system_icon_browser_form($form, &$form_state) {
     '#type' => 'container',
     '#theme' => 'system_icon_browser_form_icons',
     '#icons' => $chunks[$current_page],
-    '#prefix' => '<div id="system-icon-browser-icons-wrapper">',
-    '#suffix' => '</div>',
   );
 
   $form['pager'] = array(
@@ -5100,6 +5094,7 @@ function system_icon_browser_form_submit($form, &$form_state) {
     unset($_GET['size']);
     unset($_GET['include_brands']);
     unset($_GET['page']);
+    $form_state['input'] = array();
   }
   else {
     $form_state['provider'] = $form_state['values']['provider'];
@@ -5116,7 +5111,7 @@ function system_icon_browser_form_submit($form, &$form_state) {
  */
 function system_icon_browser_ajax_form_open_dialog($form, &$form_state) {
   $commands = array();
-  $commands[] = ajax_command_replace("#system-icon-browser-icons-wrapper", backdrop_render($form['icons']));
+  $commands[] = ajax_command_replace("#system-icon-browser-form-wrapper", backdrop_render($form));
 
   return array(
     '#type' => 'ajax',

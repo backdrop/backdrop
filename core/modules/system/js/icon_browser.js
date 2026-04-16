@@ -17,8 +17,14 @@
     };
     $('#system-icon-browser-pager li a', context).once('icon-browser-pager-links').each(function () {
       var element_settings = base_element_settings;
+
       if ($(this).attr('href')) {
-        element_settings.url = $(this).attr('href');
+        var settings_href = $(this).attr('href');
+        var split_href = settings_href.split('?');
+        if (split_href[0] != '/icon-browser/dialog') {
+          settings_href = '/icon-browser/dialog?'+split_href[1];
+        }
+        element_settings.url = settings_href;
       }
       var base = $(this).attr('class');
       Backdrop.ajax[base] = new Backdrop.ajax(base, this, element_settings);
