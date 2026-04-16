@@ -156,7 +156,6 @@ function system_theme() {
         'dialog' => TRUE,
         'options' => array(),
         'click_insert' => TRUE,
-        'show_restricted' => FALSE,
       ),
     ) + $base,
     'label_machine_name' => array(
@@ -5095,6 +5094,12 @@ function system_icon_browser_form_submit($form, &$form_state) {
     unset($_GET['include_brands']);
     unset($_GET['page']);
     $form_state['input'] = array();
+    if (backdrop_is_ajax()) {
+      $form_state['rebuild'] = TRUE;
+    }
+    else {
+      $form_state['redirect'] = 'admin/config/media/icon-browser';
+    }
   }
   else {
     $form_state['provider'] = $form_state['values']['provider'];
@@ -5102,8 +5107,8 @@ function system_icon_browser_form_submit($form, &$form_state) {
     $form_state['keyword'] = $form_state['values']['keyword'];
     $form_state['size'] = $form_state['values']['size'];
     $form_state['include_brands'] = $form_state['values']['include_brands'];
-  }
     $form_state['rebuild'] = TRUE;
+  }
 }
 
 /**

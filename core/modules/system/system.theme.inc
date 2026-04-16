@@ -759,7 +759,6 @@ function theme_icon_browser_link($variables) {
     'attributes' => array(),
     'query' => array(
       'token' => backdrop_get_token('icon-browser'),
-      'show_restricted' => $variables['show_restricted'] ? 1 : 0,
     ),
   );
 
@@ -773,7 +772,6 @@ function theme_icon_browser_link($variables) {
   // Create a security token.
   $settings['iconBrowser'] = array(
     'token' => backdrop_get_token('icon-browser-endpoint'),
-    'restricted' => $variables['show_restricted'],
     'click_insert' => $variables['click_insert'],
   );
   backdrop_add_js($settings, 'setting');

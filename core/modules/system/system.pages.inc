@@ -283,11 +283,6 @@ function system_token_browser_build_level($type, array $ancestors, $show_restric
  * Page callback to output an icon browser as an empty page.
  */
 function system_icon_browser_ajax_output() {
-  $types = isset($_GET['token_types']) ? backdrop_json_decode($_GET['token_types']) : array();
-  $globals = isset($_GET['global_types']) ? backdrop_json_decode($_GET['global_types']) : TRUE;
-  $query = backdrop_get_query_parameters();
-  $show_restricted = $query['show_restricted'];
-
   $out = backdrop_get_form('system_icon_browser_form');
   $out = backdrop_render($out);
 
