@@ -1862,7 +1862,7 @@ function file_managed_file_browser_open($form, $form_state) {
   $field_cardinality = $field['cardinality'];
 
   // Add JQuery UI selectable to allow drag and drop selection if the field
-  // cardinality is set to multple.
+  // cardinality is set to multiple.
   if ($field_cardinality != 1) {
     backdrop_add_library('system', 'ui.selectable');
   }
