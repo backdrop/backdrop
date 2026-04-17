@@ -47,7 +47,7 @@ jobs:
           free -m
           echo Get disk usage
           df -h
-          echo Get running procs by user
+          echo Get running processes by user
           pgrep -au runner
 
       - name: Save Test Results
