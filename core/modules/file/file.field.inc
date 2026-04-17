@@ -762,7 +762,11 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     // field. These are added here so that they may be referenced through a
     // hook_form_alter().
     $elements['#file_upload_title'] = format_plural($field['cardinality'], 'Add a new file', 'Add new files');
-    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $field['cardinality']));
+    $elements['#file_upload_description'] = theme('file_upload_help', array(
+      'description' => '',
+      'upload_validators' => $elements[0]['#upload_validators'],
+      'cardinality' => $field['cardinality'],
+    ));
   }
 
   return $elements;

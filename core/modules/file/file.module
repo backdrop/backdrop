@@ -850,10 +850,18 @@ function file_theme() {
       'template' => 'templates/file',
     ) + $base,
     'file_link' => array(
-      'variables' => array('file' => NULL, 'icon_directory' => NULL, 'attributes' => array()),
+      'variables' => array(
+        'file' => NULL,
+        'icon_directory' => NULL,
+        'attributes' => array(),
+      ),
     ) + $base,
     'file_icon' => array(
-      'variables' => array('file' => NULL, 'icon_directory' => NULL, 'alt' => ''),
+      'variables' => array(
+        'file' => NULL,
+        'icon_directory' => NULL,
+        'alt' => '',
+      ),
     ) + $base,
     'file_managed_file' => array(
       'render element' => 'element',
@@ -868,16 +876,27 @@ function file_theme() {
       'variables' => array('items' => NULL),
     ) + $base,
     'file_upload_help' => array(
-      'variables' => array('description' => NULL, 'upload_validators' => NULL, 'cardinality' => NULL),
+      'variables' => array(
+        'description' => NULL,
+        'upload_validators' => NULL,
+        'cardinality' => NULL,
+      ),
     ) + $base,
     'file_type_overview' => array(
-      'variables' => array('name' => NULL, 'description' => NULL),
+      'variables' => array(
+        'name' => NULL,
+        'description' => NULL,
+      ),
     ) + $base,
     'file_display_order' => array(
       'render element' => 'element',
     ) + $base,
     'file_download_link' => array(
-      'variables' => array('file' => NULL, 'icon_directory' => NULL, 'text' => NULL),
+      'variables' => array(
+        'file' => NULL,
+        'icon_directory' => NULL,
+        'text' => NULL,
+      ),
     ) + $base,
     'file_audio' => array(
       'variables' => array(
@@ -1572,7 +1591,10 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
           // the same form, so to allow that, check for the token added by
           // file_managed_file_process().
           elseif (!$GLOBALS['user']->uid) {
-            $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array('file_' . $file->fid, 'fid_token')));
+            $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array(
+              'file_' . $file->fid,
+              'fid_token',
+            )));
             if ($token !== backdrop_hmac_base64('file-' . $file->fid, backdrop_get_private_key() . backdrop_get_hash_salt())) {
               $force_default = TRUE;
             }

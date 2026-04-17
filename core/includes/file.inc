@@ -989,8 +989,13 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
   // Determine whether we can perform this operation based on overwrite rules.
   $destination = file_destination($destination, $replace);
   if ($destination === FALSE) {
-    backdrop_set_message(t('The file %file could not be moved/copied because a file by that name already exists in the destination directory.', array('%file' => $original_source)), 'error');
-    watchdog('file', 'File %file could not be moved/copied because a file by that name already exists in the destination directory (%directory)', array('%file' => $original_source, '%directory' => $destination));
+    backdrop_set_message(t('The file %file could not be moved/copied because a file by that name already exists in the destination directory.', array(
+      '%file' => $original_source,
+    )), 'error');
+    watchdog('file', 'File %file could not be moved/copied because a file by that name already exists in the destination directory (%directory)', array(
+      '%file' => $original_source,
+      '%directory' => $destination,
+    ));
     return FALSE;
   }
 
@@ -998,8 +1003,12 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
   $real_source = backdrop_realpath($source);
   $real_destination = backdrop_realpath($destination);
   if ($source == $destination || ($real_source !== FALSE) && ($real_source == $real_destination)) {
-    backdrop_set_message(t('The specified file %file was not moved/copied because it would overwrite itself.', array('%file' => $source)), 'error');
-    watchdog('file', 'File %file could not be moved/copied because it would overwrite itself.', array('%file' => $source));
+    backdrop_set_message(t('The specified file %file was not moved/copied because it would overwrite itself.', array(
+      '%file' => $source,
+    )), 'error');
+    watchdog('file', 'File %file could not be moved/copied because it would overwrite itself.', array(
+      '%file' => $source,
+    ));
     return FALSE;
   }
   // Make sure the .htaccess files are present.
@@ -1571,13 +1580,18 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     switch ($uploaded_files['files']['error'][$form_field_name][$i]) {
       case UPLOAD_ERR_INI_SIZE:
       case UPLOAD_ERR_FORM_SIZE:
-        backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $name, '%maxsize' => format_size(file_upload_max_size()))), 'error');
+        backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array(
+          '%file' => $name,
+          '%maxsize' => format_size(file_upload_max_size()),
+        )), 'error');
         $files[$i] = FALSE;
         break;
 
       case UPLOAD_ERR_PARTIAL:
       case UPLOAD_ERR_NO_FILE:
-        backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $name)), 'error');
+        backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array(
+          '%file' => $name,
+        )), 'error');
         $files[$i] = FALSE;
         break;
 
@@ -1588,9 +1602,11 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
           break;
         }
 
-        // Unknown error
+        // Unknown error:
       default:
-        backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $name)), 'error');
+        backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array(
+          '%file' => $name,
+        )), 'error');
         $files[$i] = FALSE;
         break;
     }
@@ -1681,7 +1697,10 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     // If file_destination() returns FALSE then $replace === FILE_EXISTS_ERROR and
     // there's an existing file, so we need to bail.
     if ($file->destination === FALSE) {
-      backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
+      backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array(
+        '%source' => $form_field_name,
+        '%directory' => $destination,
+      )), 'error');
       $files[$i] = FALSE;
       continue;
     }
@@ -1715,7 +1734,10 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     $file->uri = $file->destination;
     if (!backdrop_move_uploaded_file($uploaded_files['files']['tmp_name'][$form_field_name][$i], $file->uri)) {
       backdrop_set_message(t('File upload error. Could not move uploaded file.'), 'error');
-      watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
+      watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array(
+        '%file' => $file->filename,
+        '%destination' => $file->uri,
+      ));
       $files[$i] = FALSE;
       continue;
     }

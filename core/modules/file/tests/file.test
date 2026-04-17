@@ -743,7 +743,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
   /**
    * Tests file_ajax_upload() parents_hash.
    */
-  function testManagedFileParentsHash() {
+  public function testManagedFileParentsHash() {
     // Perform the tests with all permutations of $form['#tree'] and
     // $element['#extended'].
     foreach (array(0, 1) as $tree) {
