@@ -474,11 +474,18 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   if ($field['cardinality'] == 1) {
     // If there's only one field, return it as delta 0.
     if (empty($elements[0]['#default_value']['fids'])) {
-      $elements[0]['#description'] = theme('file_upload_help', array('description' => field_filter_xss($instance['description']), 'upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $field['cardinality']));
+      $elements[0]['#description'] = theme('file_upload_help', array(
+        'description' => field_filter_xss($instance['description']),
+        'upload_validators' => $elements[0]['#upload_validators'],
+        'cardinality' => $field['cardinality'],
+      ));
     }
   }
   else {
-    $elements['#file_upload_description'] = theme('file_upload_help', array('upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $field['cardinality']));
+    $elements['#file_upload_description'] = theme('file_upload_help', array(
+      'upload_validators' => $elements[0]['#upload_validators'],
+      'cardinality' => $field['cardinality'],
+    ));
   }
   return $elements;
 }
