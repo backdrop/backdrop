@@ -167,6 +167,7 @@ function comment_views_data() {
     ),
   );
 
+  // cspell:ignore fulldata
   $data['comment']['changed_fulldata'] = array(
     'title' => t('Post date'),
     'help' => t('Date in the form of CCYYMMDD.'),

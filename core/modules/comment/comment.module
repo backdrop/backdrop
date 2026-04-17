@@ -1497,6 +1497,43 @@ function comment_node_search_result(Node $node) {
 }
 
 /**
+ * Implements hook_query_TAG_alter().
+ *
+ * Lists of comments (such as at admin/content/comment) are always tied to
+ * queries that use the "node_access" tag, since the comments are shown on
+ * node paths. Alter node access queries to hide comments when they are disabled
+ * at the node type level.
+ */
+function comment_query_node_access_alter(QueryAlterableInterface $query) {
+  $comment_alias = FALSE;
+  $node_alias = FALSE;
+
+  foreach ($query->getTables() as $alias => $table) {
+    if ($table['table'] == 'comment') {
+      $comment_alias = $alias;
+    }
+    elseif ($table['table'] == 'node') {
+      $node_alias = $alias;
+    }
+  }
+
+  if ($comment_alias && $node_alias) {
+    $node_types = node_type_get_types();
+
+    $excluded_content_types = array();
+    foreach ($node_types as $type_name => $node_type) {
+      if (empty($node_type->settings['comment_enabled'])) {
+        $excluded_content_types[] = $type_name;
+      }
+    }
+
+    if ($excluded_content_types) {
+      $query->condition($node_alias . '.type', array($excluded_content_types), 'NOT IN');
+    }
+  }
+}
+
+/**
  * Implements hook_user_cancel().
  */
 function comment_user_cancel($edit, $account, $method) {

@@ -581,7 +581,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     ),
   );
 
-  // Get contexts from relationships
+  // Get contexts from relationships.
   $relevant_relationships = layout_relationships_get_relevant_info($contexts);
   if (!empty($relevant_relationships)) {
     $form['context_wrapper']['context']['links']['add_relationship'] = array(
@@ -628,7 +628,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
             '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),
           );
         }
-        else{
+        else {
           $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
             '#type' => 'select',
             '#options' => $context_options,
@@ -690,9 +690,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       '#markup' => $relationship->getAdminSummary(),
     );
     $form['context_wrapper']['context']['required'][$relationship_key]['plugin'] = array(
-      '#markup' => isset($all_relationship_info[$relationship->plugin]['title']) ?
-        check_plain($all_relationship_info[$relationship->plugin]['title']) :
-        t('Broken'),
+      '#markup' => isset($all_relationship_info[$relationship->plugin]['title']) ? check_plain($all_relationship_info[$relationship->plugin]['title']) : t('Broken'),
     );
     $form['context_wrapper']['context']['required'][$relationship_key]['operations'] = array(
       '#type' => 'container',
@@ -1077,8 +1075,8 @@ function layout_settings_form_validate(&$form, &$form_state) {
             ));
           }
 
-          // An additional path like node/5 shouldnt be allowed if there is not
-          // a context-generating path as primary. But anypath/5 would be fine
+          // An additional path like node/5 shouldn't be allowed if there is not
+          // a context-generating path as primary. But any-path/5 would be fine
           // as a layout-provided path.
           $all_info = _layout_get_all_info('layout_context');
           $split_additional_path = preg_split('/\/[0-9_]+/', $additional_path);
@@ -1113,7 +1111,8 @@ function layout_settings_form_validate(&$form, &$form_state) {
         // If no errors, save the additional path.
         $form_state['additional_paths'][$key] = $additional_path;
 
-        // @todo: may not need this. Only if subcontexts like node/%/etc/% allowed.
+        // @todo: May not need this. Only if sub-contexts like node/%/etc/%
+        // are allowed.
         $contexts_from_additional_paths = layout_context_required_by_path($additional_path);
         foreach ($contexts_from_additional_paths as $contexts_from_additional_path) {
           $context_plugins[] = $contexts_from_additional_path->plugin;
@@ -1503,23 +1502,28 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     '#suffix' => '</div>',
   );
 
-  // Add a link to preview the page.
-  $link_path = $layout->getPath();
-  // A null path returns the site root.
-  // See https://github.com/backdrop/backdrop-issues/issues/4383
-  if (!is_null($link_path) && backdrop_valid_path($link_path)) {
-    $form['top']['#theme_wrappers'] = array('container');
-    $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
+  if ($layout->is_full_page) {
+    // Add a link to preview the page.
+    $link_path = $layout->getPath();
+    // A null path returns the site root.
+    // See https://github.com/backdrop/backdrop-issues/issues/4383
+    if (!is_null($link_path) && backdrop_valid_path($link_path)) {
+      $form['top']['#theme_wrappers'] = array('container');
+      $form['top']['#attributes']['class'] = array(
+        'edit-layout-top',
+        'clearfix',
+      );
 
-    $form['top']['button'] = array(
-      '#type' => 'dropbutton',
-    );
-    $form['top']['button']['#links'] = array(
-      array(
-        'title' => t('View page'),
-        'href' => $link_path,
-      ),
-    );
+      $form['top']['button'] = array(
+        '#type' => 'dropbutton',
+      );
+      $form['top']['button']['#links'] = array(
+        array(
+          'title' => t('View page'),
+          'href' => $link_path,
+        ),
+      );
+    }
   }
 
   $form['content'] = array('#tree' => TRUE);
@@ -1741,11 +1745,11 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
             'class' => array('use-ajax block-item'),
             'data-dialog' => TRUE,
             'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-          )
+          ),
         )
       ),
       '#description' => isset($block_info['description']) ? filter_xss($block_info['description']) : NULL,
-      '#wrapper_attributes' => array('class' => array('layout-block-add-row'))
+      '#wrapper_attributes' => array('class' => array('layout-block-add-row')),
     );
   }
 
@@ -1948,7 +1952,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#default_value' => $current_style,
     '#ajax' => array(
       'wrapper' => 'block_style_settings',
-      'callback' => 'layout_block_configure_ajax_style'
+      'callback' => 'layout_block_configure_ajax_style',
     ),
     '#parents' => array('style'),
   );
@@ -2297,8 +2301,8 @@ function layout_block_disable_page(Layout $layout, Block $block, $renderer_name)
     backdrop_set_message(t('Block "@title" disabled.', array('@title' => $block->getAdminTitle())));
     backdrop_goto('admin/structure/layouts/manage/' . $layout->name);
   }
-
 }
+
 /**
  * Form callback; Displays form for adding new conditions to a layout or block.
  *
@@ -2847,10 +2851,16 @@ function layout_locked_message($item, $type = 'layout') {
     $lock_user = theme('username', array('account' => $account));
     $lock_age = format_interval(REQUEST_TIME - $item->locked['updated']);
     $lock_break_url = url('admin/structure/layouts/' . $path_type . '/' . $item->name . '/break-lock', array('query' => array('token' => backdrop_get_token($type . '-' . $item->name)) + backdrop_get_destination()));
-    $message = t('Settings on this page are being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.',  array('!user' => $lock_user, '!age' => $lock_age, '!break' => $lock_break_url));
+    $message = t('Settings on this page are being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array(
+      '!user' => $lock_user,
+      '!age' => $lock_age,
+      '!break' => $lock_break_url,
+    ));
   }
   elseif (!empty($item->locked['updated'])) {
-    $message = t('This form has unsaved changes. Click "@button" to make changes permanent or "Cancel" to discard changes.', array('@button' => $button_title));
+    $message = t('This form has unsaved changes. Click "@button" to make changes permanent or "Cancel" to discard changes.', array(
+      '@button' => $button_title,
+    ));
   }
 
   return $message;
@@ -3293,7 +3303,7 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
     '#value' => t('Add condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
     '#submit' => array(
-      'layout_menu_item_form_condition_add'
+      'layout_menu_item_form_condition_add',
     ),
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
@@ -3668,6 +3678,7 @@ function layout_settings_page($form, &$form_state) {
     }
 
     // Build the list of possible options, either enabled or not hidden.
+    // @todo: Only show standard or flexible templates here.
     if ($is_default || !$template_info['hidden']) {
       $rows[$template_name] = array(
         'layout_template_info' => theme('layout_template_info', array('template_info' => $template_info)),
@@ -3796,7 +3807,8 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
 function layout_configure_region_page($form, &$form_state, Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
   $form_state['layout'] = $layout;
   $form_state['region_name'] = $region_name;
-  $layout_template_info = layout_get_layout_template_info($layout->layout_template);
+  $layout_template_type = $layout->layout_template_type ?? 'layout';
+  $layout_template_info = layout_get_layout_template_info($layout->layout_template, FALSE, $layout_template_type);
   if (!array_key_exists($region_name, $layout_template_info['regions'])) {
     return MENU_NOT_FOUND;
   }
