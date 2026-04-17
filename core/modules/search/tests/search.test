@@ -1746,6 +1746,7 @@ class SearchTokenizerTestCase extends BackdropWebTestCase {
     // the Unicode tables.
 
     // Beginnings of the character ranges.
+    // cspell:disable
     $starts = array(
       'CJK unified' => 0x4e00,
       'CJK Ext A' => 0x3400,
@@ -1792,6 +1793,7 @@ class SearchTokenizerTestCase extends BackdropWebTestCase {
       'Lisu' => 0xa4fd,
       'Yi' => 0xa48f,
     );
+    // cspell:enable
 
     // Generate characters consisting of starts, midpoints, and ends.
     $chars = array();
