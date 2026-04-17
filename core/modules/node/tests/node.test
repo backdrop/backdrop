@@ -4219,6 +4219,7 @@ class NodePublishScheduling extends BackdropWebTestCase {
       'status_default' => 0,
     );
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    // cspell:ignore foobee
     // Create a node of type foobee and assert that its published-state is set
     // to Draft.
     $name = $this->randomName(8);
@@ -4247,6 +4248,7 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '1', 'The node is in the state Published.');
 
+    // cspell:ignore foobsee
     // Create a content type of type foobsee via the user interface.
     $edit = array(
       'name' => 'foobsee',
