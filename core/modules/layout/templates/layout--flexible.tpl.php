@@ -66,7 +66,7 @@
                       </div>
                     </div>
                   </div>
-                <?php else : ?>
+                <?php else: ?>
                   <?php print $content[$region['content_key']]; ?>
                 <?php endif; ?>
               </div>
