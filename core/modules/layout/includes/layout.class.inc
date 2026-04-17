@@ -3,6 +3,10 @@
  * @file
  * Class for loading, modifying, and executing a layout.
  */
+
+/**
+ * Class representing a layout.
+ */
 class Layout {
   /**
    * The name of the layout.
@@ -73,12 +77,28 @@ class Layout {
    * The name of the layout template used by this configuration.
    *
    * Although this property may be retrieved and set directly, if changing a
-   * layout from one value to another, it is best to use Layout::setLayout(),
-   * which will handle the moving of blocks from one region to another.
+   * layout from one value to another, it is best to use
+   * Layout::setLayoutTemplate(), which will handle the moving of blocks from
+   * one region to another.
    *
    * @var string
    */
   var $layout_template;
+
+  /**
+   * The layout template type used by this configuration.
+   *
+   * @var string
+   */
+  public $layout_template_type;
+
+  /**
+   * Whether this layout is a full page layout (for example, with a header and
+   * footer, optional page title) or not.
+   *
+   * @var bool
+   */
+  public $is_full_page = TRUE;
 
   /**
    * Whether this layout is disabled.
@@ -260,6 +280,9 @@ class Layout {
       $this->layout_template = $this->layout;
       unset($this->layout);
     }
+
+    $this->layout_template_type = (empty($this->layout_template_type)) ? 'layout' : $this->layout_template_type;
+    _layout_standardize_template_type($this->layout_template_type);
 
     // Set the storage type.
     if (isset($config['module'])) {
@@ -533,7 +556,7 @@ class Layout {
    * @param $hook
    *   One of 'insert', 'update', 'enable', 'disable', 'revert', or 'delete'.
    */
-   protected function invokeHook($hook) {
+  protected function invokeHook($hook) {
     module_invoke_all('layout_' . $hook, $this);
   }
 
@@ -683,7 +706,7 @@ class Layout {
     }
 
     // Add the block to the new region in the correct position.
-    if (isset($region_position)) {
+    if (isset($position)) {
       $new_positions = array();
       foreach (array_values($this->positions[$region_name]) as $region_position => $existing_uuid) {
         if ($region_position === $position) {
@@ -809,27 +832,27 @@ class Layout {
   /**
    * Set the layout template, accommodating moving blocks if necessary.
    *
-   * @param $layout_name
-   *   The new layout name.
-   * @param $region_mapping
+   * @param string $layout_template_name
+   *   The new layout template name.
+   * @param array $region_mapping
    *   An array of region names, each keyed by the old region name and the value
    *   of the new region name. If empty, all known regions will be copied from
    *   one to the other. To discard the contents of a region, set the value
    *   to FALSE.
    */
-  function setLayoutTemplate($layout_name, $region_mapping = array()) {
+  public function setLayoutTemplate($layout_template_name, array $region_mapping = array()) {
     // If not changing anything, return as a no-op.
-    if ($layout_name === $this->layout_template && empty($region_mapping)) {
+    if ($layout_template_name === $this->layout_template && empty($region_mapping)) {
       return;
     }
     // If no layout has yet been set, then we have no copying to do.
     if (!isset($this->layout_template)) {
-      $this->layout_template = $layout_name;
+      $this->layout_template = $layout_template_name;
       return;
     }
 
-    $old_layout_template_info = layout_get_layout_template_info($this->layout_template);
-    $new_layout_template_info = layout_get_layout_template_info($layout_name);
+    $old_layout_template_info = layout_get_layout_template_info($this->layout_template, TRUE, $this->layout_template_type);
+    $new_layout_template_info = layout_get_layout_template_info($layout_template_name, TRUE, $this->layout_template_type);
     // Set up the array with region names for the new layout.
     $new_positions = array();
     $new_regions = array_keys($new_layout_template_info['regions']);
@@ -875,15 +898,18 @@ class Layout {
     // exist.
     if (!empty($this->orphaned_blocks)) {
       end($new_positions);
-      $this->refuge_region = !empty($new_layout_template_info['default region']) ? $new_layout_template_info['default region'] : key($new_positions);
+      $this->refuge_region = (!empty($new_layout_template_info['default region'])) ? $new_layout_template_info['default region'] : key($new_positions);
       foreach ($this->orphaned_blocks as $uuid) {
         $new_positions[$this->refuge_region][] = $uuid;
       }
     }
 
-    $this->layout_template = $layout_name;
+    $this->layout_template = $layout_template_name;
     $this->positions = $new_positions;
-    module_invoke_all('layout_template_change', $this, $old_layout_template_info['name']);
+    if ($this->layout_template_type === 'layout') {
+      module_invoke_all('layout_template_change', $this, $old_layout_template_info['name']);
+    }
+
   }
 
   /**
