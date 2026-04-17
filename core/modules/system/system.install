@@ -92,7 +92,10 @@ function system_requirements($phase) {
   $phpversion = phpversion();
   if (function_exists('phpinfo')) {
     if ($phase == 'runtime') {
-      $php_value = $t('Version: !version (<a href="!infourl">PHP information</a>)', array('!version' => $phpversion, '!infourl' => url('admin/reports/status/php')));
+      $php_value = $t('Version: !version (<a href="!url">PHP information</a>)', array(
+        '!version' => $phpversion,
+        '!url' => url('admin/reports/status/php'),
+      ));
     }
     else {
       $php_value = $t('Version: !version', array('!version' => $phpversion));
