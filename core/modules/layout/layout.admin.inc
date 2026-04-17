@@ -1077,8 +1077,8 @@ function layout_settings_form_validate(&$form, &$form_state) {
             ));
           }
 
-          // An additional path like node/5 shouldnt be allowed if there is not
-          // a context-generating path as primary. But anypath/5 would be fine
+          // An additional path like node/5 shouldn't be allowed if there is not
+          // a context-generating path as primary. But any-path/5 would be fine
           // as a layout-provided path.
           $all_info = _layout_get_all_info('layout_context');
           $split_additional_path = preg_split('/\/[0-9_]+/', $additional_path);
@@ -1113,7 +1113,8 @@ function layout_settings_form_validate(&$form, &$form_state) {
         // If no errors, save the additional path.
         $form_state['additional_paths'][$key] = $additional_path;
 
-        // @todo: may not need this. Only if subcontexts like node/%/etc/% allowed.
+        // @todo: May not need this. Only if sub-contexts like node/%/etc/%
+        // are allowed.
         $contexts_from_additional_paths = layout_context_required_by_path($additional_path);
         foreach ($contexts_from_additional_paths as $contexts_from_additional_path) {
           $context_plugins[] = $contexts_from_additional_path->plugin;

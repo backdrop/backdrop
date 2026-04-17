@@ -165,18 +165,18 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
 
     $edit = array(
-      'path' => 'randompath',
-      'additional_paths[0]' => 'randompathtwo',
+      'path' => 'random-path',
+      'additional_paths[0]' => 'random-path-two',
     );
     $this->backdropPost(NULL, $edit, t('Save layout'));
 
-    $this->backdropGet('randompath');
+    $this->backdropGet('random-path');
     $this->assertResponse(200);
-    $this->assertRaw('Foo subject', 'Testing block is present on randompath');
+    $this->assertRaw('Foo subject', 'Testing block is present on random-path');
 
-    $this->backdropGet('randompathtwo');
+    $this->backdropGet('random-path-two');
     $this->assertResponse(200);
-    $this->assertRaw('Foo subject', 'Testing block is present on randompathtwo');
+    $this->assertRaw('Foo subject', 'Testing block is present on random-path-two');
 
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
 

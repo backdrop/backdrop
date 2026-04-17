@@ -25,6 +25,7 @@
 function hook_language_init() {
   global $language, $settings;
 
+  // cspell:disable
   switch ($language->language) {
     case 'it':
       $settings['locale_custom_strings_en']['site_name'] = 'Il mio sito Backdrop';
@@ -34,6 +35,7 @@ function hook_language_init() {
       $settings['locale_custom_strings_en']['site_name'] = 'Mon site Backdrop';
       break;
   }
+  // cspell:enable
 }
 
 /**

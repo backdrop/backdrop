@@ -167,6 +167,7 @@ ftid
 ftlabel
 fttype
 ftvid
+fulldate
 fullname
 funcs
 Furfero
@@ -428,7 +429,7 @@ sidebarborders
 simpletest
 simpletests
 sioc
-sito
+sitename
 slave
 skipdots
 smartmenus
