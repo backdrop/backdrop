@@ -4951,7 +4951,7 @@ function system_icon_browser_form($form, &$form_state) {
   // Set filter variables from form state if available. If not in form state
   // (such as after using the pager) then use the $_GET variable, or retrieve
   // from config.
-  $params = array('provider', 'style', 'size', 'keyword', 'include_brands');
+  $params = array('provider', 'style', 'keyword');
   foreach ($params as $param) {
     if (!empty($form_state[$param])) {
       ${$param} = $form_state[$param];
@@ -4968,9 +4968,6 @@ function system_icon_browser_form($form, &$form_state) {
 
   $results = array();
   foreach ($icons as $icon) {
-    if (!$include_brands && $icon['is_brand']) {
-      continue;
-    }
     if ($provider != 'any' && $icon['provider'] != $provider) {
       continue;
     }
@@ -5022,22 +5019,6 @@ function system_icon_browser_form($form, &$form_state) {
     '#title' => t('Keyword'),
     '#default_value' => $keyword,
     '#size' => 10,
-  );
-  $form['icon_filters']['size'] = array(
-    '#type' => 'select',
-    '#title' => t('Preview Size'),
-    '#options' => array(
-      'small' => t('Small'),
-      'medium' => t('Medium'),
-      'large' => t('Large'),
-      'xlarge' => t('Extra Large'),
-    ),
-    '#default_value' => $size,
-  );
-  $form['icon_filters']['include_brands'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Include Brand icons'),
-    '#default_value' => $include_brands,
   );
   $form['icon_filters']['submit'] = array(
     '#type' => 'submit',
@@ -5094,13 +5075,9 @@ function system_icon_browser_form_submit($form, &$form_state) {
     $form_state['provider'] = '';
     $form_state['style'] = '';
     $form_state['keyword'] = '';
-    $form_state['size'] = '';
-    $form_state['include_brands'] = '';
     unset($_GET['provider']);
     unset($_GET['style']);
     unset($_GET['keyword']);
-    unset($_GET['size']);
-    unset($_GET['include_brands']);
     unset($_GET['page']);
     $form_state['input'] = array();
     if (backdrop_is_ajax()) {
@@ -5114,8 +5091,6 @@ function system_icon_browser_form_submit($form, &$form_state) {
     $form_state['provider'] = $form_state['values']['provider'];
     $form_state['style'] = $form_state['values']['style'];
     $form_state['keyword'] = $form_state['values']['keyword'];
-    $form_state['size'] = $form_state['values']['size'];
-    $form_state['include_brands'] = $form_state['values']['include_brands'];
     $form_state['rebuild'] = TRUE;
   }
 }
