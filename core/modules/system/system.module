@@ -4965,11 +4965,6 @@ function system_icon_browser_form($form, &$form_state) {
       ${$param} = $config->get('icon_browser_' . $param);
     }
   }
-  // The token is lost and the base URL is set to `system/ajaz` when both the
-  // FormAPI `ajax_command_*` and the pager AJAX are executed together. We Reset
-  // the base URL and token here to prevent this. 
-  $_GET['q'] = 'icon-browser/dialog';
-  $_GET['token'] = backdrop_get_token('icon-browser-endpoint');
 
   $results = array();
   foreach ($icons as $icon) {
@@ -5060,7 +5055,14 @@ function system_icon_browser_form($form, &$form_state) {
     $form['icon_filters']['reset']['#ajax'] = array(
       'callback' => 'system_icon_browser_ajax_form_open_dialog',
     );
+
     backdrop_add_js(backdrop_get_path('module', 'system') . '/js/icon_browser.js');
+
+    // The token is lost and the base URL is set to `system/ajaz` when both the
+    // FormAPI `ajax_command_*` and the pager AJAX are executed together. We Reset
+    // the base URL and token here to prevent this. 
+    $_GET['q'] = 'icon-browser/dialog';
+    $_GET['token'] = backdrop_get_token('icon-browser-endpoint');
   }
 
   if ($results) {
