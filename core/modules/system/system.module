@@ -4967,7 +4967,11 @@ function system_icon_browser_form($form, &$form_state) {
   }
 
   $results = array();
+  $available_providers = array();
+  $available_styles = array();
   foreach ($icons as $icon) {
+    $available_providers[$icon['provider']] = $icon['provider'];
+    $available_styles[$icon['style']] = $icon['style'];
     if ($provider != 'any' && $icon['provider'] != $provider) {
       continue;
     }
@@ -4981,7 +4985,14 @@ function system_icon_browser_form($form, &$form_state) {
     $results[] = $icon;
   }
 
+  $provider_options = array_intersect_key(array(
+    'core' => t('Core'),
+    'module' => t('Module'),
+    'theme' => t('Theme'),
+  ), $available_providers);
+
   $icon_allowed_styles = $config->get('icon_allowed_styles');
+  $style_options = array_intersect_key($icon_allowed_styles, $available_styles);
 
   $form = array(
     '#icons' => $results,
@@ -4995,23 +5006,22 @@ function system_icon_browser_form($form, &$form_state) {
       'class' => array('icon-browser-filters-wrapper'),
     ),
   );
-  $form['icon_filters']['provider'] = array(
-    '#type' => 'select',
-    '#title' => t('Provider'),
-    '#options' => array(
-      'any' => t('Any'),
-      'core' => t('Core'),
-      'module' => t('Module'),
-      'theme' => t('Theme'),
-    ),
-    '#default_value' => $provider,
-  );
+  if (count($available_providers) > 1) {
+    $form['icon_filters']['provider'] = array(
+      '#type' => 'select',
+      '#title' => t('Provider'),
+      '#options' => array(
+        'any' => t('Any'),
+      ) + $provider_options,
+      '#default_value' => $provider,
+    );
+  }
   $form['icon_filters']['style'] = array(
     '#type' => 'select',
     '#title' => t('Style'),
     '#options' => array(
       'any' => t('Any'),
-    ) + $icon_allowed_styles,
+    ) + $style_options,
     '#default_value' => $style,
   );
   $form['icon_filters']['keyword'] = array(
@@ -5072,8 +5082,10 @@ function system_icon_browser_form($form, &$form_state) {
  */
 function system_icon_browser_form_submit($form, &$form_state) {
   if ($form_state['triggering_element']['#parents'][0] == 'reset') {
-    $form_state['provider'] = '';
-    $form_state['style'] = '';
+    if (isset($form_state['values']['provider'])) {
+      $form_state['provider'] = 'any';
+    }
+    $form_state['style'] = 'any';
     $form_state['keyword'] = '';
     unset($_GET['provider']);
     unset($_GET['style']);
@@ -5088,7 +5100,9 @@ function system_icon_browser_form_submit($form, &$form_state) {
     }
   }
   else {
-    $form_state['provider'] = $form_state['values']['provider'];
+    if (isset($form_state['values']['provider'])) {
+      $form_state['provider'] = $form_state['values']['provider'];
+    }
     $form_state['style'] = $form_state['values']['style'];
     $form_state['keyword'] = $form_state['values']['keyword'];
     $form_state['rebuild'] = TRUE;
