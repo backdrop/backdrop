@@ -4948,8 +4948,10 @@ function system_icon_browser_form($form, &$form_state) {
 
   $icons = icon_get_all_details();
 
+  // Set filter variables from form state if available. If not in form state
+  // (such as after using the pager) then use the $_GET variable, or retrieve
+  // from config.
   $params = array('provider', 'style', 'size', 'keyword', 'include_brands');
-
   foreach ($params as $param) {
     if (!empty($form_state[$param])) {
       ${$param} = $form_state[$param];
@@ -4963,6 +4965,11 @@ function system_icon_browser_form($form, &$form_state) {
       ${$param} = $config->get('icon_browser_' . $param);
     }
   }
+  // The token is lost and the base URL is set to `system/ajaz` when both the
+  // FormAPI `ajax_command_*` and the pager AJAX are executed together. We Reset
+  // the base URL and token here to prevent this. 
+  $_GET['q'] = 'icon-browser/dialog';
+  $_GET['token'] = backdrop_get_token('icon-browser-endpoint');
 
   $results = array();
   foreach ($icons as $icon) {

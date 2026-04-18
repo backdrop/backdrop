@@ -13,16 +13,8 @@
     };
     $('#system-icon-browser-pager li a', context).once('icon-browser-pager-links').each(function () {
       var element_settings = base_element_settings;
-
-      // When the pager links are clicked, the link href changes to `ajax/link`
-      // so we change it back to the icon browser URL.
       if ($(this).attr('href')) {
-        var settings_href = $(this).attr('href');
-        var split_href = settings_href.split('?');
-        if (split_href[0] != '/icon-browser/dialog') {
-          settings_href = '/icon-browser/dialog?'+split_href[1];
-        }
-        element_settings.url = settings_href;
+        element_settings.url = $(this).attr('href');
       }
       var base = $(this).attr('class');
       Backdrop.ajax[base] = new Backdrop.ajax(base, this, element_settings);
