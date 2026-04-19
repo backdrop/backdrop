@@ -6,7 +6,6 @@
         "site_name",
         "site_slogan",
         "maintenance_mode_message",
-        "icon_allowed_styles"
     ],
     "action_recursion_limit": 35,
     "active_menus_default": [],
@@ -40,19 +39,6 @@
     "file_transliterate_uploads_display_name": 0,
     "filter_fallback_format": "plain_text",
     "form_cache_expiration": 21600,
-    "icon_allowed_styles": {
-      "fill": "Fill",
-      "outline": "Outline (or other)",
-      "thin": "Thin",
-      "light": "Light",
-      "bold": "Bold",
-      "duotone": "Duotone"
-    },
-    "icon_browser_provider": "any",
-    "icon_browser_style": "any",
-    "icon_browser_keyword": "",
-    "icon_browser_size": "medium",
-    "icon_browser_include_brands": 0,
     "image_toolkit": "gd",
     "image_jpeg_quality": "75",
     "image_style_flood_limit": 5,

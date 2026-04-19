@@ -459,7 +459,7 @@ function icon_get_style($icon_name) {
 
   static $icon_allowed_styles;
   if (!isset($icon_allowed_styles)) {
-    $icon_allowed_styles = config_get('system.core', 'icon_allowed_styles');
+    $icon_allowed_styles = icon_allowed_styles();
   }
 
   // Split icon name by '-' and get the last segment.
@@ -478,4 +478,25 @@ function icon_get_style($icon_name) {
     $icon_data['is_brand'] = TRUE;
   }
   return $icon_data;
+}
+
+/**
+ * Helper function to get list of allowed/known styles.
+ *
+ * @return array
+ *   An array of approved styles, keyed by the style machine name.
+ */
+function icon_allowed_styles() {
+  $allowed_styles = array(
+    'fill' => 'Fill',
+    'outline' => 'Outline (or other)',
+    'thin' => 'Thin',
+    'light' => 'Light',
+    'bold' => 'Bold',
+    'duotone' => 'Duotone'
+  );
+
+  backdrop_alter('icon_browser_allowed_styles', $allowed_styles);
+
+  return $allowed_styles;
 }
