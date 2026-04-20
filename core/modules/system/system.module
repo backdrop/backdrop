@@ -835,7 +835,7 @@ function system_menu() {
     'title' => 'Icon browser',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_icon_browser_form'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer site configuration'),
   );
 
   // Service settings.
@@ -4981,8 +4981,8 @@ function system_icon_browser_form($form, &$form_state) {
     if ($style != 'any' && ($icon['style'] != $style)) {
       continue;
     }
-    $searchtext = implode(' ', $icon);
-    if ($keyword && stripos($searchtext, $keyword) === FALSE) {
+    $search_text = implode(' ', $icon);
+    if ($keyword && stripos($search_text, $keyword) === FALSE) {
       continue;
     }
     $results[] = $icon;
@@ -5052,7 +5052,7 @@ function system_icon_browser_form($form, &$form_state) {
 
     backdrop_add_js(backdrop_get_path('module', 'system') . '/js/icon_browser.js');
 
-    // The token is lost and the base URL is set to `system/ajaz` when both the
+    // The token is lost and the base URL is set to `system/ajax` when both the
     // FormAPI `ajax_command_*` and the pager AJAX are executed together. We Reset
     // the base URL and token here to prevent this. 
     $_GET['q'] = 'icon-browser/dialog';
