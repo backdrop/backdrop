@@ -5,7 +5,7 @@
         "anonymous",
         "site_name",
         "site_slogan",
-        "maintenance_mode_message",
+        "maintenance_mode_message"
     ],
     "action_recursion_limit": 35,
     "active_menus_default": [],
