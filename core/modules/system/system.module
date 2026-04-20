@@ -4952,13 +4952,13 @@ function system_icon_browser_form($form, &$form_state) {
   // (such as after using the pager) then use the $_GET variable.
   $params = array(
     'provider' => 'any',
-    'style' => 'any', 
+    'style' => 'any',
     'keyword' => '',
   );
   foreach ($params as $param => $default_value) {
     if (!empty($form_state[$param])) {
       ${$param} = $form_state[$param];
-      $_GET[$param] =  ${$param};
+      $_GET[$param] = ${$param};
       unset($form_state[$param]);
     }
     elseif (!empty($_GET[$param])) {
@@ -5054,7 +5054,7 @@ function system_icon_browser_form($form, &$form_state) {
 
     // The token is lost and the base URL is set to `system/ajax` when both the
     // FormAPI `ajax_command_*` and the pager AJAX are executed together. We Reset
-    // the base URL and token here to prevent this. 
+    // the base URL and token here to prevent this.
     $_GET['q'] = 'icon-browser/dialog';
     $_GET['token'] = backdrop_get_token('icon-browser-endpoint');
   }
@@ -5074,7 +5074,11 @@ function system_icon_browser_form($form, &$form_state) {
   $form['pager'] = array(
     '#prefix' => '<div id="system-icon-browser-pager">',
     '#suffix' => '</div>',
-    '#markup' =>  theme('pager', array('quantity', count($results), 'attributes' => array('class' => array('icon-browser-pager-link')))),
+    '#markup' => theme('pager', array(
+      'quantity',
+      count($results),
+      'attributes' => array('class' => array('icon-browser-pager-link'))
+    )),
   );
 
   return $form;
