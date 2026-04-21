@@ -34,7 +34,7 @@
  * @param string|null $action_name
  *   (optional) The name of the action to retrieve.
  *
- * @return array
+ * @return array|false
  *   An array of action info as provided by hook_action_info(). If no action
  *   name is specified, all actions in the system will be returned as an array
  *   keyed by the action name. If an action name is specified but not found,
