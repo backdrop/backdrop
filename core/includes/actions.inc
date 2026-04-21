@@ -79,8 +79,11 @@ function actions_get_info($action_name = NULL) {
  *
  * @param string $action_name
  *   The name of the action to check access.
+ * @param User|null $account
+ *   The user account to check access action against. Defaults to the currently
+ *   logged-in user.
  */
-function actions_access($action_name) {
+function actions_access($action_name, ?User $account = NULL) {
   global $user;
   if (!isset($account)) {
     $account = $user;
@@ -111,6 +114,8 @@ function actions_access($action_name) {
  * @param Entity|null $entity
  *   The entity object that the action will act upon, such as a node, user, or
  *   comment object.
+ * @param array $context
+ *    Information about the current action execution. See actions_get_info().
  *
  * @return mixed
  *   The result of the executed action callback.
