@@ -1848,7 +1848,7 @@ function system_jquery_settings() {
   $options = array(
     'default' => t('jQuery 3 (recommended)'),
     'legacy' => t('jQuery 1 (legacy)'),
-    'latest' => t('jQuery 4 (experimental)'),
+    'jquery4' => t('jQuery 4 (experimental)'),
   );
   $form['jquery_version'] = array(
     '#type' => 'radios',
