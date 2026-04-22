@@ -115,7 +115,7 @@ function actions_access($action_name, $account = NULL) {
  *   The entity object that the action will act upon, such as a node, user, or
  *   comment object.
  * @param array $context
- *    Information about the current action execution. See actions_get_info().
+ *   Information about the current action execution. See actions_get_info().
  *
  * @return mixed
  *   The result of the executed action callback.
