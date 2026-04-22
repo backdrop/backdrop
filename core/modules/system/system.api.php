@@ -3595,6 +3595,7 @@ function hook_file_mimetype_mapping_alter(&$mapping) {
  *     that contains the callback function.
  *
  * @see action_get_info()
+ * @since 1.32.3 Added "access callback" and "access arguments".
  *
  * @ingroup actions
  */
