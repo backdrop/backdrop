@@ -1602,7 +1602,7 @@ function hook_image_toolkits() {
  */
 function hook_mail_alter(&$message) {
   if ($message['id'] == 'modulename_messagekey') {
-    if (!example_notifications_optin($message['to'], $message['id'])) {
+    if (!example_notifications_opt_in($message['to'], $message['id'])) {
       // If the recipient has opted to not receive such messages, cancel
       // sending.
       $message['send'] = FALSE;
