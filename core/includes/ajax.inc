@@ -1370,7 +1370,12 @@ function ajax_command_open_dialog($selector, $title, $html, array $dialog_option
   if (isset($dialog_options['buttons'])) {
     foreach ($dialog_options['buttons'] as $button_index => $button) {
       // Only allow specific attributes to be defined for a button.
-      $button = array_intersect_key($button, array_flip(['disabled', 'icons', 'label', 'text']));
+      $button = array_intersect_key($button, array_flip(array(
+        'disabled',
+        'icons',
+        'label',
+        'text',
+      )));
       foreach ($button as $attribute => $value) {
         if (is_string($value)) {
           // Apply filter_xss() to button attribute values.
