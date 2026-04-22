@@ -2842,10 +2842,13 @@ function layout_field_delete_instance($instance) {
  * use them as is, otherwise we'll ensure it starts with 'custom_' before
  * sending it back.
  *
- * @param string $layout_template_type
+ * @param ?string $layout_template_type
  *   The custom template type machine name to process, passed by reference.
  */
-function _layout_standardize_template_type(string &$layout_template_type = 'flexible') {
+function _layout_standardize_template_type(?string &$layout_template_type = 'flexible') {
+  if (empty($layout_template_type)) {
+    $layout_template_type = 'flexible';
+  }
   $reserved_types = array(
     'layout',
     'flexible',
