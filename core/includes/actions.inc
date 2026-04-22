@@ -83,7 +83,7 @@ function actions_get_info($action_name = NULL) {
  *   The user account to check access action against. Defaults to the currently
  *   logged-in user.
  */
-function actions_access($action_name, $account = NULL) {
+function actions_access($action_name, ?UserInterface $account = NULL) {
   global $user;
   if (!isset($account)) {
     $account = $user;
