@@ -652,7 +652,7 @@ function layout_page_menu_item(array $menu, array $access_arguments, array $page
   switch ($menu['type']) {
     case 'normal':
       $item['type'] = MENU_NORMAL_ITEM;
-      // Insert item into the proper menu
+      // Insert item into the proper menu.
       $item['menu_name'] = $menu['name'];
       break;
     case 'tab':
@@ -817,7 +817,8 @@ function layout_theme() {
         'content' => NULL,
         'settings' => NULL,
         'layout' => NULL,
-        // @todo: Rename to layout_template_info in 2.x.
+        'layout_template_info' => NULL,
+        // @todo: Remove layout_info in favour of layout_template_info in 2.x.
         'layout_info' => NULL,
         'renderer' => NULL,
         'attributes' => array(),
@@ -886,11 +887,13 @@ function layout_theme() {
           'content' => NULL,
           'settings' => NULL,
           'layout' => NULL,
-          // @todo: Rename to layout_template_info in 2.x.
-          'layout_info' => NULL,
+          'layout_template_info' => NULL,
           'renderer' => NULL,
           'attributes' => array(),
           'admin' => FALSE,
+          // Deprecated. Renamed to layout_template_info.
+          // @todo: Remove in 2.x.
+          'layout_info' => NULL,
         ),
         'template' => $template['template'],
         'path' => $template['path'],
@@ -1595,13 +1598,15 @@ function layout_flush_caches() {
 function layout_reset_caches() {
   cache()->delete('layout:layout:config');
   cache()->delete('layout:menu_item:config');
-  cache()->delete('layout_info');
+  cache()->delete('layout_template_info:layout');
+  cache()->delete('layout_template_info:flexible');
   cache('layout_path')->flush();
 
   backdrop_static_reset('layout_load_multiple');
   backdrop_static_reset('layout_menu_item_load_multiple');
   backdrop_static_reset('layout_get_path_layout_names');
-  backdrop_static_reset('layout_get_layout_template_info');
+  backdrop_static_reset('layout_get_layout_template_info:layout');
+  backdrop_static_reset('layout_get_layout_template_info:flexible');
   backdrop_static_reset('layout_get_block_info');
   backdrop_static_reset('layout_get_layout_tempstore');
   backdrop_static_reset('_layout_include_files');
@@ -1667,7 +1672,6 @@ function _layout_get_all_info($data_type, $init = array()) {
         else {
           $info['path'] = $module_path;
         }
-
         $all_info[$data_type][$key] = $info;
       }
     }
@@ -1699,13 +1703,13 @@ function _layout_get_all_info($data_type, $init = array()) {
  * @see hook_layout_template_info()
  * @see hook_layout_info()
  */
-function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE) {
-  $info = &backdrop_static(__FUNCTION__);
+function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE, $layout_template_type = 'layout') {
+  _layout_standardize_template_type($layout_template_type);
+  $info = &backdrop_static(__FUNCTION__ . ':' . $layout_template_type);
 
   // Try getting a cached list of layout info.
   if (!isset($info) && !$rebuild) {
-    // @todo: Rename cache key to layout_template_info in 2.x.
-    $cache = cache('cache')->get('layout_info');
+    $cache = cache('cache')->get('layout_template_info:' . $layout_template_type);
 
     if ($cache && $cache->data) {
       $info = $cache->data;
@@ -1714,37 +1718,45 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
 
   // Rebuild the list of layout info.
   if (!isset($info) || $rebuild) {
-    $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'layouts', 'name', 0);
     $init = array();
+    if ($layout_template_type == 'layout') {
+      $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'layouts', 'name', 0);
 
-    foreach ($files as $name => $file) {
-      $init[$name] = backdrop_parse_info_file($file->uri);
+      foreach ($files as $name => $file) {
+        $init[$name] = backdrop_parse_info_file($file->uri);
 
-      // Skip modules or themes that have been placed in the wrong directory.
-      if (isset($init[$name]['type']) && $init[$name]['type'] != 'layout') {
-        unset($init[$name]);
-        continue;
+        // Skip modules or themes that have been placed in the wrong directory.
+        if (isset($init[$name]['type']) && $init[$name]['type'] != 'layout') {
+          unset($init[$name]);
+          continue;
+        }
+
+        $init[$name]['path'] = dirname($file->uri);
+        $init[$name]['title'] = $init[$name]['name'];
+        $init[$name]['name'] = $name;
       }
-
-      $init[$name]['path'] = dirname($file->uri);
-      $init[$name]['title'] = $init[$name]['name'];
-      $init[$name]['name'] = $name;
+      $info = _layout_get_all_info('layout_template', $init);
+      // Account for implementations of the deprecated hook_layout_info().
+      $info = _layout_get_all_info('layout', $info);
     }
-    $info = _layout_get_all_info('layout_template', $init);
-    // Account for implementations of the deprecated hook_layout_info().
-    $info = _layout_get_all_info('layout', $info);
+    else {
+      $info = layout_layout_template_info($layout_template_type);
+    }
 
     // Populate defaults.
     foreach ($info as $name => $layout_template_info) {
       $info[$name] += array(
+        'name' => $name,
         'hidden' => FALSE,
         'preview' => 'preview.png',
         'default region' => 'content',
+        'is_full_page' => TRUE,
+        'layout_template_type' => 'layout',
         'stylesheets' => array(
           'all' => array(str_replace('_', '-', $name) . '.css'),
         ),
       );
-      if (!isset($info[$name]['template'])) {
+      if (isset($layout_template_info['path']) && !isset($info[$name]['template'])) {
         $template_path = BACKDROP_ROOT . '/' . $layout_template_info['path'] . '/layout--' . str_replace('_', '-', $name) . '.tpl.php';
 
         if (is_file($template_path)) {
@@ -1756,7 +1768,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
     // Sort the available layouts by display name.
     backdrop_sort($info, array('title' => SORT_STRING));
 
-    cache('cache')->set('layout_info', $info);
+    cache('cache')->set('layout_template_info:' . $layout_template_type, $info);
   }
 
   if ($template_name) {
@@ -1781,7 +1793,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
  * @param string $layout_name
  *   The name of the layout template, e.g. "one_column" or
  *   "three_three_four_column". If no layout template is specified, all layout
- *  info will be returned.
+ *   info will be returned.
  *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
@@ -1828,7 +1840,7 @@ function layout_relationships_get_relevant_info($contexts) {
   $relationships = _layout_get_all_info('layout_relationship');
 
   foreach ($contexts as $context) {
-    // Go through each relationship
+    // Go through each relationship.
     foreach ($relationships as $rid => $relationship) {
       $handler = layout_create_handler('layout_relationship', $rid);
       if ($children = $handler->getChildren($rid)) {
@@ -2406,9 +2418,12 @@ function layout_get_title_description(Layout $layout) {
  *
  * @param LayoutFlexibleTemplate $flexible_template
  *   The loaded flexible template object.
+ * @param string $flexible_template_type
+ *   The type of flexible template to save. Defaults to 'flexible'.
  */
-function layout_flexible_tempstore_set(LayoutFlexibleTemplate $flexible_template) {
-  tempstore_set('layout.flexible', $flexible_template->name, $flexible_template, 604800);
+function layout_flexible_tempstore_set(LayoutFlexibleTemplate $flexible_template, $flexible_template_type = 'flexible') {
+  _layout_standardize_template_type($flexible_template_type);
+  tempstore_set('layout.' . $flexible_template_type, $flexible_template->name, $flexible_template, 604800);
 }
 
 /**
@@ -2419,24 +2434,27 @@ function layout_flexible_tempstore_set(LayoutFlexibleTemplate $flexible_template
  *
  * @param string $flexible_template_name
  *   The machine name of the flexible template to load.
+ * @param string $flexible_template_type
+ *   The type of flexible template to load. Defaults to 'flexible'.
  *
  * @return LayoutFlexibleTemplate
  *   The flexible template object.
  */
-function layout_flexible_tempstore_load($flexible_template_name = NULL) {
+function layout_flexible_tempstore_load($flexible_template_name = NULL, $flexible_template_type = 'flexible') {
+  _layout_standardize_template_type($flexible_template_type);
   if (!$flexible_template_name) {
     return new LayoutFlexibleTemplate();
   }
 
-  $caches = &backdrop_static(__FUNCTION__, array());
-  if (!isset($caches[$flexible_template_name])) {
-    if (!$item = tempstore_get('layout.flexible', $flexible_template_name)) {
-      $item = layout_flexible_template_load($flexible_template_name);
+  $caches = &backdrop_static(__FUNCTION__ . ':' . $flexible_template_type, array());
+  if (!isset($caches[$flexible_template_type . ':' . $flexible_template_name])) {
+    if (!$item = tempstore_get('layout.' . $flexible_template_type, $flexible_template_name)) {
+      $item = layout_flexible_template_load($flexible_template_name, $flexible_template_type);
     }
-    $caches[$flexible_template_name] = $item;
+    $caches[$flexible_template_type . ':' . $flexible_template_name] = $item;
   }
 
-  return $caches[$flexible_template_name];
+  return $caches[$flexible_template_type . ':' . $flexible_template_name];
 }
 
 /**
@@ -2444,11 +2462,14 @@ function layout_flexible_tempstore_load($flexible_template_name = NULL) {
  *
  * @param string $flexible_template_name
  *   The machine name of the template to load.
+ * @param string $flexible_type
+ *   The type of flexible template to load. Defaults to 'flexible'.
  *
  * @return LayoutFlexibleTemplate|false
  */
-function layout_flexible_template_load($flexible_template_name = NULL) {
-  $all_templates = layout_flexible_template_load_all();
+function layout_flexible_template_load($flexible_template_name = NULL, $flexible_type = 'flexible') {
+  _layout_standardize_template_type($flexible_type);
+  $all_templates = layout_flexible_template_load_all($flexible_type);
   if (isset($all_templates[$flexible_template_name])) {
     return $all_templates[$flexible_template_name];
   }
@@ -2458,31 +2479,36 @@ function layout_flexible_template_load($flexible_template_name = NULL) {
 }
 
 /**
- * Load all flexible templates.
+ * Load all flexible templates by type. Defaults to 'flexible'.
+ *
+ * @param string $flexible_type
+ *   The type of flexible template to load. Defaults to 'flexible'.
  *
  * @return LayoutFlexibleTemplate[]
  */
-function layout_flexible_template_load_all() {
-  $templates = &backdrop_static(__FUNCTION__, array());
+function layout_flexible_template_load_all($flexible_type = 'flexible') {
+  _layout_standardize_template_type($flexible_type);
+  $templates = &backdrop_static(__FUNCTION__ . ':' . $flexible_type, array());
 
   if (empty($templates)) {
-    $cache = cache()->get('layout:flexible:config');
+    $cache = cache()->get('layout:' . $flexible_type . ':config');
     if ($cache && $cache->data) {
       $configs = $cache->data;
     }
     else {
       $configs = array();
-      $config_names = config_get_names_with_prefix('layout.flexible.');
+      $config_names = config_get_names_with_prefix('layout.' . $flexible_type . '.');
       foreach ($config_names as $config_file) {
         $config = config($config_file);
         $data = $config->get();
         $configs[$data['name']] = $data;
       }
 
-      cache()->set('layout:flexible:config', $configs);
+      cache()->set('layout:' . $flexible_type . ':config', $configs);
     }
 
     foreach ($configs as $template_name => $config) {
+      $config['layout_template_type'] = $flexible_type;
       $templates[$template_name] = new LayoutFlexibleTemplate($config);
     }
   }
@@ -2491,13 +2517,27 @@ function layout_flexible_template_load_all() {
 }
 
 /**
+ * Returns whether a flexible layout template machine name already exists. This
+ * function will also check if a layout template with the same machine name
+ * exists, to prevent clashes on the core "Layout templates" listing page.
+ *
+ * @see layout_flexible_template_settings_edit_form()
+ * @see form_validate_machine_name()
+ */
+function layout_flexible_template_machine_name_exists($value) {
+  $exists = (bool) layout_flexible_template_load($value) || !empty(layout_get_layout_template_info($value));
+  return $exists;
+}
+
+/**
  * Implements hook_layout_template_info().
  */
-function layout_layout_template_info() {
+function layout_layout_template_info($flexible_template_type = 'flexible') {
+  _layout_standardize_template_type($flexible_template_type);
   $layouts = array();
   $styles = layout_flexible_row_styles();
 
-  $flexible_templates = layout_flexible_template_load_all();
+  $flexible_templates = layout_flexible_template_load_all($flexible_template_type);
   foreach ($flexible_templates as $flexible_template) {
     $layouts[$flexible_template->name] = array(
       'title' => $flexible_template->title,
@@ -2508,7 +2548,8 @@ function layout_layout_template_info() {
       'flexible' => TRUE,
       'type' => 'layout',
       'path' => 'templates',
-      'preview' => 'flexible_template.png',
+      'preview' => $flexible_template->preview ?? 'flexible_template.png',
+      'is_full_page' => $flexible_template->is_full_page ?? TRUE,
       'libraries' => array('bootstrap4-gs'),
     );
 
@@ -2555,11 +2596,12 @@ function layout_layout_presave($layout) {
 /**
  * Reset all caches provided by Layout module.
  */
-function layout_flexible_reset_caches() {
-  cache()->delete('layout:flexible:config');
+function layout_flexible_reset_caches($flexible_template_type = 'flexible') {
+  _layout_standardize_template_type($flexible_template_type);
+  cache()->delete('layout:' . $flexible_template_type . ':config');
 
-  backdrop_static_reset('layout_flexible_template_load_all');
-  backdrop_static_reset('layout_flexible_tempstore_load');
+  backdrop_static_reset('layout_flexible_template_load_all:' . $flexible_template_type);
+  backdrop_static_reset('layout_flexible_tempstore_load:' . $flexible_template_type);
 }
 
 /**
@@ -2577,187 +2619,187 @@ function layout_flexible_row_styles() {
       'split' => '83:17',
       'bootstrap' => '10:2',
       'region_count' => 2,
-      'name' => t('Two regions') . (' 83% : 17%'),
+      'name' => t('Two regions') . (' 83% : 17% '),
     ),
     'region_9_3' => array(
       'split' => '75:25',
       'bootstrap' => '9:3',
       'region_count' => 2,
-      'name' => t('Two regions') . (' 75% : 25%'),
+      'name' => t('Two regions') . (' 75% : 25% '),
     ),
     'region_8_4' => array(
       'split' => '67:33',
       'bootstrap' => '8:4',
       'region_count' => 2,
-      'name' => t('Two regions') . (' 67% : 33%'),
+      'name' => t('Two regions') . (' 67% : 33% '),
     ),
     'region_6_6' => array(
       'split' => '50:50',
       'bootstrap' => '6:6',
       'region_count' => 2,
-      'name' => t('Two regions') . (' 50% : 50%'),
+      'name' => t('Two regions') . (' 50% : 50% '),
     ),
     'region_4_8' => array(
       'split' => '33:67',
       'bootstrap' => '4:8',
       'region_count' => 2,
-      'name' => t('Two regions') . (' 33% : 67%'),
+      'name' => t('Two regions') . (' 33% : 67% '),
     ),
     'region_3_9' => array(
       'split' => '25:75',
       'bootstrap' => '3:9',
       'region_count' => 2,
-      'name' => t('Two regions') . (' 25% : 75%'),
+      'name' => t('Two regions') . (' 25% : 75% '),
     ),
     'region_2_10' => array(
       'split' => '17:83',
       'bootstrap' => '2:10',
       'region_count' => 2,
-      'name' => t('Two regions') . (' 17% : 83%'),
+      'name' => t('Two regions') . (' 17% : 83% '),
     ),
     'region_4_4_4' => array(
       'split' => '33:33:33',
       'bootstrap' => '4:4:4',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 33% : 33% : 33%'),
+      'name' => t('Three regions') . (' 33% : 33% : 33% '),
     ),
     'region_2_8_2' => array(
       'split' => '17:67:17',
       'bootstrap' => '2:8:2',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 17% : 67% : 17%'),
+      'name' => t('Three regions') . (' 17% : 67% : 17% '),
     ),
     'region_2_2_8' => array(
       'split' => '17:17:67',
       'bootstrap' => '2:2:8',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 17% : 17% : 67%'),
+      'name' => t('Three regions') . (' 17% : 17% : 67% '),
     ),
     'region_8_2_2' => array(
       'split' => '67:17:17',
       'bootstrap' => '8:2:2',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 67% : 17% : 17%'),
+      'name' => t('Three regions') . (' 67% : 17% : 17% '),
     ),
     'region_3_6_3' => array(
       'split' => '25:50:25',
       'bootstrap' => '3:6:3',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 25% : 50% : 25%'),
+      'name' => t('Three regions') . (' 25% : 50% : 25% '),
     ),
     'region_3_3_6' => array(
       'split' => '25:25:50',
       'bootstrap' => '3:3:6',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 25% : 25% : 50%'),
+      'name' => t('Three regions') . (' 25% : 25% : 50% '),
     ),
     'region_6_3_3' => array(
       'split' => '50:25:25',
       'bootstrap' => '6:3:3',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 50% : 25% : 25%'),
+      'name' => t('Three regions') . (' 50% : 25% : 25% '),
     ),
     'region_4_2_6' => array(
       'split' => '33:17:50',
       'bootstrap' => '4:2:6',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 33% : 17% : 50%'),
+      'name' => t('Three regions') . (' 33% : 17% : 50% '),
     ),
     'region_4_6_2' => array(
       'split' => '33:50:17',
       'bootstrap' => '4:6:2',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 33% : 50% : 17%'),
+      'name' => t('Three regions') . (' 33% : 50% : 17% '),
     ),
     'region_2_6_4' => array(
       'split' => '17:50:33',
       'bootstrap' => '2:6:4',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 17% : 50% : 33%'),
+      'name' => t('Three regions') . (' 17% : 50% : 33% '),
     ),
     'region_2_4_6' => array(
       'split' => '17:33:50',
       'bootstrap' => '2:4:6',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 17% : 33% : 50%'),
+      'name' => t('Three regions') . (' 17% : 33% : 50% '),
     ),
     'region_6_2_4' => array(
       'split' => '50:17:33',
       'bootstrap' => '6:2:4',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 50% : 17% : 33%'),
+      'name' => t('Three regions') . (' 50% : 17% : 33% '),
     ),
     'region_6_4_2' => array(
       'split' => '50:33:17',
       'bootstrap' => '6:4:2',
       'region_count' => 3,
-      'name' => t('Three regions') . (' 50% : 33% : 17%'),
+      'name' => t('Three regions') . (' 50% : 33% : 17% '),
     ),
     'region_3_3_3_3' => array(
       'split' => '25:25:25:25',
       'bootstrap' => '3:3:3:3',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 25% : 25% : 25% : 25%'),
+      'name' => t('Four regions') . (' 25% : 25% : 25% : 25% '),
     ),
     'region_3_3_4_2' => array(
       'split' => '25:25:33:17',
       'bootstrap' => '3:3:4:2',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 25% : 25% : 33% : 17%'),
+      'name' => t('Four regions') . (' 25% : 25% : 33% : 17% '),
     ),
     'region_3_3_2_4' => array(
       'split' => '25:25:17:33',
       'bootstrap' => '3:3:2:4',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 25% : 25% : 17% : 33%'),
+      'name' => t('Four regions') . (' 25% : 25% : 17% : 33% '),
     ),
     'region_4_3_3_2' => array(
       'split' => '33:25:25:17',
       'bootstrap' => '4:3:3:2',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 33% : 25% : 25% : 17%'),
+      'name' => t('Four regions') . (' 33% : 25% : 25% : 17% '),
     ),
     'region_2_3_3_4' => array(
       'split' => '17:25:25:33',
       'bootstrap' => '2:3:3:4',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 17% : 25% : 25% : 33%'),
+      'name' => t('Four regions') . (' 17% : 25% : 25% : 33% '),
     ),
     'region_2_4_3_3' => array(
       'split' => '17:33:25:25',
       'bootstrap' => '2:4:3:3',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 17% : 33% : 25% : 25%'),
+      'name' => t('Four regions') . (' 17% : 33% : 25% : 25% '),
     ),
     'region_4_2_3_3' => array(
       'split' => '33:17:25:25',
       'bootstrap' => '4:2:3:3',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 33% : 17% : 25% : 25%'),
+      'name' => t('Four regions') . (' 33% : 17% : 25% : 25% '),
     ),
     'region_2_4_4_2' => array(
       'split' => '17:33:33:17',
       'bootstrap' => '2:4:4:2',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 17% : 33% : 33% : 17%'),
+      'name' => t('Four regions') . (' 17% : 33% : 33% : 17% '),
     ),
     'region_2_4_2_4' => array(
       'split' => '17:33:17:33',
       'bootstrap' => '2:4:2:4',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 17% : 33% : 17% : 33%'),
+      'name' => t('Four regions') . (' 17% : 33% : 17% : 33% '),
     ),
     'region_4_2_2_4' => array(
       'split' => '33:17:17:33',
       'bootstrap' => '4:2:2:4',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 33% : 17% : 17% : 33%'),
+      'name' => t('Four regions') . (' 33% : 17% : 17% : 33% '),
     ),
     'region_4_2_4_2' => array(
       'split' => '33:17:33:17',
       'bootstrap' => '4:2:4:2',
       'region_count' => 4,
-      'name' => t('Four regions') . (' 33% : 17% : 33% : 17%'),
+      'name' => t('Four regions') . (' 33% : 17% : 33% : 17% '),
     ),
   );
 
@@ -2792,6 +2834,25 @@ function _layout_clean_custom_css($classes = array()) {
  */
 function layout_field_delete_instance($instance) {
   cache('layout_path')->flush();
+}
+
+/**
+ * Helper to standardize layout template type machine names and ensure we
+ * don't have any namespace issues. If the type is in the reserved list, we can
+ * use them as is, otherwise we'll ensure it starts with 'custom_' before
+ * sending it back.
+ *
+ * @param string $layout_template_type
+ *   The custom template type machine name to process, passed by reference.
+ */
+function _layout_standardize_template_type(string &$layout_template_type = 'flexible') {
+  $reserved_types = array(
+    'layout',
+    'flexible',
+  );
+  if (!in_array($layout_template_type, $reserved_types) && strpos($layout_template_type, 'custom_') !== 0) {
+    $layout_template_type = 'custom_' . $layout_template_type;
+  }
 }
 
 /**
