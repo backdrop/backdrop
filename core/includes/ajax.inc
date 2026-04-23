@@ -707,6 +707,7 @@ function ajax_process_form(array $element, &$form_state) {
  * @param array $element
  *   An associative array containing the properties of the element.
  *   Properties used:
+ *   @code
  *   - #ajax['event']
  *   - #ajax['prevent']
  *   - #ajax['disable']
@@ -715,6 +716,7 @@ function ajax_process_form(array $element, &$form_state) {
  *   - #ajax['wrapper']
  *   - #ajax['parameters']
  *   - #ajax['effect']
+ *   @endcode
  *
  * @return array
  *   The processed element with the necessary JavaScript attached to it.
@@ -1018,7 +1020,7 @@ function ajax_command_html($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery prepend() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -1051,7 +1053,7 @@ function ajax_command_prepend($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery append() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -1084,7 +1086,7 @@ function ajax_command_append($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery after() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -1117,7 +1119,7 @@ function ajax_command_after($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery before() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -1363,6 +1365,26 @@ function ajax_command_open_dialog($selector, $title, $html, array $dialog_option
 
   // For consistency ensure the modal option is set to TRUE or FALSE.
   $dialog_options['modal'] = isset($dialog_options['modal']) && $dialog_options['modal'];
+
+  // Filter the list of buttons.
+  if (isset($dialog_options['buttons'])) {
+    foreach ($dialog_options['buttons'] as $button_index => $button) {
+      // Only allow specific attributes to be defined for a button.
+      $button = array_intersect_key($button, array_flip(array(
+        'disabled',
+        'icons',
+        'label',
+        'text',
+      )));
+      foreach ($button as $attribute => $value) {
+        if (is_string($value)) {
+          // Apply filter_xss() to button attribute values.
+          $button[$attribute] = filter_xss($value);
+        }
+      }
+      $dialog_options['buttons'][$button_index] = $button;
+    }
+  }
 
   return array(
     'command' => 'openDialog',

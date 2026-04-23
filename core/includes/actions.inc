@@ -34,10 +34,11 @@
  * @param string|null $action_name
  *   (optional) The name of the action to retrieve.
  *
- * @return array
+ * @return array|false
  *   An array of action info as provided by hook_action_info(). If no action
  *   name is specified, all actions in the system will be returned as an array
- *   keyed by the action name.
+ *   keyed by the action name. If an action name is specified but not found,
+ *   FALSE will be returned.
  */
 function actions_get_info($action_name = NULL) {
   $actions = &backdrop_static(__FUNCTION__);
@@ -48,6 +49,11 @@ function actions_get_info($action_name = NULL) {
       foreach ($module_actions as $module_action_name => $action_info) {
         $action_info += array(
           'callback' => $module_action_name,
+          // @todo In Backdrop 2.x, the default access callback should be
+          // user_access() rather than TRUE, requiring always-available actions
+          // to specify that they have no access check.
+          'access callback' => TRUE,
+          'access arguments' => array(),
           'module' => $module,
         );
         $actions[$module_action_name] = $action_info;
@@ -69,6 +75,38 @@ function actions_get_info($action_name = NULL) {
 }
 
 /**
+ * Checks if the current user account has access to a single action.
+ *
+ * @param string $action_name
+ *   The name of the action to check access.
+ * @param UserInterface|null $account
+ *   The user account to check access action against. Defaults to the currently
+ *   logged-in user.
+ */
+function actions_access($action_name, ?UserInterface $account = NULL) {
+  global $user;
+  if (!isset($account)) {
+    $account = $user;
+  }
+
+  $action_info = actions_get_info($action_name);
+  if (!$action_info) {
+    trigger_error(t('The action "@action" could not be found.', array('@action' => $action_name)), E_USER_ERROR);
+  }
+
+  // Check if access is allowed to this action.
+  $access_callback = $action_info['access callback'];
+  $access_arguments = $action_info['access arguments'];
+  $access_arguments[] = $account;
+  $access = ($access_callback === TRUE);
+  if (!$access) {
+    $access = call_user_func_array($access_callback, $access_arguments);
+  }
+
+  return $access;
+}
+
+/**
  * Executes a single action.
  *
  * @param string $action_name
@@ -76,6 +114,8 @@ function actions_get_info($action_name = NULL) {
  * @param Entity|null $entity
  *   The entity object that the action will act upon, such as a node, user, or
  *   comment object.
+ * @param array $context
+ *   Information about the current action execution. See actions_get_info().
  *
  * @return mixed
  *   The result of the executed action callback.
@@ -95,6 +135,12 @@ function actions_execute($action_name, ?Entity $entity, &$context) {
     return NULL;
   }
 
+  if (!actions_access($action_name)) {
+    watchdog('actions', 'Action %name not executed because the user account does not have the required access.', array('%name' => $action_name), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  // Get action info and include the file containing the callbacks.
   $action_info = actions_get_info($action_name);
   $callback = $action_info['callback'];
   if (isset($action_info['file'])) {

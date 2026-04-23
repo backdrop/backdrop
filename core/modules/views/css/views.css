@@ -141,3 +141,28 @@
 .view .progress-disabled {
   float: none;
 }
+
+/* Bulk form select all pages */
+.views-select-all-pages--wrapper {
+  display: none;
+}
+
+.views-select-all-pages--row {
+  display: none;
+}
+.views-select-all-pages--row td {
+  text-align: center;
+}
+
+/* Generic bulk form "select all" for non-tables */
+.views-select-all-pages--fieldset {
+  text-align: left;
+  padding: 0.6em 0;
+}
+.views-select-all-pages--fieldset .form-item {
+  margin-bottom: 0;
+}
+.views-select-all-pages--fieldset div {
+  padding: 0;
+  margin: 0;
+}

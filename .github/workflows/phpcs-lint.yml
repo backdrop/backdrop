@@ -11,23 +11,23 @@ jobs:
       - name: Setup PHP with CodeSniffer tool
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: '8.4'
           tools: phpcs
 
       # The checkout action refuses to put it outside, so we have to do it in
       # two steps.
       - name: Checkout coding standard
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: backdrop-ops/phpcs
-          ref: 1.2.0
+          ref: 1.3.0
           path: phpcs
 
       - name: Move standard outside current dir
         run: mv phpcs ..
 
       - name: Checkout code with full depth
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -40,9 +40,14 @@ jobs:
     name: Check spelling
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       name: Checkout code
-    - uses: streetsidesoftware/cspell-action@v5
+    - uses: actions/checkout@v6
+      name: Checkout cspell config
+      with:
+        repository: backdrop-ops/cspell
+        path: .cspell
+    - uses: streetsidesoftware/cspell-action@v8
       name: Run CSpell
       with:
         incremental_files_only: true

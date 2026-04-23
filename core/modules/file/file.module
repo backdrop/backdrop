@@ -98,6 +98,8 @@ function file_action_info() {
     'label' => t('Delete file(s)'),
     'type' => 'file',
     'callback' => 'file_delete_action',
+    'access callback' => 'user_access',
+    'access arguments' => array('delete files'),
     'file' => 'file.actions.inc',
   );
 
