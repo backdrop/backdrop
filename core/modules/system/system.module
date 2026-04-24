@@ -2845,8 +2845,26 @@ function system_check_directory($form_element) {
     return $form_element;
   }
 
+  // Safety-check that a protected system path is not used as an upload path
+  // that could result in system files getting overwritten.
+  $real_path = backdrop_realpath($directory);
+  $unsafe_directories = file_unsafe_directories();
+
+  foreach ($unsafe_directories as $unsafe_directory) {
+    $is_wildcard = (substr($unsafe_directory, -2) == '/*');
+    $unsafe_directory = ($is_wildcard) ? substr($unsafe_directory, 0, -2) : $unsafe_directory;
+    $unsafe_real_path = backdrop_realpath($unsafe_directory);
+
+    // Match the directory itself, and if a wildcard is present, any child
+    // directories of an unsafe directory.
+    if (($real_path === $unsafe_real_path) || ($is_wildcard && strpos($real_path, $unsafe_real_path) === 0)) {
+      form_set_error($form_element['#parents'][0], t('The directory %directory is not allowed to be an upload destination.', array('%directory' => $directory)));
+      return $form_element;
+    }
+  }
+
   if (!is_dir($directory) && !backdrop_mkdir($directory, NULL, TRUE)) {
-    // If the directory does not exists and cannot be created.
+    // If the directory does not exist and cannot be created.
     form_set_error($form_element['#parents'][0], t('The directory %directory does not exist and could not be created.', array('%directory' => $directory)));
     watchdog('file system', 'The directory %directory does not exist and could not be created.', array('%directory' => $directory), WATCHDOG_ERROR);
   }

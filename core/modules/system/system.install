@@ -92,7 +92,10 @@ function system_requirements($phase) {
   $phpversion = phpversion();
   if (function_exists('phpinfo')) {
     if ($phase == 'runtime') {
-      $php_value = $t('Version: !version (<a href="!infourl">PHP information</a>)', array('!version' => $phpversion, '!infourl' => url('admin/reports/status/php')));
+      $php_value = $t('Version: !version (<a href="!url">PHP information</a>)', array(
+        '!version' => $phpversion,
+        '!url' => url('admin/reports/status/php'),
+      ));
     }
     else {
       $php_value = $t('Version: !version', array('!version' => $phpversion));
@@ -1747,6 +1750,17 @@ function system_update_last_removed() {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function system_update_dependencies() {
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['system'][1071] = array(
+    'user' => 1007,
+  );
+  return $dependencies;
+}
+
+/**
  * @defgroup updates-7.x-to-1.x Updates from 7.x to 1.x
  * @{
  * Update functions from Drupal 7.x to Backdrop CMS 1.x.
@@ -3307,6 +3321,7 @@ function system_update_1070() {
  * See: https://github.com/backdrop/backdrop-issues/issues/1759
  */
 function system_update_1071() {
+  backdrop_static_reset('user_roles');
   $roles = user_roles(FALSE, 'administer layouts');
   foreach ($roles as $role_name => $role) {
     user_role_grant_permissions($role_name, array('administer flexible templates'));

@@ -1234,9 +1234,8 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
 
     $allowlist = array_unique(explode(' ', strtolower(trim($extensions))));
 
-    // Remove unsafe extensions from the list of allowed extensions. The list is
-    // copied from file_save_upload().
-    $allowlist = array_diff($allowlist, explode('|', 'php|phar|pl|py|cgi|asp|js'));
+    // Remove unsafe extensions from the list of allowed extensions.
+    $allowlist = array_diff($allowlist, file_unsafe_extensions());
 
     // Split the filename up by periods. The first part becomes the basename
     // the last part the final extension.
@@ -1785,7 +1784,8 @@ function file_validate(File $file, $validators = array()) {
   // malicious extension. Contributed and custom code that calls this method
   // needs to take similar steps if they need to permit files with malicious
   // extensions to be uploaded.
-  if (empty($errors) && !settings_get('allow_insecure_uploads', 0) && preg_match('/\.(php|phar|pl|py|cgi|asp|js)(\.|$)/i', $file->filename)) {
+  $preg_extension_list = implode('|', file_unsafe_extensions());
+  if (empty($errors) && !settings_get('allow_insecure_uploads', 0) && preg_match('/\.(' . $preg_extension_list . ')(\.|$)/i', $file->filename)) {
     $errors[] = t('For security reasons, your upload has been rejected.');
   }
 
@@ -2085,6 +2085,72 @@ function file_validate_svg(File $file) {
   }
 
   return $errors;
+}
+
+/**
+ * Return a list of unsafe file extensions that are never allowed.
+ *
+ * @return string[]
+ */
+function file_unsafe_extensions() {
+  // cspell:disable
+  $unsafe_extensions = array(
+    'asp',
+    'cgi',
+    'ctp',
+    'htaccess',
+    'hphp',
+    'inc',
+    'js',
+    'module',
+    'phar',
+    'php',
+    'php2',
+    'php3',
+    'php4',
+    'php5',
+    'php6',
+    'php7',
+    'php8',
+    'phps',
+    'pht',
+    'phtml',
+    'phtm',
+    'pgif',
+    'pl',
+    'py',
+    'shtml',
+  );
+  // cspell:enable
+
+  // Allow the list to be overridden in settings.php:
+  return settings_get('file_unsafe_extensions', $unsafe_extensions);
+}
+
+
+/**
+ * Return a list of directories that are not allowed to be upload destinations.
+ *
+ * This list is not comprehensive. It is utilized to prevent accidental
+ * administrative misconfiguration.
+ *
+ * @return string[]
+ */
+function file_unsafe_directories() {
+  $unsafe_directories = array(
+    // The installation root directory.
+    '.',
+    // Wildcards prevent any children directories. Wildcards are only supported
+    // at the end of a directory path.
+    'core/*',
+    'layouts/*',
+    'modules/*',
+    'themes/*',
+  );
+
+  // Allow the list to be overridden in settings.php:
+  return settings_get('file_unsafe_directories', $unsafe_directories);
+
 }
 
 /**
