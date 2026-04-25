@@ -33,17 +33,24 @@
   display: none;
   float: left; /* LTR */
   margin-right: 10px;
-  max-width: 37px;
-  height: auto;
 }
 [dir="rtl"] .layout-list img {
   float: right; /* LTR */
   margin-right: 0;
   margin-left: 10px;
 }
+.layout-icon {
+  object-fit: contain;
+  max-width: 50px;
+  max-height: 75px;
+  width: 50px;
+  height: 75px;
+}
 @media (min-width: 768px) {
-  .layout-list img {
-    display: inline;
+  .layout-list img,
+  .layout-list .layout-icon {
+    display: inline-block;
+    color: rgb(102, 102, 102);
   }
 }
 
@@ -58,6 +65,11 @@
    [dir="rtl"] .layout-list thead .layout-title {
      padding-right: 71px;
    }
+}
+
+.layout-info {
+  display: flex;
+  gap: 10px;
 }
 
 /* Individual layout settings form. */

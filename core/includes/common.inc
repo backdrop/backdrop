@@ -2521,6 +2521,7 @@ function format_plural($count, $singular, $plural, array $args = array(), array 
  */
 function parse_size($size) {
   // Remove the non-unit characters from the size.
+  // cspell:ignore bkmgtpezy
   $unit = preg_replace('/[^bkmgtpezy]/i', '', $size);
   // Remove the non-numeric characters from the size.
   $size = (float) preg_replace('/[^0-9\.]/', '', $size);

@@ -2394,11 +2394,15 @@ function comment_action_info() {
       'label' => t('Publish comment'),
       'type' => 'comment',
       'callback' => 'comment_publish_action',
+      'access callback' => 'user_access',
+      'access arguments' => array('administer comments'),
     ),
     'comment_unpublish_action' => array(
       'label' => t('Unpublish comment'),
       'type' => 'comment',
       'callback' => 'comment_unpublish_action',
+      'access callback' => 'user_access',
+      'access arguments' => array('administer comments'),
     ),
   );
 }

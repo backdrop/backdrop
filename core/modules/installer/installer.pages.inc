@@ -779,7 +779,11 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         '#name' => 'cancel',
         '#title' => t('Finish without enabling'),
         '#href' => 'admin/installer/reset/module/all',
-        '#options' => array(),
+        '#options' => array(
+          'query' => array(
+            'token' => backdrop_get_token('installer_install_action_access'),
+          ),
+        ),
       );
     }
 
@@ -858,7 +862,11 @@ function installer_browser_install_button_form($form, &$form_state) {
     '#name' => 'cancel',
     '#title' => t('Clear queue'),
     '#href' => 'admin/installer/reset/' . $project_type . '/clear',
-    '#options' => array(),
+    '#options' => array(
+      'query' => array(
+        'token' => backdrop_get_token('installer_install_action_access'),
+      ),
+    ),
   );
 
   return $form;
