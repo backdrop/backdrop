@@ -5008,20 +5008,6 @@ function system_icon_browser_form($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Reset'),
   );
-  if (backdrop_is_ajax()) {
-    $form['icon_filters']['submit']['#ajax'] = array(
-      'callback' => 'system_icon_browser_ajax_form_open_dialog',
-    );
-    $form['icon_filters']['reset']['#ajax'] = array(
-      'callback' => 'system_icon_browser_ajax_form_open_dialog',
-    );
-
-    // The token is lost and the base URL is set to `system/ajax` when both the
-    // FormAPI `ajax_command_*` and the pager AJAX are executed together. We Reset
-    // the base URL and token here to prevent this.
-    $_GET['q'] = 'icon-browser/dialog';
-    $_GET['token'] = backdrop_get_token('icon-browser-endpoint');
-  }
 
   $icons_per_page = $config->get('icon_browser_icons_per_page');
   if ($results) {
@@ -5064,12 +5050,7 @@ function system_icon_browser_form_submit($form, &$form_state) {
     unset($_GET['keyword']);
     unset($_GET['page']);
     $form_state['input'] = array();
-    if (backdrop_is_ajax()) {
-      $form_state['rebuild'] = TRUE;
-    }
-    else {
-      $form_state['redirect'] = 'admin/config/media/icon-browser';
-    }
+    $form_state['redirect'] = 'admin/config/media/icon-browser';
   }
   else {
     if (isset($form_state['values']['provider'])) {
