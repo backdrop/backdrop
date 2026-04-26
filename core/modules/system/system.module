@@ -57,11 +57,6 @@ define('EMAIL_MAX_LENGTH', 254);
 define('TOKEN_MAX_DEPTH', 9);
 
 /**
- * The maximum depth for token tree recursion.
- */
-define('SYSTEM_ICON_BROWSER_PER_PAGE', 110);
-
-/**
  * Implements hook_theme().
  */
 function system_theme() {
@@ -148,14 +143,6 @@ function system_theme() {
         'options' => array(),
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-      ),
-    ) + $base,
-    'icon_browser_link' => array(
-      'variables' => array(
-        'text' => t('Browse available icons.'),
-        'dialog' => TRUE,
-        'options' => array(),
-        'click_insert' => TRUE,
       ),
     ) + $base,
     'label_machine_name' => array(
@@ -1172,15 +1159,6 @@ function system_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  // AJAX endpoint for the icon browser dialog.
-  $items['icon-browser/dialog'] = array(
-    'page callback' => 'system_icon_browser_ajax_output',
-    'access callback' => 'system_icon_browser_access',
-    'type' => MENU_CALLBACK,
-    'file' => 'system.pages.inc',
-    'theme callback' => 'ajax_base_page_theme',
-  );
-
   // Machine names transliteration.
   $items['system/transliterate/%'] = array(
     'page callback' => 'system_transliterate_ajax',
@@ -2191,18 +2169,6 @@ function system_library_info() {
     'css' => array(
       $system_module_path . '/css/jquery.treetable.css' => array(),
       $system_module_path . '/css/jquery.treetable.theme.default.css' => array(),
-    ),
-  );
-
-  // jQuery treeTable plugin.
-  $libraries['icon_browser'] = array(
-    'title' => 'Icon browser',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      $system_module_path . '/js/icon_browser.js' => array(),
-    ),
-    'css' => array(
-      $system_module_path . '/css/icon_browser.css' => array(),
     ),
   );
 
@@ -5050,8 +5016,6 @@ function system_icon_browser_form($form, &$form_state) {
       'callback' => 'system_icon_browser_ajax_form_open_dialog',
     );
 
-    backdrop_add_js(backdrop_get_path('module', 'system') . '/js/icon_browser.js');
-
     // The token is lost and the base URL is set to `system/ajax` when both the
     // FormAPI `ajax_command_*` and the pager AJAX are executed together. We Reset
     // the base URL and token here to prevent this.
@@ -5059,9 +5023,10 @@ function system_icon_browser_form($form, &$form_state) {
     $_GET['token'] = backdrop_get_token('icon-browser-endpoint');
   }
 
+  $icons_per_page = $config->get('icon_browser_icons_per_page');
   if ($results) {
-    $current_page = pager_default_initialize(count($results), SYSTEM_ICON_BROWSER_PER_PAGE);
-    $chunks = array_chunk($results, SYSTEM_ICON_BROWSER_PER_PAGE, TRUE);
+    $current_page = pager_default_initialize(count($results), $icons_per_page);
+    $chunks = array_chunk($results, $icons_per_page, TRUE);
     $filter_results = $chunks[$current_page];
   }
 
@@ -5114,17 +5079,4 @@ function system_icon_browser_form_submit($form, &$form_state) {
     $form_state['keyword'] = $form_state['values']['keyword'];
     $form_state['rebuild'] = TRUE;
   }
-}
-
-/**
- * Handles the Icon Browser filter form submit.
- */
-function system_icon_browser_ajax_form_open_dialog($form, &$form_state) {
-  $commands = array();
-  $commands[] = ajax_command_replace("#system-icon-browser-form-wrapper", backdrop_render($form));
-
-  return array(
-    '#type' => 'ajax',
-    '#commands' => $commands,
-  );
 }

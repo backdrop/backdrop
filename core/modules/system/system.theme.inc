@@ -750,28 +750,3 @@ function theme_system_icon_browser_form_icons($variables) {
 
   return $output;
 }
-
-/**
- * Theme a link to an icon browser either as a regular link or a dialog.
- */
-function theme_icon_browser_link($variables) {
-  $options = array(
-    'attributes' => array(),
-    'query' => array(
-      'token' => backdrop_get_token('icon-browser-endpoint'),
-    ),
-  );
-
-  if (!empty($variables['dialog'])) {
-    backdrop_add_library('system', 'backdrop.ajax');
-    $options['attributes']['class'][] = 'use-ajax icon-browser-link';
-  }
-  else {
-    $options['attributes']['target'] = '_blank';
-  }
-  $settings['iconBrowser'] = array(
-    'click_insert' => $variables['click_insert'],
-  );
-  backdrop_add_js($settings, 'setting');
-  return l($variables['text'], 'icon-browser/dialog', $options);
-}
