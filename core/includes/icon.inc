@@ -357,8 +357,20 @@ function theme_icon(array $variables) {
  *    - An empty array if no icon was found for a provided $icon_name.
  */
 function icon_get_all_details($icon_name = '') {
-  $icons = &backdrop_static(__FUNCTION__, array());
+  // Skip building the whole array if one icon was requested and the icon is
+  // present in the most likely location (core).
+  if (isset($icon_name) && _icon_from_core($icon_name)) {
+    return array($icon_name => array(
+        'provider' => 'core',
+        'provider_detail' => t('Backdrop core'),
+        'provider_key' => $icon_name,
+        'name' => $icon_name,
+        'directory' => CORE_ICON_BROWSER_PATH,
+      ) + icon_get_style($icon_name)
+    );
+  }
 
+  $icons = &backdrop_static(__FUNCTION__, array());
   if (empty($icons)) {
     // Icons provided by Backdrop core.
     $core_icons = scandir(CORE_ICON_BROWSER_PATH);
