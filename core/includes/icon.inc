@@ -373,7 +373,7 @@ function icon_get_all_details($icon_name = '') {
   $icons = &backdrop_static(__FUNCTION__, array());
   if (empty($icons)) {
     // Icons provided by Backdrop core.
-    $core_icons = scandir(CORE_ICON_BROWSER_PATH);
+    $core_icons = scandir(CORE_ICON_BROWSER_PATH, SCANDIR_SORT_NONE);
     foreach ($core_icons as $icon) {
       if (substr($icon, -4, 4) == '.svg') {
         $icon_key = substr($icon, 0, -4);
