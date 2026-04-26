@@ -4910,7 +4910,7 @@ function system_icon_browser_form($form, &$form_state) {
     $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
   }
   $config = config('system.core');
-  backdrop_add_css(backdrop_get_path('module', 'system') . '/css/icon_browser.css');
+  backdrop_add_css(backdrop_get_path('module', 'system') . '/css/icon-browser.css');
 
   $icons = icon_get_all_details();
 
