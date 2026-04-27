@@ -409,7 +409,13 @@ class TokenCommentTestCase extends TokenTestHelper {
   }
 
   function testCommentTokens() {
-    $node = $this->backdropCreateNode(array('comment' => COMMENT_NODE_OPEN));
+    $content_type = $this->backdropCreateContentType(array(
+      'comment_enabled' => TRUE,
+    ));
+    $node = $this->backdropCreateNode(array(
+      'comment' => COMMENT_NODE_OPEN,
+      'type' => $content_type->type,
+    ));
 
     /** @var Comment $parent_comment */
     $parent_comment = entity_create('comment', array());
