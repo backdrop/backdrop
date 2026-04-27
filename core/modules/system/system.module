@@ -4917,7 +4917,7 @@ function system_icon_browser_form($form, &$form_state) {
   // Set filter variables from form state if available. If not in form state
   // (such as after using the pager) then use the $_GET variable.
   $params = array(
-    'provider' => 'any',
+    'project_type' => 'any',
     'style' => 'any',
     'keyword' => '',
   );
@@ -4936,12 +4936,12 @@ function system_icon_browser_form($form, &$form_state) {
   }
 
   $results = array();
-  $available_providers = array();
+  $available_project_types = array();
   $available_styles = array();
   foreach ($icons as $icon) {
-    $available_providers[$icon['provider']] = $icon['provider'];
+    $available_project_types[$icon['project_type']] = $icon['project_type'];
     $available_styles[$icon['style']] = $icon['style'];
-    if ($provider != 'any' && $icon['provider'] != $provider) {
+    if ($project_type != 'any' && $icon['project_type'] != $project_type) {
       continue;
     }
     if ($style != 'any' && ($icon['style'] != $style)) {
@@ -4954,11 +4954,11 @@ function system_icon_browser_form($form, &$form_state) {
     $results[] = $icon;
   }
 
-  $provider_options = array_intersect_key(array(
+  $project_type_options = array_intersect_key(array(
     'core' => t('Core'),
     'module' => t('Module'),
     'theme' => t('Theme'),
-  ), $available_providers);
+  ), $available_project_types);
 
   $icon_allowed_styles = icon_allowed_styles();
   $style_options = array_intersect_key($icon_allowed_styles, $available_styles);
@@ -4975,14 +4975,14 @@ function system_icon_browser_form($form, &$form_state) {
       'class' => array('icon-browser-filters-wrapper'),
     ),
   );
-  if (count($available_providers) > 1) {
-    $form['icon_filters']['provider'] = array(
+  if (count($available_project_types) > 1) {
+    $form['icon_filters']['project_type'] = array(
       '#type' => 'select',
-      '#title' => t('Provider'),
+      '#title' => t('project_type'),
       '#options' => array(
         'any' => t('Any'),
-      ) + $provider_options,
-      '#default_value' => $provider,
+      ) + $project_type_options,
+      '#default_value' => $project_type,
     );
   }
   $form['icon_filters']['style'] = array(
@@ -5040,12 +5040,12 @@ function system_icon_browser_form($form, &$form_state) {
  */
 function system_icon_browser_form_submit($form, &$form_state) {
   if ($form_state['triggering_element']['#parents'][0] == 'reset') {
-    if (isset($form_state['values']['provider'])) {
-      $form_state['provider'] = 'any';
+    if (isset($form_state['values']['project_type'])) {
+      $form_state['project_type'] = 'any';
     }
     $form_state['style'] = 'any';
     $form_state['keyword'] = '';
-    unset($_GET['provider']);
+    unset($_GET['project_type']);
     unset($_GET['style']);
     unset($_GET['keyword']);
     unset($_GET['page']);
@@ -5053,8 +5053,8 @@ function system_icon_browser_form_submit($form, &$form_state) {
     $form_state['redirect'] = 'admin/config/media/icon-browser';
   }
   else {
-    if (isset($form_state['values']['provider'])) {
-      $form_state['provider'] = $form_state['values']['provider'];
+    if (isset($form_state['values']['project_type'])) {
+      $form_state['project_type'] = $form_state['values']['project_type'];
     }
     $form_state['style'] = $form_state['values']['style'];
     $form_state['keyword'] = $form_state['values']['keyword'];

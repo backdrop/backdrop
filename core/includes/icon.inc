@@ -361,9 +361,9 @@ function icon_get_all_details($icon_name = '') {
   // present in the most likely location (core).
   if (isset($icon_name) && _icon_from_core($icon_name)) {
     return array($icon_name => array(
-      'provider' => 'core',
-      'provider_detail' => t('Backdrop core'),
-      'provider_key' => $icon_name,
+      'project_type' => 'core',
+      'project_description' => t('Backdrop core'),
+      'project_icon_key' => $icon_name,
       'name' => $icon_name,
       'directory' => CORE_ICON_BROWSER_PATH,
     ) + icon_get_style($icon_name));
@@ -371,7 +371,7 @@ function icon_get_all_details($icon_name = '') {
 
   // Skip building the whole array if one icon was requested and it doesn't
   // exist in the allowed places.
-  if (isset($icon_name) && !icon_get_path($icon_name)) {
+  if (!empty($icon_name) && !icon_get_path($icon_name)) {
     return array();
   }
 
@@ -384,9 +384,9 @@ function icon_get_all_details($icon_name = '') {
       if (substr($icon, -4, 4) == '.svg') {
         $icon_key = substr($icon, 0, -4);
         $icons[$icon_key] = array(
-          'provider' => 'core',
-          'provider_detail' => t('Backdrop core'),
-          'provider_key' => $icon_key,
+          'project_type' => 'core',
+          'project_description' => t('Backdrop core'),
+          'project_icon_key' => $icon_key,
           'name' => $icon_key,
           'directory' => CORE_ICON_BROWSER_PATH,
         ) + icon_get_style($icon_key);
@@ -397,9 +397,9 @@ function icon_get_all_details($icon_name = '') {
     foreach ($module_icons as $name => $icon) {
       $icon_key = isset($icon['name']) ? $icon['name'] : $name;
       $icons[$name] = array(
-        'provider' => 'module',
-        'provider_detail' => t('@module (module)', ['@module' => $icon['module']]),
-        'provider_key' => $name,
+        'project_type' => 'module',
+        'project_description' => t('@module (module)', ['@module' => $icon['module']]),
+        'project_icon_key' => $name,
         'name' => $icon_key,
       ) + icon_get_style($icon_key);
     }
@@ -427,9 +427,9 @@ function icon_get_all_details($icon_name = '') {
             if (substr($icon, -4, 4) == '.svg') {
               $icon_key = substr($icon, 0, -4);
               $icons[$icon_key] = array(
-                'provider' => 'theme',
-                'provider_detail' => t('@theme (theme*) <br><br><em>*Theme-provided icons may only be available when the theme is active.</em>', ['@theme' => $theme]),
-                'provider_key' => $icon_key,
+                'project_type' => 'theme',
+                'project_description' => t('@theme (theme*) <br><br><em>*Theme-provided icons may only be available when the theme is active.</em>', ['@theme' => $theme]),
+                'project_icon_key' => $icon_key,
                 'name' => $icon_key,
                 'directory' => $theme_directory,
               ) + icon_get_style($icon_key);
@@ -442,7 +442,7 @@ function icon_get_all_details($icon_name = '') {
 
   backdrop_alter('icon_get_all_details', $icons);
 
-  backdrop_sort($icons, array('provider_key' => SORT_STRING));
+  backdrop_sort($icons, array('project_icon_key' => SORT_STRING));
 
   if (empty($icon_name)) {
     $result = $icons;
