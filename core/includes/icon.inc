@@ -7,7 +7,7 @@
  * https://docs.backdropcms.org/documentation/icon-api
  */
 
- define ('CORE_ICON_BROWSER_PATH', 'core/misc/icons');
+ define ('CORE_ICON_PATH', 'core/misc/icons');
 
 /**
  * Return the markup for outputting an icon by a machine name.
@@ -365,7 +365,7 @@ function icon_get_all_details($icon_name = '') {
       'project_description' => t('Backdrop core'),
       'project_icon_key' => $icon_name,
       'name' => $icon_name,
-      'directory' => CORE_ICON_BROWSER_PATH,
+      'directory' => CORE_ICON_PATH,
     ) + icon_get_style($icon_name));
   }
 
@@ -379,7 +379,7 @@ function icon_get_all_details($icon_name = '') {
 
   if (empty($icons)) {
     // Icons provided by Backdrop core.
-    $core_icons = scandir(CORE_ICON_BROWSER_PATH, SCANDIR_SORT_NONE);
+    $core_icons = scandir(CORE_ICON_PATH, SCANDIR_SORT_NONE);
     foreach ($core_icons as $icon) {
       if (substr($icon, -4, 4) == '.svg') {
         $icon_key = substr($icon, 0, -4);
@@ -388,7 +388,7 @@ function icon_get_all_details($icon_name = '') {
           'project_description' => t('Backdrop core'),
           'project_icon_key' => $icon_key,
           'name' => $icon_key,
-          'directory' => CORE_ICON_BROWSER_PATH,
+          'directory' => CORE_ICON_PATH,
         ) + icon_get_style($icon_key);
       }
     }
@@ -495,6 +495,7 @@ function icon_get_style($icon_name) {
   if ($icon_style == 'logo' || $brand_check == 'logo') {
     $icon_data['is_brand'] = TRUE;
   }
+
   return $icon_data;
 }
 
@@ -514,7 +515,7 @@ function icon_allowed_styles() {
     'duotone' => 'Duotone'
   );
 
-  backdrop_alter('icon_browser_allowed_styles', $allowed_styles);
+  backdrop_alter('icon_allowed_styles', $allowed_styles);
 
   return $allowed_styles;
 }
