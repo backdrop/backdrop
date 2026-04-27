@@ -361,16 +361,22 @@ function icon_get_all_details($icon_name = '') {
   // present in the most likely location (core).
   if (isset($icon_name) && _icon_from_core($icon_name)) {
     return array($icon_name => array(
-        'provider' => 'core',
-        'provider_detail' => t('Backdrop core'),
-        'provider_key' => $icon_name,
-        'name' => $icon_name,
-        'directory' => CORE_ICON_BROWSER_PATH,
-      ) + icon_get_style($icon_name)
-    );
+      'provider' => 'core',
+      'provider_detail' => t('Backdrop core'),
+      'provider_key' => $icon_name,
+      'name' => $icon_name,
+      'directory' => CORE_ICON_BROWSER_PATH,
+    ) + icon_get_style($icon_name));
+  }
+
+  // Skip building the whole array if one icon was requested and it doesn't
+  // exist in the allowed places.
+  if (isset($icon_name) && !icon_get_path($icon_name)) {
+    return array();
   }
 
   $icons = &backdrop_static(__FUNCTION__, array());
+
   if (empty($icons)) {
     // Icons provided by Backdrop core.
     $core_icons = scandir(CORE_ICON_BROWSER_PATH, SCANDIR_SORT_NONE);
