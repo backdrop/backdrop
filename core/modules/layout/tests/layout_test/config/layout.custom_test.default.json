@@ -1,0 +1,25 @@
+{
+  "_config_name": "layout.custom_test.default",
+  "name": "default",
+  "title": "Custom Layout Type Test",
+  "description": "A simple custom layout template in its simplest form.",
+  "layout_template_type": "custom_test",
+  "is_full_page": false,
+  "rows": {
+    "custom-layout-default-template": {
+      "contains": "region_12",
+      "element": "div",
+      "classes": "",
+      "container": "no_container",
+      "region_names": {
+        "region_0": {
+          "label": "Main Content",
+          "name": "content",
+          "region_class_enable": 0,
+          "classes": ""
+        }
+      }
+    }
+  },
+  "preview": "<div class='layout-icon'><svg width='100%' height='100%' viewBox='0 0 100 100' preserveAspectRatio='none'><rect x='0%' y='0%' width='100%' height='100%' fill='currentColor' /></svg></div>"
+}

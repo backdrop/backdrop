@@ -1,4 +1,4 @@
-[ContactSitewideTestCase]
+[ContactSiteWideTestCase]
 name = Site-wide contact form
 description = Tests site-wide contact form functionality.
 group = Contact

@@ -28,7 +28,7 @@ function layout_flexible_template_settings_add_form() {
  */
 function layout_flexible_template_settings_edit_form($form, &$form_state, LayoutFlexibleTemplate $flexible_template) {
   $form_state['flexible_template'] = $flexible_template;
-  $template_exists = layout_flexible_template_load($flexible_template->name);
+  $template_exists = layout_flexible_template_load($flexible_template->name, 'flexible');
 
   $form['name'] = array(
     '#title' => t('Template name'),
@@ -43,7 +43,7 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, Layout
     '#default_value' => $flexible_template->name,
     '#disabled' => ($template_exists && empty($flexible_template->is_new)),
     '#machine_name' => array(
-      'exists' => 'layout_flexible_template_load',
+      'exists' => 'layout_flexible_template_machine_name_exists',
     ),
   );
   $form['description'] = array(
@@ -97,7 +97,7 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
 
   $flexible_template->save();
 
-  layout_flexible_tempstore_set($flexible_template);
+  layout_flexible_tempstore_set($flexible_template, 'flexible');
 
   backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $flexible_template->title)));
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['values']['machine_name'] . '/configure';
@@ -221,7 +221,7 @@ function layout_flexible_template_configure_form_cancel($form, &$form_state) {
 function layout_flexible_template_configure_form_submit($form, &$form_state) {
   // Load from tempstore rather than using $form_state, in the event a row
   // has been removed in an AJAX request.
-  $flexible_template = layout_flexible_tempstore_load($form_state['flexible_template_name']);
+  $flexible_template = layout_flexible_tempstore_load($form_state['flexible_template_name'], 'flexible');
   $positions = array();
 
   if (!empty($form_state['values']['row_positions'])) {
@@ -382,7 +382,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, Layou
 /**
  * Submit handler that cancels the region style selection form.
  *
- * @see layout_flexible_template_region_style_select().
+ * @see layout_flexible_template_region_style_select()
  */
 function layout_flexible_template_cancel($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/configure';
@@ -391,7 +391,7 @@ function layout_flexible_template_cancel($form, &$form_state) {
 /**
  * AJAX handler to cancels the region style selection form.
  *
- * @see layout_flexible_template_region_style_select().
+ * @see layout_flexible_template_region_style_select()
  */
 function layout_flexible_template_cancel_ajax($form, $form_state) {
   $commands = array();
@@ -406,7 +406,7 @@ function layout_flexible_template_cancel_ajax($form, $form_state) {
 /**
  * Submit handler that cancels the region style selection form.
  *
- * @see layout_flexible_template_region_style_select().
+ * @see layout_flexible_template_region_style_select()
  */
 function layout_flexible_template_region_style_select_cancel($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/configure';
@@ -415,7 +415,7 @@ function layout_flexible_template_region_style_select_cancel($form, &$form_state
 /**
  * Submit handler that saves the region style selection form.
  *
- * @see layout_flexible_template_region_style_select().
+ * @see layout_flexible_template_region_style_select()
  */
 function layout_flexible_template_region_style_select_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/configure/' . $form_state['values']['region_style'];
@@ -525,7 +525,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
         'replace' => '-',
       ),
     );
-    if (isset($row_data['region_names']['region_' . $i]['region_class_enable'])){
+    if (isset($row_data['region_names']['region_' . $i]['region_class_enable'])) {
       $region_class_enable = $row_data['region_names']['region_' . $i]['region_class_enable'];
     }
     $form['region_names']['region_' . $i]['region_class_enable'] = array(
@@ -641,7 +641,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
  * @see form_validate_machine_name()
  */
 function _layout_flexible_template_region_name_exists($machine_name, $element, $form_state) {
-  $flexible_template = layout_flexible_tempstore_load($form_state['flexible_template_name']);
+  $flexible_template = layout_flexible_tempstore_load($form_state['flexible_template_name'], 'flexible');
   foreach ($flexible_template->rows as $row) {
     foreach ($row['region_names'] as $region_name) {
       if ($region_name['name'] == $machine_name) {
@@ -698,7 +698,7 @@ function layout_flexible_template_change_region_style($form, &$form_state) {
   );
   $form_state['flexible_template']->rows[$form_state['original_row']]['in_progress'] = $old_row;
 
-  layout_flexible_tempstore_set($form_state['flexible_template']);
+  layout_flexible_tempstore_set($form_state['flexible_template'], 'flexible');
 
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/select-widths';
 }
@@ -756,7 +756,7 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $form_state['ajax_rebuild_form'] = 'layout_flexible_template_configure_form';
   $form_state['ajax_rebuild_args'] = array($flexible_template);
   $form_state['ajax_update'] = array('content');
-  layout_flexible_tempstore_set($flexible_template);
+  layout_flexible_tempstore_set($flexible_template, 'flexible');
   layout_flexible_reset_caches();
   if (!backdrop_is_ajax()) {
     $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/configure';
@@ -786,7 +786,7 @@ function layout_flexible_template_edit_region_style_submit($form, &$form_state) 
 /**
  * AJAX callback on the submit button for editing a layout row.
  *
- * @see layout_flexible_template_edit_row_form().
+ * @see layout_flexible_template_edit_row_form()
  */
 function layout_flexible_template_edit_row_ajax($form, $form_state) {
   $commands = array();
@@ -834,7 +834,7 @@ function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_te
   $flexible_template_name = $flexible_template->name;
 
   unset($flexible_template->rows[$original_row]);
-  layout_flexible_tempstore_set($flexible_template);
+  layout_flexible_tempstore_set($flexible_template, 'flexible');
 
   if (backdrop_is_ajax()) {
     $commands[] = ajax_command_remove('#flexible-row--' . $original_row);
@@ -875,12 +875,12 @@ function layout_flexible_template_delete_form($form, &$form_state, LayoutFlexibl
   }
   else {
     $form['description'] = array(
-      '#markup' => $description
+      '#markup' => $description,
     );
   }
 
   $form['actions'] = array(
-    '#type' => 'actions'
+    '#type' => 'actions',
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
