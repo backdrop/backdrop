@@ -1509,7 +1509,7 @@ class views_plugin_display extends views_plugin {
         $form['enable_ajax_history'] = [
           '#title' => t('AJAX history'),
           '#type' => 'checkbox',
-          '#description' => t('Enable Views AJAX history.'),
+          '#description' => t('Update the URL after AJAX requests.'),
           '#default_value' => $this->get_option('enable_ajax_history') ? 1 : 0,
           '#states' => [
             'visible' => [
