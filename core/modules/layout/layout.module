@@ -1028,6 +1028,29 @@ function layout_library_info() {
       'icons' => array(
         'arrows-out-cardinal-fill',
       ),
+  $libraries['bootstrap4-gs'] = array(
+    'title' => 'Bootstrap4 Grid System',
+    'website' => 'http://v4-alpha.getbootstrap.com/layout/grid/',
+    'version' => BACKDROP_VERSION,
+    'css' => array(
+      $path . '/css/grid-flexbox.css' => array(),
+    ),
+    'js' => array(
+      $path . '/js/grid-fallback.js' => array(),
+    ),
+  );
+
+  $libraries['layout.admin'] = array(
+    'title' => 'Layout administration',
+    'version' => BACKDROP_VERSION,
+    'css' => array(
+      $path . '/css/layout.admin.css' => array(),
+    ),
+    'js' => array(
+      $path . '/js/layout.admin.js' => array(),
+    ),
+    'icons' => array(
+      'arrows-out-cardinal-fill',
     ),
   );
 
