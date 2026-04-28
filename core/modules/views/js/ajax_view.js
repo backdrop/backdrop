@@ -184,7 +184,8 @@ Backdrop.views.ajaxView.prototype.attachPagerLinkAjax = function(id, link) {
  */
 Backdrop.views.ajaxView.prototype.applyAjaxOverrides = function (ajaxInstance) {
   ajaxInstance.beforeSerialize = function (element, options) {
-    if (options.data.enable_ajax_history && options.data.view_name) {
+    let enable_ajax_history = !!options.data.enable_ajax_history;
+    if (enable_ajax_history && options.data.view_name) {
       // If restoring a previous state the dummy element will have this class,
       // don't need to go through all this processing.
       if ($(element).hasClass('ajax-history-trigger')) {
@@ -193,7 +194,7 @@ Backdrop.views.ajaxView.prototype.applyAjaxOverrides = function (ajaxInstance) {
     }
 
     // Check that we handle a click on a link, not a form submission.
-    if (options.data.view_name && element && $(element).is('a')) {
+    if (enable_ajax_history && options.data.view_name && element && $(element).is('a')) {
       // Strip the view base path so it isn't treated as a parameter.
       let params = new URLSearchParams($(element).attr('href').replace($(element).get(0).pathname + '?', ''));
       if (!$.isEmptyObject(options.data.exclude_ajax_args)) {
@@ -217,7 +218,7 @@ Backdrop.views.ajaxView.prototype.applyAjaxOverrides = function (ajaxInstance) {
   };
 
   ajaxInstance.beforeSubmit = function (form_values, element, options) {
-    if (options.data.enable_ajax_history && options && options.data && options.data.view_name) {
+    if (!!options.data.enable_ajax_history && options && options.data && options.data.view_name) {
       var url = original.path + '?' + new URLSearchParams(new FormData(element.get(0))).toString();
       var currentQuery = Backdrop.Views.parseQueryString(window.location.href);
 
@@ -314,9 +315,9 @@ Backdrop.views.ajaxView.prototype.applyAjaxOverrides = function (ajaxInstance) {
   };
 
   ajaxInstance.beforeSend = function (jqXHR, options) {
-    var data = (typeof options.data === 'string') ? Backdrop.Views.parseQuery(options.data) : {};
+    var data = (typeof options.data === 'string') ? Backdrop.Views.parseQueryString(options.data) : {};
 
-    if (data.enable_ajax_history && data.view_name && options.type !== 'GET') {
+    if (!!data.enable_ajax_history && data.view_name && options.type !== 'GET') {
       // Override the URL to not contain any fields that were submitted.
       options.url = Backdrop.settings.views.ajax_path;
     }
