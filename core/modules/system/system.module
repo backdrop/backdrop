@@ -4922,12 +4922,7 @@ function system_icon_browser_form($form, &$form_state) {
     'keyword' => '',
   );
   foreach ($params as $param => $default_value) {
-    if (!empty($form_state[$param])) {
-      ${$param} = $form_state[$param];
-      $_GET[$param] = ${$param};
-      unset($form_state[$param]);
-    }
-    elseif (!empty($_GET[$param])) {
+    if (!empty($_GET[$param])) {
       ${$param} = $_GET[$param];
     }
     else {
@@ -4978,7 +4973,7 @@ function system_icon_browser_form($form, &$form_state) {
   if (count($available_project_types) > 1) {
     $form['icon_filters']['project_type'] = array(
       '#type' => 'select',
-      '#title' => t('project_type'),
+      '#title' => t('Project type'),
       '#options' => array(
         'any' => t('Any'),
       ) + $project_type_options,
@@ -5040,11 +5035,6 @@ function system_icon_browser_form($form, &$form_state) {
  */
 function system_icon_browser_form_submit($form, &$form_state) {
   if ($form_state['triggering_element']['#parents'][0] == 'reset') {
-    if (isset($form_state['values']['project_type'])) {
-      $form_state['project_type'] = 'any';
-    }
-    $form_state['style'] = 'any';
-    $form_state['keyword'] = '';
     unset($_GET['project_type']);
     unset($_GET['style']);
     unset($_GET['keyword']);
@@ -5054,10 +5044,9 @@ function system_icon_browser_form_submit($form, &$form_state) {
   }
   else {
     if (isset($form_state['values']['project_type'])) {
-      $form_state['project_type'] = $form_state['values']['project_type'];
+      $_GET['project_type'] = $form_state['values']['project_type'];
     }
-    $form_state['style'] = $form_state['values']['style'];
-    $form_state['keyword'] = $form_state['values']['keyword'];
-    $form_state['rebuild'] = TRUE;
+    $_GET['style'] = $form_state['values']['style'];
+    $_GET['keyword'] = $form_state['values']['keyword'];
   }
 }
