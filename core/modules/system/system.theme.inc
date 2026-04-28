@@ -755,7 +755,7 @@ function theme_system_icon_browser_form_icons($variables) {
       $theme_error_message = t('One or more icons on this page are provided by another theme:');
       $error_list = array();
       foreach ($theme_error_icons as $error_icon => $theme_key) {
-        $theme = $themes[$theme_key];        
+        $theme = $themes[$theme_key];
         $error_list[] = $error_icon . ' (' . $theme->info['name'] . ')';
       }
       $theme_error_message .= theme('item_list', array('items' => $error_list));

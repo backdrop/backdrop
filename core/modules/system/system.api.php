@@ -533,7 +533,7 @@ function hook_icon_info_alter(&$icons) {
 /**
  * Modify the list of icon details.
  *
- * @param $icons
+ * @param array $icons
  *   This parameter is passed by reference. It contains the entire list of
  *   available icons with details about each icon, keyed by the icon name.
  *
@@ -552,7 +552,7 @@ function hook_icon_get_all_details_alter(&$icons) {
 /**
  * Modify the list of available icon styles.
  *
- * @param $allowed_styles
+ * @param array $allowed_styles
  *   This parameter is passed by reference.
  *
  * @see icon_allowed_styles()
