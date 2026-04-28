@@ -180,7 +180,7 @@ Backdrop.Views.parseQuery = function (queryString) {
 };
 
 /**
- * Unbind 'popstate' when adding a new state to avoid an infinite loop.
+ * Remove 'popstate' handler when adding a new state to avoid an infinite loop.
  *
  * We only use the 'popstate' event to trigger refresh on back or forward click.
  *
@@ -195,9 +195,9 @@ Backdrop.Views.addState = function (options, url) {
 
   // Store the actual view's dom id.
   Backdrop.settings.lastViewDomID = options.data.view_dom_id;
-  $(window).unbind('popstate', Backdrop.Views.loadView);
+  $(window).off('popstate', Backdrop.Views.loadView);
   history.pushState(Backdrop.Views.cleanStateForHistory(historyOptions), document.title, Backdrop.Views.cleanURL(url, options.data));
-  $(window).bind('popstate', Backdrop.Views.loadView);
+  $(window).on('popstate', Backdrop.Views.loadView);
 };
 
 /**
