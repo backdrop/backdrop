@@ -403,15 +403,11 @@ function icon_get_all_details($icon_name = '') {
         'name' => $icon_key,
       ) + icon_get_style($icon_key);
     }
-    // Icons provided by themes. Only look in the active theme or its base
-    // themes since _icon_from_theme() only checks these.
+    // Icons provided by themes.
     $themes = list_themes();
     $active_theme = $GLOBALS['theme_key'];
-    $current_themes = array($active_theme);
-    if (isset($themes->$active_theme['base_themes'])) {
-      $current_themes += array_keys($themes->$active_theme['base_themes']);
-    }
-    foreach ($current_themes as $theme) {
+    foreach ($themes as $theme => $theme_data) {
+      $theme_error = ($theme != $active_theme) ? $theme : '';
       // Check if the theme provides a non-default icon path.
       $theme_icon_directory = theme_get_setting('icon_directory', $theme);
 
@@ -423,14 +419,15 @@ function icon_get_all_details($icon_name = '') {
       if (is_dir($theme_directory)) {
         $theme_icons = scandir($theme_directory);
         if (!empty($theme_icons)) {
-          foreach ($theme_icons as $name => $icon) {
+          foreach ($theme_icons as $key => $icon) {
             if (substr($icon, -4, 4) == '.svg') {
               $icon_key = substr($icon, 0, -4);
               $icons[$icon_key] = array(
                 'project_type' => 'theme',
-                'project_description' => t('@theme (theme*) <br><br><em>*Theme-provided icons may only be available when the theme is active.</em>', ['@theme' => $theme]),
+                'project_description' => t('@theme (theme*)', ['@theme' => $theme]),
                 'project_icon_key' => $icon_key,
                 'name' => $icon_key,
+                'theme_error' => $theme_error,
                 'directory' => $theme_directory,
               ) + icon_get_style($icon_key);
             }

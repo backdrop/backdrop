@@ -736,11 +736,30 @@ function theme_system_icon_browser_form_icons($variables) {
   $output = '';
   if ($icons) {
     $output .= "<div class='icon-browser-list'>";
-
+    $theme_error_icons = array();
     foreach ($icons as $icon) {
-      $output .= '<div class="icon-wrapper" data-icon-name="' . $icon['project_icon_key'] . '">';
-      $output .= '<div class="icon">' . icon($icon['project_icon_key']) . '</div>';
-      $output .= '<div class="icon-name">' . $icon['name'] . '</div></div>';
+      $icon_classes = isset($icon['theme_error']) ? 'icon-wrapper error' : 'icon-wrapper';
+      $output .= '<div class="' . $icon_classes . '" data-icon-name="' . $icon['project_icon_key'] . '">';
+      if (empty($icon['theme_error'])) {
+        $output .= '<div class="icon">' . icon($icon['project_icon_key']) . '</div>';
+      }
+      else {
+        $theme_error_icons[$icon['name']] = $icon['theme_error'];
+        $output .= '<div class="icon">' . icon('seal-warning-fill') . '</div>';
+      }
+      $output .= '<div class="icon-name">' . $icon['name'] . '</div>';
+      $output .= '</div>';
+    }
+    if (!empty($theme_error_icons)) {
+      $themes = list_themes();
+      $theme_error_message = t('One or more icons on this page are provided by another theme:');
+      $error_list = array();
+      foreach ($theme_error_icons as $error_icon => $theme_key) {
+        $theme = $themes[$theme_key];        
+        $error_list[] = $error_icon . ' (' . $theme->info['name'] . ')';
+      }
+      $theme_error_message .= theme('item_list', array('items' => $error_list));
+      backdrop_set_message($theme_error_message, 'warning');
     }
     $output .= '</div>';
   }

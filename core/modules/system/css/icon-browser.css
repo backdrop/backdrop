@@ -54,3 +54,7 @@
   width: 36px;
   height: 36px;
 }
+
+.icon-browser-list .icon-wrapper.error .icon {
+  color: #aaaaaa;
+}
