@@ -195,7 +195,7 @@ Backdrop.views.ajaxView.prototype.applyAjaxOverrides = function (ajaxInstance) {
     // Check that we handle a click on a link, not a form submission.
     if (options.data.view_name && element && $(element).is('a')) {
       // Strip the view base path so it isn't treated as a parameter.
-      let params = new URLSearchParams($(element).attr('href').replace('/' + options.data.view_base_path + '?', ''));
+      let params = new URLSearchParams($(element).attr('href').replace($(element).get(0).pathname + '?', ''));
       if (!$.isEmptyObject(options.data.exclude_ajax_args)) {
         var keysToRemove = [];
         $.each(options.data.exclude_ajax_args, function (index, pathToExclude) {
