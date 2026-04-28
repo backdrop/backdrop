@@ -3884,6 +3884,17 @@ function system_update_1104() {
 }
 
 /**
+ * Set icon browser default number of icons per page.
+ */
+function system_update_1105() {
+  $config = config('system.core');
+  if ($config->get('icon_browser_icons_per_page') === NULL) {
+    $config->set('icon_browser_icons_per_page', 110);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
