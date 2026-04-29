@@ -2188,6 +2188,21 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $account = user_load($web_user->uid, TRUE);
     $this->assertTrue(user_access('edit own page content', $account), "Web user has edit own page content permission.");
     $this->assertTrue(user_access('edit any page content', $account), "Web user has edit any page content permission.");
+
+    // On the Node Type test: check that custom permissions for the "test" node
+    // type appear on the Node Type page via hook_node_type_list_permissions().
+    module_enable(array('node_test'), FALSE);
+
+    $this->backdropLogin($admin_user);
+
+    $edit = array(
+      $role_name . '[view own page content]' => TRUE,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+
+    // Check that the permission changes are saved on the permissions page.
+    $this->backdropGet('admin/config/people/permissions');
+    $this->assertFieldByName($role_name . '[view own page content]', 'view own page content', "Role $role_name has view own page content permission.");
   }
 
   /**
