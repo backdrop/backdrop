@@ -973,6 +973,8 @@ function hook_node_type_delete($info) {
  *
  * @param string $type
  *   The node type.
+ * 
+ * @since 1.34.0 Hook added.
  */
 function hook_node_type_list_permissions($type) {
   $perms = array();
