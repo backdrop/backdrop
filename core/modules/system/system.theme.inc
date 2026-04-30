@@ -738,15 +738,20 @@ function theme_system_icon_browser_form_icons($variables) {
     $output .= "<div class='icon-browser-list'>";
     $theme_error_icons = array();
     foreach ($icons as $icon) {
+      if (!empty($icon['theme_error'])) {
+        $theme_error_icons[$icon['name']] = $icon['theme_error'];
+      }
+
       $icon_classes = isset($icon['theme_error']) ? 'icon-wrapper error' : 'icon-wrapper';
       $output .= '<div class="' . $icon_classes . '" data-icon-name="' . $icon['project_icon_key'] . '">';
-      if (empty($icon['theme_error'])) {
-        $output .= '<div class="icon">' . icon($icon['project_icon_key']) . '</div>';
-      }
-      else {
-        $theme_error_icons[$icon['name']] = $icon['theme_error'];
-        $output .= '<div class="icon">' . icon('seal-warning-fill') . '</div>';
-      }
+      $rendered_icon = theme('icon', array(
+        'name' => $icon['project_icon_key'],
+        'path' => $icon['directory'] . '/' . $icon['name'] . '.svg',
+        'alt' => NULL,
+        'attributes' => array(),
+      ));
+
+      $output .= '<div class="icon">' . $rendered_icon . '</div>';
       $output .= '<div class="icon-name">' . $icon['name'] . '</div>';
       $output .= '</div>';
     }

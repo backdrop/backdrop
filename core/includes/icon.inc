@@ -403,11 +403,28 @@ function icon_get_all_details($icon_name = '') {
         'name' => $icon_key,
       ) + icon_get_style($icon_key);
     }
+
     // Icons provided by themes.
     $themes = list_themes();
+    $config = config('system.core');
     $active_theme = $GLOBALS['theme_key'];
-    foreach ($themes as $theme => $theme_data) {
+    $current_themes = array($active_theme);
+    if (isset($themes->$active_theme['base_themes'])) {
+      $current_themes += array_keys($themes->$active_theme['base_themes']);
+    }
+    // If the active theme is the admin theme, add in icons from the default
+    // theme.
+    if ($active_theme == $config->get('admin_theme')) {
+      $default_theme = $config->get('theme_default');
+      $current_themes[] = $default_theme;
+      if (isset($themes->$default_theme['base_themes'])) {
+        $current_themes += array_keys($themes->$default_theme['base_themes']);
+      }
+    }
+      
+    foreach ($current_themes as $theme) {
       $theme_error = ($theme != $active_theme) ? $theme : '';
+
       // Check if the theme provides a non-default icon path.
       $theme_icon_directory = theme_get_setting('icon_directory', $theme);
 
@@ -427,8 +444,8 @@ function icon_get_all_details($icon_name = '') {
                 'project_description' => t('@theme (theme*)', ['@theme' => $theme]),
                 'project_icon_key' => $icon_key,
                 'name' => $icon_key,
-                'theme_error' => $theme_error,
                 'directory' => $theme_directory,
+                'theme_error' => $theme_error,
               ) + icon_get_style($icon_key);
             }
           }
