@@ -423,7 +423,7 @@ function icon_get_all_details($icon_name = '') {
         $current_themes += array_keys($themes->$default_theme['base_themes']);
       }
     }
-      
+
     foreach ($current_themes as $theme) {
       $theme_error = ($theme != $active_theme) ? $theme : '';
 
