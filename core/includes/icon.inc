@@ -396,11 +396,13 @@ function icon_get_all_details($icon_name = '') {
     $module_icons = icon_get_info();
     foreach ($module_icons as $name => $icon) {
       $icon_key = isset($icon['name']) ? $icon['name'] : $name;
+      $directory = isset($icon['directory']) ? $icon['directory'] : backdrop_get_path('module', $icon['module']) . '/icons';;
       $icons[$name] = array(
         'project_type' => 'module',
         'project_description' => t('@module (module)', ['@module' => $icon['module']]),
         'project_icon_key' => $name,
         'name' => $icon_key,
+        'directory' => $directory,
       ) + icon_get_style($icon_key);
     }
 

@@ -4901,7 +4901,6 @@ function system_transliterate_machine_name($string, $options = array()) {
   return $string;
 }
 
-
 /**
  * Display the page of icons with filters.
  */
@@ -5005,6 +5004,7 @@ function system_icon_browser_form($form, &$form_state) {
   );
 
   $icons_per_page = $config->get('icon_browser_icons_per_page');
+  $filter_results = array();
   if ($results) {
     $current_page = pager_default_initialize(count($results), $icons_per_page);
     $chunks = array_chunk($results, $icons_per_page, TRUE);

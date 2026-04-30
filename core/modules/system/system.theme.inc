@@ -731,7 +731,6 @@ function theme_label_machine_name($variables) {
  */
 function theme_system_icon_browser_form_icons($variables) {
   $icons = $variables['icons'];
-  $all_icons = icon_get_all_details();
 
   $output = '';
   if ($icons) {
