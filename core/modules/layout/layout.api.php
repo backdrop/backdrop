@@ -29,6 +29,9 @@
  *     file.
  *   - regions: A list of regions this layout template provides, keyed by a
  *     machine name with a human label value.
+ *   - is_full_page: Optional. A boolean indicating whether this layout is
+ *     intended to be used as a full page layout. If left empty, the default
+ *     value is TRUE, which will insert header and footer regions on the layout.
  *   - preview: Optional. An image representing the appearance of this layout
  *     template. If left empty, "preview.png" will be used.
  *   - stylesheets: An array of CSS file used whenever this layout template
@@ -58,6 +61,7 @@ function hook_layout_template_info() {
     'preview' => 'preview.png',
     'stylesheets' => array('all' => array('one-column.css')),
     'template' => 'layout--my-layout-template',
+    'is_full_page' => TRUE,
 
     // Specify a file containing preprocess functions if needed.
     'file' => 'my_layout_template.php',
@@ -85,7 +89,6 @@ function hook_layout_info() {
     // 'preview' => 'preview.png',
     // 'stylesheets' => array('all' => array('one-column.css')),
     // 'template' => 'layout--my-layout',
-
     // Specify a file containing preprocess functions if needed.
     // 'file' => 'my_layout.php',
   );
@@ -415,7 +418,6 @@ function hook_layout_load_by_router_item_alter(&$layouts, $router_item) {
   // begin previewed. But we want to display it using a layout whose system path
   // is node/%. So we choose those layouts and set the context from the
   // tempstore node.
-
   // Check path structure before checking node type because
   // node_type_get_types() is expensive; don't call it if we don't need to.
   $map = $router_item['map'];
@@ -503,7 +505,7 @@ function hook_layout_load_by_router_item_alter(&$layouts, $router_item) {
  *     of the hooks for hook_block_configure(), hook_block_save(), and
  *     hook_block_view(). This class should be a sub-class of the Block class.
  *
- * For a detailed usage example, see block_example.module.
+ *   For a detailed usage example, see block_example.module.
  *
  * @see hook_block_configure()
  * @see hook_block_save()
@@ -573,7 +575,7 @@ function hook_block_info_alter(&$blocks) {
  *   A configuration form, if one is needed for your block beyond the standard
  *   elements that the block module provides (block title, visibility, etc.).
  *
- * For a detailed usage example, see block_example.module.
+ *   For a detailed usage example, see block_example.module.
  *
  * @see hook_block_info()
  * @see hook_block_save()
@@ -649,7 +651,7 @@ function hook_block_save($delta, &$edit = array()) {
  *     (preferable) or a string containing rendered HTML content. If the content
  *     is empty the block will not be shown.
  *
- * For a detailed usage example, see block_example.module.
+ *   For a detailed usage example, see block_example.module.
  *
  * @see hook_block_info()
  * @see hook_block_view_alter()

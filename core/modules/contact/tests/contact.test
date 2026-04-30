@@ -7,7 +7,7 @@
 /**
  * Tests the site-wide contact form.
  */
-class ContactSitewideTestCase extends BackdropWebTestCase {
+class ContactSiteWideTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   /**

@@ -2002,7 +2002,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
     foreach ($result as $record) {
       $num_records++;
       $this->assertTrue($record->$priority_field >= $last_priority, 'Results returned in correct order.');
-      $this->assertNotEqual($record->$name_field, 'Ringo', 'Taskless person not selected.');
+      $this->assertNotEqual($record->$name_field, 'Ringo', 'Person without tasks not selected.');
       $last_priority = $record->$priority_field;
     }
 
@@ -2306,7 +2306,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
     foreach ($result as $record) {
       $num_records++;
       $this->assertTrue($record->$priority_field >= $last_priority, 'Results returned in correct order.');
-      $this->assertNotEqual($record->$name_field, 'Ringo', 'Taskless person not selected.');
+      $this->assertNotEqual($record->$name_field, 'Ringo', 'Person without tasks not selected.');
       $last_priority = $record->$priority_field;
     }
 
