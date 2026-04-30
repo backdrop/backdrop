@@ -143,7 +143,7 @@ Backdrop.views.ajaxView.prototype.filterNestedViews= function() {
  * Attach the ajax behavior to each link.
  */
 Backdrop.views.ajaxView.prototype.attachPagerAjax = function() {
-  this.$view.find('ul.pager > li > a, th.views-field a, .attachment .views-summary a')
+  this.$view.find('ul.pager > li > a, th a[data-sort], .attachment .views-summary a')
   .each($.proxy(this.attachPagerLinkAjax, this));
 };
 

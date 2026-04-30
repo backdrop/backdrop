@@ -501,7 +501,7 @@ function template_preprocess_views_view_table(&$variables) {
       $variables['fields'][$field] .= ' active';
     }
 
-    // render the header labels
+    // Render the header labels.
     if ($field == $column && empty($fields[$field]->options['exclude'])) {
       $label = check_plain(!empty($fields[$field]) ? $fields[$field]->label() : '');
       if (empty($options['info'][$field]['sortable']) || !$fields[$field]->click_sortable()) {
@@ -523,7 +523,11 @@ function template_preprocess_views_view_table(&$variables) {
         $query['sort'] = $initial;
         $link_options = array(
           'html' => TRUE,
-          'attributes' => array('title' => $title),
+          'attributes' => array(
+            'title' => $title,
+            'data-sort' => $order,
+            'data-order' => $field,
+          ),
           'query' => $query,
         );
         $variables['header'][$field] = l($label, $_GET['q'], $link_options);
