@@ -6,7 +6,7 @@
 
 "use strict";
 
-// Keep to check if there are extra parameters in the original URL.
+// Save the query string from the original URL on page load.
 var original = {
   path: window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '') + window.location.pathname,
   query: window.location.search || ''
@@ -175,9 +175,6 @@ Backdrop.views.ajaxView.prototype.attachPagerLinkAjax = function(id, link) {
 
 /**
  * Apply Views-specific overrides to the lifecycle methods of an ajax instance.
- *
- * Rather than overriding Backdrop.ajax.prototype methods globally, this function
- * sets the Views-specific behavior only on ajax objects created by ajax_view.js.
  *
  * @param {Backdrop.ajax} ajaxInstance
  *   The ajax instance to configure with Views-specific behavior.
