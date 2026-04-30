@@ -11,7 +11,7 @@ function theme_layout_reorder_layouts($variables) {
   $element = $variables['element'];
   $rows = array();
 
-  // Assemble the data for a table from everything in $form['handlers']
+  // Assemble the data for a table from everything in $form['handlers'].
   foreach (element_children($element) as $layout_name) {
     if (isset($element[$layout_name]['title'])) {
       $row = array();
@@ -49,7 +49,7 @@ function theme_layout_info($variables) {
   $layout = $variables['layout'];
   $info = layout_get_layout_template_info($layout->layout_template);
 
-  // Build template thumbnail preview
+  // Build template thumbnail preview.
   $preview_path = $info['path'] . '/' . $info['preview'];
   $preview_img = theme('image', array('path' => $preview_path));
   $preview = l($preview_img, 'admin/structure/layouts/manage/' . $layout->name, array('html' => TRUE));
@@ -80,7 +80,7 @@ function theme_layout_info($variables) {
 function theme_layout_condition_info($variables) {
   /** @var Layout $layout */
   $layout = $variables['layout'];
-  // Build a list of visibility conditions on this layout
+  // Build a list of visibility conditions on this layout.
   $conditions = array();
   if (isset($layout->conditions)) {
     foreach ($layout->conditions as $access_key => $layout_access) {
@@ -370,15 +370,23 @@ function layout_preprocess_layout(&$variables) {
     }
   }
 
+  // Support deprecated 'layout_info' property until Backdrop 2.0.
+  if (isset($variables['layout_info']) && !isset($variables['layout_template_info'])) {
+    $variables['layout_template_info'] = $variables['layout_info'];
+  }
+
   // Build HTML for displaying flexible templates.
-  if (isset($variables['layout_info']['template']) && ($variables['layout_info']['template'] == 'layout--flexible')) {
+  if (isset($variables['layout_template_info']['template']) && (!empty($variables['layout_template_info']['flexible']))) {
+    $variables['is_full_page'] = $variables['layout']->is_full_page ?? TRUE;
+    $flexible_template_type = (!empty($variables['layout']->layout_template_type) && $variables['layout']->layout_template_type != 'layout') ? $variables['layout']->layout_template_type : 'flexible';
+    _layout_standardize_template_type($flexible_template_type);
     if (is_a($variables['renderer'], 'LayoutRendererFlexible')) {
       $variables['flexible_editor'] = TRUE;
-      $flexible_layout = layout_flexible_tempstore_load($variables['layout_info']['name']);
+      $flexible_layout = layout_flexible_tempstore_load($variables['layout_template_info']['name'], $flexible_template_type);
     }
     else {
       $variables['flexible_editor'] = FALSE;
-      $flexible_layout = layout_flexible_template_load($variables['layout_info']['name']);
+      $flexible_layout = layout_flexible_template_load($variables['layout_template_info']['name'], $flexible_template_type);
     }
     $variables['region_buttons'] = array();
     if (isset($variables['renderer']->region_buttons)) {

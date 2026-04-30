@@ -945,7 +945,7 @@ function simpletest_script_format_result($result) {
   list($class, $function) = explode('->', $result->function, 2);
 
   $summary = sprintf(
-    "%-9.9s %-10.10s %-17.17s %-7.7s %-72.72s\n",
+    "%-9s %-10s %-17s %-7s %-72s\n",
     $results_map[$result->status],
     $result->message_group,
     basename($result->file),

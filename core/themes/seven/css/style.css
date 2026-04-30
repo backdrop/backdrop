@@ -1959,9 +1959,5 @@ table .machine-name {
 }
 .tabledrag-handles-shown .label,
 .tabledrag-handles-shown .machine-name {
-  padding-left: 28px; /* LTR */
-}
-[dir="rtl"] .tabledrag-handles-shown .label,
-[dir="rtl"] .tabledrag-handles-shown .machine-name {
-  padding-right: 28px;
+  padding-inline-start: 1.5em;
 }
