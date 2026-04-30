@@ -3333,6 +3333,87 @@ class FileTypeTestCase extends FileTestHelper {
       return FALSE;
     }
   }
+
+  /**
+   * Test inline file fields.
+   */
+  public function testInlineFileFields() {
+    $admin_user = $this->backdropCreateUser(array(
+      'access file overview',
+      'manage files',
+      'access content',
+      'access administration pages',
+      'administer site configuration',
+      'administer content types',
+      'administer nodes',
+      'bypass node access',
+      'administer file types',
+      'administer fields',
+      'create url aliases',
+    ));
+    $this->backdropLogin($admin_user);
+
+    // Add text field to Document file type.
+    $text_field_name = 'test_textfield';
+    $text_field_machine_name = "field_{$text_field_name}";
+    $edit = array(
+      'fields[_add_new_field][field_name]' => $text_field_name,
+      'fields[_add_new_field][label]' => $text_field_name,
+      'fields[_add_new_field][type]' => 'text',
+      'fields[_add_new_field][widget_type]' => 'text_textfield',
+    );
+    // First step: 'Add new field'.
+    $this->backdropPost('admin/structure/file-types/manage/document/fields', $edit, t('Save'));
+    // Second step: "Field settings'.
+    $this->backdropPost(NULL, NULL, t('Save field settings'));
+    // Third step: "Instance settings'.
+    $this->backdropPost(NULL, NULL, t('Save settings'));
+    $this->assertRaw(format_string('Saved %label configuration.', array('%label' => $text_field_name)), 'Redirected to "Manage fields" page.');
+
+    // Add file field to Page content type.
+    // Inline fields is enabled by default for new fields.
+    $file_field_name = 'test_filefield';
+    $this->createFileField($file_field_name, 'page');
+
+    // Change to rendered file entity so the field will be displayed.
+    $edit = array(
+      "fields[{$file_field_name}][type]" => 'file_rendered',
+    );
+    $this->backdropPost('admin/structure/types/manage/page/display/default', $edit, t('Save'));
+
+    // Upload a file.
+    $test_file = $this->getTestFile('text');
+
+    // Test a 'nojs' submission, because backdropPostAJAX()
+    // does not yet support file uploads.
+    $nid = $this->uploadNodeFile($test_file, $file_field_name, 'page');
+    $last_fid = $this->getLastFileId();
+
+    // Ensure the text field is visible on the node form.
+    $this->backdropGet("node/$nid/edit");
+    $text_input_name = "//input[@name=\"files[$last_fid][{$text_field_machine_name}][und][0][value]\"]";
+    $this->assertFieldByXPath($text_input_name, NULL, 'Text field on document file entity is visible on node form.');
+
+    // Add text to that text field.
+    $random_filler = 'This is some text to describe the file.';
+    $edit = array(
+      "files[$last_fid][{$text_field_machine_name}][und][0][value]" => $random_filler,
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    $this->assertText($random_filler, 'Text entered in the text field attached to the file entity is visible.');
+
+    // Update the text on the file manager.
+    $random_filler2 = 'This is some new text to describe the file.';
+    $edit = array(
+      "{$text_field_machine_name}[und][0][value]" => $random_filler2,
+    );
+    $this->backdropPost('file/' . $last_fid . '/manage', $edit, 'Save');
+
+    // Go back to node and it should have the new text.
+    $this->backdropGet('node/' . $nid);
+    $this->assertText($random_filler2, 'Updated text from the file admin is displayed on the node.');
+  }
 }
 
 /**
