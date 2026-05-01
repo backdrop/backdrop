@@ -889,7 +889,7 @@ function file_field_inline_fields_widget($element, &$form_state, $instance) {
   $widget_settings = $instance['widget']['settings'];
 
   // Bail out if inline file entities are not enabled on this field.
-  if (isset($widget_settings['inline_fields_option']) && $widget_settings['inline_fields_option'] == FILE_INLINE_FIELDS_NONE) {
+  if (!isset($widget_settings['inline_fields_option']) || $widget_settings['inline_fields_option'] == FILE_INLINE_FIELDS_NONE) {
     return $element;
   }
 
@@ -913,7 +913,7 @@ function file_field_inline_fields_widget($element, &$form_state, $instance) {
   $element['entity'] = array(
     '#type' => 'container',
     '#attributes' => array(
-      'class' => array('inline-fields'),
+      'class' => array('file-inline-fields'),
     ),
     '#indentation' => ($instance['widget']['type'] == 'file_generic') ? 2 : 0,
     '#weight' => 10,
