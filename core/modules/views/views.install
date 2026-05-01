@@ -214,11 +214,13 @@ function views_update_1008() {
 }
 
 /**
- * Enable Ajax History for all Views using AJAX.
+ * Enable ajax history for all Views that used Views Ajax History contrib
+ * module, and disable contrib module.
  */
 function views_update_1009() {
   $views = config_get_names_with_prefix('views.view');
   $views_ajax_history = module_exists('views_ajax_history');
+  $has_changes = FALSE;
   foreach ($views as $view_name) {
     $config = config($view_name);
     $use_ajax_default = $config->get('display.default.display_options.use_ajax');
@@ -231,10 +233,13 @@ function views_update_1009() {
         // Set the value based on whether views_ajax_history module was enabled.
         $config->set('display.' . $display_name . '.display_options.enable_ajax_history', $views_ajax_history);
         $config->set('display.' . $display_name . '.display_options.exclude_ajax_args', '');
+        $has_changes = TRUE;
       }
     }
 
-    $config->save();
+    if ($has_changes) {
+      $config->save();
+    }
   }
 
   // Remove the entry for the views_ajax_history module in the system table.
