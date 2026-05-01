@@ -989,8 +989,13 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
   // Determine whether we can perform this operation based on overwrite rules.
   $destination = file_destination($destination, $replace);
   if ($destination === FALSE) {
-    backdrop_set_message(t('The file %file could not be moved/copied because a file by that name already exists in the destination directory.', array('%file' => $original_source)), 'error');
-    watchdog('file', 'File %file could not be moved/copied because a file by that name already exists in the destination directory (%directory)', array('%file' => $original_source, '%directory' => $destination));
+    backdrop_set_message(t('The file %file could not be moved/copied because a file by that name already exists in the destination directory.', array(
+      '%file' => $original_source,
+    )), 'error');
+    watchdog('file', 'File %file could not be moved/copied because a file by that name already exists in the destination directory (%directory)', array(
+      '%file' => $original_source,
+      '%directory' => $destination,
+    ));
     return FALSE;
   }
 
@@ -998,8 +1003,12 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
   $real_source = backdrop_realpath($source);
   $real_destination = backdrop_realpath($destination);
   if ($source == $destination || ($real_source !== FALSE) && ($real_source == $real_destination)) {
-    backdrop_set_message(t('The specified file %file was not moved/copied because it would overwrite itself.', array('%file' => $source)), 'error');
-    watchdog('file', 'File %file could not be moved/copied because it would overwrite itself.', array('%file' => $source));
+    backdrop_set_message(t('The specified file %file was not moved/copied because it would overwrite itself.', array(
+      '%file' => $source,
+    )), 'error');
+    watchdog('file', 'File %file could not be moved/copied because it would overwrite itself.', array(
+      '%file' => $source,
+    ));
     return FALSE;
   }
   // Make sure the .htaccess files are present.
@@ -1483,9 +1492,9 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  * @param $validators
  *   An optional, associative array of callback functions used to validate the
  *   file. See file_validate() for a full discussion of the array format.
- *   If no extension validator is provided it will default to a limited safe
+ *   If no extension validator is provided, it will default to a limited safe
  *   list of extensions which is as follows: "jpg jpeg gif png txt
- *   doc xls pdf ppt pps odt ods odp". To allow all extensions you must
+ *   doc xls pdf ppt pps odt ods odp". To allow all extensions, you must
  *   explicitly set the 'file_validate_extensions' validator to an empty array
  *   (Beware: this is not safe and should only be allowed for trusted users, if
  *   at all).
@@ -1499,213 +1508,267 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *   - FILE_EXISTS_RENAME: Append _{incrementing number} until the filename is
  *     unique.
  *   - FILE_EXISTS_ERROR: Do nothing and return FALSE.
+ * @param int|NULL $delta
+ *   If multiple files are uploaded into the same field (via the "multiple"
+ *   HTML attribute), an individual file can be saved one at a time by
+ *   specifying the numeric offset for that file, starting from 0. If left NULL,
+ *   all the files from that field are saved.
  *
- * @return File|FALSE|NULL
- *   An object containing the file information if the upload succeeded, FALSE
- *   in the event of an error, or NULL if no file was uploaded. The
- *   documentation for the "File interface" group, which you can find under
- *   Related topics, or the header at the top of this file, documents the
- *   components of a file entity. In addition to the standard components,
- *   this function adds:
+ * @return File|File[]|FALSE|NULL
+ *   A File object (or array of File objects) containing the file information if
+ *   the upload succeeded, FALSE in the event of an error, or NULL if no file
+ *   was uploaded.
+ *
+ *   If only a single file was uploaded, or $delta was specified, then a single
+ *   File object is returned. If multiple files are uploaded, an array of
+ *   return values is provided instead.
+ *
+ *   The documentation for the "File interface" group, which you
+ *   can find under Related topics, or the header at the top of this file,
+ *   documents the properties of a File object. After saving, each File object
+ *   will be populated with the following additional properties:
  *   - source: Path to the file before it is moved.
  *   - destination: Path to the file after it is moved (same as 'uri').
  */
-function file_save_upload($form_field_name, $validators = array(), $destination = FALSE, $replace = FILE_EXISTS_RENAME) {
+function file_save_upload($form_field_name, $validators = array(), $destination = FALSE, $replace = FILE_EXISTS_RENAME, $delta = NULL) {
   global $user;
   static $upload_cache;
-
-  // Return cached objects without processing since the file will have
-  // already been processed and the paths in _FILES will be invalid.
-  if (isset($upload_cache[$form_field_name])) {
-    return $upload_cache[$form_field_name];
-  }
 
   // Make sure there's an upload to process.
   if (empty($_FILES['files']['name'][$form_field_name])) {
     return NULL;
   }
 
-  // Check for file upload errors and return FALSE if a lower level system
-  // error occurred. For a complete list of errors:
-  // See http://php.net/manual/features.file-upload.errors.php.
-  switch ($_FILES['files']['error'][$form_field_name]) {
-    case UPLOAD_ERR_INI_SIZE:
-    case UPLOAD_ERR_FORM_SIZE:
-      backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $_FILES['files']['name'][$form_field_name], '%maxsize' => format_size(file_upload_max_size()))), 'error');
-      return FALSE;
+  // Check if this is a multiple file upload. If there is only a single file,
+  // return the first and only file (delta 0).
+  $multiple_file_upload = is_array($_FILES['files']['name'][$form_field_name]);
+  if (!$multiple_file_upload) {
+    $delta = 0;
+  }
 
-    case UPLOAD_ERR_PARTIAL:
-    case UPLOAD_ERR_NO_FILE:
-      backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $_FILES['files']['name'][$form_field_name])), 'error');
-      return FALSE;
+  // Return cached objects without processing since the file will have
+  // already been processed and the paths in $_FILES will be invalid.
+  if (isset($upload_cache[$form_field_name])) {
+    if (isset($delta)) {
+      return $upload_cache[$form_field_name][$delta];
+    }
+    else {
+      $return_file_cache = [];
+      foreach ($_FILES['files']['name'][$form_field_name] as $file_index => $cache_file_name) {
+        if (isset($upload_cache[$form_field_name][$file_index])) {
+          $return_file_cache[] = $upload_cache[$form_field_name][$file_index];
+        }
+      }
+      return $return_file_cache;
+    }
+  }
 
-    case UPLOAD_ERR_OK:
-      // Final check that this is a valid upload, if it isn't, use the
-      // default error handler.
-      if (is_uploaded_file($_FILES['files']['tmp_name'][$form_field_name])) {
+  // Prepare uploaded files info so that single and multiple value uploads can
+  // be handled consistently despite differences in the $_FILES array structure.
+  $uploaded_files = $_FILES;
+  if (!$multiple_file_upload) {
+    foreach (array('name', 'type', 'tmp_name', 'error', 'size') as $value)
+    $uploaded_files['files'][$value][$form_field_name] = array($uploaded_files['files'][$value][$form_field_name]);
+  }
+
+  $files = array();
+  foreach ($uploaded_files['files']['name'][$form_field_name] as $i => $name) {
+    // Check for file upload errors and return FALSE for this file if a lower
+    // level system error occurred. For a complete list of errors:
+    // See http://php.net/manual/features.file-upload.errors.php.
+    switch ($uploaded_files['files']['error'][$form_field_name][$i]) {
+      case UPLOAD_ERR_INI_SIZE:
+      case UPLOAD_ERR_FORM_SIZE:
+        backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array(
+          '%file' => $name,
+          '%maxsize' => format_size(file_upload_max_size()),
+        )), 'error');
+        $files[$i] = FALSE;
         break;
+
+      case UPLOAD_ERR_PARTIAL:
+      case UPLOAD_ERR_NO_FILE:
+        backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array(
+          '%file' => $name,
+        )), 'error');
+        $files[$i] = FALSE;
+        break;
+
+      case UPLOAD_ERR_OK:
+        // Final check that this is a valid upload, if it isn't, use the
+        // default error handler.
+        if (is_uploaded_file($uploaded_files['files']['tmp_name'][$form_field_name][$i])) {
+          break;
+        }
+
+        // Unknown error:
+      default:
+        backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array(
+          '%file' => $name,
+        )), 'error');
+        $files[$i] = FALSE;
+        break;
+    }
+
+    // Begin building file entity.
+    $values = array(
+      'uid' => $user->uid,
+      'status' => 0,
+      'filename' => trim(backdrop_basename($name, '.')),
+      'uri' => $uploaded_files['files']['tmp_name'][$form_field_name][$i],
+      'filesize' => $uploaded_files['files']['size'][$form_field_name][$i],
+    );
+    $values['filemime'] = file_get_mimetype($values['filename']);
+    /** @var File|FALSE $file */
+    $file = entity_create('file', $values);
+
+    $extensions = '';
+    if (isset($validators['file_validate_extensions'])) {
+      if (isset($validators['file_validate_extensions'][0])) {
+        // Build the list of non-munged extensions if the caller provided them.
+        $extensions = $validators['file_validate_extensions'][0];
       }
-
-    // Unknown error
-    default:
-      backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $_FILES['files']['name'][$form_field_name])), 'error');
-      return FALSE;
-  }
-  // Begin building file entity.
-  $values = array(
-    'uid' => $user->uid,
-    'status' => 0,
-    'filename' => trim(backdrop_basename($_FILES['files']['name'][$form_field_name]), '.'),
-    'uri' => $_FILES['files']['tmp_name'][$form_field_name],
-    'filesize' => $_FILES['files']['size'][$form_field_name],
-  );
-  $values['filemime'] = file_get_mimetype($values['filename']);
-  /** @var File $file */
-  $file = entity_create('file', $values);
-
-  $extensions = '';
-  if (isset($validators['file_validate_extensions'])) {
-    if (isset($validators['file_validate_extensions'][0])) {
-      // Build the list of non-munged extensions if the caller provided them.
-      $extensions = $validators['file_validate_extensions'][0];
+      else {
+        // If 'file_validate_extensions' is set and the list is empty then the
+        // caller wants to allow any extension. In this case we have to remove the
+        // validator or else it will reject all extensions.
+        unset($validators['file_validate_extensions']);
+      }
     }
     else {
-      // If 'file_validate_extensions' is set and the list is empty then the
-      // caller wants to allow any extension. In this case we have to remove the
-      // validator or else it will reject all extensions.
-      unset($validators['file_validate_extensions']);
-    }
-  }
-  else {
-    // No validator was provided, so add one using the default list.
-    // Build a default non-munged safe list for file_munge_filename().
-    $extensions = implode(' ', image_get_supported_extensions()) . ' txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
-
-    $validators['file_validate_extensions'] = array();
-    $validators['file_validate_extensions'][0] = $extensions;
-  }
-
-
-  if (!settings_get('allow_insecure_uploads', 0)) {
-    if (!empty($extensions)) {
-      // Munge the filename to protect against possible malicious extension hiding
-      // within an unknown file type (ie: filename.html.foo).
-      $file->filename = file_munge_filename($file->filename, $extensions);
+      // No validator was provided, so add one using the default list.
+      // Build a default non-munged safe list for file_munge_filename().
+      $extensions = 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
+      $validators['file_validate_extensions'] = array();
+      $validators['file_validate_extensions'][0] = $extensions;
     }
 
-    // Rename potentially executable files, to help prevent exploits (i.e. will
-    // rename filename.php.foo and filename.php to filename.php_.foo_.txt and
-    // filename.php_.txt, respectively). Don't rename if 'allow_insecure_uploads'
-    // evaluates to TRUE.
-    if (preg_match('/\.(php|phar|pl|py|cgi|asp|js)(\.|$)/i', $file->filename)) {
-      // If the file will be rejected anyway due to a disallowed extension, it
-      // should not be renamed; rather, we'll let file_validate_extensions()
-      // reject it below.
-      if (!isset($validators['file_validate_extensions']) || !file_validate_extensions($file, $extensions)) {
-        $file->filemime = 'text/plain';
-        if (substr($file->filename, -4) != '.txt') {
-          // The destination filename will also later be used to create the URI.
-          $file->filename .= '.txt';
-        }
-        $file->filename = file_munge_filename($file->filename, $extensions, FALSE);
-        backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
-        // The .txt extension may not be in the allowed list of extensions. We have
-        // to add it here or else the file upload will fail.
-        if (!empty($validators['file_validate_extensions'][0])) {
-          $validators['file_validate_extensions'][0] .= ' txt';
+    if (!settings_get('allow_insecure_uploads', 0)) {
+      if (!empty($extensions)) {
+        // Munge the filename to protect against possible malicious extension hiding
+        // within an unknown file type (ie: filename.html.foo).
+        $file->filename = file_munge_filename($file->filename, $extensions);
+      }
+
+      // Rename potentially executable files, to help prevent exploits (i.e. will
+      // rename filename.php.foo and filename.php to filename.php_.foo_.txt and
+      // filename.php_.txt, respectively). Don't rename if 'allow_insecure_uploads'
+      // evaluates to TRUE.
+      if (preg_match('/\.(php|phar|pl|py|cgi|asp|js)(\.|$)/i', $file->filename)) {
+        // If the file will be rejected anyway due to a disallowed extension, it
+        // should not be renamed; rather, we'll let file_validate_extensions()
+        // reject it below.
+        if (!isset($validators['file_validate_extensions']) || !file_validate_extensions($file, $extensions)) {
+          $file->filemime = 'text/plain';
+          if (substr($file->filename, -4) != '.txt') {
+            // The destination filename will also later be used to create the URI.
+            $file->filename .= '.txt';
+          }
+          $file->filename = file_munge_filename($file->filename, $extensions, FALSE);
+          backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
+          // The .txt extension may not be in the allowed list of extensions. We have
+          // to add it here or else the file upload will fail.
+          if (!empty($validators['file_validate_extensions'][0])) {
+            $validators['file_validate_extensions'][0] .= ' txt';
+          }
         }
       }
     }
-  }
 
-  // If the destination is not provided, use the temporary directory.
-  if (empty($destination)) {
-    $destination = 'temporary://';
-  }
+    // If the destination is not provided, use the temporary directory.
+    if (empty($destination)) {
+      $destination = 'temporary://';
+    }
 
-  // Assert that the destination contains a valid stream.
-  $destination_scheme = file_uri_scheme($destination);
-  if (!$destination_scheme || !file_stream_wrapper_valid_scheme($destination_scheme)) {
-    backdrop_set_message(t('The file could not be uploaded because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
-    return FALSE;
-  }
-
-  $file->source = $form_field_name;
-  // A URI may already have a trailing slash or look like "public://".
-  if (substr($destination, -1) != '/') {
-    $destination .= '/';
-  }
-  try {
+    // Assert that the destination contains a valid stream.
+    $destination_scheme = file_uri_scheme($destination);
+    if (!file_stream_wrapper_valid_scheme($destination_scheme)) {
+      backdrop_set_message(t('The file could not be uploaded because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
+      $files[$i] = FALSE;
+      continue;
+    }
+    $file->source = $form_field_name;
+    // A file URI may already have a trailing slash or look like "public://".
+    if (substr($destination, -1) != '/') {
+      $destination .= '/';
+    }
     $file->destination = file_destination($destination . $file->filename, $replace);
-  }
-  catch (RuntimeException $e) {
-    backdrop_set_message(t('The file %source could not be uploaded because the name is invalid.', array('%source' => $form_field_name)), 'error');
-    return FALSE;
-  }
-  // If file_destination() returns FALSE then $replace == FILE_EXISTS_ERROR and
-  // there's an existing file so we need to bail.
-  if ($file->destination === FALSE) {
-    backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
-    return FALSE;
-  }
-
-  // Add in our check of the the file name length.
-  $validators['file_validate_name_length'] = array();
-
-  // Add in check for valid SVG.
-  $validators['file_validate_svg'] = array();
-
-  // Call the validation functions specified by this function's caller.
-  $errors = file_validate($file, $validators);
-
-  // Check for errors.
-  if (!empty($errors)) {
-    $message = t('The specified file %name could not be uploaded.', array('%name' => $file->filename));
-    if (count($errors) > 1) {
-      $message .= theme('item_list', array('items' => $errors));
+    // If file_destination() returns FALSE then $replace === FILE_EXISTS_ERROR and
+    // there's an existing file, so we need to bail.
+    if ($file->destination === FALSE) {
+      backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array(
+        '%source' => $form_field_name,
+        '%directory' => $destination,
+      )), 'error');
+      $files[$i] = FALSE;
+      continue;
     }
-    else {
-      $message .= ' ' . array_pop($errors);
+
+    // Add in our check of the file name length.
+    $validators['file_validate_name_length'] = array();
+
+    // Add in check for valid SVG.
+    $validators['file_validate_svg'] = array();
+
+    // Call the validation functions specified by this function's caller.
+    $errors = file_validate($file, $validators);
+
+    // Check for errors.
+    if (!empty($errors)) {
+      $message = t('The specified file %name could not be uploaded.', array('%name' => $file->filename));
+      if (count($errors) > 1) {
+        $message .= theme('item_list', array('items' => $errors));
+      }
+      else {
+        $message .= ' ' . array_pop($errors);
+      }
+      backdrop_set_message($message, 'error');
+      $files[$i] = FALSE;
+      continue;
     }
-    form_set_error($form_field_name, $message);
-    return FALSE;
-  }
 
-  // Move uploaded files from PHP's upload_tmp_dir to Backdrop's temporary
-  // directory. This overcomes open_basedir restrictions for future file
-  // operations.
-  $file->uri = $file->destination;
-  if (!backdrop_move_uploaded_file($_FILES['files']['tmp_name'][$form_field_name], $file->uri)) {
-    form_set_error($form_field_name, t('File upload error. Could not move uploaded file.'));
-    watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
-    return FALSE;
-  }
+    // Move uploaded files from PHP's upload_tmp_dir to Drupal's temporary
+    // directory. This overcomes open_basedir restrictions for future file
+    // operations.
+    $file->uri = $file->destination;
+    if (!backdrop_move_uploaded_file($uploaded_files['files']['tmp_name'][$form_field_name][$i], $file->uri)) {
+      backdrop_set_message(t('File upload error. Could not move uploaded file.'), 'error');
+      watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array(
+        '%file' => $file->filename,
+        '%destination' => $file->uri,
+      ));
+      $files[$i] = FALSE;
+      continue;
+    }
+    // Set the permissions on the new file.
+    backdrop_chmod($file->uri);
 
-  // Set the permissions on the new file.
-  backdrop_chmod($file->uri);
+    // If we are replacing an existing file re-use its database record.
+    if ($replace == FILE_EXISTS_REPLACE) {
+      $existing_files = entity_load_multiple('file', FALSE, array('uri' => $file->uri));
+      if (count($existing_files)) {
+        $existing = reset($existing_files);
+        $file->fid = $existing->fid;
+      }
+    }
 
-  // If we are replacing an existing file re-use its database record.
-  if ($replace == FILE_EXISTS_REPLACE) {
-    $existing_files = file_load_multiple(array(), array('uri' => $file->uri));
-    if (count($existing_files)) {
-      $existing = reset($existing_files);
-      $file->fid = $existing->fid;
+    // If we made it this far it's safe to record this file in the database.
+    if ($file->save()) {
+      // Track non-public files in the session if they were uploaded by an
+      // anonymous user. This allows modules such as the File module to only
+      // grant view access to the specific anonymous user who uploaded the file.
+      // See file_file_download().
+      if (!$user->uid && $destination_scheme === 'private') {
+        $_SESSION['anonymous_allowed_file_ids'][$file->fid] = $file->fid;
+      }
+      $files[$i] = $file;
     }
   }
 
-  // If we made it this far it's safe to record this file in the database.
-  if (file_save($file)) {
-    // Track non-public files in the session if they were uploaded by an
-    // anonymous user. This allows modules such as the File module to only
-    // grant view access to the specific anonymous user who uploaded the file.
-    // See file_file_download().
-    if (!$user->uid && $destination_scheme === 'private') {
-      $_SESSION['anonymous_allowed_file_ids'][$file->fid] = $file->fid;
-    }
-    // Add file to the cache.
-    $upload_cache[$form_field_name] = $file;
-    return $file;
-  }
+  // Add files to the cache.
+  $upload_cache[$form_field_name] = $files;
+
+  return isset($delta) ? $files[$delta] : $files;
 }
 
 /**
