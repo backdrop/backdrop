@@ -925,6 +925,13 @@ function file_field_inline_fields_widget($element, &$form_state, $instance) {
     }
   }
 
+  // Indent each field to improve the display.
+  if ($instance['widget']['type'] == 'file_generic') {
+    foreach (element_children($element['entity']) as $form_key) {
+      $element['entity'][$form_key]['#indentation'] = 2;
+    }
+  }
+
   return $element;
 }
 
