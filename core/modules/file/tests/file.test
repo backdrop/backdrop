@@ -278,8 +278,8 @@ class FileTestHelper extends BackdropWebTestCase {
   /**
    * Uploads a file to a node.
    *
-   * @param File $file
-   *   File object.
+   * @param File|File[] $file
+   *   One or more File objects.
    * @param string $field_name
    *   The field name.
    * @param mixed $nid_or_type
@@ -292,7 +292,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @return int
    *   Node ID.
    */
-  function uploadNodeFile($file, $field_name, $nid_or_type, $new_revision = TRUE, $extras = array()) {
+  protected function uploadNodeFile($file, $field_name, $nid_or_type, $new_revision = TRUE, $extras = array()) {
     $langcode = LANGUAGE_NONE;
     $edit = array(
       "title" => $this->randomName(),
@@ -313,13 +313,22 @@ class FileTestHelper extends BackdropWebTestCase {
       $this->assertNotEqual($nid, $node->vid, 'Node revision exists.');
     }
 
-    // Attach a file to the node.
     $field = field_info_field($field_name);
     $name = 'files[' . $field_name . '_' . $langcode . '_0]';
+    // Upload as an array of files if multiple. The HTML input for a multiple
+    // file field has a trailing [] in the name (added by form_process_file()).
     if ($field['cardinality'] != 1) {
-      $name .= '[]';
+      $files = is_array($file) ? $file : array($file);
+      $file_paths = array();
+      foreach ($files as $file) {
+        $file_paths[] = backdrop_realpath($file->uri);
+      }
+      $edit[$name . '[]'] = $file_paths;
     }
-    $edit[$name] = backdrop_realpath($file->uri);
+    else {
+      $edit[$name] = backdrop_realpath($file->uri);
+    }
+
     $this->backdropPost("node/$nid/edit", $edit, t('Save'));
 
     return $nid;
@@ -1472,7 +1481,7 @@ class FileFieldValidateTestCase extends FileTestHelper {
   /**
    * Tests the required property on file fields.
    */
-  function testRequired() {
+  public function testRequired() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name, array(), array('required' => '1'));
@@ -1521,7 +1530,7 @@ class FileFieldValidateTestCase extends FileTestHelper {
   /**
    * Tests the max file size validator.
    */
-  function testFileMaxSize() {
+  public function testFileMaxSize() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name, array(), array('required' => '1'));
@@ -1573,7 +1582,7 @@ class FileFieldValidateTestCase extends FileTestHelper {
   /**
    * Tests file extension checking.
    */
-  function testFileExtension() {
+  public function testFileExtension() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name);
@@ -1616,9 +1625,76 @@ class FileFieldValidateTestCase extends FileTestHelper {
   }
 
   /**
+   * Tests file extension validation when uploading multiple files at once.
+   */
+  public function testMultipleFileValidate() {
+    $type_name = 'post';
+    $field_name = strtolower($this->randomName());
+    $this->createFileField($field_name, $type_name, array('cardinality' => FIELD_CARDINALITY_UNLIMITED));
+
+    $txt_file1 = $this->getTestFile('text');
+    // 128KB, distinct from txt_file1.
+    $txt_file2 = $this->getTestFile('text', 131072);
+    $image_file = $this->getTestFile('image');
+
+    // Restrict uploads to text files only.
+    $this->updateFileField($field_name, $type_name, array('file_extensions' => 'txt'));
+
+    // Upload two valid txt files and one invalid image file simultaneously.
+    $nid = $this->uploadNodeFile(array($txt_file1, $txt_file2, $image_file), $field_name, $type_name);
+
+    // The image file should be rejected with an extension error.
+    $error_message = t('Only files with the following extensions are allowed: %files-allowed.', array('%files-allowed' => 'txt'));
+    $this->assertRaw($error_message, 'Extension error shown when invalid file uploaded alongside valid files.');
+
+    // The node should have been saved with only the two valid txt files.
+    $node = node_load($nid, NULL, TRUE);
+    $this->assertEqual(2, count($node->{$field_name}[LANGUAGE_NONE]), 'Node saved with both valid txt files.');
+
+    foreach ($node->{$field_name}[LANGUAGE_NONE] as $delta => $item) {
+      $node_file = file_load($item['fid']);
+      $this->assertFileExists($node_file, format_string('Txt file @delta exists on disk.', array('@delta' => $delta)));
+      $this->assertFileEntryExists($node_file, format_string('Txt file @delta entry exists in the database.', array('@delta' => $delta)));
+      $this->assertEqual(FILE_STATUS_PERMANENT, $node_file->status, format_string('Txt file @delta is marked permanent.', array('@delta' => $delta)));
+    }
+
+    // Test max file size validation with multiple simultaneous uploads.
+    // Set a 500 KB size cap while keeping the txt-only extension restriction.
+    $this->updateFileField($field_name, $type_name, array('max_filesize' => '500K'));
+
+    // 128 KB, under the 500 KB limit.
+    $small_txt_file = $this->getTestFile('text', 131072);
+
+    // 1.2 MB, exceeds 500 KB.
+    $large_txt_file = $this->getTestFile('text', 1310720);
+
+    // Upload both txt files simultaneously.
+    $nid = $this->uploadNodeFile(array($small_txt_file, $large_txt_file), $field_name, $type_name);
+
+    // The oversized file should be rejected.
+    $size_error = t('The file is %filesize exceeding the maximum file size of %maxsize.', array(
+      '%filesize' => format_size($large_txt_file->filesize),
+      '%maxsize' => format_size(parse_size('500K')),
+    ));
+    $this->assertRaw($size_error, 'Size error shown when oversized txt file uploaded alongside a valid txt file.');
+
+    // The node should be saved with only the small, valid file.
+    $node = node_load($nid, NULL, TRUE);
+    $this->assertEqual(1, count($node->{$field_name}[LANGUAGE_NONE]), 'Node saved with only the small txt file.');
+
+    $saved_file = file_load($node->{$field_name}[LANGUAGE_NONE][0]['fid']);
+    $this->assertFileExists($saved_file, 'Small txt file exists on disk after uploading alongside an oversized file.');
+    $this->assertFileEntryExists($saved_file, 'Small txt file entry exists in the database after uploading alongside an oversized file.');
+    $this->assertEqual(FILE_STATUS_PERMANENT, $saved_file->status, 'Small txt file is marked permanent.');
+
+    // Remove our file field.
+    field_delete_field($field_name);
+  }
+
+  /**
    * Tests default display of File Field.
    */
-  function testDefaultFileFieldDisplay() {
+  public function testDefaultFileFieldDisplay() {
     $field_name = strtolower($this->randomName());
     $type_name = 'post';
     $field_settings = array(
@@ -2401,7 +2477,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the basic file upload wizard functionality.
    */
-  function testFileUploadWizardBasic() {
+  public function testFileUploadWizardBasic() {
     $test_file = $this->getTestFile('text');
 
     // Step 1: Upload a basic document file.
@@ -2419,9 +2495,51 @@ class FileUploadWizardTestCase extends FileTestHelper {
   }
 
   /**
+   * Test uploading multiple files of different types through the wizard.
+   *
+   * When more than one file is uploaded at once the wizard skips all steps and
+   * saves every file immediately using the default scheme, with each file
+   * marked permanent.
+   */
+  public function testFileUploadWizardMultiple() {
+    $txt_file = $this->getTestFile('text');
+    $image_file = $this->getTestFile('image');
+
+    // Record the highest fid before the upload so we can find the new files.
+    $previous_last_fid = $this->getLastFileId();
+
+    // Upload a text file and an image file simultaneously.
+    $edit = array();
+    $edit['files[upload][]'] = array(
+      backdrop_realpath($txt_file->uri),
+      backdrop_realpath($image_file->uri),
+    );
+    $this->backdropPost('file/add', $edit, t('Next'));
+
+    // Both files should have been saved immediately without wizard steps.
+    $new_fids = db_query('SELECT fid FROM {file_managed} WHERE fid > :prev ORDER BY fid ASC', array(':prev' => $previous_last_fid))->fetchCol();
+    $new_files = file_load_multiple($new_fids);
+    $this->assertEqual(2, count($new_files), 'Both uploaded files were saved to the database.');
+
+    foreach ($new_files as $file) {
+      // Each file should be reported as uploaded. The wizard bypasses type
+      // detection for multi-file uploads, so only check that the filename and
+      // "was uploaded" appear together on the page.
+      $this->assertText($file->filename . ' was uploaded.', format_string('Upload message shown for %name.', array('%name' => $file->filename)));
+
+      // Each file should exist on disk and in the database.
+      $this->assertFileExists($file, format_string('File %name exists on disk.', array('%name' => $file->filename)));
+      $this->assertFileEntryExists($file, format_string('File %name entry exists in the database.', array('%name' => $file->filename)));
+
+      // Each file must be marked permanent.
+      $this->assertEqual(FILE_STATUS_PERMANENT, $file->status, format_string('File %name is marked permanent.', array('%name' => $file->filename)));
+    }
+  }
+
+  /**
    * Test the file upload wizard type step.
    */
-  function testFileUploadWizardTypes() {
+  public function testFileUploadWizardTypes() {
     $test_file = $this->getTestFile('text');
 
     // Create multiple file types with the same mime types.
@@ -2450,7 +2568,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the file upload wizard scheme step.
    */
-  function testFileUploadWizardSchemes() {
+  public function testFileUploadWizardSchemes() {
     $test_file = $this->getTestFile('text');
 
     // Enable the private file system.
@@ -2478,7 +2596,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the file upload wizard when uploading a private file fails.
    */
-  function testFileUploadWizardPrivateFailure() {
+  public function testFileUploadWizardPrivateFailure() {
     $test_file = $this->getTestFile('text');
 
     // Record the last saved file ID.
@@ -2530,7 +2648,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the file upload wizard field step.
    */
-  function testFileUploadWizardFields() {
+  public function testFileUploadWizardFields() {
     $test_file = $this->getTestFile('image');
     $filename = $this->randomName();
     $alt = $this->randomName();
@@ -2589,7 +2707,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test skipping each of the file upload wizard steps.
    */
-  function testFileUploadWizardStepSkipping() {
+  public function testFileUploadWizardStepSkipping() {
     $test_file = $this->getTestFile('image');
     $filename = $this->randomName();
 
