@@ -392,7 +392,7 @@ function theme_views_ui_style_plugin_table($variables) {
       'align' => 'center',
     ),
     array(
-      'data' => t('Responsive'),
+      'data' => t('Responsive priority'),
       'align' => 'center',
     ),
   );

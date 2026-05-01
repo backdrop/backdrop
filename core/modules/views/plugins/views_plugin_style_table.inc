@@ -322,7 +322,7 @@ class views_plugin_style_table extends views_plugin_style {
         '#type' => 'select',
         '#default_value' => !empty($this->options['info'][$field]['responsive']) ? $this->options['info'][$field]['responsive'] : '',
         '#options' => array(
-          '' => t('None'),
+          '' => t('High'),
           RESPONSIVE_PRIORITY_MEDIUM => t('Medium'),
           RESPONSIVE_PRIORITY_LOW => t('Low'),
         ),
