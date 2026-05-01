@@ -2207,7 +2207,7 @@ function system_library_info_alter(&$libraries, $module) {
       ),
     );
   }
-  elseif ($config->get('jquery_version') == 'jquery4') {
+  elseif ($config->get('jquery_version') == '4.x') {
     $libraries['jquery']['version'] = '4.0.0';
     $libraries['jquery']['js'] = array(
       'core/misc/jquery-4.0.0.min.js' => array(
