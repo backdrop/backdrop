@@ -1602,7 +1602,7 @@ function hook_image_toolkits() {
  */
 function hook_mail_alter(&$message) {
   if ($message['id'] == 'modulename_messagekey') {
-    if (!example_notifications_optin($message['to'], $message['id'])) {
+    if (!example_notifications_opt_in($message['to'], $message['id'])) {
       // If the recipient has opted to not receive such messages, cancel
       // sending.
       $message['send'] = FALSE;
@@ -3583,10 +3583,19 @@ function hook_file_mimetype_mapping_alter(&$mapping) {
  *     through the t() function for translation.
  *   - 'callback': Optional. A function name that will execute the action if the
  *     name of the action differs from the function name.
+ *   - 'access callback': A function name that will return TRUE if the user
+ *     account executing the action has permission to run the action, and FALSE
+ *     if not. If set to TRUE, access to this action is always allowed.
+ *     Defaults to TRUE. In Backdrop 2.x, the default will be changed to
+ *     'user_access'.
+ *   - 'access arguments': Optional. An array of arguments to pass to the
+ *     access callback function. Usually this is an array with a permission name
+ *     within it, which is passed to user_access().
  *   - 'file': Optional. Relative path to a file from the module's directory
  *     that contains the callback function.
  *
  * @see action_get_info()
+ * @since 1.32.3 Added "access callback" and "access arguments".
  *
  * @ingroup actions
  */
@@ -3596,6 +3605,8 @@ function hook_action_info() {
       'type' => 'comment',
       'label' => t('Unpublish comment'),
       'callback' => 'comment_unpublish_action',
+      'access callback' => 'user_access',
+      'access arguments' => array('administer comments'),
     ),
   );
 }

@@ -40,12 +40,13 @@ function file_add_form($form, &$form_state, $options = array()) {
     case 1:
       $form['upload'] = array(
         '#type' => 'managed_file',
-        '#title' => t('Upload a new file'),
+        '#multiple' => TRUE,
+        '#title' => t('Upload files'),
         '#upload_location' => file_upload_destination_uri($options),
         '#upload_validators' => file_get_upload_validators($options),
         '#progress_indicator' => 'bar',
         '#pre_render' => array('file_managed_file_pre_render', 'file_upload_validators_pre_render'),
-        '#default_value' => isset($form_state['storage']['upload']) ? $form_state['storage']['upload'] : NULL,
+        '#default_value' => isset($form_state['storage']['upload']) ? $form_state['storage']['upload'] : array(),
       );
 
       $form['actions']['next'] = array(
@@ -73,7 +74,8 @@ function file_add_form($form, &$form_state, $options = array()) {
  */
 function file_add_upload_step_filetype($form, &$form_state, array $options = array()) {
   backdrop_set_title(t('Configure file type'));
-  $file = file_load($form_state['storage']['upload']);
+  $upload_fids = (array) $form_state['storage']['upload'];
+  $file = file_load($upload_fids[0]);
   $selected_files = $form['#options']['types'];
 
   $form['type'] = array(
@@ -103,7 +105,8 @@ function file_add_upload_step_filetype($form, &$form_state, array $options = arr
  */
 function file_add_upload_step_scheme($form, &$form_state, array $options = array()) {
   backdrop_set_title(t('Configure file scheme'));
-  $file = file_load($form_state['storage']['upload']);
+  $upload_fids = (array) $form_state['storage']['upload'];
+  $file = file_load($upload_fids[0]);
 
   $schemes = array();
   foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
@@ -154,7 +157,8 @@ function file_add_upload_step_scheme($form, &$form_state, array $options = array
 function file_add_upload_step_fields($form, &$form_state, array $options = array()) {
   backdrop_set_title(t('Configure file fields'));
   // Load the file and overwrite the filetype set on the previous screen.
-  $file = file_load($form_state['storage']['upload']);
+  $upload_fids = (array) $form_state['storage']['upload'];
+  $file = file_load($upload_fids[0]);
   $file->type = $form_state['storage']['type'];
 
   // Let users modify the filename here.
@@ -229,179 +233,201 @@ function file_get_filetype_candidates(File $file, $selected_files = array()) {
  * Submit handler for the add file form.
  */
 function file_add_form_submit($form, &$form_state) {
-  $config = config('file.settings');
-  $form_state['storage'] = isset($form_state['storage']) ? $form_state['storage'] : array();
-  $form_state['storage'] = array_merge($form_state['storage'], $form_state['values']);
-
-  // Field selected allowed types.
-  $selected_files = $form['#options']['types'];
-
-  // This var is set to TRUE when we are ready to save the file.
-  $save = FALSE;
-  $trigger = $form_state['triggering_element']['#id'];
-  $triggered_next = $trigger == 'edit-next' || (strpos($trigger, 'edit-next--') === 0);
-  $triggered_previous = $trigger == 'edit-previous' || (strpos($trigger, 'edit-previous--') === 0);
-  $step_delta = ($triggered_previous) ? -1 : 1;
-
-  $steps_to_check = array(2, 3);
-  if ($triggered_previous) {
-    // If the previous button was hit,
-    // the step checking order should be reversed 3, 2.
-    $steps_to_check = array_reverse($steps_to_check);
+  if ($form['#step'] === 1) {
+    $fids = array_filter(explode(',', $form_state['values']['upload']));
+    $form_state['storage']['file_count'] = count($fids);
+  }
+  else {
+    // On steps 2+, the upload element is not in the form; use stored FIDs.
+    $fids = (array) $form_state['storage']['upload'];
   }
 
-  foreach ($steps_to_check as $step) {
-    // Check if we can skip step 2 and 3.
-    if (($form['#step'] == $step - 1 && $triggered_next) || ($form['#step'] == $step + 1 && $triggered_previous)) {
-      $file = file_load($form_state['storage']['upload']);
-      if ($step == 2) {
-        // Check if we can skip step 2.
-        $candidates = file_get_filetype_candidates($file, $selected_files);
-        if (count($candidates) == 1) {
-          $candidates_keys = array_keys($candidates);
-          // There is only one possible filetype for this file.
-          // Skip the second page.
-          $form['#step'] += $step_delta;
-          $form_state['storage']['type'] = reset($candidates_keys);
-        }
-        elseif (!$candidates || $config->get('upload_wizard_skip_file_type')) {
-          // Do not assign the file a file type.
-          $form['#step'] += $step_delta;
-          $form_state['storage']['type'] = FILE_TYPE_NONE;
-        }
-      }
-      else {
-        // Check if we can skip step 3.
-        $options = $form['#options'];
-        $schemes = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+  // Only use the wizard if only one file was uploaded.
+  if ($form_state['storage']['file_count'] === 1) {
+    $multiple = FALSE;
+    $config = config('file.settings');
+    $form_state['storage'] = isset($form_state['storage']) ? $form_state['storage'] : array();
+    $form_state['storage'] = array_merge($form_state['storage'], $form_state['values']);
 
-        // Remove any schemes not found in the instance settings.
-        if (!empty($options['schemes'])) {
-          $schemes = array_intersect_key($schemes, $options['schemes']);
-        }
+    // Field selected allowed types.
+    $selected_files = $form['#options']['types'];
 
-        if (!file_is_writeable($file)) {
-          // The file is read-only (remote) and must use its provided scheme.
-          $form['#step'] += $step_delta;
-          $form_state['storage']['scheme'] = file_uri_scheme($file->uri);
-        }
-        elseif (count($schemes) == 1) {
-          // There is only one possible stream wrapper for this file.
-          // Skip the third page.
-          $form['#step'] += $step_delta;
-          $form_state['storage']['scheme'] = key($schemes);
-        }
-        elseif ($config->get('upload_wizard_skip_scheme')) {
-          $form['#step'] += $step_delta;
+    // This var is set to TRUE when we are ready to save the file.
+    $save = FALSE;
+    $trigger = $form_state['triggering_element']['#id'];
+    $triggered_next = $trigger == 'edit-next' || (strpos($trigger, 'edit-next--') === 0);
+    $triggered_previous = $trigger == 'edit-previous' || (strpos($trigger, 'edit-previous--') === 0);
+    $step_delta = ($triggered_previous) ? -1 : 1;
 
-          // Fallback to the URI scheme specified in the field settings
-          // otherwise use the default file scheme.
-          if (!empty($options['uri_scheme'])) {
-            $form_state['storage']['scheme'] = $options['uri_scheme'];
+    $steps_to_check = array(2, 3);
+    if ($triggered_previous) {
+      // If the previous button was hit,
+      // the step checking order should be reversed 3, 2.
+      $steps_to_check = array_reverse($steps_to_check);
+    }
+
+    foreach ($steps_to_check as $step) {
+      // Check if we can skip step 2 and 3.
+      if (($form['#step'] == $step - 1 && $triggered_next) || ($form['#step'] == $step + 1 && $triggered_previous)) {
+        $upload_fids = (array) $form_state['storage']['upload'];
+        $file = file_load($upload_fids[0]);
+        if ($step == 2) {
+          // Check if we can skip step 2.
+          $candidates = file_get_filetype_candidates($file, $selected_files);
+          if (count($candidates) == 1) {
+            $candidates_keys = array_keys($candidates);
+            // There is only one possible filetype for this file.
+            // Skip the second page.
+            $form['#step'] += $step_delta;
+            $form_state['storage']['type'] = reset($candidates_keys);
           }
-          else {
-            $form_state['storage']['scheme'] = file_default_scheme();
+          elseif (!$candidates || $config->get('upload_wizard_skip_file_type')) {
+            // Do not assign the file a file type.
+            $form['#step'] += $step_delta;
+            $form_state['storage']['type'] = FILE_TYPE_NONE;
           }
         }
+        else {
+          // Check if we can skip step 3.
+          $options = $form['#options'];
+          $schemes = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+
+          // Remove any schemes not found in the instance settings.
+          if (!empty($options['schemes'])) {
+            $schemes = array_intersect_key($schemes, $options['schemes']);
+          }
+
+          if (!file_is_writeable($file)) {
+            // The file is read-only (remote) and must use its provided scheme.
+            $form['#step'] += $step_delta;
+            $form_state['storage']['scheme'] = file_uri_scheme($file->uri);
+          }
+          elseif (count($schemes) == 1) {
+            // There is only one possible stream wrapper for this file.
+            // Skip the third page.
+            $form['#step'] += $step_delta;
+            $form_state['storage']['scheme'] = key($schemes);
+          }
+          elseif ($config->get('upload_wizard_skip_scheme')) {
+            $form['#step'] += $step_delta;
+
+            // Fallback to the URI scheme specified in the field settings
+            // otherwise use the default file scheme.
+            if (!empty($options['uri_scheme'])) {
+              $form_state['storage']['scheme'] = $options['uri_scheme'];
+            }
+            else {
+              $form_state['storage']['scheme'] = file_default_scheme();
+            }
+          }
+        }
       }
     }
-  }
 
-  // We have the filetype, check if we can skip step 4.
-  if ($form['#step'] == 3 && $triggered_next) {
-    $file = file_load($form_state['storage']['upload']);
-    $form_state['file'] = $file;
-    if (!field_info_instances('file', $form_state['storage']['type'])) {
-      // This filetype doesn't have fields, save the file.
+    // We have the filetype, check if we can skip step 4.
+    if ($form['#step'] == 3 && $triggered_next) {
+      $upload_fids = (array) $form_state['storage']['upload'];
+      $file = file_load($upload_fids[0]);
+      $form_state['file'] = $file;
+      if (!field_info_instances('file', $form_state['storage']['type'])) {
+        // This filetype doesn't have fields, save the file.
+        $save = TRUE;
+      }
+      elseif ($config->get('upload_wizard_skip_fields')) {
+        // Save the file with blanks fields.
+        $save = TRUE;
+      }
+    }
+
+    // Form id's can vary depending on how many other forms are displayed, so we
+    // need to do string comparisons. e.g edit-submit--2.
+    if ($triggered_next) {
+      $form_state['step'] = $form['#step'] + 1;
+    }
+    elseif ($triggered_previous) {
+      $form_state['step'] = $form['#step'] - 1;
+    }
+    elseif (strpos($trigger, 'edit-submit') !== FALSE) {
       $save = TRUE;
     }
-    elseif ($config->get('upload_wizard_skip_fields')) {
-      // Save the file with blanks fields.
-      $save = TRUE;
-    }
   }
-
-  // Form id's can vary depending on how many other forms are displayed, so we
-  // need to do string comparisons. e.g edit-submit--2.
-  if ($triggered_next) {
-    $form_state['step'] = $form['#step'] + 1;
-  }
-  elseif ($triggered_previous) {
-    $form_state['step'] = $form['#step'] - 1;
-  }
-  elseif (strpos($trigger, 'edit-submit') !== FALSE) {
+  else {
     $save = TRUE;
+    $multiple = TRUE;
   }
 
   if ($save) {
-    $file = file_load($form_state['storage']['upload']);
-    if ($file) {
-      $file->type = $form_state['storage']['type'];
-      $file->display = TRUE;
+    foreach ($fids as $fid) {
+      $file = file_load($fid);
+      if ($file) {
+        $file->type = $multiple ? FILE_TYPE_NONE : $form_state['storage']['type'];
+        $file_scheme = $multiple ? file_default_scheme() : $form_state['storage']['scheme'];
+        $file->display = TRUE;
 
-      // Save the form fields.
-      // Keep in mind that the values for the Field API fields must be in
-      // $form_state['values'] and not in ['storage']. This is true as long as
-      // the fields are on the last page of the multi step form.
-      entity_form_submit_build_entity('file', $file, $form, $form_state);
+        // Save the form fields.
+        // Keep in mind that the values for the Field API fields must be in
+        // $form_state['values'] and not in ['storage']. This is true as long as
+        // the fields are on the last page of the multi step form.
+        entity_form_submit_build_entity('file', $file, $form, $form_state);
 
-      if (file_uri_scheme($file->uri) != $form_state['storage']['scheme']) {
-        $file_destination = $form_state['storage']['scheme'] . '://' . file_uri_target($file->uri);
-        $file_destination = file_stream_wrapper_uri_normalize($file_destination);
-        $file_destination_dirname = backdrop_dirname($file_destination);
-        // Create the directory in case it doesn't exist.
-        file_prepare_directory($file_destination_dirname, FILE_CREATE_DIRECTORY);
-        if ($moved_file = file_move($file, $file_destination, FILE_EXISTS_RENAME)) {
-          // Only re-assign the file object if file_move() did not fail.
-          $file = $moved_file;
-          $file_in_final_location = TRUE;
+        if (file_uri_scheme($file->uri) != $file_scheme) {
+          $file_destination = $file_scheme . '://' . file_uri_target($file->uri);
+          $file_destination = file_stream_wrapper_uri_normalize($file_destination);
+          $file_destination_dirname = backdrop_dirname($file_destination);
+          // Create the directory in case it doesn't exist.
+          file_prepare_directory($file_destination_dirname, FILE_CREATE_DIRECTORY);
+          if ($moved_file = file_move($file, $file_destination, FILE_EXISTS_RENAME)) {
+            // Only re-assign the file object if file_move() did not fail.
+            $file = $moved_file;
+            $file_in_final_location = TRUE;
+          }
+          else {
+            $file_in_final_location = FALSE;
+          }
         }
         else {
-          $file_in_final_location = FALSE;
+          $file_in_final_location = TRUE;
+        }
+
+        $substitutions = array(
+          '@type' => file_type_get_name($file),
+          '%name' => $file->filename,
+        );
+
+        // Only save the file if any necessary move was successful.
+        if ($file_in_final_location) {
+          // Change the file from temporary to permanent.
+          $file->status = FILE_STATUS_PERMANENT;
+
+          file_save($file);
+          // Record that the module (in this case, the File module) is using the
+          // file. Without the call to file_usage_add, file_managed_file_validate()
+          // produces an error upon saving the form, saying that the uploaded file
+          // may not be referenced.
+          file_usage_add($file, 'file', 'file', $file->fid);
+          $form_state['file'] = $file;
+
+          backdrop_set_message(t('@type %name was uploaded.', $substitutions));
+        }
+        else {
+          $file->delete();
+          backdrop_set_message(t('@type %name was not saved.', $substitutions), 'error');
         }
       }
       else {
-        $file_in_final_location = TRUE;
+        backdrop_set_message(t('An error occurred and no file was uploaded.'), 'error');
+        return;
       }
 
-      $substitutions = array(
-        '@type' => file_type_get_name($file),
-        '%name' => $file->filename,
-      );
-
-      // Only save the file if any necessary move was successful.
-      if ($file_in_final_location) {
-        // Change the file from temporary to permanent.
-        $file->status = FILE_STATUS_PERMANENT;
-
-        file_save($file);
-        // Record that the module (in this case, the File module) is using the
-        // file. Without the call to file_usage_add, file_managed_file_validate()
-        // produces an error upon saving the form, saying that the uploaded file
-        // may not be referenced.
-        file_usage_add($file, 'file', 'file', $file->fid);
-        $form_state['file'] = $file;
-
-        backdrop_set_message(t('@type %name was uploaded.', $substitutions));
+      // Figure out destination.
+      if (user_access('administer files')) {
+        $path = 'admin/content/files';
       }
       else {
-        $file->delete();
-        backdrop_set_message(t('@type %name was not saved.', $substitutions), 'error');
+        $path = 'file/' . $file->fid;
       }
+      $form_state['redirect'] = $path;
     }
-    else {
-      backdrop_set_message(t('An error occurred and no file was uploaded.'), 'error');
-      return;
-    }
-
-    // Figure out destination.
-    if (user_access('administer files')) {
-      $path = 'admin/content/files';
-    }
-    else {
-      $path = 'file/' . $file->fid;
-    }
-    $form_state['redirect'] = $path;
   }
   else {
     $form_state['rebuild'] = TRUE;
@@ -693,7 +719,7 @@ function file_manage_form_submit($form, &$form_state) {
   /** @var File $file */
   $file = $form_state['file'];
   /** @var File $temporary_upload */
-  $temporary_upload = $form_state['values']['replace_upload'] ? file_load($form_state['values']['replace_upload']) : NULL;
+  $temporary_upload = $form_state['values']['replace_upload'] ? file_load($form_state['values']['replace_upload'][0]) : NULL;
   $orphaned_uri = '';
 
   // Check if a replacement file has been uploaded.

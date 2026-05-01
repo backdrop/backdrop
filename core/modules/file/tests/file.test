@@ -166,7 +166,8 @@ class FileTestHelper extends BackdropWebTestCase {
    *   File type.
    * @param mixed $size
    *   File size.
-   * @return EntityInterface
+   * @return File
+   *   The created file entity.
    */
   function getTestFile($type_name, $size = NULL) {
     // Get a file to upload.
@@ -174,8 +175,11 @@ class FileTestHelper extends BackdropWebTestCase {
 
     // Add a filesize property to files as would be read by file_load().
     $file->filesize = filesize($file->uri);
+    $file->status = FILE_STATUS_PERMANENT;
 
-    return entity_create('file', (array) $file);
+    /** @var File $file_entity */
+    $file_entity = entity_create('file', (array) $file);
+    return $file_entity;
   }
 
   /**
@@ -274,8 +278,8 @@ class FileTestHelper extends BackdropWebTestCase {
   /**
    * Uploads a file to a node.
    *
-   * @param File $file
-   *   File object.
+   * @param File|File[] $file
+   *   One or more File objects.
    * @param string $field_name
    *   The field name.
    * @param mixed $nid_or_type
@@ -288,7 +292,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @return int
    *   Node ID.
    */
-  function uploadNodeFile($file, $field_name, $nid_or_type, $new_revision = TRUE, $extras = array()) {
+  protected function uploadNodeFile($file, $field_name, $nid_or_type, $new_revision = TRUE, $extras = array()) {
     $langcode = LANGUAGE_NONE;
     $edit = array(
       "title" => $this->randomName(),
@@ -309,8 +313,22 @@ class FileTestHelper extends BackdropWebTestCase {
       $this->assertNotEqual($nid, $node->vid, 'Node revision exists.');
     }
 
-    // Attach a file to the node.
-    $edit['files[' . $field_name . '_' . $langcode . '_0]'] = backdrop_realpath($file->uri);
+    $field = field_info_field($field_name);
+    $name = 'files[' . $field_name . '_' . $langcode . '_0]';
+    // Upload as an array of files if multiple. The HTML input for a multiple
+    // file field has a trailing [] in the name (added by form_process_file()).
+    if ($field['cardinality'] != 1) {
+      $files = is_array($file) ? $file : array($file);
+      $file_paths = array();
+      foreach ($files as $file) {
+        $file_paths[] = backdrop_realpath($file->uri);
+      }
+      $edit[$name . '[]'] = $file_paths;
+    }
+    else {
+      $edit[$name] = backdrop_realpath($file->uri);
+    }
+
     $this->backdropPost("node/$nid/edit", $edit, t('Save'));
 
     return $nid;
@@ -598,92 +616,143 @@ class FileManagedFileElementTestCase extends FileTestHelper {
     $this->backdropGet('file/test');
     $this->assertFieldByXpath('//input[@name="files[nested_file]" and @size="13"]', NULL, 'The custom #size attribute is passed to the child upload element.');
 
-    // Perform the tests with all permutations of $form['#tree'] and
-    // $element['#extended'].
+    // Perform the tests with all permutations of $form['#tree'],
+    // $element['#extended'], and $element['#multiple'].
+    $test_file = $this->getTestFile('text');
     foreach (array(0, 1) as $tree) {
       foreach (array(0, 1) as $extended) {
-        $test_file = $this->getTestFile('text');
-        $path = 'file/test/' . $tree . '/' . $extended;
-        $input_base_name = $tree ? 'nested_file' : 'file';
+        foreach (array(0, 1) as $multiple) {
+          $path = 'file/test/' . $tree . '/' . $extended . '/' . $multiple;
+          $input_base_name = $tree ? 'nested_file' : 'file';
+          $file_field_name = $multiple ? 'files[' . $input_base_name . '][]' : 'files[' . $input_base_name . ']';
 
-        // Submit without a file.
-        $this->backdropPost($path, array(), t('Save'));
-        $this->assertRaw(t('The file id is %fid.', array('%fid' => 0)), 'Submitted without a file.');
+          // Submit without a file.
+          $this->backdropPost($path, array(), t('Save'));
+          $this->assertRaw(t('The file ids are %fids.', array('%fids' => implode(',', array()))), t('Submitted without a file.'));
 
-        // Submit with a file, but with an invalid form token. Ensure the file
-        // was not saved.
-        $last_fid_prior = $this->getLastFileId();
-        $edit = array(
-          'files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri),
-          'form_token' => 'invalid token',
-        );
-        $this->backdropPost($path, $edit, t('Save'));
-        $this->assertText('The form has become outdated.');
-        $last_fid = $this->getLastFileId();
-        $this->assertEqual($last_fid_prior, $last_fid, 'File was not saved when uploaded with an invalid form token.');
-
-        // Submit a new file, without using the Upload button.
-        $last_fid_prior = $this->getLastFileId();
-        $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri));
-        $this->backdropPost($path, $edit, t('Save'));
-        $last_fid = $this->getLastFileId();
-        $this->assertTrue($last_fid > $last_fid_prior, 'New file got saved.');
-        $this->assertRaw(t('The file id is %fid.', array('%fid' => $last_fid)), 'Submit handler has correct file info.');
-
-        // Submit no new input, but with a default file.
-        $this->backdropPost($path . '/' . $last_fid, array(), t('Save'));
-        $this->assertRaw(t('The file id is %fid.', array('%fid' => $last_fid)), 'Empty submission did not change an existing file.');
-
-        // Now, test the Upload and Remove buttons, with and without Ajax.
-        foreach (array(FALSE, TRUE) as $ajax) {
-          // Upload, then Submit.
+          // Submit with a file, but with an invalid form token. Ensure the file
+          // was not saved.
           $last_fid_prior = $this->getLastFileId();
-          $this->backdropGet($path);
-          $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri));
-          if ($ajax) {
-            $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
-          }
-          else {
-            $this->backdropPost(NULL, $edit, t('Upload'));
-          }
+          $files_field_field = $multiple ? 'files[' . $input_base_name . '][]' : 'files[' . $input_base_name . ']';
+          $edit = array(
+            $files_field_field => backdrop_realpath($test_file->uri),
+            'form_token' => 'invalid token',
+          );
+          $this->backdropPost($path, $edit, t('Save'));
+          $this->assertText('The form has become outdated.');
           $last_fid = $this->getLastFileId();
-          $this->assertTrue($last_fid > $last_fid_prior, 'New file got uploaded.');
-          $this->backdropPost(NULL, array(), t('Save'));
-          $this->assertRaw(t('The file id is %fid.', array('%fid' => $last_fid)), 'Submit handler has correct file info.');
+          $this->assertEqual($last_fid_prior, $last_fid, 'File was not saved when uploaded with an invalid form token.');
 
-          // Remove, then Submit.
-          $this->backdropGet($path . '/' . $last_fid);
-          if ($ajax) {
-            $this->backdropPostAJAX(NULL, array(), $input_base_name . '_remove_button');
-          }
-          else {
-            $this->backdropPost(NULL, array(), t('Remove'));
-          }
-          $this->backdropPost(NULL, array(), t('Save'));
-          $this->assertRaw(t('The file id is %fid.', array('%fid' => 0)), 'Submission after file removal was successful.');
+          // Submit a new file, without using the Upload button.
+          $last_fid_prior = $this->getLastFileId();
+          $edit = array($file_field_name => backdrop_realpath($test_file->uri));
+          $this->backdropPost($path, $edit, t('Save'));
+          $last_fid = $this->getLastFileId();
+          $this->assertTrue($last_fid > $last_fid_prior, t('New file got saved.'));
+          $this->assertRaw(t('The file ids are %fids.', array('%fids' => implode(',', array($last_fid)))), t('Submit handler has correct file info.'));
 
-          // Upload, then Remove, then Submit.
-          $this->backdropGet($path);
-          $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri));
-          if ($ajax) {
-            $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
-            $this->backdropPostAJAX(NULL, array(), $input_base_name . '_remove_button');
+          // Submit no new input, but with a default file.
+          $this->backdropPost($path . '/' . $last_fid, array(), t('Save'));
+          $this->assertRaw(t('The file ids are %fids.', array('%fids' => implode(',', array($last_fid)))), t('Empty submission did not change an existing file.'));
+
+          // Now, test the Upload and Remove buttons, with and without Ajax.
+          foreach (array(FALSE, TRUE) as $ajax) {
+            // Upload, then Submit.
+            $last_fid_prior = $this->getLastFileId();
+            $this->backdropGet($path);
+            $edit = array($file_field_name => backdrop_realpath($test_file->uri));
+            if ($ajax) {
+              $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
+            }
+            else {
+              $this->backdropPost(NULL, $edit, t('Upload'));
+            }
+            $last_fid = $this->getLastFileId();
+            $this->assertTrue($last_fid > $last_fid_prior, t('New file got uploaded.'));
+            $this->backdropPost(NULL, array(), t('Save'));
+            $this->assertRaw(t('The file ids are %fids.', array('%fids' => implode(',', array($last_fid)))), t('Submit handler has correct file info.'));
+
+            // Remove, then Submit.
+            $remove_button_title = $multiple ? t('Remove selected') : t('Remove');
+            $remove_edit = array();
+            if ($multiple) {
+              $selected_checkbox = ($tree ? 'nested[file]' : 'file') . '[file_' . $last_fid . '][selected]';
+              $remove_edit = array($selected_checkbox => '1');
+            }
+            $this->backdropGet($path . '/' . $last_fid);
+            if ($ajax) {
+              $this->backdropPostAJAX(NULL, $remove_edit, $input_base_name . '_remove_button');
+            }
+            else {
+              $this->backdropPost(NULL, $remove_edit, $remove_button_title);
+            }
+            $this->backdropPost(NULL, array(), t('Save'));
+            $this->assertRaw(t('The file ids are %fids.', array('%fids' => '')), t('Submission after file removal was successful.'));
+
+            // Upload, then Remove, then Submit.
+            $this->backdropGet($path);
+            $edit = array($file_field_name => backdrop_realpath($test_file->uri));
+            if ($ajax) {
+              $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
+            }
+            else {
+              $this->backdropPost(NULL, $edit, t('Upload'));
+            }
+            $remove_edit = array();
+            if ($multiple) {
+              $selected_checkbox = ($tree ? 'nested[file]' : 'file') . '[file_' . $this->getLastFileId() . '][selected]';
+              $remove_edit = array($selected_checkbox => '1');
+            }
+            if ($ajax) {
+              $this->backdropPostAJAX(NULL, $remove_edit, $input_base_name . '_remove_button');
+            }
+            else {
+              $this->backdropPost(NULL, $remove_edit, $remove_button_title);
+            }
+
+            $this->backdropPost(NULL, array(), t('Save'));
+            $this->assertRaw(t('The file ids are %fids.', array('%fids' => '')), t('Submission after file upload and removal was successful.'));
           }
-          else {
-            $this->backdropPost(NULL, $edit, t('Upload'));
-            $this->backdropPost(NULL, array(), t('Remove'));
-          }
-          $this->backdropPost(NULL, array(), t('Save'));
-          $this->assertRaw(t('The file id is %fid.', array('%fid' => 0)), 'Submission after file upload and removal was successful.');
         }
       }
+
+      // The multiple file upload has additional conditions that need checking.
+      $path = 'file/test/1/1/1';
+      $edit = array('files[nested_file][]' => backdrop_realpath($test_file->uri));
+      $fid_list = array();
+
+      $this->backdropGet($path);
+
+      // Add a single file to the upload field.
+      $this->backdropPost(NULL, $edit, t('Upload'));
+      $fid_list[] = $this->getLastFileId();
+      $this->assertFieldByXpath('//input[@name="nested[file][file_' . $fid_list[0] . '][selected]"]', NULL, 'First file successfully uploaded to multiple file element.');
+
+      // Add another file to the same upload field.
+      $this->backdropPost(NULL, $edit, t('Upload'));
+      $fid_list[] = $this->getLastFileId();
+      $this->assertFieldByXpath('//input[@name="nested[file][file_' . $fid_list[1] . '][selected]"]', NULL, 'Second file successfully uploaded to multiple file element.');
+
+      // Save the entire form.
+      $this->backdropPost(NULL, array(), t('Save'));
+      $this->assertRaw(t('The file ids are %fids.', array('%fids' => implode(',', array_reverse($fid_list)))), t('Two files saved into a single multiple file element.'));
+
+      // Delete only the first file.
+      $edit = array(
+        'nested[file][file_' . $fid_list[0] . '][selected]' => '1',
+      );
+      $this->backdropPost($path . '/' . implode(',', $fid_list), $edit, t('Remove selected'));
+
+      // Check that the first file has been deleted but not the second.
+      $this->assertNoFieldByXpath('//input[@name="nested[file][file_' . $fid_list[0] . '][selected]"]', NULL, 'An individual file can be deleted from a multiple file element.');
+      $this->assertFieldByXpath('//input[@name="nested[file][file_' . $fid_list[1] . '][selected]"]', NULL, 'Second individual file not deleted when the first file is deleted from a multiple file element.');
     }
   }
 
   /**
    * Tests file_ajax_upload() parents_hash.
    */
-  function testManagedFileParentsHash() {
+  public function testManagedFileParentsHash() {
     // Perform the tests with all permutations of $form['#tree'] and
     // $element['#extended'].
     foreach (array(0, 1) as $tree) {
@@ -732,7 +801,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
     $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
     $this->assertFieldByXpath('//input[@type="submit"]', t('Upload'), 'After uploading a file that exceeds the maximum file size, the "Upload" button is displayed.');
     $this->backdropPost($path, array(), t('Save'));
-    $this->assertRaw(t('The file id is %fid.', array('%fid' => 0)), 'Submitted without a file.');
+    $this->assertRaw(t('The file ids are %fids.', array('%fids' => '')), 'Submitted without a file.');
   }
 
   /**
@@ -1011,7 +1080,7 @@ class FileFieldWidgetTestCase extends FileTestHelper {
       $this->backdropGet("node/add/$type_name");
       foreach (array($field_name2, $field_name) as $each_field_name) {
         for ($delta = 0; $delta < 3; $delta++) {
-          $edit = array('files[' . $each_field_name . '_' . LANGUAGE_NONE . '_' . $delta . ']' => backdrop_realpath($test_file->uri));
+          $edit = array('files[' . $each_field_name . '_' . LANGUAGE_NONE . '_' . $delta . '][]' => backdrop_realpath($test_file->uri));
           // If the Upload button doesn't exist, backdropPost() will automatically
           // fail with an assertion message.
           $this->backdropPost(NULL, $edit, t('Upload'));
@@ -1412,7 +1481,7 @@ class FileFieldValidateTestCase extends FileTestHelper {
   /**
    * Tests the required property on file fields.
    */
-  function testRequired() {
+  public function testRequired() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name, array(), array('required' => '1'));
@@ -1461,7 +1530,7 @@ class FileFieldValidateTestCase extends FileTestHelper {
   /**
    * Tests the max file size validator.
    */
-  function testFileMaxSize() {
+  public function testFileMaxSize() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name, array(), array('required' => '1'));
@@ -1513,7 +1582,7 @@ class FileFieldValidateTestCase extends FileTestHelper {
   /**
    * Tests file extension checking.
    */
-  function testFileExtension() {
+  public function testFileExtension() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name);
@@ -1556,9 +1625,76 @@ class FileFieldValidateTestCase extends FileTestHelper {
   }
 
   /**
+   * Tests file extension validation when uploading multiple files at once.
+   */
+  public function testMultipleFileValidate() {
+    $type_name = 'post';
+    $field_name = strtolower($this->randomName());
+    $this->createFileField($field_name, $type_name, array('cardinality' => FIELD_CARDINALITY_UNLIMITED));
+
+    $txt_file1 = $this->getTestFile('text');
+    // 128KB, distinct from txt_file1.
+    $txt_file2 = $this->getTestFile('text', 131072);
+    $image_file = $this->getTestFile('image');
+
+    // Restrict uploads to text files only.
+    $this->updateFileField($field_name, $type_name, array('file_extensions' => 'txt'));
+
+    // Upload two valid txt files and one invalid image file simultaneously.
+    $nid = $this->uploadNodeFile(array($txt_file1, $txt_file2, $image_file), $field_name, $type_name);
+
+    // The image file should be rejected with an extension error.
+    $error_message = t('Only files with the following extensions are allowed: %files-allowed.', array('%files-allowed' => 'txt'));
+    $this->assertRaw($error_message, 'Extension error shown when invalid file uploaded alongside valid files.');
+
+    // The node should have been saved with only the two valid txt files.
+    $node = node_load($nid, NULL, TRUE);
+    $this->assertEqual(2, count($node->{$field_name}[LANGUAGE_NONE]), 'Node saved with both valid txt files.');
+
+    foreach ($node->{$field_name}[LANGUAGE_NONE] as $delta => $item) {
+      $node_file = file_load($item['fid']);
+      $this->assertFileExists($node_file, format_string('Txt file @delta exists on disk.', array('@delta' => $delta)));
+      $this->assertFileEntryExists($node_file, format_string('Txt file @delta entry exists in the database.', array('@delta' => $delta)));
+      $this->assertEqual(FILE_STATUS_PERMANENT, $node_file->status, format_string('Txt file @delta is marked permanent.', array('@delta' => $delta)));
+    }
+
+    // Test max file size validation with multiple simultaneous uploads.
+    // Set a 500 KB size cap while keeping the txt-only extension restriction.
+    $this->updateFileField($field_name, $type_name, array('max_filesize' => '500K'));
+
+    // 128 KB, under the 500 KB limit.
+    $small_txt_file = $this->getTestFile('text', 131072);
+
+    // 1.2 MB, exceeds 500 KB.
+    $large_txt_file = $this->getTestFile('text', 1310720);
+
+    // Upload both txt files simultaneously.
+    $nid = $this->uploadNodeFile(array($small_txt_file, $large_txt_file), $field_name, $type_name);
+
+    // The oversized file should be rejected.
+    $size_error = t('The file is %filesize exceeding the maximum file size of %maxsize.', array(
+      '%filesize' => format_size($large_txt_file->filesize),
+      '%maxsize' => format_size(parse_size('500K')),
+    ));
+    $this->assertRaw($size_error, 'Size error shown when oversized txt file uploaded alongside a valid txt file.');
+
+    // The node should be saved with only the small, valid file.
+    $node = node_load($nid, NULL, TRUE);
+    $this->assertEqual(1, count($node->{$field_name}[LANGUAGE_NONE]), 'Node saved with only the small txt file.');
+
+    $saved_file = file_load($node->{$field_name}[LANGUAGE_NONE][0]['fid']);
+    $this->assertFileExists($saved_file, 'Small txt file exists on disk after uploading alongside an oversized file.');
+    $this->assertFileEntryExists($saved_file, 'Small txt file entry exists in the database after uploading alongside an oversized file.');
+    $this->assertEqual(FILE_STATUS_PERMANENT, $saved_file->status, 'Small txt file is marked permanent.');
+
+    // Remove our file field.
+    field_delete_field($field_name);
+  }
+
+  /**
    * Tests default display of File Field.
    */
-  function testDefaultFileFieldDisplay() {
+  public function testDefaultFileFieldDisplay() {
     $field_name = strtolower($this->randomName());
     $type_name = 'post';
     $field_settings = array(
@@ -2053,6 +2189,7 @@ class FileFieldAnonymousSubmission extends FileTestHelper {
     $type_name = 'page';
     $bundle_label = 'Page';
     $node_title = 'Test page';
+    $previous_fid = $this->getLastFileId();
 
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name);
@@ -2078,6 +2215,12 @@ class FileFieldAnonymousSubmission extends FileTestHelper {
     $t_args = array('@type' => $bundle_label, '%title' => $node_title);
     $this->assertNoText(strip_tags(t('@type %title has been created.', $t_args)), 'The node was created.');
     $this->assertText(t('!name field is required.', array('!name' => t('Title'))));
+
+    $new_fid = $this->getLastFileId();
+    $new_file = file_load($new_fid);
+    $this->assertNotEqual($previous_fid, $new_fid, 'New file has been uploaded during validation of the node title.');
+    $this->assertTrue(file_exists($new_file->uri), 'New file exists at the uploaded location.');
+    $this->assertNotEqual($new_file->status, FILE_STATUS_PERMANENT, 'New file has a temporary status when uploading during failed validation.');
 
     // Submit the form again but this time with the missing title field. This
     // should still work.
@@ -2334,12 +2477,12 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the basic file upload wizard functionality.
    */
-  function testFileUploadWizardBasic() {
+  public function testFileUploadWizardBasic() {
     $test_file = $this->getTestFile('text');
 
     // Step 1: Upload a basic document file.
     $edit = array();
-    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
     $this->backdropPost('file/add', $edit, t('Next'));
 
     // Check that the file exists in the database.
@@ -2352,9 +2495,51 @@ class FileUploadWizardTestCase extends FileTestHelper {
   }
 
   /**
+   * Test uploading multiple files of different types through the wizard.
+   *
+   * When more than one file is uploaded at once the wizard skips all steps and
+   * saves every file immediately using the default scheme, with each file
+   * marked permanent.
+   */
+  public function testFileUploadWizardMultiple() {
+    $txt_file = $this->getTestFile('text');
+    $image_file = $this->getTestFile('image');
+
+    // Record the highest fid before the upload so we can find the new files.
+    $previous_last_fid = $this->getLastFileId();
+
+    // Upload a text file and an image file simultaneously.
+    $edit = array();
+    $edit['files[upload][]'] = array(
+      backdrop_realpath($txt_file->uri),
+      backdrop_realpath($image_file->uri),
+    );
+    $this->backdropPost('file/add', $edit, t('Next'));
+
+    // Both files should have been saved immediately without wizard steps.
+    $new_fids = db_query('SELECT fid FROM {file_managed} WHERE fid > :prev ORDER BY fid ASC', array(':prev' => $previous_last_fid))->fetchCol();
+    $new_files = file_load_multiple($new_fids);
+    $this->assertEqual(2, count($new_files), 'Both uploaded files were saved to the database.');
+
+    foreach ($new_files as $file) {
+      // Each file should be reported as uploaded. The wizard bypasses type
+      // detection for multi-file uploads, so only check that the filename and
+      // "was uploaded" appear together on the page.
+      $this->assertText($file->filename . ' was uploaded.', format_string('Upload message shown for %name.', array('%name' => $file->filename)));
+
+      // Each file should exist on disk and in the database.
+      $this->assertFileExists($file, format_string('File %name exists on disk.', array('%name' => $file->filename)));
+      $this->assertFileEntryExists($file, format_string('File %name entry exists in the database.', array('%name' => $file->filename)));
+
+      // Each file must be marked permanent.
+      $this->assertEqual(FILE_STATUS_PERMANENT, $file->status, format_string('File %name is marked permanent.', array('%name' => $file->filename)));
+    }
+  }
+
+  /**
    * Test the file upload wizard type step.
    */
-  function testFileUploadWizardTypes() {
+  public function testFileUploadWizardTypes() {
     $test_file = $this->getTestFile('text');
 
     // Create multiple file types with the same mime types.
@@ -2363,7 +2548,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
 
     // Step 1: Upload a basic document file.
     $edit = array();
-    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
     $this->backdropPost('file/add', $edit, t('Next'));
 
     // Step 2: File type selection.
@@ -2383,7 +2568,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the file upload wizard scheme step.
    */
-  function testFileUploadWizardSchemes() {
+  public function testFileUploadWizardSchemes() {
     $test_file = $this->getTestFile('text');
 
     // Enable the private file system.
@@ -2391,7 +2576,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
 
     // Step 1: Upload a basic document file.
     $edit = array();
-    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
     $this->backdropPost('file/add', $edit, t('Next'));
 
     // Step 3: Scheme selection.
@@ -2411,7 +2596,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the file upload wizard when uploading a private file fails.
    */
-  function testFileUploadWizardPrivateFailure() {
+  public function testFileUploadWizardPrivateFailure() {
     $test_file = $this->getTestFile('text');
 
     // Record the last saved file ID.
@@ -2422,7 +2607,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
 
     // Step 1: Upload a basic document file.
     $edit = array();
-    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
     $this->backdropPost('file/add', $edit, t('Next'));
 
     // After the file is uploaded but before the file is saved to its final
@@ -2463,7 +2648,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the file upload wizard field step.
    */
-  function testFileUploadWizardFields() {
+  public function testFileUploadWizardFields() {
     $test_file = $this->getTestFile('image');
     $filename = $this->randomName();
     $alt = $this->randomName();
@@ -2494,7 +2679,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
 
     // Upload a basic image file.
     $edit = array();
-    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
     $this->backdropPost('file/add', $edit, t('Next'));
 
     // Enter values into the attached fields.
@@ -2522,7 +2707,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test skipping each of the file upload wizard steps.
    */
-  function testFileUploadWizardStepSkipping() {
+  public function testFileUploadWizardStepSkipping() {
     $test_file = $this->getTestFile('image');
     $filename = $this->randomName();
 
@@ -2562,7 +2747,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
       // Step 0: Upload a basic image file.
       debug('Step 0: Upload a basic image file.');
       $edit = array();
-      $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+      $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
       $this->backdropPost('file/add', $edit, t('Next'));
 
       $debug_i++;
@@ -2744,7 +2929,7 @@ class FileUploadSvgTestCase extends FileTestHelper {
 
       // Upload an SVG file.
       $edit = array();
-      $edit['files[upload]'] = backdrop_realpath($filepath);
+      $edit['files[upload][]'] = backdrop_realpath($filepath);
       $this->backdropPost('file/add', $edit, t('Next'));
 
       // Check that the file exists in the database.

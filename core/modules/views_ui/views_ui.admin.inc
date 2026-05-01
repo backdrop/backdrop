@@ -1044,7 +1044,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['#attached']['library'][] = array('system', 'jquery.form');
   // TODO: This should be getting added to the page when an ajax popup calls
   // for it, instead of having to add it manually here.
-  $form['#attached']['js'][] = 'core/misc/tabledrag.js';
+  $form['#attached']['library'][] = array('system', 'backdrop.tabledrag');
 
   $form['#attached']['css'] = views_ui_get_admin_css();
   $module_path = backdrop_get_path('module', 'views_ui');

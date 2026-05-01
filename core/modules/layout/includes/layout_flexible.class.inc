@@ -3,6 +3,10 @@
  * @file
  * Class that holds configuration for a flexible layout template configuration.
  */
+
+/**
+ * Class representing a flexible layout template.
+ */
 class LayoutFlexibleTemplate {
   /**
    * The name of the layout template.
@@ -26,6 +30,13 @@ class LayoutFlexibleTemplate {
   var $description;
 
   /**
+   * The module providing the layout template.
+   *
+   * @var string
+   */
+  public $module = 'layout';
+
+  /**
    * Configuration of the rows for this layout template.
    *
    * Each row contains the following values:
@@ -45,6 +56,24 @@ class LayoutFlexibleTemplate {
   public $is_new;
 
   /**
+   * @var string
+   */
+  public $preview;
+
+  /**
+   * @var string
+   */
+  public $layout_template_type = 'flexible';
+
+  /**
+   * Whether this layout is a full page layout (for example, with a header and
+   * footer, optional page title) or not.
+   *
+   * @var bool
+   */
+  public $is_full_page = TRUE;
+
+  /**
    * Constructor for a LayoutFlexibleTemplate class.
    *
    * @param array $config
@@ -54,30 +83,58 @@ class LayoutFlexibleTemplate {
     foreach ($config as $property => $property_value) {
       $this->{$property} = $property_value;
     }
+    if ($this->is_full_page === NULL) {
+      $this->is_full_page = TRUE;
+    }
+
+    _layout_standardize_template_type($this->layout_template_type);
 
     if (empty($this->rows)) {
       $uuid = new Uuid();
-      $this->rows[$uuid->generate()] = array(
-        'contains' => 'region_12',
-        'element' => 'header',
-        'classes' => '',
-        'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Header'), 'name' => 'header', 'classes' => '')),
-      );
+      if ($this->is_full_page) {
+        $this->rows[$uuid->generate()] = array(
+          'contains' => 'region_12',
+          'element' => 'header',
+          'classes' => '',
+          'container' => 'container',
+          'region_names' => array(
+            'region_0' => array(
+              'label' => t('Header'),
+              'name' => 'header',
+              'classes' => '',
+            ),
+          ),
+        );
+      }
       $this->rows[$uuid->generate()] = array(
         'contains' => 'region_12',
         'element' => '',
         'classes' => '',
         'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Content'), 'name' => 'content', 'classes' => '')),
+        'region_names' => array(
+          'region_0' => array(
+            'label' => t('Content'),
+            'name' => 'content',
+            'classes' => '',
+          ),
+        ),
       );
-      $this->rows[$uuid->generate()] = array(
-        'contains' => 'region_12',
-        'element' => 'footer',
-        'classes' => '',
-        'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Footer'), 'name' => 'footer', 'classes' => '')),
-      );
+      if ($this->is_full_page) {
+        $this->rows[$uuid->generate()] = array(
+          'contains' => 'region_12',
+          'element' => 'footer',
+          'classes' => '',
+          'container' => 'container',
+          'region_names' => array(
+            'region_0' => array(
+              'label' => t('Footer'),
+              'name' => 'footer',
+              'classes' => '',
+            ),
+          ),
+        );
+      }
+
     }
   }
 
@@ -87,12 +144,15 @@ class LayoutFlexibleTemplate {
   function save() {
     $data = array(
       'name' => $this->name,
+      'layout_template_type' => $this->layout_template_type,
       'title' => $this->title,
       'description' => $this->description,
       'rows' => $this->rows,
+      'preview' => $this->preview,
+      'is_full_page' => $this->is_full_page,
     );
 
-    config('layout.flexible.' . $this->name)
+    config('layout.' . $this->layout_template_type . '.' . $this->name)
       ->setData($data)
       ->save();
 
@@ -109,11 +169,10 @@ class LayoutFlexibleTemplate {
    * Delete this layout template.
    */
   function delete() {
-    config('layout.flexible.' . $this->name)->delete();
+    config('layout.' . $this->layout_template_type . '.' . $this->name)->delete();
 
     layout_reset_caches();
-    layout_flexible_reset_caches();
+    layout_flexible_reset_caches($this->layout_template_type);
     backdrop_theme_rebuild();
   }
 }
-
