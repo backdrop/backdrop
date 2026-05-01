@@ -220,8 +220,8 @@ function views_update_1008() {
 function views_update_1009() {
   $views = config_get_names_with_prefix('views.view');
   $views_ajax_history = module_exists('views_ajax_history');
-  $has_changes = FALSE;
   foreach ($views as $view_name) {
+    $has_changes = FALSE;
     $config = config($view_name);
     $use_ajax_default = $config->get('display.default.display_options.use_ajax');
     $displays = $config->get('display');
