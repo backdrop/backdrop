@@ -911,6 +911,11 @@ function file_field_inline_fields_widget($element, &$form_state, $instance) {
 
   // Add the entity form for the file.
   $element['entity'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('inline-fields'),
+    ),
+    '#indentation' => ($instance['widget']['type'] == 'file_generic') ? 2 : 0,
     '#weight' => 10,
     '#parents' => array('files', $file->fid),
   );
@@ -922,13 +927,6 @@ function file_field_inline_fields_widget($element, &$form_state, $instance) {
     $disabled_fields = array_diff(element_children($element['entity']), $widget_settings['inline_fields']);
     foreach ($disabled_fields as $form_key) {
       $element['entity'][$form_key]['#access'] = FALSE;
-    }
-  }
-
-  // Indent each field to improve the display.
-  if ($instance['widget']['type'] == 'file_generic') {
-    foreach (element_children($element['entity']) as $form_key) {
-      $element['entity'][$form_key]['#indentation'] = 2;
     }
   }
 
