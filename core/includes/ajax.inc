@@ -1367,6 +1367,7 @@ function ajax_command_open_dialog($selector, $title, $html, array $dialog_option
   if (isset($dialog_options['classes']['ui-dialog'])) {
     $classes[] = $dialog_options['classes']['ui-dialog'];
   }
+  // Support converting the legacy "dialogClass" option to "classes".
   if (isset($dialog_options['dialogClass'])) {
     $classes[] = $dialog_options['dialogClass'];
     unset($dialog_options['dialogClass']);
