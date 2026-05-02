@@ -5073,7 +5073,7 @@ function system_icon_browser_form_submit($form, &$form_state) {
     unset($_GET['keyword']);
     unset($_GET['page']);
     $form_state['input'] = array();
-    $form_state['redirect'] = 'admin/config/media/icon-browser';
+    $form_state['redirect'] = 'admin/reports/icon-browser';
   }
   else {
     if (isset($form_state['values']['project_type'])) {
