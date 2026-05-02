@@ -725,7 +725,6 @@ function theme_label_machine_name($variables) {
   return $output;
 }
 
-
 /**
  * Theme hook for the icon browser page.
  */

@@ -4947,13 +4947,12 @@ function system_icon_browser_form($form, &$form_state) {
 
   $icons = icon_get_all_details();
 
-  // Set filter variables from form state if available. If not in form state
-  // (such as after using the pager) then use the $_GET variable.
   $params = array(
     'project_type' => 'any',
     'style' => 'any',
     'keyword' => '',
   );
+  // Set filter variables from the $_GET variable if set.
   foreach ($params as $param => $default_value) {
     if (!empty($_GET[$param])) {
       ${$param} = $_GET[$param];

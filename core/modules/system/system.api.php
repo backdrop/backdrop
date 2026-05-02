@@ -544,7 +544,7 @@ function hook_icon_info_alter(&$icons) {
 function hook_icon_get_all_details_alter(&$icons) {
   foreach ($icons as $icon) {
     if (strpos($icon['name'], 'my_module') === 0) {
-      $icon['style'] = ['my_module_style'];
+      $icon['style'] = 'my_module_style';
     }
   }
 }
