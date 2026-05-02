@@ -75,12 +75,12 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/modules/install');
 
     // Simulate adding a project to the install queue.
-    $this->backdropGet('admin/installer/queue/nojs/add/ddd_installer_test', array('query' => array('destination' => 'admin/modules/install')));
+    $this->clickLink(t('Add to Installation queue'));
     $this->assertNoText(t('Installation queue is empty.'));
     $this->assertNoText(t('Error: The project was not found.'));
 
     // Simulate removing a project from the install queue.
-    $this->backdropGet('admin/installer/queue/nojs/remove/ddd_installer_test', array('query' => array('destination' => 'admin/modules/install')));
+    $this->clickLink(t('Remove from Installation queue'));
     $this->assertText(t('Installation queue is empty.'));
     $this->assertNoText(t('Error: The project was not found.'));
   }
@@ -92,8 +92,8 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $module_two = 'eee_installer_test';
 
     // Attempt to install a project.
-    $this->backdropGet('admin/installer/queue/nojs/add/' . $module_one, array('query' => array('destination' => 'admin/modules/install')));
-    $this->backdropGet('admin/installer/queue/nojs/add/' . $module_two, array('query' => array('destination' => 'admin/modules/install')));
+    $this->clickLink(t('Add to Installation queue'));
+    $this->clickLink(t('Add to Installation queue'));
     $this->backdropPost('admin/modules/install', array(), t('Install'));
 
     // Check that this is the install page.
@@ -111,10 +111,11 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->assertEqual(count($releases), 2, 'Two releases available for EEE Installer test.');
 
     // Cancel and go back to project list.
-    $this->backdropGet('admin/installer/reset/module/all');
+    $this->clickLink(t('Cancel'));
+    $this->clickLink(t('Clear queue'));
 
     // Check project installs.
-    $this->backdropGet('admin/installer/queue/nojs/add/' . $module_one, array('query' => array('destination' => 'admin/modules/install')));
+    $this->clickLink(t('Add to Installation queue'));
     $this->backdropPost('admin/modules/install', array(), t('Install'));
 
     // Check that this is the install page.

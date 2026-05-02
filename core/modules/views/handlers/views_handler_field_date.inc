@@ -68,8 +68,16 @@ class views_handler_field_date extends views_handler_field {
     parent::options_form($form, $form_state);
   }
 
-  function render($values) {
+  /**
+   * {@inheritdoc}
+   */
+  public function render($values) {
     $value = $this->get_value($values);
+
+    // Return early, nothing to do.
+    if ($value === NULL) {
+      return '';
+    }
 
     if (!is_numeric($value)) {
       // If the value isn't numeric, assume it's an SQL DATETIME.

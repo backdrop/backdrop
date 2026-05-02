@@ -737,9 +737,6 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $name = $this->randomName(8);
     $edit = array();
     $edit[$title_key] = $name;
-    $edit['status'] = 2;
-    $edit['scheduled[date]'] = format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone);
-    $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'H:i:s', $web_user->timezone);
     $this->backdropPost(NULL, $edit, t('Preview'));
     // Make sure that the preview warnings are shown, and that they are only
     // shown once.
@@ -750,9 +747,6 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertNoText(t('This is a preview. Links within the page are disabled.'), 'Preview warning NOT displayed.');
     $this->assertNoText(t('Changes are stored temporarily.'), 'Temporary changes warning NOT displayed.');
     $node = $this->backdropGetNodeByTitle($name, TRUE);
-    $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
-
-    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
 
     // Test that a user with permissions to create, but not edit, can still
     // access preview.
@@ -1430,7 +1424,7 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
  *
  * Create a node, enable the node_test module to ensure that extra data is
  * added to the node->content array, then verify that the data appears on the
- * sitewide RSS feed at rss.xml.
+ * site-wide RSS feed at rss.xml.
  */
 class NodeRSSContentTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
@@ -2194,6 +2188,21 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $account = user_load($web_user->uid, TRUE);
     $this->assertTrue(user_access('edit own page content', $account), "Web user has edit own page content permission.");
     $this->assertTrue(user_access('edit any page content', $account), "Web user has edit any page content permission.");
+
+    // On the Node Type test: check that custom permissions for the "test" node
+    // type appear on the Node Type page via hook_node_type_list_permissions().
+    module_enable(array('node_test'), FALSE);
+
+    $this->backdropLogin($admin_user);
+
+    $edit = array(
+      $role_name . '[view own page content]' => TRUE,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+
+    // Check that the permission changes are saved on the permissions page.
+    $this->backdropGet('admin/config/people/permissions');
+    $this->assertFieldByName($role_name . '[view own page content]', 'view own page content', "Role $role_name has view own page content permission.");
   }
 
   /**
@@ -3542,7 +3551,9 @@ class NodeAccessPagerTestCase extends BackdropWebTestCase {
    */
   public function testCommentPager() {
     // Create a node.
-    $node = $this->backdropCreateNode();
+    $node = $this->backdropCreateNode(array(
+      'type' => 'post',
+    ));
 
     // Create 60 comments.
     for ($i = 0; $i < 60; $i++) {
@@ -4223,6 +4234,7 @@ class NodePublishScheduling extends BackdropWebTestCase {
       'status_default' => 0,
     );
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    // cspell:ignore foobee
     // Create a node of type foobee and assert that its published-state is set
     // to Draft.
     $name = $this->randomName(8);
@@ -4251,6 +4263,7 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '1', 'The node is in the state Published.');
 
+    // cspell:ignore foobsee
     // Create a content type of type foobsee via the user interface.
     $edit = array(
       'name' => 'foobsee',

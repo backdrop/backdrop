@@ -388,7 +388,7 @@ class BackdropLinkCommand extends CKEditor5.Command {
     const closestImage = imageUtils.getClosestSelectedImageElement(selection);
     const extraAttributes = new Map(Object.entries(config.extraAttributes));
     const dialogSettings = {
-      dialogClass: 'editor-link-dialog'
+      classes: {'ui-dialog': 'editor-link-dialog'}
     };
 
     // Pull in existing value from linkCommand to be sent to the dialog.

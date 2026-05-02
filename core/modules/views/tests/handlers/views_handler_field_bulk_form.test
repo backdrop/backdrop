@@ -249,4 +249,56 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
     $this->assertCorrectBulkFormEntityIds('id', 'views_test');
 
   }
+
+  /**
+   * Test selecting all items on all pages and executing a bulk action.
+   */
+  public function testSelectAllPages() {
+    // Create 18 more nodes to reach a total of 20.
+    for ($i = 0; $i < 18; $i++) {
+      $this->backdropCreateNode();
+    }
+
+    // Modify the existing view to add pager that shows only 10 items in the
+    // page.
+    $this->view->display['default']->handler->override_option('pager', array(
+      'type' => 'full',
+      'options' => array(
+        'items_per_page' => 10,
+        'offset' => 0,
+      ),
+    ));
+
+    // Add bulk_form field with unpublish action selected.
+    $this->view->add_item('default', 'field', 'node', 'bulk_form', array(
+      'id' => 'bulk_form',
+      'table' => 'node',
+      'field' => 'bulk_form',
+      'include_exclude' => 'include',
+      'selected_actions' => array('node_unpublish_action' => 'node_unpublish_action'),
+    ));
+
+    $this->view->save();
+
+    // Build the view to ensure it's ready.
+    $this->view->preview();
+
+    // Navigate to the view page.
+    $this->backdropGet('test-bulk-form');
+
+    // Verify that there are 20 published nodes before unpublishing.
+    $count_before = db_query('SELECT COUNT(*) FROM {node} WHERE status = 1')->fetchField();
+    $this->assertEqual($count_before, 20, 'There are 20 published nodes before unpublishing.');
+
+    // Submit the form to select all pages and execute unpublish action.
+    $data = array(
+      'action' => 'node_unpublish_action',
+      'select_all_pages' => 1,
+    );
+    $this->backdropPost('test-bulk-form', $data, 'Execute');
+
+    // Verify that all 20 nodes have been unpublished.
+    $count = db_query('SELECT COUNT(*) FROM {node} WHERE status = 1')->fetchField();
+    $this->assertEqual($count, 0, 'All 20 nodes have been bulk-unpublished.');
+  }
 }

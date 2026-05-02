@@ -499,7 +499,9 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
       '#title' => $title,
       '#href' => 'admin/installer/queue/nojs/' . $op . '/'. $project_name,
       '#options' => array(
-        'query' => backdrop_get_destination(),
+        'query' => backdrop_get_destination() + array(
+          'token' => backdrop_get_token('installer_install_action_access'),
+        ),
       ),
       '#id' => $id_prefix . '-' . $project_name,
       '#ajax' => array(
@@ -521,8 +523,7 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
  */
 function installer_browser_add_remove_queue_dialog_link($form, &$form_state, $project_name, $op, $title) {
   form_load_include($form_state, 'inc', 'installer', 'installer.browser');
-  $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
-  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['#attached']['library'][] = array('layout', 'layout.admin');
 
   if (empty($form_state['project_name'])) {
     $form_state['project_name'] = $project_name;

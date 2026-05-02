@@ -322,6 +322,11 @@ function comment_update_dependencies() {
   $dependencies['comment'][1001] = array(
     'node' => 1005,
   );
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['comment'][1007] = array(
+    'user' => 1007,
+  );
+
   return $dependencies;
 }
 
@@ -509,6 +514,31 @@ function comment_update_1008() {
     $path = backdrop_get_path('module', 'comment_hide_subject');
     db_query("DELETE FROM {system} WHERE name = 'comment_hide_subject' AND type = 'module'");
     backdrop_set_message(t('The contributed module <em>Comment Hide Subject</em> is located at %path. The module has been disabled and uninstalled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+  }
+}
+
+/**
+ * Enable comments on types with existing comments for backwards-compatibility.
+ */
+function comment_update_1009() {
+  // Comments can now be disabled per type, but prior to Backdrop 1.33.0,
+  // they were always enabled on all types.
+  $count = 0;
+  foreach (config_get_names_with_prefix('node.type.') as $config_name) {
+    $config = config($config_name);
+    $node_type = $config->get('type');
+    $default_setting = $config->get('settings.comment_default');
+    $comment_count = (int) db_query('SELECT COUNT(*) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type', array(':type' => $node_type))->fetchField();
+    // Constant avoided if the module is not loaded, COMMENT_NODE_OPEN == 2.
+    if ($default_setting == 2 || $comment_count > 0) {
+      $config->set('settings.comment_enabled', TRUE);
+      $config->save();
+      $count++;
+    }
+  }
+
+  if ($count) {
+    return format_plural($count, 'Comments enabled on @count content type.', 'Comments enabled on @count content types.');
   }
 }
 
