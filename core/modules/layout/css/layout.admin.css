@@ -273,6 +273,9 @@ input.layout-additional-path-remove.form-submit {
 .ui-sortable .layout-editor-block {
   cursor: move;
 }
+.ui-sortable .layout-editor-block:hover .handle {
+  opacity: 1;
+}
 .layout-editor-block {
   margin: -1px 1px 15px -1px;
   background: #ffffff;
@@ -290,15 +293,16 @@ input.layout-additional-path-remove.form-submit {
   padding: 0.4em 0.5em;
 }
 .layout-editor-block-title .handle {
-  background: url(../../../misc/draggable.png) no-repeat 6px 9px;
-  height: 13px;
-  width: 13px;
-  margin: 0 0.5em 0 0; /* LTR */
-  padding: 0.25em 0.75em;
+  mask-image: var(--icon-arrows-out-cardinal-fill);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  display: inline-block;
+  background-color: currentColor;
+  opacity: 0.65;
+  height: 1em;
+  width: 1em;
+  margin: 0 .5em;
   box-sizing: content-box;
-}
-[dir="rtl"] .layout-editor-block-title .handle {
-  margin: 0 0 0 0.5em;
 }
 .layout-editor-block-title .text {
   font-size: 1.1em;

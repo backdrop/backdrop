@@ -965,6 +965,37 @@ function hook_node_type_delete($info) {
 }
 
 /**
+ * Add to the matrix of node permissions on a node type to be
+ * displayed on the node type form. This would be used in addition to
+ * hook_permission() which supplies the actual permissions.
+ *
+ * This hook is invoked from node_type_form_permissions.
+ *
+ * @param string $type
+ *   The node type.
+ * 
+ * @since 1.34.0 Hook added.
+ */
+function hook_node_type_list_permissions($type) {
+  $perms = array();
+  foreach (node_type_get_names() as $node_type => $name) {
+    if ($type != $node_type) {
+      continue;
+    }
+    $perms += array(
+      "view own $type content" => array(
+        'title' => t('%type_name: View own content', array('%type_name' => $name)),
+      ),
+      "view any $type content" => array(
+        'title' => t('%type_name: View any content', array('%type_name' => $name)),
+      ),
+    );
+  }
+
+  return $perms;
+}
+
+/**
  * Respond to node deletion.
  *
  * This is a node-type-specific hook, which is invoked only for the node type

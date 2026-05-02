@@ -230,6 +230,8 @@ function file_field_prepare_view($entity_type, $entities, $field, $instances, $l
  * Implements hook_field_insert().
  */
 function file_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  $items = file_field_expand_items($items);
+
   // Add a new usage of each uploaded file.
   foreach ($items as $item) {
     if ($file = file_load($item['fid'])) {
@@ -244,10 +246,17 @@ function file_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  * Checks for files that have been removed from the object.
  */
 function file_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  $items = file_field_expand_items($items);
+
+  // Check whether the field is defined on the object.
+  if (!isset($entity->{$field['field_name']})) {
+    // We cannot check for removed files if the field is not defined.
+    return;
+  }
   $id = $entity->id();
 
   // On new revisions, all files are considered to be a new usage and no
-  // deletion of previous file usages are necessary.
+  // deletion of previous file usages is necessary.
   if (!empty($entity->revision)) {
     foreach ($items as $item) {
       if ($file = file_load($item['fid'])) {
@@ -319,6 +328,46 @@ function file_field_delete_revision($entity_type, $entity, $field, $instance, $l
  */
 function file_field_is_empty($item, $field) {
   return empty($item['fid']);
+}
+
+/**
+ * Expands multiple file IDs within a single item into separate item arrays.
+ *
+ * When using a multiple-value file field, an individual $item['fid'] may
+ * contain an array of file IDs. Before saving values, each $item['fid'] should
+ * only contain an integer. This helper converts multiple file IDs within a
+ * single item into separate items.
+ *
+ * Calling this function is only needed when new files may be added, such as on
+ * insert or update operations.
+ *
+ * @param array $items
+ *
+ * @return array
+ *   The modified list of $items.
+ */
+function file_field_expand_items(array $items) {
+  foreach ($items as $i => $item) {
+    if (is_array($item['fid'])) {
+      $multiple_fids = $item['fid'];
+      $new_items = array();
+      foreach ($multiple_fids as $f => $fid) {
+        // The first item should adopt the first file ID.
+        if ($f === 0) {
+          $items[$i]['fid'] = $fid;
+        }
+        // Subsequent file IDs duplicate the first item's properties.
+        else {
+          $item['fid'] = $fid;
+          $new_items[] = $item;
+        }
+      }
+      // Insert the new items in the array after the original item.
+      array_splice($items, $i + 1, 0, $new_items);
+    }
+  }
+
+  return $items;
 }
 
 /**
@@ -642,8 +691,8 @@ function file_field_widget_settings_form($field, $instance) {
 function file_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
 
   $defaults = array(
-    'fid' => 0,
-    'display' => !empty($field['settings']['display_default']),
+    'fid' => NULL,
+    'display' => empty($field['settings']['display_default']) ? 0 : 1,
     'description' => '',
   );
 
@@ -655,7 +704,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     $items = $field_state['items'];
   }
 
-  // Essentially we use the managed_file type, extended with some enhancements.
+  // Essentially, we use the managed_file type, extended with some enhancements.
   $element_info = element_info('managed_file');
   $element += array(
     '#type' => 'managed_file',
@@ -683,6 +732,9 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $elements[$delta] = $element;
       $elements[$delta]['#default_value'] = $item;
       $elements[$delta]['#weight'] = $delta;
+      if ($field['cardinality'] != FIELD_CARDINALITY_UNLIMITED) {
+        $elements[$delta]['#element_validate'] = array('file_field_widget_multiple_count_validate');
+      }
       $delta++;
     }
     // And then add one more empty row for new uploads except when this is a
@@ -692,6 +744,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $elements[$delta]['#default_value'] = $defaults;
       $elements[$delta]['#weight'] = $delta;
       $elements[$delta]['#required'] = ($element['#required'] && $delta == 0);
+      $elements[$delta]['#multiple'] = TRUE;
     }
     // The group of elements all-together need some extra functionality
     // after building up the full list (like draggable table rows).
@@ -708,8 +761,12 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     // Add some properties that will eventually be added to the file upload
     // field. These are added here so that they may be referenced through a
     // hook_form_alter().
-    $elements['#file_upload_title'] = t('Add a new file');
-    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators']));
+    $elements['#file_upload_title'] = format_plural($field['cardinality'], 'Add a new file', 'Add new files');
+    $elements['#file_upload_description'] = theme('file_upload_help', array(
+      'description' => '',
+      'upload_validators' => $elements[0]['#upload_validators'],
+      'cardinality' => $field['cardinality'],
+    ));
   }
 
   return $elements;
@@ -721,7 +778,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
  * @param $field
  *   A field array.
  *
- * @return
+ * @return array
  *   An array suitable for passing to file_save_upload() or the file field
  *   element's '#upload_validators' property.
  */
@@ -789,12 +846,53 @@ function file_field_widget_value($element, $input, $form_state) {
 
   // Ensure that all the required properties are returned even if empty.
   $return += array(
-    'fid' => 0,
+    'fid' => NULL,
     'display' => 1,
     'description' => '',
   );
 
   return $return;
+}
+
+ /**
+ * Validation callback for upload element on file widget. Checks if user has
+ * uploaded more files than allowed.
+ *
+ * This validator is used only when cardinality not set to 1 or unlimited.
+ */
+function file_field_widget_multiple_count_validate($element, &$form_state, $form) {
+  $parents = $element['#parents'];
+  $values = backdrop_array_get_nested_value($form_state['values'], $parents);
+
+  array_pop($parents);
+  $current = count(element_children(backdrop_array_get_nested_value($form, $parents))) - 1;
+
+  $field = field_info_field($element['#field_name']);
+  $uploaded = is_array($values['fid']) ? count($values['fid']) : 1;
+  $count = $uploaded + $current;
+  if ($count > $field['cardinality']) {
+    $keep = $uploaded - $count + $field['cardinality'];
+    $removed_files = array_slice($values['fid'], $keep);
+    $removed_names = array();
+    foreach ($removed_files as $fid) {
+      $file = file_load($fid);
+      $removed_names[] = $file->filename;
+    }
+    backdrop_set_message(
+      t(
+        'Field %field can only hold @max values but there were @count uploaded. The following files have been omitted as a result: %list.',
+        array(
+          '%field' => $field['field_name'],
+          '@max' => $field['cardinality'],
+          '@count' => $keep,
+          '%list' => implode(', ', $removed_names),
+        )
+      ),
+      'warning'
+    );
+    $values['fid'] = array_slice($values['fid'], 0, $keep);
+    backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $values);
+  }
 }
 
 /**
@@ -966,13 +1064,29 @@ function file_field_widget_submit($form, &$form_state) {
 
   $submitted_values = backdrop_array_get_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2));
   foreach ($submitted_values as $delta => $submitted_value) {
-    if (!$submitted_value['fid']) {
+    if (empty($submitted_value['fid'])) {
       unset($submitted_values[$delta]);
     }
   }
 
+  // If there are more files uploaded via the same widget, we have to separate
+  // them, as we display each file in its own widget.
+  $new_values = array();
+  foreach ($submitted_values as $delta => $submitted_value) {
+    if (is_array($submitted_value['fid'])) {
+      foreach ($submitted_value['fid'] as $fid) {
+        $new_value = $submitted_value;
+        $new_value['fid'] = $fid;
+        $new_values[] = $new_value;
+      }
+    }
+    else {
+      $new_values[] = $submitted_value;
+    }
+  }
+
   // Re-index deltas after removing empty items.
-  $submitted_values = array_values($submitted_values);
+  $submitted_values = array_values($new_values);
 
   // Update form_state values.
   backdrop_array_set_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2), $submitted_values);

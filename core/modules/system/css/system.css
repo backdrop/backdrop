@@ -113,29 +113,38 @@ body.drag {
   margin-left: -1em; /* LTR */
   overflow: hidden;
   text-decoration: none;
+  color: currentColor;
 }
 [dir="rtl"] .draggable a.tabledrag-handle {
   float: right;
   margin-right: -1em;
   margin-left: 0;
 }
+.draggable a.tabledrag-handle-y {
+  cursor: row-resize;
+}
 a.tabledrag-handle:hover {
   text-decoration: none;
 }
 a.tabledrag-handle .handle {
-  background: url(../../../misc/draggable.png) no-repeat 6px 9px;
-  height: 13px;
-  margin: -0.4em 0.5em; /* LTR */
-  padding: 0.42em 0.5em; /* LTR */
-  width: 13px;
+  mask-image: var(--icon-arrows-out-cardinal-fill);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  display: inline-block;
+  background-color: currentColor;
+  opacity: 0.65;
+  height: 1em;
+  width: 1em;
+  margin-block: .35em;
+  margin-inline-start: .75em;
+  margin-inline-end: 1em;
   box-sizing: content-box;
 }
-[dir="rtl"] a.tabledrag-handle .handle {
-  margin: -0.4em 0.5em;
-  padding: 0.42em 0.5em;
+a.tabledrag-handle-y .handle {
+  mask-image: var(--icon-arrows-out-line-vertical-fill);
 }
 a.tabledrag-handle-hover .handle {
-  background-position: 6px -11px;
+  opacity: 1;
 }
 div.indentation {
   float: left; /* LTR */

@@ -1172,13 +1172,15 @@ class FileDirectoryTest extends FileTestCase {
     $this->assertDirectoryPermissions($directory, settings_get('file_chmod_directory', 0775));
 
     // Remove .htaccess file to then test that it gets re-created.
-    @backdrop_unlink(file_default_scheme() . '://.htaccess');
-    $this->assertFalse(is_file(file_default_scheme() . '://.htaccess'), 'Successfully removed the .htaccess file in the files directory.', 'File');
-    file_ensure_htaccess();
-    $this->assertTrue(is_file(file_default_scheme() . '://.htaccess'), 'Successfully re-created the .htaccess file in the files directory.', 'File');
-    // Verify contents of .htaccess file.
-    $file = file_get_contents(file_default_scheme() . '://.htaccess');
-    $this->assertEqual($file, file_htaccess_lines(FALSE), 'The .htaccess file contains the proper content.', 'File');
+    if (backdrop_is_apache()) {
+      @backdrop_unlink(file_default_scheme() . '://.htaccess');
+      $this->assertFalse(is_file(file_default_scheme() . '://.htaccess'), 'Successfully removed the .htaccess file in the files directory.', 'File');
+      file_ensure_htaccess();
+      $this->assertTrue(is_file(file_default_scheme() . '://.htaccess'), 'Successfully re-created the .htaccess file in the files directory.', 'File');
+      // Verify contents of .htaccess file.
+      $file = file_get_contents(file_default_scheme() . '://.htaccess');
+      $this->assertEqual($file, file_htaccess_lines(FALSE), 'The .htaccess file contains the proper content.', 'File');
+    }
   }
 
   /**

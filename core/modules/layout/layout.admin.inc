@@ -191,7 +191,7 @@ function layout_list_page() {
     ),
     '#weight' => -1,
   );
-  $page['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $page['#attached']['library'][] = array('layout', 'layout.admin');
   $page['stand_alone'] = array(
     '#type' => 'help',
     '#markup' => '<h2>' . t('Layout pages') . '</h2>' . t('These layouts will create new stand-alone pages on the site.'),
@@ -351,8 +351,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form_state['layout'] = &$layout;
   $form['#tree'] = TRUE;
 
-  $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
-  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['#attached']['library'][] = array('layout', 'layout.admin');
 
   $messages = array();
   if ($layout->locked) {
@@ -3113,8 +3112,7 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
   $form_state['menu_item'] = $menu_item;
 
   $form['#tree'] = TRUE;
-  $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
-  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['#attached']['library'][] = array('layout', 'layout.admin');
 
   $messages = array();
   if ($menu_item->locked) {
@@ -3696,7 +3694,7 @@ function layout_settings_page($form, &$form_state) {
     }
   }
 
-  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['#attached']['library'][] = array('layout', 'layout.admin');
   $form['templates'] = array(
     '#type' => 'tableselect',
     '#js_select' => FALSE,
