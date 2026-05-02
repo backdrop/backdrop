@@ -245,11 +245,15 @@ function views_update_1009() {
   // Remove the entry for the views_ajax_history module in the system table.
   // This will "disable" the module if present. No other configuration was
   // present for this module.
-  db_query("DELETE FROM {system} WHERE name = 'views_ajax_history' AND type = 'module'");
-
-  backdrop_set_message(t('The contributed module <em>Views Ajax History</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array(
-    '%path' => BACKDROP_ROOT . '/' . backdrop_get_path('module', 'views_ajax_history'),
-  )), 'warning');
+  $module = db_query("SELECT name FROM {system} WHERE name = 'views_ajax_history' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'views_ajax_history');
+    db_query("DELETE FROM {system} WHERE name = 'views_ajax_history' AND type = 'module'");
+    backdrop_set_message(t('The contributed module %module has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array(
+      '%module' => 'Views Ajax History',
+      '%path' => BACKDROP_ROOT . '/' . $path,
+    )), 'warning');
+  }
 }
 
 /**

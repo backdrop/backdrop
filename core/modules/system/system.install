@@ -3718,7 +3718,10 @@ function system_update_1098() {
   $module = db_query("SELECT name FROM {system} WHERE name = 'fast_token_browser' AND type = 'module'")->fetchField();
   if ($module) {
     $path = backdrop_get_path('module', 'fast_token_browser');
-    backdrop_set_message(t('The contributed module <em>Fast Token Browser</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('The contributed module %module has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array(
+      '%module' => 'Fast Token Browser',
+      '%path' => BACKDROP_ROOT . '/' . $path,
+    )), 'warning');
     // Remove the entry for the Fast Token Browser module from the system table.
     // As this module does not provide any config or settings, there doesn't
     // seem to be anything else left to clean up or migrate.
@@ -3890,7 +3893,11 @@ function system_update_1105() {
   $module = db_query("SELECT name FROM {system} WHERE name = 'html5_upload' AND type = 'module'")->fetchField();
   if ($module) {
     $path = backdrop_get_path('module', 'html5_upload');
-    backdrop_set_message(t('The contributed module <em>HTML5 Upload</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('The contributed module %module has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array(
+      '%module' => 'HTML5 Upload',
+      '%path' => BACKDROP_ROOT . '/' . $path,
+    )), 'warning');
+
     // Remove the entry for the HTML5 Upload module from the system table.
     // As this module does not provide any config or settings, there doesn't
     // seem to be anything else left to clean up or migrate.
