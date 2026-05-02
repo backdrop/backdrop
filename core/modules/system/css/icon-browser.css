@@ -31,10 +31,6 @@
   border-radius: 4px;
   padding: 5px;
 }
-.icon-browser-list .icon-wrapper:hover {
-  background-color: #ffffff;
-  border-color: #43afe4;
-}
 
 .icon-browser-list .icon-wrapper .icon-name {
   color: unset;
