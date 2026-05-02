@@ -359,7 +359,7 @@ function theme_icon(array $variables) {
 function icon_get_all_details($icon_name = '') {
   // Skip building the whole array if one icon was requested and the icon is
   // present in the most likely location (core).
-  if (isset($icon_name) && _icon_from_core($icon_name)) {
+  if (!empty($icon_name) && _icon_from_core($icon_name)) {
     return array($icon_name => array(
       'project_type' => 'core',
       'project_description' => t('Backdrop core'),

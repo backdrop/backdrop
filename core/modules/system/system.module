@@ -817,14 +817,6 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
 
-  // Icon browser page.
-  $items['admin/config/media/icon-browser'] = array(
-    'title' => 'Icon browser',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_icon_browser_form'),
-    'access arguments' => array('administer site configuration'),
-  );
-
   // Service settings.
   $items['admin/config/services'] = array(
     'title' => 'Web services',
@@ -1129,6 +1121,13 @@ function system_menu() {
     'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
+  );
+  $items['admin/reports/icon-browser'] = array(
+    'title' => 'Icon browser',
+    'description' => 'Browse available icons.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_icon_browser_form'),
+    'access arguments' => array('administer site configuration'),
   );
 
   // Default page for batch operations.
