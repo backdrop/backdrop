@@ -1156,7 +1156,7 @@ function file_field_widget_process($element, &$form_state, $form) {
  * @param array $element
  *   The element being processed.
  * @param array $form_state
- *  A keyed array of the form state.
+ *   A keyed array of the form state.
  * @param array $form
  *   The parent form, passed by reference.
  *
@@ -1192,7 +1192,7 @@ function file_field_inline_fields_widget_process(array $element, array &$form_st
  * @param array $form
  *   The form to be submitted.
  * @param array $form_state
- *  A keyed array of the form state.
+ *   A keyed array of the form state.
  *
  * @see file_field_inline_fields_widget_process()
  */
