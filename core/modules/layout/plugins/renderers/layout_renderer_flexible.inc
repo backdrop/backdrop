@@ -174,7 +174,7 @@ class LayoutRendererFlexible {
       'attributes' => array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,
-        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
       ),
     );
     $links['delete'] = array(

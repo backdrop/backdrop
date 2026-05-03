@@ -219,7 +219,7 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
 
     $title = empty($form_state['title']) ? '' : $form_state['title'];
     $options = array(
-      'dialogClass' => 'views-ui-dialog',
+      'classes' => array('ui-dialog' => 'views-ui-dialog'),
     );
     $commands[] = ajax_command_open_modal_dialog($title, $display, $options);
 

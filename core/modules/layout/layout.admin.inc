@@ -1743,8 +1743,8 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
           'attributes' => array(
             'class' => array('use-ajax block-item'),
             'data-dialog' => TRUE,
-            'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-          ),
+            'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
+          )
         )
       ),
       '#description' => isset($block_info['description']) ? filter_xss($block_info['description']) : NULL,
@@ -2194,7 +2194,7 @@ function layout_block_configure_ajax_update($form, $form_state) {
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
     $title = isset($form['#title']) ? $form['#title'] : backdrop_get_title();
-    $commands[] = ajax_command_open_modal_dialog($title, $html, array('dialogClass' => 'layout-dialog'));
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array('classes' => array('ui-dialog' => 'layout-dialog')));
   }
   // If a new block, add to the bottom of the region.
   elseif ($added_to_region) {
@@ -3470,7 +3470,7 @@ function layout_ajax_form_open_dialog($form, &$form_state) {
     else {
       $title = $router_item['title'];
     }
-    $commands[] = ajax_command_open_modal_dialog($title, $html, array('dialogClass' => 'layout-dialog'));
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array('classes' => array('ui-dialog' => 'layout-dialog')));
   }
 
   return array(
@@ -3508,7 +3508,7 @@ function layout_ajax_form_save_dialog($form, $form_state) {
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
     $title = isset($form['#title']) ? $form['#title'] : backdrop_get_title();
-    $commands[] = ajax_command_open_modal_dialog($title, $html, array('dialogClass' => 'layout-dialog'));
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array('classes' => array('ui-dialog' => 'layout-dialog')));
   }
   else {
     // If there is a part of the page that needs to be updated, update it.
@@ -3558,7 +3558,7 @@ function layout_ajax_form_save_title_dialog($form, $form_state) {
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
     $title = isset($form['#title']) ? $form['#title'] : backdrop_get_title();
-    $commands[] = ajax_command_open_modal_dialog($title, $html, array('dialogClass' => 'layout-dialog'));
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array('classes' => array('ui-dialog' => 'layout-dialog')));
   }
   else {
     // Rebuild the title area description.

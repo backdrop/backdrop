@@ -796,7 +796,7 @@ function layout_flexible_template_edit_row_ajax($form, $form_state) {
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
     $title = isset($form['#title']) ? $form['#title'] : backdrop_get_title();
-    $commands[] = ajax_command_open_modal_dialog($title, $html, array('dialogClass' => 'layout-dialog'));
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array('classes' => array('ui-dialog' => 'layout-dialog')));
   }
   else {
     $commands[] = ajax_command_close_modal_dialog();

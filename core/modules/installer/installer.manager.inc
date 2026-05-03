@@ -585,7 +585,10 @@ function installer_manager_install_modal_callback($form, $form_state) {
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
     $title = isset($form['#title']) ? $form['#title'] : 'Manual installation';
-    $commands[] = ajax_command_open_modal_dialog($title, $html, array('width' => 700, 'dialogClass' => 'layout-dialog'));
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array(
+      'width' => 700,
+      'classes' => array('ui-dialog' => 'layout-dialog'),
+    ));
   }
   elseif (!empty($form_state['redirect'])) {
     if (is_array($form_state['redirect'])) {

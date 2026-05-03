@@ -214,12 +214,14 @@ function views_update_1008() {
 }
 
 /**
- * Enable Ajax History for all Views using AJAX.
+ * Enable ajax history for all Views that used Views Ajax History contrib
+ * module, and disable contrib module.
  */
 function views_update_1009() {
   $views = config_get_names_with_prefix('views.view');
   $views_ajax_history = module_exists('views_ajax_history');
   foreach ($views as $view_name) {
+    $has_changes = FALSE;
     $config = config($view_name);
     $use_ajax_default = $config->get('display.default.display_options.use_ajax');
     $displays = $config->get('display');
@@ -231,16 +233,27 @@ function views_update_1009() {
         // Set the value based on whether views_ajax_history module was enabled.
         $config->set('display.' . $display_name . '.display_options.enable_ajax_history', $views_ajax_history);
         $config->set('display.' . $display_name . '.display_options.exclude_ajax_args', '');
+        $has_changes = TRUE;
       }
     }
 
-    $config->save();
+    if ($has_changes) {
+      $config->save();
+    }
   }
 
   // Remove the entry for the views_ajax_history module in the system table.
   // This will "disable" the module if present. No other configuration was
   // present for this module.
-  db_query("DELETE FROM {system} WHERE name = 'views_ajax_history' AND type = 'module'");
+  $module = db_query("SELECT name FROM {system} WHERE name = 'views_ajax_history' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'views_ajax_history');
+    db_query("DELETE FROM {system} WHERE name = 'views_ajax_history' AND type = 'module'");
+    backdrop_set_message(t('The contributed module %module has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array(
+      '%module' => 'Views Ajax History',
+      '%path' => BACKDROP_ROOT . '/' . $path,
+    )), 'warning');
+  }
 }
 
 /**

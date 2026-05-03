@@ -1363,6 +1363,19 @@ function ajax_command_open_dialog($selector, $title, $html, array $dialog_option
 
   $dialog_options['title'] = $title;
 
+  $classes = array();
+  if (isset($dialog_options['classes']['ui-dialog'])) {
+    $classes[] = $dialog_options['classes']['ui-dialog'];
+  }
+  // Support converting the legacy "dialogClass" option to "classes".
+  if (isset($dialog_options['dialogClass'])) {
+    $classes[] = $dialog_options['dialogClass'];
+    unset($dialog_options['dialogClass']);
+  }
+  if ($classes) {
+    $dialog_options['classes']['ui-dialog'] = implode(' ', $classes);
+  }
+
   // For consistency ensure the modal option is set to TRUE or FALSE.
   $dialog_options['modal'] = isset($dialog_options['modal']) && $dialog_options['modal'];
 

@@ -194,9 +194,10 @@
       $toolbar.find('.ckeditor5-dialog-loading').remove();
 
       // Add a consistent dialog class.
-      const classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
+      dialogSettings.classes = dialogSettings.classes || {};
+      var classes = dialogSettings.classes['ui-dialog'] ? dialogSettings.classes['ui-dialog'].split(' ') : [];
       classes.push('editor-dialog');
-      dialogSettings.dialogClass = classes.join(' ');
+      dialogSettings.classes['ui-dialog'] = classes.join(' ');
       dialogSettings.autoResize = true;
       dialogSettings.modal = true;
       dialogSettings.target = '#ckeditor5-modal';

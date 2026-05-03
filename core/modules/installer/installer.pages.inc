@@ -1033,7 +1033,10 @@ function installer_browser_manual_install_link($form, &$form_state) {
     '#attributes' => array(
       'class' => array('use-ajax'),
       'data-dialog' => 'true',
-      'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
+      'data-dialog-options' => json_encode(array(
+        'width' => 700,
+        'classes' => array('ui-dialog' => 'project-dialog'),
+      )),
     ),
   );
 

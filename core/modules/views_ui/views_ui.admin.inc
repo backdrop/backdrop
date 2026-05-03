@@ -1724,6 +1724,14 @@ function views_ui_get_display_tab_details($view, $display) {
       '#description' => t('Display name'),
       '#link' => $display->handler->option_link(check_plain($display_title), 'display_title'),
     );
+    $display_type = $display->display_plugin;
+    if ($display_type != strtolower($display_title)) {
+      $build['top']['display_type'] = array(
+        '#theme' => 'views_ui_display_tab_setting',
+        '#description' => t('Display type'),
+        '#link' => '<span class="display-type">' . ucfirst($display_type) . '</span>',
+      );
+    }
   }
 
   $build['columns'] = array();

@@ -1880,7 +1880,7 @@ function file_managed_file_browser_open($form, $form_state) {
 
   $title = t('Select from Image Library');
   $options = array(
-    'dialogClass' => 'file-browser-container',
+    'classes' => array('ui-dialog' => 'file-browser-container'),
     'width' => '90%',
     'modal' => TRUE,
   );
