@@ -102,7 +102,7 @@ function installer_menu() {
     'description' => 'Reset installer project list.',
     'page callback' => 'installer_browser_installation_reset',
     'page arguments' => array(3, 4),
-    'access callback' => 'installer_install_access',
+    'access callback' => 'installer_install_action_access',
     'file' => 'installer.pages.inc',
     'type' => MENU_CALLBACK,
   );
@@ -117,7 +117,7 @@ function installer_menu() {
   $items['admin/installer/queue/%/%/%'] = array(
     'page callback' => 'installer_browser_install_queue_callback',
     'page arguments' => array(3, 4, 5),
-    'access callback' => 'installer_install_access',
+    'access callback' => 'installer_install_action_access',
     'type' => MENU_CALLBACK,
     'file' => 'installer.pages.inc',
   );
@@ -131,7 +131,7 @@ function installer_menu() {
  * It both enforces the 'administer software updates' permission and the global
  * kill switch for the authorize.php script.
  *
- * @return
+ * @return bool
  *   TRUE if the current user can access the updater menu items; FALSE
  *   otherwise.
  *
@@ -147,7 +147,7 @@ function installer_update_access() {
  * It both enforces the 'use installer browser' permission and the global
  * kill switch for the authorize.php script.
  *
- * @return
+ * @return bool
  *   TRUE if the current user can access the installer menu items; FALSE
  *   otherwise.
  *
@@ -157,6 +157,23 @@ function installer_install_access() {
   return settings_get('allow_authorize_operations', TRUE) && user_access('use installer browser');
 }
 
+/**
+ * Access callback used for pages that directly execute an installer action.
+ *
+ * This extends installer_install_access() to also check for a valid query
+ * string token. This is used for pages that directly execute an installer
+ * action, such as the reset and install pages.
+ *
+ * @return bool
+ *   TRUE if the current user can access the installer menu items; FALSE
+ *   otherwise.
+ *
+ * @see installer_menu()
+ */
+function installer_install_action_access() {
+  $valid_token = isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'installer_install_action_access');
+  return installer_install_access() && $valid_token;
+}
 
 /**
  * Implements hook_theme().
