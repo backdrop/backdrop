@@ -253,9 +253,6 @@ function _file_generic_settings_file_directory_validate($element, &$form_state) 
  * @param array $form_state
  *   A keyed array containing the current state of the form.
  *
- * @return array
- *   Return only values on checked checkboxes.
- *
  * @see file_field_instance_settings_form()
  */
 function _file_generic_settings_inline_fields_validate(array $element, array &$form_state) {
