@@ -248,12 +248,17 @@ function _file_generic_settings_file_directory_validate($element, &$form_state) 
 /**
  * Render API callback: Validates the selected fields.
  *
- * This function is assigned as an #element_validate callback in
- * file_field_instance_settings_form().
+ * @param array $element
+ *   The element being validated.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
  *
- * Return only values on checked checkboxes.
+ * @return array
+ *   Return only values on checked checkboxes.
+ *
+ * @see file_field_instance_settings_form()
  */
-function _file_generic_settings_inline_fields_validate($element, &$form_state) {
+function _file_generic_settings_inline_fields_validate(array $element, array &$form_state) {
   $value = array_values(array_filter($element['#value']));
   form_set_value($element, $value, $form_state);
 }
@@ -872,12 +877,17 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
  * Adds the additional file entity fields to the widget.
  *
  * @param array $element
+ *   The element being processed.
  * @param array $form_state
+ *   A keyed array containing the current state of the form.
  * @param array $instance
+ *   The field instance.
  *
  * @return array
+ *   The element with fields attached, or just the element if no fields to be
+ *   attached.
  */
-function file_field_inline_fields_widget($element, &$form_state, $instance) {
+function file_field_inline_fields_widget(array $element, array &$form_state, array $instance) {
   $element['#process'] = array_merge($element['#process'], array('file_field_inline_fields_widget_process'));
 
   // Only act on entity forms, and when a file has been uploaded.
@@ -1143,9 +1153,19 @@ function file_field_widget_process($element, &$form_state, $form) {
  *
  * Expands the file_generic type to include the file entity fields.
  *
- * This function is assigned as a #process callback in file_field_inline_fields_widget().
+ * @param array $element
+ *   The element being processed.
+ * @param array $form_state
+ *  A keyed array of the form state.
+ * @param array $form
+ *   The parent form, passed by reference.
+ *
+ * @return array
+ *   The element that is processed.
+ *
+ * @see file_field_inline_fields_widget()
  */
-function file_field_inline_fields_widget_process($element, &$form_state, &$form) {
+function file_field_inline_fields_widget_process(array $element, array &$form_state, array &$form) {
   // Only act on entity forms, and when a file has been uploaded.
   if (empty($element['fid']['#value']) || !isset($element['#entity_type']) || !isset($element['#field_name'])) {
     return $element;
@@ -1165,13 +1185,18 @@ function file_field_inline_fields_widget_process($element, &$form_state, &$form)
 }
 
 /**
- * An element #element_validate callback for the file entity.
+ * Callback handler for inline fields submission.
  *
  * Saves the file entity field values.
  *
+ * @param array $form
+ *   The form to be submitted.
+ * @param array $form_state
+ *  A keyed array of the form state.
+ *
  * @see file_field_inline_fields_widget_process()
  */
-function file_field_inline_fields_submit($form, &$form_state) {
+function file_field_inline_fields_submit(array $form, array &$form_state) {
   if (!isset($form_state['values']['files'])) {
     return;
   }
@@ -1510,6 +1535,12 @@ function file_field_formatter_view($entity_type, $entity, $field, $instance, $la
 
 /**
  * Get a list of all file field widgets that support inline fields.
+ *
+ * @param bool $reset
+ *   TRUE to reset the static cache, FALSE by default.
+ *
+ * @return array
+ *   An array of widgets that can support inline fields.
  */
 function file_field_inline_fields_widgets($reset = FALSE) {
   static $widgets;

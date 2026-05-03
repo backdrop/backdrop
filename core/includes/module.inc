@@ -1028,6 +1028,7 @@ function backdrop_merged_modules() {
     'fast_token_browser', // Backdrop 1.30.0.
     'book_cache', // Backdrop 1.32.0.
     'views_ajax_history', // Backdrop 1.34.0.
+    'file_entity_inline', // Backdrop 1.34.0
   );
 }
 
