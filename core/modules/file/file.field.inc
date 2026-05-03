@@ -128,12 +128,17 @@ function file_field_instance_settings_form($field, $instance) {
     $widget = $instance['widget'];
     $settings = $widget['settings'];
 
+    $description = t('These options allow extended file fields to be edited inline after a file has been uploaded into this field. The fields displayed will depend upon the type of file uploaded. Setting or changing a value in these fields will affect the file everywhere throughout the site. More fields may be added in the <a href="!file-types">File types configuration</a>.', array('!file-types' => url('admin/structure/file-types')));
+    if ($instance['entity_type'] == 'file') {
+      $description = t('This option is <strong>disabled</strong>. Inline file fields are disabled for file fields attached to a <em>file type</em>.');
+    }
+
     $form['inline_fields'] = array(
       '#type' => 'fieldset',
       '#title' => t('Inline fields'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-      '#description' => t('These options allow extended file fields to be edited inline after a file has been uploaded into this field. The fields displayed will depend upon the type of file uploaded. Setting or changing a value in these fields will affect the file everywhere throughout the site. More fields may be added in the <a href="!file-types">File types configuration</a>', array('!file-types' => url('admin/structure/file-types'))),
+      '#description' => $description,
       '#weight' => 30,
       '#parents' => array('instance', 'widget', 'settings'),
     );
@@ -148,6 +153,7 @@ function file_field_instance_settings_form($field, $instance) {
       ),
       '#default_value' => isset($settings['inline_fields_option']) ? $settings['inline_fields_option'] : 0,
       '#weight' => -9,
+      '#disabled' => ($instance['entity_type'] == 'file'),
     );
 
     $options = array();

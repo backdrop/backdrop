@@ -496,6 +496,8 @@ function hook_file_upload_skip_fields_alter(&$skip_fields, $form_state) {
  *
  * @return array
  *   An array of file widgets.
+ *
+ * @since 1.34.0
  */
 function hook_file_field_inline_fields_widgets() {
   $widgets = array();
@@ -513,6 +515,8 @@ function hook_file_field_inline_fields_widgets() {
  *
  * @param array $widgets
  *   An array of file field widgets. Passed by reference.
+ *
+ * @since 1.34.0
  */
 function hook_file_field_inline_fields_widgets_alter(&$widgets) {
   unset($widgets['image_image']);
