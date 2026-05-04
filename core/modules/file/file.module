@@ -1897,6 +1897,8 @@ function file_managed_file_browser_open($form, $form_state) {
     'file' => array(
       'browser' => array(
         'fieldCardinality' => $field_cardinality,
+        // @todo It's probably a bad idea to derive the file count from delta.
+        'existingFilesCount' => end($parents),
         'selectedFid' => NULL,
         'currentFidElement' => '[name="' . $element['fid']['#name'] . '"]',
       ),

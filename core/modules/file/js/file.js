@@ -233,8 +233,10 @@ Backdrop.file = Backdrop.file || {
     var $browserContainer = $element.find(".file-browser");
     if ($browserContainer.length > 0) {
       let fieldCardinality = 1;
+      let existingFilesCount = 0;
       if (typeof Backdrop.settings.file !== 'undefined') {
         fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
+        existingFilesCount = parseInt(Backdrop.settings.file.browser.existingFilesCount);
       }
       // These two variables are set server-side when submitting the dialog, in
       // file_managed_file_browser_submit().
@@ -245,13 +247,19 @@ Backdrop.file = Backdrop.file || {
       }
       else {
         // Input has "multiple" enabled, so provide an array.
-        let providedFids = selectedFid.split(' ');
-        if (fieldCardinality === -1 || providedFids.length <= fieldCardinality) {
+        const providedFids = selectedFid.split(' ');
+        if (fieldCardinality === -1) {
           fidValue = providedFids;
         }
         else {
-          // Just in case, make sure the limit is respected.
-          fidValue = providedFids.slice(0, fieldCardinality);
+          const remaining = fieldCardinality - existingFilesCount;
+          if (providedFids.length <= remaining) {
+            fidValue = providedFids;
+          }
+          else {
+            // Just in case, make sure the limit is respected.
+            fidValue = providedFids.slice(0, remaining);
+          }
         }
       }
       var $fidElement = $(Backdrop.settings.file.browser.currentFidElement);
