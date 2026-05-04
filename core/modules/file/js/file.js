@@ -246,7 +246,7 @@ Backdrop.file = Backdrop.file || {
       else {
         // Input has "multiple" enabled, so provide an array.
         let providedFids = selectedFid.split(' ');
-        if (fieldCardinality === -1 || providedFids.length < fieldCardinality) {
+        if (fieldCardinality === -1 || providedFids.length <= fieldCardinality) {
           fidValue = providedFids;
         }
         else {
