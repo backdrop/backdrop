@@ -232,9 +232,28 @@ Backdrop.file = Backdrop.file || {
   dialogCloseEvent: function(e, dialog, $element) {
     var $browserContainer = $element.find(".file-browser");
     if ($browserContainer.length > 0) {
+      let fieldCardinality = 1;
+      if (typeof Backdrop.settings.file !== 'undefined') {
+        fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
+      }
       // These two variables are set server-side when submitting the dialog, in
       // file_managed_file_browser_submit().
       var selectedFid = Backdrop.settings.file.browser.selectedFid;
+      let fidValue;
+      if (fieldCardinality === 1) {
+        fidValue = selectedFid;
+      }
+      else {
+        // Input has "multiple" enabled, so provide an array.
+        let providedFids = selectedFid.split(' ');
+        if (fieldCardinality === -1 || providedFids.length < fieldCardinality) {
+          fidValue = providedFids;
+        }
+        else {
+          // Just in case, make sure the limit is respected.
+          fidValue = providedFids.slice(0, fieldCardinality);
+        }
+      }
       var $fidElement = $(Backdrop.settings.file.browser.currentFidElement);
 
       var $parentElement = $fidElement.closest('.form-type-managed-file');
@@ -246,7 +265,7 @@ Backdrop.file = Backdrop.file || {
         $fileInputField.val('');
 
         // Set this hidden FID value to the selected file.
-        $fidElement.val(selectedFid);
+        $fidElement.val(fidValue);
 
         // Then click the "Upload" button, which will utilize the given file.
         $uploadButton
