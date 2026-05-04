@@ -174,10 +174,10 @@ Backdrop.file = Backdrop.file || {
    */
   dialogOpenEvent: function(e, dialog, $element, settings) {
     var $browserContainer = $element.find(".file-browser");
-    var $viewContent = $element.find(".view-content");
     var fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
     if (fieldCardinality != 1) {
-      $viewContent.selectable({
+      $browserContainer.selectable({
+        filter: '.image-library-choose-file',
         classes: {
           "ui-selected": "image-library-image-selected"
         },
