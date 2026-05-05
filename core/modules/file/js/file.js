@@ -178,14 +178,14 @@ Backdrop.file = Backdrop.file || {
     if (typeof Backdrop.settings.file !== 'undefined') {
       fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
     }
-    if (fieldCardinality != 1) {
+    if (fieldCardinality !== 1) {
       $browserContainer.selectable({
         filter: '.image-library-choose-file',
         classes: {
           "ui-selected": "image-library-image-selected"
         },
         selecting: function(event, ui) {
-          if (fieldCardinality == -1) {
+          if (fieldCardinality === -1) {
             return false;
           }
           else if ($(".image-library-choose-file.ui-selecting").length > fieldCardinality) {
@@ -201,14 +201,14 @@ Backdrop.file = Backdrop.file || {
             fids.push($(this).children("img").data("fid"));
           });
           // Set the FID in the modal submit form.
-          $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(' '));
-        }  
+          $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
+        }
       });
     }
     else {
       $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
         var $selectedElement = $(this);
-        if ($selectedElement.is('img') && fieldCardinality==1) {
+        if ($selectedElement.is('img') && fieldCardinality === 1) {
           $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
           $selectedElement.parent('.image-library-choose-file').addClass('image-library-image-selected');
         }
@@ -230,7 +230,7 @@ Backdrop.file = Backdrop.file || {
   },
 
   /**
-   * After closing a dialog, check if the file ID needs to be updated..
+   * After closing a dialog, check if the file ID needs to be updated.
    */
   dialogCloseEvent: function(e, dialog, $element) {
     var $browserContainer = $element.find(".file-browser");
