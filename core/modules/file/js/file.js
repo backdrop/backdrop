@@ -175,9 +175,12 @@ Backdrop.file = Backdrop.file || {
   dialogOpenEvent: function(e, dialog, $element, settings) {
     var $browserContainer = $element.find(".file-browser");
     let fieldCardinality = 1;
+    let existingFilesCount = 0;
     if (typeof Backdrop.settings.file !== 'undefined') {
       fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
+      existingFilesCount = parseInt(Backdrop.settings.file.browser.existingFilesCount);
     }
+    let available = fieldCardinality - existingFilesCount;
     if (fieldCardinality !== 1) {
       $browserContainer.selectable({
         filter: '.image-library-choose-file',
@@ -188,10 +191,10 @@ Backdrop.file = Backdrop.file || {
           if (fieldCardinality === -1) {
             return false;
           }
-          else if ($(".image-library-choose-file.ui-selecting").length > fieldCardinality) {
+          else if ($(".image-library-choose-file.ui-selecting").length >= available) {
             $(ui.selecting).removeClass("ui-selecting");
           }
-          else if ($(".image-library-choose-file.image-library-image-selected").length > fieldCardinality-1) {
+          else if ($(".image-library-choose-file.image-library-image-selected").length >= available) {
             $(".image-library-choose-file.image-library-image-selected").removeClass("image-library-image-selected");
           }
         },
