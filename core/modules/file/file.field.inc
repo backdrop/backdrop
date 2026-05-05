@@ -1029,43 +1029,46 @@ function file_field_widget_value($element, $input, $form_state) {
 }
 
  /**
- * Validation callback for upload element on file widget. Checks if user has
- * uploaded more files than allowed.
+ * Validation callback for managed file element on file field widgets.
  *
- * This validator is used only when cardinality not set to 1 or unlimited.
+ * Checks if more files than allowed have been uploaded or added via image
+ * library, truncates values to the limit and shows a warning message.
+ * This validator is only used when cardinality not set to 1 or unlimited.
+ *
+ * @see file_field_widget_form()
  */
 function file_field_widget_multiple_count_validate($element, &$form_state, $form) {
   $parents = $element['#parents'];
-  $values = backdrop_array_get_nested_value($form_state['values'], $parents);
-
   array_pop($parents);
-  $current = count(element_children(backdrop_array_get_nested_value($form, $parents))) - 1;
+  $values = backdrop_array_get_nested_value($form_state['values'], $parents);
+  $item_count = count($values);
 
   $field = field_info_field($element['#field_name']);
-  $uploaded = is_array($values['fid']) ? count($values['fid']) : 1;
-  $count = $uploaded + $current;
-  if ($count > $field['cardinality']) {
-    $keep = $uploaded - $count + $field['cardinality'];
-    $removed_files = array_slice($values['fid'], $keep);
-    $removed_names = array();
-    foreach ($removed_files as $fid) {
-      $file = file_load($fid);
-      $removed_names[] = $file->filename;
+  if ($item_count > $field['cardinality']) {
+    $keep_items = array();
+    $remove_item_names = array();
+    foreach ($values as $delta => $value_array) {
+      if ($delta < $field['cardinality']) {
+        $keep_items[] = $value_array;
+      }
+      else {
+        $file = file_load($value_array['fid']);
+        $remove_item_names[] = $file->filename;
+      }
     }
+    backdrop_array_set_nested_value($form_state['values'], $parents, $keep_items);
     backdrop_set_message(
       t(
-        'Field %field can only hold @max values but there were @count uploaded. The following files have been omitted as a result: %list.',
+        'Field %field can only hold @max values but there were @count. The following files have been omitted as a result: %list.',
         array(
           '%field' => $field['field_name'],
           '@max' => $field['cardinality'],
-          '@count' => $keep,
-          '%list' => implode(', ', $removed_names),
+          '@count' => $item_count,
+          '%list' => implode(', ', $remove_item_names),
         )
       ),
       'warning'
     );
-    $values['fid'] = array_slice($values['fid'], 0, $keep);
-    backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $values);
   }
 }
 
