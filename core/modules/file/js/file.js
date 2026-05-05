@@ -174,7 +174,6 @@ Backdrop.file = Backdrop.file || {
    */
   dialogOpenEvent: function(e, dialog, $element, settings) {
     var $browserContainer = $element.find(".file-browser");
-    var fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
     let fieldCardinality = 1;
     if (typeof Backdrop.settings.file !== 'undefined') {
       fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
