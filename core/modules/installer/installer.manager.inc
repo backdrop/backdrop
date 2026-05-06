@@ -585,7 +585,10 @@ function installer_manager_install_modal_callback($form, $form_state) {
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
     $title = isset($form['#title']) ? $form['#title'] : 'Manual installation';
-    $commands[] = ajax_command_open_modal_dialog($title, $html, array('width' => 700, 'dialogClass' => 'layout-dialog'));
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array(
+      'width' => 700,
+      'classes' => array('ui-dialog' => 'layout-dialog'),
+    ));
   }
   elseif (!empty($form_state['redirect'])) {
     if (is_array($form_state['redirect'])) {
@@ -634,10 +637,10 @@ function _installer_manager_check_backends(&$form, $operation) {
   $available_backends = backdrop_get_filetransfer_info();
   if (empty($available_backends)) {
     if ($operation == 'update') {
-      $form['available_backends']['#markup'] = t('Your server does not support updating modules, themes, and layouts from this interface. Instead, update modules, themes, and layouts by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'https://backdropcms.org/guide/modules'));
+      $form['available_backends']['#markup'] = t('Your server does not support updating modules, themes, and layouts from this interface. Instead, update modules, themes, and layouts by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'https://docs.backdropcms.org/documentation/core-updates'));
     }
     else {
-      $form['available_backends']['#markup'] = t('Your server does not support installing modules, themes, and layouts from this interface. Instead, install modules, themes, and layouts by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'https://backdropcms.org/guide/modules'));
+      $form['available_backends']['#markup'] = t('Your server does not support installing modules, themes, and layouts from this interface. Instead, install modules, themes, and layouts by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'https://docs.backdropcms.org/documentation/core-updates'));
     }
     return FALSE;
   }
