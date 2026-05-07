@@ -490,3 +490,34 @@ function hook_file_upload_skip_fields_alter(&$skip_fields, $form_state) {
     $skip_fields = TRUE;
   }
 }
+
+/**
+ * Provides a list of file field widgets that support inline fields.
+ *
+ * @return array
+ *   An array of file widgets.
+ *
+ * @since 1.34.0
+ */
+function hook_file_field_inline_fields_widgets() {
+  $widgets = array();
+  $widgets['file_generic'] = array(
+    'element_type' => 'managed_file',
+  );
+  $widgets['image_image'] = array(
+    'element_type' => 'managed_file',
+  );
+  return $widgets;
+}
+
+/**
+ * Alters the list of file field widgets that support inline fields.
+ *
+ * @param array $widgets
+ *   An array of file field widgets. Passed by reference.
+ *
+ * @since 1.34.0
+ */
+function hook_file_field_inline_fields_widgets_alter(&$widgets) {
+  unset($widgets['image_image']);
+}

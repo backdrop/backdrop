@@ -704,6 +704,15 @@ function node_type_form_permissions($type) {
 
   $permissions = !empty($type) ? node_list_permissions($type) : $default_perms;
 
+  // Modules invoking hook_node_type_list_permissions() can add to the
+  // permissions displayed.
+  foreach (module_implements('node_type_list_permissions') as $module) {
+    $additional_permissions = module_invoke($module, 'node_type_list_permissions', $type);
+    foreach ($additional_permissions as $permission_name => $permission_info) {
+      $permissions[$permission_name] = $permission_info;
+    }
+  }
+
   $status = array();
   foreach ($permissions as $perm => $perm_item) {
     // Fill in default values for the permission.
@@ -777,9 +786,9 @@ function node_node_type_load(&$types) {
       'node_preview' => TRUE,
 
       // Submitted information.
-      'node_submitted' => TRUE,
+      'node_submitted' => FALSE,
       'node_submitted_format' => t('[node:created:medium] by [node:author]'),
-      'node_user_picture' => TRUE,
+      'node_user_picture' => FALSE,
 
       // Setting to prevent page from being accessed directly.
       'hidden_path' => FALSE,
