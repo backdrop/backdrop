@@ -181,7 +181,7 @@ Backdrop.file = Backdrop.file || {
       existingFilesCount = parseInt(Backdrop.settings.file.browser.existingFilesCount);
     }
     let available = fieldCardinality - existingFilesCount;
-    if (fieldCardinality !== 1 && typeof $browserContainer.selectable === 'function') {
+    if (fieldCardinality !== 1) {
       $browserContainer.selectable({
         filter: '.image-library-choose-file',
         classes: {
@@ -191,7 +191,7 @@ Backdrop.file = Backdrop.file || {
           if (fieldCardinality === -1) {
             return false;
           }
-          else if ($(".image-library-choose-file.ui-selecting").length >= available) {
+          else if ($(".image-library-choose-file.ui-selecting").length > available) {
             $(ui.selecting).removeClass("ui-selecting");
           }
           else if ($(".image-library-choose-file.image-library-image-selected").length >= available) {
@@ -199,11 +199,19 @@ Backdrop.file = Backdrop.file || {
           }
         },
         selected: function(event, ui) {
-          var fids = [];
+          let fids = [];
           $(".image-library-choose-file.image-library-image-selected").each(function() {
             fids.push($(this).children("img").data("fid"));
           });
           // Set the FID in the modal submit form.
+          $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
+        },
+        unselected: function(event, ui) {
+          let fids = [];
+          $(".image-library-choose-file.image-library-image-selected").each(function() {
+            fids.push($(this).children("img").data("fid"));
+          });
+          // Update values also when unselected.
           $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
         }
       });
