@@ -181,7 +181,7 @@ Backdrop.file = Backdrop.file || {
       existingFilesCount = parseInt(Backdrop.settings.file.browser.existingFilesCount);
     }
     let available = fieldCardinality - existingFilesCount;
-    if (fieldCardinality !== 1) {
+    if (fieldCardinality !== 1 && typeof $browserContainer.selectable === 'function') {
       $browserContainer.selectable({
         filter: '.image-library-choose-file',
         classes: {
