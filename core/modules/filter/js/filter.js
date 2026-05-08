@@ -160,6 +160,9 @@ Backdrop.behaviors.editorImageDialog = {
           if (n > m) {
             $toggleItems.eq(n).find('label:first').before($toggleLink);
           }
+          else if (m-n == 2) {
+            $toggleItems.eq(n).find('label:first').next('a').after($toggleLink);
+          }
           else if (n < m) {
             $toggleItems.eq(n).find('label:first').after($toggleLink);
           }
@@ -198,7 +201,7 @@ Backdrop.behaviors.editorImageDialog = {
       // Focus the first shown new element. This keeps focus on the dialog and
       // allows it to be closed with the escape key.
       $newItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
-      $newItem.trigger('editor-image-show');
+      $newItem.trigger('editor-image-show', [$link]);
 
       return false;
     });
@@ -212,7 +215,7 @@ Backdrop.behaviors.editorImageDialog = {
       });
     });
 
-    $newToggles.on('editor-image-show', function() {
+    $newToggles.on('editor-image-show', function(e, $link) {
       var $input, previousValue;
       $(this).find('input[type="url"], input[type="text"], textarea').each(function() {
         $input = $(this);
@@ -222,7 +225,7 @@ Backdrop.behaviors.editorImageDialog = {
         }
       });
 
-      var libraryShown = $('.editor-image-fields').find('[name="attributes[src]"]').is(':visible');
+      var libraryShown = $('.editor-image-fields').find('[name="attributes[src]"], [name="attributes[icon_src]"]').is(':visible');
       if (libraryShown) {
         // Toggle state is set to show 'select an image'
         // so add library view to dialog display.
@@ -241,8 +244,18 @@ Backdrop.behaviors.editorImageDialog = {
 
           // Display the library view.
           $('.editor-image-fields').removeClass('editor-image-fields-full');
+          // Remove the library part of the dialog form.
+          $('.editor-image-library').each(function() {
+            Backdrop.detachBehaviors(this);
+            $(this).remove();
+          });
           $('form.filter-format-editor-image-form').append('<div class="editor-image-library"></div>');
-          $('[name=library_open]').trigger('click');
+          if ($link.text() === "Select image") {
+            $('[name=library_open]').trigger('click');
+          }else{
+            $('[name=icon_library_open]').trigger('click');
+          }
+            
         }
       }
       else {
