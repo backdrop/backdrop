@@ -317,6 +317,19 @@ Backdrop.behaviors.editorImageLibrary = {
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');
       });
 
+    $('#system-icon-browser-form-wrapper')
+      .once('system-icon-browser-view')
+      .on('click', '.icon-wrapper', function() {
+        var icon = $(this).data('icon-name');
+        var $form = $('.filter-format-editor-image-form');
+        $form.find('[name="attributes[icon_src]"]').val(icon);
+
+        // Remove style from previous selection.
+        $('.image-library-icon-selected').removeClass('image-library-icon-selected');
+        // Add style to this selection.
+        $(this).addClass('image-library-icon-selected');
+      });
+
     // Empty width and height input fields, when an existing file is removed,
     // so a newly uploaded one does not inherit dimensions.
     // See Backdrop.behaviors.fileButtons, which triggers mousedown.

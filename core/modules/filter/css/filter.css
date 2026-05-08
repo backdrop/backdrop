@@ -207,3 +207,9 @@
 .view-image-library .view-header p {
   margin: 0;
 }
+.filter-format-editor-image-form .icon-wrapper:hover {
+  border: 2px solid #ddd;
+}
+.filter-format-editor-image-form .icon-wrapper.image-library-icon-selected {
+  border: 2px solid #000;
+}
