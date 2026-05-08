@@ -180,7 +180,6 @@ Backdrop.file = Backdrop.file || {
       fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
       existingFilesCount = parseInt(Backdrop.settings.file.browser.existingFilesCount);
     }
-    let available = fieldCardinality - existingFilesCount;
     if (fieldCardinality !== 1) {
       $browserContainer.selectable({
         filter: '.image-library-choose-file',
@@ -189,9 +188,10 @@ Backdrop.file = Backdrop.file || {
         },
         selecting: function(event, ui) {
           if (fieldCardinality === -1) {
-            return false;
+            return;
           }
-          else if ($(".image-library-choose-file.ui-selecting").length > available) {
+          let available = fieldCardinality - existingFilesCount;
+          if ($(".image-library-choose-file.ui-selecting").length > available) {
             $(ui.selecting).removeClass("ui-selecting");
           }
           else if ($(".image-library-choose-file.image-library-image-selected").length >= available) {
