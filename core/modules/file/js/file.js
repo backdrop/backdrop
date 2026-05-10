@@ -232,7 +232,7 @@ Backdrop.file = Backdrop.file || {
         $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
       }).on('dblclick', '.image-library-choose-file', function() {
         var $selectedElement = $(this);
-        $selectedElement.click();
+        $selectedElement.trigger('click');
         var $form = $selectedElement.closest('.ui-dialog-content').find('form');
         var $submit = $form.find('.form-actions input[type=submit]:first');
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');
