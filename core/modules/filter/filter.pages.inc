@@ -338,18 +338,13 @@ function _filter_image_library_ajax() {
 }
 
 /**
- * Render the image library.
+ * Render the icon library.
  */
-function _filter_icon_library_ajax($form) {
-  $view = backdrop_render(backdrop_get_form('system_icon_browser_form'));
-  if (empty($view)) {
-    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
-    if (user_access('administer views')) {
-      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
-    }
-  }
+function _filter_icon_library_ajax() {
+  $system_icon_browser_form = backdrop_get_form('system_icon_browser_form');
+  $rendered_icon_form = backdrop_render($system_icon_browser_form);
 
-  $rendered_library = '<div class="library-view" data-editor-library-view="true">' . $view . '</div>';
+  $rendered_library = '<div class="library-view" data-editor-library-view="true">' . $rendered_icon_form . '</div>';
   $error_messages = theme('status_messages');
 
   $commands = array();
@@ -370,6 +365,9 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
   $file = NULL;
   $fid = 0;
   $attributes = $form_state['values']['attributes'] ?? array();
+  if (!empty($attributes['icon_src']) && empty($attributes['src'])) {
+    $attributes['src'] = $attributes['icon_src'];
+  }
   if (!empty($form_state['values']['fid']) && empty($attributes['src'])) {
     $file = file_load($form_state['values']['fid']);
     $fid = $form_state['values']['fid'];

@@ -250,7 +250,7 @@ Backdrop.behaviors.editorImageDialog = {
             $(this).remove();
           });
           $('form.filter-format-editor-image-form').append('<div class="editor-image-library"></div>');
-          if ($link.text() === "Select image") {
+          if ($link && $link.text() === "Select image") {
             $('[name=library_open]').trigger('click');
           }else{
             $('[name=icon_library_open]').trigger('click');
@@ -320,7 +320,7 @@ Backdrop.behaviors.editorImageLibrary = {
     $('#system-icon-browser-form-wrapper')
       .once('system-icon-browser-view')
       .on('click', '.icon-wrapper', function() {
-        var icon = $(this).data('icon-name');
+        var icon = $(this).data('icon-url');
         var $form = $('.filter-format-editor-image-form');
         $form.find('[name="attributes[icon_src]"]').val(icon);
 
@@ -358,8 +358,10 @@ $(window).on('dialog:aftercreate', function () {
   var $visibleItems = $('[data-editor-image-toggle]').filter(':visible');
   if ($visibleItems.length > 1) {
     var $fidField = $visibleItems.find('[name="fid[fid]"]');
-    var $srcField = $visibleItems.find('[name="attributes[src]"]');
-    var $srcItem = $visibleItems.find($srcField).closest('[data-editor-image-toggle]');
+    var $imgSrcField = $visibleItems.find('[name="attributes[src]"]');
+    var $imgSrcItem = $visibleItems.find($imgSrcField).closest('[data-editor-image-toggle]');
+    var $iconSrcField = $visibleItems.find('[name="attributes[icon_src]"]');
+    var $iconSrcItem = $visibleItems.find($iconSrcField).closest('[data-editor-image-toggle]');
     var $errorItem = $visibleItems.find('.error').closest('[data-editor-image-toggle]');
 
     // If any errors are present in the form, pre-select that tab.
@@ -370,7 +372,28 @@ $(window).on('dialog:aftercreate', function () {
     }
     // If an FID is not provided but a src attribute is, highlight the tab
     // that contains the src attribute field.
-    if (($fidField.val() === '0' || !$fidField.val()) && $srcField.length > 0 && $srcField.val().length > 0) {
+    if (($fidField.val() === '0' || !$fidField.val()) && $imgSrcField.length > 0 && $imgSrcField.val().length > 0) {
+      // If this is an SVG image, it could be an icon or an uploaded SVG file.
+      // Check the path with icon API to test which it is, and open the
+      // appropriate tab.
+      var fileBaseName = $imgSrcField.val().split('\\').pop().split('/').pop().split('.');
+      let fileIsIcon = null;
+      if ($fileBaseName[1] == 'svg') {
+        $.ajax({
+          async: false,
+          url: Backdrop.settings.basePath + 'system/icon-path-ajax/'+$fileBaseName[0],
+          type: 'POST',
+          dataType: 'json',
+          success: function (response) {
+            fileIsIcon = response.message;
+          },
+          error: function (xhr, status, error) {
+            console.error('AJAX Error: ' + error);
+          }
+        });
+      }
+
+      $srcItem = fileIsIcon ? $iconSrcItem : $imgSrcItem;
       $visibleItems.not($srcItem).hide().trigger('editor-image-hide');
       $srcItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
       $srcItem.trigger('editor-image-show');

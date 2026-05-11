@@ -1168,6 +1168,14 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
 
+  // Validate icon path.
+  $items['system/icon-path-ajax/%'] = array(
+    'page callback' => 'system_validate_icon_path_ajax',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   return $items;
 }
 
@@ -5095,4 +5103,16 @@ function system_icon_browser_form_submit($form, &$form_state) {
     $_GET['style'] = $form_state['values']['style'];
     $_GET['keyword'] = $form_state['values']['keyword'];
   }
+}
+
+/**
+ * Menu callback; Validate an icon path.
+ */
+function system_validate_icon_path_ajax($icon_name) {
+  watchdog('lol', $icon_name);
+  $data = array('status' => 'success', 'message' => icon_get_path($icon_name));
+  
+  // Return data as JSON
+  backdrop_json_output($data);
+  backdrop_exit(); // Correct way to end AJAX requests in D7
 }
