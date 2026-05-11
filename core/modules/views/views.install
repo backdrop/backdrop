@@ -263,6 +263,9 @@ function views_update_1010() {
   $view_names = array('views.view.user_admin', 'views.view.node_admin_content');
   foreach ($view_names as $view_name) {
     $config = config($view_name);
+    if (!$config) {
+      continue;
+    }
     $displays = $config->get('display');
     foreach ($displays as $display_key => $display_details) {
       if (!isset($display_details['display_options']['fields'])) {
@@ -281,9 +284,6 @@ function views_update_1010() {
         if ($has_low || $has_medium) {
           $updated_classes = implode(' ', $label_classes);
           $config->set('display.' . $display_key . '.display_options.fields.' . $field_key . '.element_label_class', $updated_classes);
-          if (!$updated_classes) {
-            $config->set('display.' . $display_key . '.display_options.fields.' . $field_key . '.element_default_classes', 1);
-          }
           $responsive = '';
           if ($has_low) {
             $responsive = 'priority-low';
@@ -297,6 +297,8 @@ function views_update_1010() {
     }
     $config->save();
   }
+
+  backdrop_set_message(t('The "Administer user accounts" and "Manage content" views have been updated to the new "Responsive priority" style option for table columns, and custom classes "priority-low" and "priority-medium" have been removed from the "Configure field > Style settings > Customize label HTML > Create a CSS class" section.'));
 }
 
 /**
