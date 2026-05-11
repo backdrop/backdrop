@@ -257,6 +257,49 @@ function views_update_1009() {
 }
 
 /**
+ * Use new responsive table column UI rather than custom css class.
+ */
+function views_update_1010() {
+  $view_names = array('views.view.user_admin', 'views.view.node_admin_content');
+  foreach ($view_names as $view_name) {
+    $config = config($view_name);
+    $displays = $config->get('display');
+    foreach ($displays as $display_key => $display_details) {
+      if (!isset($display_details['display_options']['fields'])) {
+        continue;
+      }
+      foreach ($display_details['display_options']['fields'] as $field_key => $field) {
+        if (!isset($field['element_label_class'])) {
+          continue;
+        }
+        $label_classes = explode(' ', $field['element_label_class']);
+        $has_low = in_array('priority-low', $label_classes);
+        $has_medium = in_array('priority-medium', $label_classes);
+        $label_classes = array_values(array_filter($label_classes, function ($p) {
+          return $p !== 'priority-low' && $p !== 'priority-medium';
+        }));
+        if ($has_low || $has_medium) {
+          $updated_classes = implode(' ', $label_classes);
+          $config->set('display.' . $display_key . '.display_options.fields.' . $field_key . '.element_label_class', $updated_classes);
+          if (!$updated_classes) {
+            $config->set('display.' . $display_key . '.display_options.fields.' . $field_key . '.element_default_classes', 1);
+          }
+          $responsive = '';
+          if ($has_low) {
+            $responsive = 'priority-low';
+          }
+          if ($has_medium) {
+            $responsive = 'priority-medium';
+          }
+          $config->set('display.' . $display_key . '.display_options.style_options.info.' . $field_key . '.responsive', $responsive);
+        }
+      }
+    }
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
