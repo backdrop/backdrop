@@ -298,7 +298,7 @@ function views_update_1010() {
     $config->save();
   }
 
-  backdrop_set_message(t('The "Administer user accounts" and "Manage content" views have been updated to the new "Responsive priority" style option for table columns, and custom classes "priority-low" and "priority-medium" have been removed from the "Configure field > Style settings > Customize label HTML > Create a CSS class" section.'));
+  backdrop_set_message(t('The <em>Administer user accounts</em> and <em>Manage content</em> views have been updated to the new "Responsive priority" style option for table columns, and the <code>priority-low</code> and <code>priority-medium</code> custom classes have been removed from the <em>Configure field > Style settings > Customize label HTML > Create a CSS class</em> section. If you have used <code>priority-low</code> or <code>priority-medium</code> classes in the field style settings in other views, you might want to adapt those views manually.'));
 }
 
 /**
