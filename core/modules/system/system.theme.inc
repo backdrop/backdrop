@@ -741,7 +741,8 @@ function theme_system_icon_browser_form_icons($variables) {
       }
 
       $icon_classes = isset($icon['theme_error']) ? 'icon-wrapper error' : 'icon-wrapper';
-      $output .= '<div class="' . $icon_classes . '" data-icon-name="' . $icon['project_icon_key'] . '">';
+      $path = $icon['directory'] . '/' . $icon['name'] . '.svg';
+      $output .= '<div class="' . $icon_classes . '" data-icon-name="' . $icon['project_icon_key'] . '" data-icon-url="' . $path . '">';
       $rendered_icon = theme('icon', array(
         'name' => $icon['project_icon_key'],
         'path' => $icon['directory'] . '/' . $icon['name'] . '.svg',
