@@ -7,6 +7,8 @@
  * https://docs.backdropcms.org/documentation/icon-api
  */
 
+ define ('CORE_ICON_PATH', 'core/misc/icons');
+
 /**
  * Return the markup for outputting an icon by a machine name.
  *
@@ -341,4 +343,195 @@ function theme_icon(array $variables) {
     }
   }
   return '';
+}
+
+/**
+ * Helper function to load icon details.
+ *
+ * @param string $icon_name
+ *   The icon name to load details for. If empty, load all icons.
+ * @return array
+ *   An array of icon details, keyed by icon name:
+ *    - All icons, if no $icon_name was provided
+ *    - The single result if an $icon_name was provided, or
+ *    - An empty array if no icon was found for a provided $icon_name.
+ */
+function icon_get_all_details($icon_name = '') {
+  // Skip building the whole array if one icon was requested and the icon is
+  // present in the most likely location (core).
+  if (!empty($icon_name) && _icon_from_core($icon_name)) {
+    return array($icon_name => array(
+      'project_type' => 'core',
+      'project_description' => t('Backdrop core'),
+      'project_icon_key' => $icon_name,
+      'name' => $icon_name,
+      'directory' => CORE_ICON_PATH,
+    ) + icon_get_style($icon_name));
+  }
+
+  // Skip building the whole array if one icon was requested and it doesn't
+  // exist in the allowed places.
+  if (!empty($icon_name) && !icon_get_path($icon_name)) {
+    return array();
+  }
+
+  $icons = &backdrop_static(__FUNCTION__, array());
+
+  if (empty($icons)) {
+    // Icons provided by Backdrop core.
+    $core_icons = scandir(CORE_ICON_PATH, SCANDIR_SORT_NONE);
+    foreach ($core_icons as $icon) {
+      if (substr($icon, -4, 4) == '.svg') {
+        $icon_key = substr($icon, 0, -4);
+        $icons[$icon_key] = array(
+          'project_type' => 'core',
+          'project_description' => t('Backdrop core'),
+          'project_icon_key' => $icon_key,
+          'name' => $icon_key,
+          'directory' => CORE_ICON_PATH,
+        ) + icon_get_style($icon_key);
+      }
+    }
+    // Icons provided by modules.
+    $module_icons = icon_get_info();
+    foreach ($module_icons as $name => $icon) {
+      $icon_key = isset($icon['name']) ? $icon['name'] : $name;
+      $directory = isset($icon['directory']) ? $icon['directory'] : backdrop_get_path('module', $icon['module']) . '/icons';;
+      $icons[$name] = array(
+        'project_type' => 'module',
+        'project_description' => t('@module (module)', ['@module' => $icon['module']]),
+        'project_icon_key' => $name,
+        'name' => $icon_key,
+        'directory' => $directory,
+      ) + icon_get_style($icon_key);
+    }
+
+    // Icons provided by themes.
+    $themes = list_themes();
+    $config = config('system.core');
+    $active_theme = $GLOBALS['theme_key'];
+    $current_themes = array($active_theme);
+    if (isset($themes->$active_theme['base_themes'])) {
+      $current_themes += array_keys($themes->$active_theme['base_themes']);
+    }
+    // If the active theme is the admin theme, add in icons from the default
+    // theme.
+    if ($active_theme == $config->get('admin_theme')) {
+      $default_theme = $config->get('theme_default');
+      $current_themes[] = $default_theme;
+      if (isset($themes->$default_theme['base_themes'])) {
+        $current_themes += array_keys($themes->$default_theme['base_themes']);
+      }
+    }
+
+    foreach ($current_themes as $theme) {
+      $theme_error = ($theme != $active_theme) ? $theme : '';
+
+      // Check if the theme provides a non-default icon path.
+      $theme_icon_directory = theme_get_setting('icon_directory', $theme);
+
+      // Otherwise just check in the theme "icons" directory.
+      if (!$theme_icon_directory) {
+        $theme_icon_directory = 'icons';
+      }
+      $theme_directory = backdrop_get_path('theme', $theme) . '/' . $theme_icon_directory;
+      if (is_dir($theme_directory)) {
+        $theme_icons = scandir($theme_directory);
+        if (!empty($theme_icons)) {
+          foreach ($theme_icons as $key => $icon) {
+            if (substr($icon, -4, 4) == '.svg') {
+              $icon_key = substr($icon, 0, -4);
+              $icons[$icon_key] = array(
+                'project_type' => 'theme',
+                'project_description' => t('@theme (theme*)', ['@theme' => $theme]),
+                'project_icon_key' => $icon_key,
+                'name' => $icon_key,
+                'directory' => $theme_directory,
+                'theme_error' => $theme_error,
+              ) + icon_get_style($icon_key);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  backdrop_alter('icon_get_all_details', $icons);
+
+  backdrop_sort($icons, array('project_icon_key' => SORT_STRING));
+
+  if (empty($icon_name)) {
+    $result = $icons;
+  }
+  elseif (isset($icons[$icon_name])) {
+    $result = $icons[$icon_name];
+  }
+  else {
+    $result = array();
+  }
+
+  return $result;
+}
+
+/**
+ * Helper function to get an icon style based on the last segment of the icon
+ * name. We have some pre-approved suffixes that correspond to style options.
+ *
+ * @param string $icon_name
+ *   The icon name to get the style for.
+ *
+ * @return array
+ *   An array keyed with:
+ *   - 'style': A string containing the style of the icon, or empty for default.
+ *   - 'is_brand': A boolean indicating whether this is a brand icon.
+ */
+function icon_get_style($icon_name) {
+  $icon_data = array(
+    'style' => '',
+    'is_brand' => FALSE,
+  );
+
+  static $icon_allowed_styles;
+  if (!isset($icon_allowed_styles)) {
+    $icon_allowed_styles = icon_allowed_styles();
+  }
+
+  // Split icon name by '-' and get the last segment.
+  $icon_name = explode('-', $icon_name);
+  $icon_style = array_pop($icon_name);
+  $brand_check = array_pop($icon_name);
+
+  if (in_array($icon_style, array_keys($icon_allowed_styles))) {
+    $icon_data['style'] = $icon_style;
+  }
+  else {
+    // Default to outline if no approved style is provided.
+    $icon_data['style'] = 'outline';
+  }
+  if ($icon_style == 'logo' || $brand_check == 'logo') {
+    $icon_data['is_brand'] = TRUE;
+  }
+
+  return $icon_data;
+}
+
+/**
+ * Helper function to get list of allowed/known styles.
+ *
+ * @return array
+ *   An array of approved styles, keyed by the style machine name.
+ */
+function icon_allowed_styles() {
+  $allowed_styles = array(
+    'fill' => 'Fill',
+    'outline' => 'Outline (or other)',
+    'thin' => 'Thin',
+    'light' => 'Light',
+    'bold' => 'Bold',
+    'duotone' => 'Duotone'
+  );
+
+  backdrop_alter('icon_allowed_styles', $allowed_styles);
+
+  return $allowed_styles;
 }

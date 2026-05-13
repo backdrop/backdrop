@@ -180,3 +180,44 @@ function node_test_node_insert($node) {
     node_save($node);
   }
 }
+
+/**
+ * Implements hook_permission().
+ */
+function node_test_permission() {
+  $perms = array();
+  foreach (node_type_get_names() as $type => $name) {
+    $perms += array(
+      "view own $type content" => array(
+        'title' => t('%type_name: View own content', array('%type_name' => $name)),
+      ),
+      "view any $type content" => array(
+        'title' => t('%type_name: View any content', array('%type_name' => $name)),
+      ),
+    );
+  }
+  return $perms;
+}
+
+/**
+ *
+ * Implements hook_node_type_list_permissions()
+ */
+function node_test_node_type_list_permissions($type) {
+  $perms = array();
+  foreach (node_type_get_names() as $node_type => $name) {
+    if ($type != $node_type) {
+      continue;
+    }
+    $perms += array(
+      "view own $type content" => array(
+        'title' => t('%type_name: View own content', array('%type_name' => $name)),
+      ),
+      "view any $type content" => array(
+        'title' => t('%type_name: View any content', array('%type_name' => $name)),
+      ),
+    );
+  }
+
+  return $perms;
+}

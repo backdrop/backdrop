@@ -2521,6 +2521,7 @@ function format_plural($count, $singular, $plural, array $args = array(), array 
  */
 function parse_size($size) {
   // Remove the non-unit characters from the size.
+  // cspell:ignore bkmgtpezy
   $unit = preg_replace('/[^bkmgtpezy]/i', '', $size);
   // Remove the non-numeric characters from the size.
   $size = (float) preg_replace('/[^0-9\.]/', '', $size);
@@ -5920,7 +5921,7 @@ function backdrop_add_tabledrag($table_id, $action, $relationship, $group, $subg
     // to ensure that table drag behaviors are registered before any module
     // uses it.
     backdrop_add_library('system', 'jquery.cookie');
-    backdrop_add_js('core/misc/tabledrag.js', array('weight' => -1));
+    backdrop_add_library('system', 'backdrop.tabledrag');
     $js_added = TRUE;
   }
 
