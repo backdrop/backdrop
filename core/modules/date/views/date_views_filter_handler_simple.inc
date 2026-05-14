@@ -621,6 +621,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
       // for each group and default value needs to be taken from group item.
       $input_type_key = $prefix . '_choose_input_type';
       if ($this->options['is_grouped']) {
+        $source = "#edit-options-group-info-group-items-{$element_no}-operator";
         $input_class = "$prefix-$element_no-choose-input-type";
         $default_select_date_value = !empty($this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$prefix]) ? $this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$prefix] : $default_date;
         $relative_value = !empty($this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$relative_value_key]) ? $this->options['group_info']['group_items'][$element_no]['value'][$prefix . '_group'][$relative_value_key] : $this->options[$relative_value_key];
