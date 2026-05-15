@@ -175,8 +175,10 @@ Backdrop.file = Backdrop.file || {
   dialogOpenEvent: function(e, dialog, $element, settings) {
     var $browserContainer = $element.find(".file-browser");
     let fieldCardinality = 1;
+    let existingFilesCount = 0;
     if (typeof Backdrop.settings.file !== 'undefined') {
       fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
+      existingFilesCount = parseInt(Backdrop.settings.file.browser.existingFilesCount);
     }
     if (fieldCardinality !== 1) {
       $browserContainer.selectable({
@@ -186,21 +188,30 @@ Backdrop.file = Backdrop.file || {
         },
         selecting: function(event, ui) {
           if (fieldCardinality === -1) {
-            return false;
+            return;
           }
-          else if ($(".image-library-choose-file.ui-selecting").length > fieldCardinality) {
+          let available = fieldCardinality - existingFilesCount;
+          if ($(".image-library-choose-file.ui-selecting").length > available) {
             $(ui.selecting).removeClass("ui-selecting");
           }
-          else if ($(".image-library-choose-file.image-library-image-selected").length > fieldCardinality-1) {
+          else if ($(".image-library-choose-file.image-library-image-selected").length >= available) {
             $(".image-library-choose-file.image-library-image-selected").removeClass("image-library-image-selected");
           }
         },
         selected: function(event, ui) {
-          var fids = [];
+          let fids = [];
           $(".image-library-choose-file.image-library-image-selected").each(function() {
             fids.push($(this).children("img").data("fid"));
           });
           // Set the FID in the modal submit form.
+          $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
+        },
+        unselected: function(event, ui) {
+          let fids = [];
+          $(".image-library-choose-file.image-library-image-selected").each(function() {
+            fids.push($(this).children("img").data("fid"));
+          });
+          // Update values also when unselected.
           $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
         }
       });
@@ -221,7 +232,7 @@ Backdrop.file = Backdrop.file || {
         $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
       }).on('dblclick', '.image-library-choose-file', function() {
         var $selectedElement = $(this);
-        $selectedElement.click();
+        $selectedElement.trigger('click');
         var $form = $selectedElement.closest('.ui-dialog-content').find('form');
         var $submit = $form.find('.form-actions input[type=submit]:first');
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');

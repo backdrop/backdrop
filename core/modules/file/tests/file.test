@@ -1686,9 +1686,100 @@ class FileFieldValidateTestCase extends FileTestHelper {
     $this->assertFileExists($saved_file, 'Small txt file exists on disk after uploading alongside an oversized file.');
     $this->assertFileEntryExists($saved_file, 'Small txt file entry exists in the database after uploading alongside an oversized file.');
     $this->assertEqual(FILE_STATUS_PERMANENT, $saved_file->status, 'Small txt file is marked permanent.');
+  }
 
-    // Remove our file field.
-    field_delete_field($field_name);
+  /**
+   * Tests that cardinality is enforced when too many files are uploaded.
+   *
+   * Covers two scenarios: uploading all excess files at once, and adding excess
+   * files to a node that already has files saved.
+   */
+  public function testCardinalityLimit() {
+    // Use 'page' instead of 'post', so that the 'post' image field does not
+    // add a second Upload button that could conflict with this test.
+    $type_name = 'page';
+    $field_name = strtolower($this->randomName());
+    $langcode = LANGUAGE_NONE;
+
+    // Create a file field with a cardinality limit of 3.
+    $this->createFileField($field_name, $type_name, array('cardinality' => 3));
+    $field = field_info_field($field_name);
+
+    // Get 5 distinct text test files. The 'text' type generates text-0.txt
+    // through text-4.txt, sorted by size (smallest first).
+    $files = $this->backdropGetTestFiles('text');
+
+    // Test 1: Upload 5 files at once to a field that only allows 3.
+    $node = $this->backdropCreateNode(array('type' => $type_name));
+    $nid = $node->nid;
+
+    // Collect paths for all 5 files.
+    $all_paths = array();
+    foreach ($files as $f) {
+      $all_paths[] = backdrop_realpath($f->uri);
+    }
+
+    // Upload all 5 files via the Upload button. This triggers
+    // file_field_widget_submit(), which distributes them into 5 separate field
+    // items before Save is clicked.
+    $this->backdropPost("node/$nid/edit", array(
+      'files[' . $field_name . '_' . $langcode . '_0][]' => $all_paths,
+    ), t('Upload'));
+
+    // Save the node. The cardinality validator fires with 5 items, truncates
+    // to 3, and shows a warning.
+    $this->backdropPost(NULL, array(), t('Save'));
+
+    // Verify the cardinality warning was shown.
+    $this->assertRaw(t('Field %field can only hold @max values but there were @count. The following files have been omitted as a result: %list.', array(
+      '%field' => $field['field_name'],
+      '@max' => $field['cardinality'],
+      '@count' => 5,
+      '%list' => implode(', ', array(
+        $files[3]->filename,
+        $files[4]->filename,
+      )),
+    )), 'Warning shown when 5 files uploaded at once to a cardinality-3 field.');
+
+    // Verify only 3 files were saved.
+    $node = node_load($nid, NULL, TRUE);
+    $this->assertEqual(3, count($node->{$field_name}[$langcode]), 'Only 3 files saved when 5 uploaded at once to a cardinality 3 field.');
+
+    // Test 2: Upload 2 files and save, then edit the node to add 3 more.
+    // Create a node with 2 files already saved.
+    $nid2 = $this->uploadNodeFile(array($files[0], $files[1]), $field_name, $type_name);
+    $node2 = node_load($nid2, NULL, TRUE);
+    $this->assertEqual(2, count($node2->{$field_name}[$langcode]), 'Node saved with 2 files in initial upload.');
+
+    // Upload 3 more files. Since 2 files already occupy delta 0 and 1, the
+    // new upload widget is at delta 2. Save the node directly instead of
+    // using the "Upload" button. This executes a different code-path.
+    $this->backdropPost("node/$nid2/edit", array(
+      'files[' . $field_name . '_' . $langcode . '_2][]' => array(
+        backdrop_realpath($files[2]->uri),
+        backdrop_realpath($files[3]->uri),
+        backdrop_realpath($files[4]->uri),
+      ),
+    ), t('Upload'));
+
+    // Save the node. The cardinality validator fires with 5 total items
+    // (2 existing + 3 new), truncates to 3, and shows a warning.
+    $this->backdropPost(NULL, array(), t('Save'));
+
+    // Verify the cardinality warning was shown.
+    $this->assertRaw(t('Field %field can only hold @max values but there were @count. The following files have been omitted as a result: %list.', array(
+      '%field' => $field['field_name'],
+      '@max' => $field['cardinality'],
+      '@count' => 5,
+      '%list' => implode(', ', array(
+        $files[3]->filename,
+        $files[4]->filename,
+      )),
+    )), 'Warning shown when 3 more files added to a node with 2 existing files in a cardinality 3 field.');
+
+    // Verify only 3 files were saved.
+    $node2 = node_load($nid2, NULL, TRUE);
+    $this->assertEqual(3, count($node2->{$field_name}[$langcode]), 'Only 3 files saved when 3 more added to node with 2 existing files in a cardinality 3 field.');
   }
 
   /**
