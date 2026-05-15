@@ -261,7 +261,7 @@ function views_update_1009() {
  */
 function views_update_1010() {
   $views_updated = 0;
-  $view_names = config_get_names_with_prefix('views.view.')
+  $view_names = config_get_names_with_prefix('views.view.');
   foreach ($view_names as $view_name) {
     $config = config($view_name);
     $view_updated = FALSE;
@@ -303,7 +303,9 @@ function views_update_1010() {
     }
   }
 
-  return t('@count views updated to move responsive table classes to the table display settings.', array('@count' => $views_updated));
+  if ($views_updated) {
+    return format_plural($views_updated, 'One view updated to move responsive table classes to the table display settings.', '@count views updated to move responsive table classes to the table display settings.');
+  }
 }
 
 /**
