@@ -260,18 +260,19 @@ function views_update_1009() {
  * Use new responsive table column UI rather than custom css class.
  */
 function views_update_1010() {
-  $view_names = array('views.view.user_admin', 'views.view.node_admin_content');
+  $views_updated = 0;
+  $view_names = config_get_names_with_prefix('views.view.')
   foreach ($view_names as $view_name) {
     $config = config($view_name);
-    if (!$config) {
-      continue;
-    }
+    $view_updated = FALSE;
     $displays = $config->get('display');
     foreach ($displays as $display_key => $display_details) {
-      if (!isset($display_details['display_options']['fields'])) {
+      $fields = $display_details['display_options']['fields'] ?? NULL;
+      $style = $display_details['display_options']['style_plugin'] ?? NULL;
+      if (!$fields || $style !== 'table') {
         continue;
       }
-      foreach ($display_details['display_options']['fields'] as $field_key => $field) {
+      foreach ($fields as $field_key => $field) {
         if (!isset($field['element_label_class'])) {
           continue;
         }
@@ -292,13 +293,17 @@ function views_update_1010() {
             $responsive = 'priority-medium';
           }
           $config->set('display.' . $display_key . '.display_options.style_options.info.' . $field_key . '.responsive', $responsive);
+          $view_updated = TRUE;
         }
       }
     }
-    $config->save();
+    if ($view_updated) {
+      $views_updated++;
+      $config->save();
+    }
   }
 
-  backdrop_set_message(t('The <em>Administer user accounts</em> and <em>Manage content</em> views have been updated to the new "Responsive priority" style option for table columns, and the <code>priority-low</code> and <code>priority-medium</code> custom classes have been removed from the <em>Configure field > Style settings > Customize label HTML > Create a CSS class</em> section. If you have used <code>priority-low</code> or <code>priority-medium</code> classes in the field style settings in other views, you might want to adapt those views manually.'));
+  return t('@count views updated to move responsive table classes to the table display settings.', array('@count' => $views_updated));
 }
 
 /**
