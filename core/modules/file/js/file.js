@@ -173,71 +173,65 @@ Backdrop.file = Backdrop.file || {
    * Provide events for files in the file browser dialog.
    */
   dialogOpenEvent: function(e, dialog, $element, settings) {
-    var $browserContainer = $element.find(".file-browser");
+    const $browserContainer = $element.find(".file-browser");
     let fieldCardinality = 1;
     let existingFilesCount = 0;
+    let available = 1;
+    let selectedFids = [];
     if (typeof Backdrop.settings.file !== 'undefined') {
       fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
       existingFilesCount = parseInt(Backdrop.settings.file.browser.existingFilesCount);
+      if (fieldCardinality === -1) {
+        // An arbitrary high number for "unlimited" makes comparison easier.
+        fieldCardinality = 500;
+      }
+      available = fieldCardinality - existingFilesCount;
     }
-    if (fieldCardinality !== 1) {
-      $browserContainer.selectable({
-        filter: '.image-library-choose-file',
-        classes: {
-          "ui-selected": "image-library-image-selected"
-        },
-        selecting: function(event, ui) {
-          if (fieldCardinality === -1) {
-            return;
-          }
-          let available = fieldCardinality - existingFilesCount;
-          if ($(".image-library-choose-file.ui-selecting").length > available) {
-            $(ui.selecting).removeClass("ui-selecting");
-          }
-          else if ($(".image-library-choose-file.image-library-image-selected").length >= available) {
-            $(".image-library-choose-file.image-library-image-selected").removeClass("image-library-image-selected");
-          }
-        },
-        selected: function(event, ui) {
-          let fids = [];
-          $(".image-library-choose-file.image-library-image-selected").each(function() {
-            fids.push($(this).children("img").data("fid"));
-          });
-          // Set the FID in the modal submit form.
-          $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
-        },
-        unselected: function(event, ui) {
-          let fids = [];
-          $(".image-library-choose-file.image-library-image-selected").each(function() {
-            fids.push($(this).children("img").data("fid"));
-          });
-          // Update values also when unselected.
-          $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
-        }
-      });
-    }
-    else {
-      $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
-        var $selectedElement = $(this);
-        if ($selectedElement.is('img') && fieldCardinality === 1) {
-          $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
-          $selectedElement.parent('.image-library-choose-file').addClass('image-library-image-selected');
+
+    $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
+      const $parentItem = $(this).closest('.image-library-choose-file');
+      const currentFid = this.dataset.fid;
+      // Unselect previously selected item.
+      if ($parentItem.hasClass('image-library-image-selected')) {
+        $parentItem.removeClass('image-library-image-selected');
+        if (fieldCardinality === 1) {
+          selectedFids = [];
         }
         else {
-          $browserContainer.find('.file-browser-selected').removeClass('file-browser-selected');
-          $selectedElement.parent('.file-browser-file').addClass('file-browser-selected');
+          selectedFids = selectedFids.filter(function (fid) { return fid !== currentFid; });
         }
-        var selectedFid = $(this).data('fid');
-        // Set the FID in the modal submit form.
-        $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
-      }).on('dblclick', '.image-library-choose-file', function() {
-        var $selectedElement = $(this);
-        $selectedElement.trigger('click');
-        var $form = $selectedElement.closest('.ui-dialog-content').find('form');
-        var $submit = $form.find('.form-actions input[type=submit]:first');
-        $submit.trigger('mousedown').trigger('click').trigger('mouseup');
-      });
-    }
+      }
+      // Select item.
+      else {
+        if (fieldCardinality === 1) {
+          $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
+          $parentItem.addClass('image-library-image-selected');
+          selectedFids = [];
+          selectedFids.push(currentFid);
+        }
+        else {
+          let alreadySelected = $browserContainer.find('.image-library-image-selected');
+          if (alreadySelected.length < available) {
+            $parentItem.addClass('image-library-image-selected');
+            selectedFids.push(this.dataset.fid);
+          }
+          else {
+            // Re-use existing string from PHP.
+            const hint = Backdrop.formatPlural(fieldCardinality, 'This field can store only one file.', 'This field can store at most @count files.');
+            alert(hint);// @todo Popover would be a lot nicer than alert().
+          }
+        }
+      }
+
+      // Set the FID in the modal submit form.
+      $('form.file-managed-file-browser-form [name="fid"]').val(selectedFids);
+    }).on('dblclick', '[data-fid]', function() {
+      // Double click inserts single item, as we can not validate count nor
+      // reject if limit exceeded.
+      $('form.file-managed-file-browser-form [name="fid"]').val(this.dataset.fid);
+      let $submitButton = $('.ui-dialog-buttonpane .form-actions .button-primary');
+      $submitButton.trigger('mousedown').trigger('click').trigger('mouseup');
+    });
   },
 
   /**

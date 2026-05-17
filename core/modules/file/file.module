@@ -1870,12 +1870,6 @@ function file_managed_file_browser_open($form, $form_state) {
   $field = field_info_field($element['#field_name']);
   $field_cardinality = $field['cardinality'];
 
-  // Add JQuery UI selectable to allow drag and drop selection if the field
-  // cardinality is set to multiple.
-  if ($field_cardinality != 1) {
-    backdrop_add_library('system', 'ui.selectable');
-  }
-
   $submit_form = backdrop_get_form('file_managed_file_browser_form');
 
   $title = t('Select from Image Library');
