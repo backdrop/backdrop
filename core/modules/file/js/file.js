@@ -210,8 +210,7 @@ Backdrop.file = Backdrop.file || {
           selectedFids.push(currentFid);
         }
         else {
-          let alreadySelected = $browserContainer.find('.image-library-image-selected');
-          if (alreadySelected.length < available) {
+          if (selectedFids.length < available) {
             $parentItem.addClass('image-library-image-selected');
             selectedFids.push(this.dataset.fid);
           }
