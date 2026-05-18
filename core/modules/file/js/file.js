@@ -187,6 +187,12 @@ Backdrop.file = Backdrop.file || {
       }
       available = fieldCardinality - existingFilesCount;
     }
+    if (fieldCardinality > 1 && fieldCardinality < 500) {
+      // Re-use existing string from PHP.
+      const hint = Backdrop.formatPlural(fieldCardinality, 'This field can store only one file.', 'This field can store at most @count files.');
+      $browserContainer.append('<div id="file-cardinality-hint" class="popover messages warning" popover="">' +  hint + '</div>');
+      var popoverTimer = 0;
+    }
 
     $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
       const $parentItem = $(this).closest('.image-library-choose-file');
@@ -215,9 +221,12 @@ Backdrop.file = Backdrop.file || {
             selectedFids.push(this.dataset.fid);
           }
           else {
-            // Re-use existing string from PHP.
-            const hint = Backdrop.formatPlural(fieldCardinality, 'This field can store only one file.', 'This field can store at most @count files.');
-            alert(hint);// @todo Popover would be a lot nicer than alert().
+            let popover = document.getElementById('file-cardinality-hint');
+            window.clearTimeout(popoverTimer);
+            popover.showPopover();
+            popoverTimer = window.setTimeout(function() {
+              popover.hidePopover();
+            }, 4000);
           }
         }
       }
