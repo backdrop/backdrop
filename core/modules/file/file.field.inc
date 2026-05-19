@@ -973,6 +973,13 @@ function file_field_widget_upload_validators($field, $instance) {
     $validators['file_validate_extensions'] = array($instance['settings']['file_extensions']);
   }
 
+  // Limit upload file count if uploading multiple is enabled.
+  $cardinality = (int) $field['cardinality'];
+  if ($cardinality != FIELD_CARDINALITY_UNLIMITED && $cardinality > 1) {
+    // We don't have the existing files count in file widgets at this point.
+    $validators['file_validate_upload_limit'] = array($cardinality);
+  }
+
   return $validators;
 }
 

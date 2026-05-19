@@ -16,6 +16,7 @@
 Backdrop.behaviors.fileUploadChange = {
   attach: function (context, settings) {
     $(context).find('input[data-file-extensions]').once('validate-extension').on('change', Backdrop.file.validateExtension);
+    $(context).find('input[data-file-upload-limit]').once('validate-upload-limit').on('change', Backdrop.file.validateUploadLimit);
     $(context).find('input[data-file-auto-upload]').once('auto-upload').on('change', Backdrop.file.autoUpload).each(function() {
       $(this).closest('.form-item').find('.file-upload-button').hide();
     });
@@ -96,6 +97,26 @@ Backdrop.file = Backdrop.file || {
       else {
         event.filePreValidation = true;
       }
+    }
+  },
+  /**
+   * Client side upload count limit.
+   */
+  validateUploadLimit: function (event) {
+    let limit = $(this).data('file-upload-limit');
+    if (this.files.length > limit) {
+      $('.file-upload-js-error').remove();
+      let error = Backdrop.t('Too many files. The upload limit is %limit, but @selected have been selected.', {
+        '%limit': limit,
+        '@selected': this.files.length
+      });
+      $(this).closest('div.form-managed-file').prepend('<div class="messages error file-upload-js-error" aria-live="polite">' + error + '</div>');
+      this.value = '';
+      event.filePreValidation = false;
+      return false;
+    }
+    else {
+      event.filePreValidation = true;
     }
   },
   /**
