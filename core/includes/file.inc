@@ -1769,7 +1769,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   // if a limit has been set.
   if (isset($validators['file_validate_upload_limit'][0])) {
     $limit = $validators['file_validate_upload_limit'][0];
-    if (count($files) >= $limit) {
+    if (count($files) > $limit) {
       $accepted = array_slice($files, 0, $limit);
       $rejected = array_slice($files, $limit);
       $delete_fids = array();
