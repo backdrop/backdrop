@@ -1509,9 +1509,7 @@ function file_managed_file_process($element, &$form_state, $form) {
 
   // Add client-side validation of upload limits.
   if (isset($element['#upload_validators']['file_validate_upload_limit'][0])) {
-    $field_cardinality = $element['#upload_validators']['file_validate_upload_limit'][0];
-    // Subtract existing files count from cardinality.
-    $upload_limit = $field_cardinality - end($element['#parents']);
+    $upload_limit = $element['#upload_validators']['file_validate_upload_limit'][0];
     $element['upload']['#attributes']['data-file-upload-limit'] = $upload_limit;
   }
 
