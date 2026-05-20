@@ -1767,22 +1767,22 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
 
   // After all invalid files have been sorted out, check the amount of files,
   // if a limit has been set.
-  // Note: We can only consider cardinality, not the amount of pre-existing
-  // files in a file field widget.
   if (isset($validators['file_validate_upload_limit'][0])) {
     $limit = $validators['file_validate_upload_limit'][0];
     if (count($files) >= $limit) {
       $accepted = array_slice($files, 0, $limit);
       $rejected = array_slice($files, $limit);
-      $message = t('@count files have been rejected as the upload limit of @limit has been reached.', array(
-        '@count' => count($rejected),
-        '@limit' => $limit,
-      ));
       $delete_fids = array();
       foreach ($rejected as $file) {
         $delete_fids[] = $file->fid;
       }
       file_delete_multiple($delete_fids);
+      $count = count($rejected);
+      $singular = 'One file has been rejected as the upload limit of @limit has been reached.';
+      $plural = '@count files have been rejected as the upload limit of @limit has been reached.';
+      $message = format_plural($count, $singular, $plural, array(
+        '@limit' => $limit,
+      ));
       backdrop_set_message($message, 'error');
       $files = $accepted;
     }
