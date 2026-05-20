@@ -68,6 +68,7 @@ Backdrop.file = Backdrop.file || {
    * Client-side file input validation combined.
    */
   validatePreUpload: function (event) {
+    // Remove any previous errors.
     $('.file-upload-js-error').remove();
     let errors = [];
     let returnedError;
@@ -100,9 +101,6 @@ Backdrop.file = Backdrop.file || {
     var extensionList = $(element).data('file-extensions');
     var extensionPattern = extensionList.replace(/,\s*/g, '|');
     if (extensionPattern.length > 1 && element.value.length > 0) {
-      // Remove any previous errors.
-      $('.file-upload-js-error').remove();
-
       var acceptableMatch = new RegExp('\\.(' + extensionPattern + ')$', 'gi');
       if (!acceptableMatch.test(element.value)) {
         var error = Backdrop.t("The selected file %filename cannot be uploaded. Only files with the following extensions are allowed: %extensions.", {
@@ -126,7 +124,6 @@ Backdrop.file = Backdrop.file || {
   validateUploadLimit: function (element) {
     let limit = $(element).data('file-upload-limit');
     if (element.files.length > limit) {
-      $('.file-upload-js-error-limit').remove();
       let error = Backdrop.t('Too many files. The upload limit is %limit, but @selected have been selected.', {
         '%limit': limit,
         '@selected': element.files.length
