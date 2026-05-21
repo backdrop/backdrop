@@ -1718,6 +1718,9 @@ function _layout_get_all_info($data_type, $init = array()) {
  * @see hook_layout_info()
  */
 function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE, $layout_template_type = 'layout') {
+  if (is_null($layout_template_type)) {
+    $layout_template_type = 'layout';
+  }
   _layout_standardize_template_type($layout_template_type);
   $info = &backdrop_static(__FUNCTION__ . ':' . $layout_template_type);
 
