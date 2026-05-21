@@ -360,13 +360,13 @@ function icon_get_all_details($icon_name = '') {
   // Skip building the whole array if one icon was requested and the icon is
   // present in the most likely location (core).
   if (!empty($icon_name) && _icon_from_core($icon_name)) {
-    return array($icon_name => array(
+    return array(
       'project_type' => 'core',
       'project_description' => t('Backdrop core'),
       'project_icon_key' => $icon_name,
       'name' => $icon_name,
       'directory' => CORE_ICON_PATH,
-    ) + icon_get_style($icon_name));
+    ) + icon_get_style($icon_name);
   }
 
   // Skip building the whole array if one icon was requested and it doesn't
