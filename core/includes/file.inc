@@ -1770,8 +1770,8 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   if (isset($validators['file_validate_upload_limit'][0])) {
     $limit = $validators['file_validate_upload_limit'][0];
     if (count($files) > $limit) {
-      $accepted = array_slice($files, 0, $limit);
       $rejected = array_slice($files, $limit);
+      $files = array_slice($files, 0, $limit);
       $delete_fids = array();
       $delete_names = array();
       foreach ($rejected as $file) {
@@ -1780,14 +1780,13 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       }
       file_delete_multiple($delete_fids);
       $count = count($rejected);
-      $singular = 'One file has been rejected as the upload limit of @limit has been reached. The following files have been omitted: %file_list.';
+      $singular = 'One file has been rejected as the upload limit of @limit has been reached. The following file has been omitted: %file_list.';
       $plural = '@count files have been rejected as the upload limit of @limit has been reached. The following files have been omitted: %file_list.';
       $message = format_plural($count, $singular, $plural, array(
         '@limit' => $limit,
         '%file_list' => implode(', ', $delete_names),
       ));
       backdrop_set_message($message, 'error');
-      $files = $accepted;
     }
   }
 
