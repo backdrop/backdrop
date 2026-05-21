@@ -1778,6 +1778,26 @@ class FileFieldValidateTestCase extends FileTestHelper {
     $this->backdropPost(NULL, array(), t('Save'));
     $node2 = node_load($nid2, NULL, TRUE);
     $this->assertEqual(3, count($node2->{$field_name}[$langcode]), 'Only 3 files saved when 3 more added to node with 2 existing files in a cardinality 3 field.');
+
+    // Now reduce field cardinality and save the node again.
+    $field['cardinality'] = 2;
+    field_update_field($field);
+    $this->backdropGet('node/' . $nid2 . '/edit');
+    $buttons = $this->xpath('//input[@type="submit" and @value="Remove"]');
+    $this->assertEqual(3, count($buttons), 'Three files when opening the node form');
+
+    // Save the node without any changes.
+    $this->backdropPost(NULL, array(), t('Save'));
+    // Node saved, warning message shown.
+    $this->assertRaw(t('Field %field can only hold @max values but there were @count. The following files have been omitted as a result: %list.', array(
+      '%field' => $field['field_name'],
+      '@max' => $field['cardinality'],
+      '@count' => 3,
+      '%list' => $files[2]->filename,
+    )), 'Warning shown after node save when cardinality has been reduced.');
+
+    $node2 = node_load($nid2, NULL, TRUE);
+    $this->assertEqual(2, count($node2->{$field_name}[$langcode]), 'After node save only 2 files are attached to node');
   }
 
   /**
