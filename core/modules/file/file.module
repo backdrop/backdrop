@@ -1507,12 +1507,6 @@ function file_managed_file_process($element, &$form_state, $form) {
     }
   }
 
-  // Add client-side validation of upload limits.
-  if (isset($element['#upload_validators']['file_validate_upload_limit'][0])) {
-    $upload_limit = $element['#upload_validators']['file_validate_upload_limit'][0];
-    $element['upload']['#attributes']['data-file-upload-limit'] = $upload_limit;
-  }
-
   // Prefix and suffix used for Ajax replacement.
   $element['#prefix'] = '<div id="' . $element['#id'] . '-ajax-wrapper">';
   $element['#suffix'] = '</div>';

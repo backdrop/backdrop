@@ -15,7 +15,7 @@
  */
 Backdrop.behaviors.fileUploadChange = {
   attach: function (context, settings) {
-    $(context).find('input[type="file"]').once('validate-pre-upload').on('change', Backdrop.file.validatePreUpload);
+    $(context).find('input[data-file-extensions]').once('validate-extension').on('change', Backdrop.file.validateExtension);
     $(context).find('input[data-file-auto-upload]').once('auto-upload').on('change', Backdrop.file.autoUpload).each(function() {
       $(this).closest('.form-item').find('.file-upload-button').hide();
     });
@@ -65,44 +65,18 @@ Backdrop.behaviors.fileFieldsetSummaries = {
  */
 Backdrop.file = Backdrop.file || {
   /**
-   * Client-side file input validation combined.
-   */
-  validatePreUpload: function (event) {
-    // Remove any previous errors.
-    $('.file-upload-js-error').remove();
-    let errors = [];
-    let returnedError;
-    $('.file-upload-js-error').remove();
-    if (this.dataset.fileExtensions !== undefined) {
-      returnedError = Backdrop.file.validateExtension(this);
-      if (returnedError !== undefined) {
-        errors.push(returnedError);
-      }
-    }
-    if (this.dataset.fileUploadLimit !== undefined) {
-      returnedError = Backdrop.file.validateUploadLimit(this);
-      if (returnedError !== undefined) {
-        errors.push(returnedError);
-      }
-    }
-    if (errors.length) {
-      event.filePreValidation = false;
-      let error = errors.join('<br>');
-      $(this).closest('div.form-managed-file').prepend('<div class="messages error file-upload-js-error" aria-live="polite">' + error + '</div>');
-      event.filePreValidation = false;
-      this.value = '';
-    }
-  },
-  /**
    * Client-side file input validation of file extensions.
    */
-  validateExtension: function (element) {
+  validateExtension: function (event) {
     // Add client side validation for the input[type=file].
-    var extensionList = $(element).data('file-extensions');
+    var extensionList = $(this).data('file-extensions');
     var extensionPattern = extensionList.replace(/,\s*/g, '|');
-    if (extensionPattern.length > 1 && element.value.length > 0) {
+    if (extensionPattern.length > 1 && this.value.length > 0) {
+      // Remove any previous errors.
+      $('.file-upload-js-error').remove();
+
       var acceptableMatch = new RegExp('\\.(' + extensionPattern + ')$', 'gi');
-      if (!acceptableMatch.test(element.value)) {
+      if (!acceptableMatch.test(this.value)) {
         var error = Backdrop.t("The selected file %filename cannot be uploaded. Only files with the following extensions are allowed: %extensions.", {
           // According to the specifications of HTML5, a file upload control
           // should not reveal the real local path to the file that a user
@@ -111,24 +85,17 @@ Backdrop.file = Backdrop.file || {
           // confusion by leaving the user thinking perhaps Backdrop could not
           // find the file because it messed up the file path. To avoid this
           // confusion, therefore, we strip out the bogus fakepath string.
-          '%filename': element.value.replace('C:\\fakepath\\', ''),
+          '%filename': this.value.replace('C:\\fakepath\\', ''),
           '%extensions': extensionPattern.replace(/\|/g, ', ')
         });
-        return error;
+        $(this).closest('div.form-managed-file').prepend('<div class="messages error file-upload-js-error" aria-live="polite">' + error + '</div>');
+        this.value = '';
+        event.filePreValidation = false;
+        return false;
       }
-    }
-  },
-  /**
-   * Client-side upload count validation.
-   */
-  validateUploadLimit: function (element) {
-    let limit = $(element).data('file-upload-limit');
-    if (element.files.length > limit) {
-      let error = Backdrop.t('Too many files. The upload limit is %limit, but @selected have been selected.', {
-        '%limit': limit,
-        '@selected': element.files.length
-      });
-      return error;
+      else {
+        event.filePreValidation = true;
+      }
     }
   },
   /**
@@ -136,7 +103,7 @@ Backdrop.file = Backdrop.file || {
    */
   autoUpload: function (event) {
     // This value is set in Backdrop.file.validateExtension().
-    if (event.filePreValidation !== false) {
+    if (event.filePreValidation === undefined || event.filePreValidation === true) {
       $(this).closest('.form-item').find('.file-upload-button').trigger('mousedown').trigger('mouseup').trigger('click');
     }
   },
