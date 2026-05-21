@@ -1780,8 +1780,8 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       }
       file_delete_multiple($delete_fids);
       $count = count($rejected);
-      $singular = 'One file has been rejected as the upload limit of @limit has been reached. Files: %file_list.';
-      $plural = '@count files have been rejected as the upload limit of @limit has been reached. Files: %file_list.';
+      $singular = 'One file has been rejected as the upload limit of @limit has been reached. The following files have been omitted: %file_list.';
+      $plural = '@count files have been rejected as the upload limit of @limit has been reached. The following files have been omitted: %file_list.';
       $message = format_plural($count, $singular, $plural, array(
         '@limit' => $limit,
         '%file_list' => implode(', ', $delete_names),
