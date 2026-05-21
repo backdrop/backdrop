@@ -1029,6 +1029,7 @@ function backdrop_merged_modules() {
     'book_cache', // Backdrop 1.32.0.
     'views_ajax_history', // Backdrop 1.34.0.
     'file_entity_inline', // Backdrop 1.34.0.
+    'html5_upload', // Backdrop 1.34.0.
   );
 }
 
