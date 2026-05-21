@@ -1773,15 +1773,18 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       $accepted = array_slice($files, 0, $limit);
       $rejected = array_slice($files, $limit);
       $delete_fids = array();
+      $delete_names = array();
       foreach ($rejected as $file) {
         $delete_fids[] = $file->fid;
+        $delete_names[] = $file->filename;
       }
       file_delete_multiple($delete_fids);
       $count = count($rejected);
-      $singular = 'One file has been rejected as the upload limit of @limit has been reached.';
-      $plural = '@count files have been rejected as the upload limit of @limit has been reached.';
+      $singular = 'One file has been rejected as the upload limit of @limit has been reached. Files: %file_list.';
+      $plural = '@count files have been rejected as the upload limit of @limit has been reached. Files: %file_list.';
       $message = format_plural($count, $singular, $plural, array(
         '@limit' => $limit,
+        '%file_list' => implode(', ', $delete_names),
       ));
       backdrop_set_message($message, 'error');
       $files = $accepted;
