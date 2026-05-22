@@ -1,10 +1,8 @@
 <?php
-
 /**
  * @file
  * Functions to aid in presenting mysql database results as a set of pages.
  */
-
 
 /**
  * Query extender for mysql pager queries.
@@ -40,7 +38,7 @@ class PagerDefault_mysql extends PagerDefault {
     $page = isset($_GET['page']) ? $_GET['page'] : '';
 
     // Convert comma-separated $page to an array, used by other functions.
-    $pager_page_array = explode(',', $page);
+    $pager_page_array = array_map('intval', explode(',', $page));
 
     if (!isset($pager_page_array[$this->element])) {
       $pager_page_array[$this->element] = 0;
@@ -49,7 +47,7 @@ class PagerDefault_mysql extends PagerDefault {
     // Rather than rely on the countQuery, add a query hint to prepare for a
     // FOUND_ROWS() call a bit later on. That means we don't need to load the
     // entire table index twice, which should see a nice speed increase when
-    // paging through large tables, esepecially on InnoDB.
+    // paging through large tables, especially on InnoDB.
     $this->query->setHints('SQL_CALC_FOUND_ROWS');
 
     // We usually calculate the total number of pages as ceil(items / limit) but
@@ -88,9 +86,10 @@ class PagerDefault_mysql extends PagerDefault {
       $result = $this->query->execute();
     }
 
-    // Redo the page number calculation, because we now know the total humber of results.
+    // Redo the page number calculation, because we now know the total number of
+    // results.
     $pager_total[$this->element] = ceil($pager_total_items[$this->element] / $this->limit);
-    $pager_page_array[$this->element] = max(0, min((int)$pager_page_array[$this->element], ((int)$pager_total[$this->element]) - 1));
+    $pager_page_array[$this->element] = max(0, min((int) $pager_page_array[$this->element], ((int) $pager_total[$this->element]) - 1));
     $pager_limits[$this->element] = $this->limit;
 
     return $result;
