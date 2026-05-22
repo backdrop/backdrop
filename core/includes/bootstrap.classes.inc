@@ -113,6 +113,7 @@ function backdrop_class_list() {
     'InsertQuery_mysql' => $path . 'database/mysql/query.inc',
     'TruncateQuery_mysql' => $path . 'database/mysql/query.inc',
     'DatabaseSchema_mysql' => $path . 'database/mysql/schema.inc',
+    'PagerDefault_mysql' => $path . 'database/mysql/pager.inc',
 
     'FileTransfer' => $path . 'filetransfer/filetransfer.inc',
     'FileTransferException' => $path . 'filetransfer/filetransfer.inc',
