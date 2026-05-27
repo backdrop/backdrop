@@ -1021,7 +1021,7 @@ function layout_library_info() {
     'version' => BACKDROP_VERSION,
     'css' => array(
       $path . '/css/layout.admin.css' => array(
-        'group' => CSS_THEME,
+        'group' => CSS_DEFAULT,
       ),
     ),
     'js' => array(
