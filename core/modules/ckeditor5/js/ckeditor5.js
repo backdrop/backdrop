@@ -121,7 +121,10 @@
 
       // Destroy the instance if fully detaching.
       if (trigger !== 'serialize') {
-        editor.destroy();
+        // Prevent flash of HTML from being seen by user when the form is submitted.
+        if (!Backdrop.settings.formIsSubmitting) {          
+          editor.destroy();
+        }
         Backdrop.ckeditor5.instances.delete(editor.id);
         delete element.ckeditor5AttachedEditor;
         delete element.ckeditor5Processed;
