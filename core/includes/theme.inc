@@ -1812,6 +1812,9 @@ function theme_datetime($variables) {
  *     of that type.
  */
 function theme_status_messages($variables) {
+  $path = backdrop_get_path('module', 'system');
+  backdrop_add_js($path . '/js/status-messages.js');
+
   $display = $variables['display'];
   $message_types = (empty($variables['messages']))? backdrop_get_messages($display) : $variables['messages'];
   $output = '';
@@ -1824,7 +1827,7 @@ function theme_status_messages($variables) {
   );
 
   foreach ($message_types as $type => $messages) {
-    $output .= "<div class=\"messages $type\">\n";
+    $output .= "<div data-message-type=\"true\" class=\"messages $type\">\n";
     if (!empty($status_heading[$type])) {
       $output .= '  <h2 class="element-invisible">' . $status_heading[$type] . "</h2>\n";
     }
