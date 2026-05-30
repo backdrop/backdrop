@@ -80,6 +80,7 @@ Backdrop.behaviors.filterEditors = {
         if (event.isDefaultPrevented()) {
           return;
         }
+        Backdrop.settings.formIsSubmitting = true;
         Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
       });
     });
