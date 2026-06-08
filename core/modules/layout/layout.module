@@ -1020,7 +1020,9 @@ function layout_library_info() {
     'title' => 'Layout administration',
     'version' => BACKDROP_VERSION,
     'css' => array(
-      $path . '/css/layout.admin.css' => array(),
+      $path . '/css/layout.admin.css' => array(
+        'group' => CSS_DEFAULT,
+      ),
     ),
     'js' => array(
       $path . '/js/layout.admin.js' => array(),
