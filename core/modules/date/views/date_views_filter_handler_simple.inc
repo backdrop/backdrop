@@ -98,7 +98,10 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     $default_option = $prefix == 'max' ? $options['default_to_date'] : $options['default_date'];
     $is_relative = ($this->options['is_grouped'] && isset($options[$prefix . '_choose_input_type']) && $options[$prefix . '_choose_input_type'] == 'relative') || (!empty($this->options['value']['type']) && $this->options['value']['type'] == 'relative');
     if ($is_relative) {
-      $default_date = $default_option;
+      $date = date_create($default_option, date_default_timezone_object());
+      if ($date) {
+        $default_date = $date->format($this->format);
+      }
     }
     // This a fixed date.
     else {
