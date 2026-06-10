@@ -143,15 +143,7 @@ class date_views_filter_handler extends date_views_filter_handler_simple {
     $widget_options = $this->widget_options();
     // If the filter is exposed, display the granularity.
     if ($this->options['exposed']) {
-      $summary = t('(@field) <strong>Exposed</strong> @widget @format', array(
-        '@field' => $field,
-        '@format' => $parts[$handler->granularity],
-        '@widget' => $widget_options[$this->options['form_type']],
-      ));
-      if (!empty($this->options['value']['type']) && $this->options['value']['type'] == 'relative') {
-        $summary .= ' ' . t('(Relative)');
-      }
-      return $summary;
+      return t('(@field) <strong>Exposed</strong> @widget @format', array('@field' => $field, '@format' => $parts[$handler->granularity], '@widget' => $widget_options[$this->options['form_type']]));
     }
     // If not exposed, display the value.
     if (in_array($this->operator, $this->operator_values(2))) {
@@ -161,9 +153,6 @@ class date_views_filter_handler extends date_views_filter_handler_simple {
     }
     else {
       $output .= check_plain(!empty($this->options['default_date']) ? $this->options['default_date'] : $this->options['value']['value']);
-    }
-    if (!empty($this->options['value']['type']) && $this->options['value']['type'] == 'relative') {
-      $output .= ' ' . t('(Relative)');
     }
     return $output;
   }

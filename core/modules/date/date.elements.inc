@@ -142,12 +142,12 @@ function _date_element_info() {
  */
 function date_default_date($element) {
   $granularity = date_format_order($element['#date_format']);
-  $default_value = is_array($element['#default_value']) ? reset($element['#default_value']) : $element['#default_value'];
+  $default_value = $element['#default_value'];
   $format = DATE_FORMAT_DATETIME;
 
   // The text and popup widgets might return less than a full datetime string.
-  if (strlen((string) $default_value) < 19) {
-    switch (strlen((string) $default_value)) {
+  if (strlen($element['#default_value']) < 19) {
+    switch (strlen($element['#default_value'])) {
       case 16:
         $format = 'Y-m-d H:i';
         break;
