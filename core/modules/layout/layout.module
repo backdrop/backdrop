@@ -1020,7 +1020,9 @@ function layout_library_info() {
     'title' => 'Layout administration',
     'version' => BACKDROP_VERSION,
     'css' => array(
-      $path . '/css/layout.admin.css' => array(),
+      $path . '/css/layout.admin.css' => array(
+        'group' => CSS_DEFAULT,
+      ),
     ),
     'js' => array(
       $path . '/js/layout.admin.js' => array(),
@@ -1703,12 +1705,15 @@ function _layout_get_all_info($data_type, $init = array()) {
  *   "simmons". If no layout template name is specified, information for all
  *   layout templates will be returned.
  *
- * @param boolean $rebuild
+ * @param bool $rebuild
  *   Whether the list of layout template info needs to be rebuilt (see
  *   https://github.com/backdrop/backdrop-issues/issues/984). The rebuild is
  *   required only on specific cases, so this defaults to FALSE. That way, the
  *   rest of the times the layout cache is used (when available) for performance
  *   reasons.
+ *
+ * @param string $layout_template_type
+ *   The type of layout template to return.
  *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
@@ -2860,7 +2865,7 @@ function layout_field_delete_instance($instance) {
  *   The custom template type machine name to process, passed by reference. If
  *   NULL is passed in, the default type of "flexible" will be used.
  */
-function _layout_standardize_template_type(?string &$layout_template_type = 'flexible') {
+function _layout_standardize_template_type(?string &$layout_template_type) {
   if (empty($layout_template_type)) {
     $layout_template_type = 'flexible';
   }
