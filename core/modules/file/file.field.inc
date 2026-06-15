@@ -808,6 +808,14 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     '#extended' => TRUE,
   );
 
+  // Unlike other validators we need to evaluate the amount of existing files
+  // for upload limits, so this validator gets added here instead of in
+  // file_field_widget_upload_validators().
+  if ($field['cardinality'] != FIELD_CARDINALITY_UNLIMITED && $field['cardinality'] > 1) {
+    $limit = $field['cardinality'] - count($items);
+    $element['#upload_validators']['file_validate_upload_limit'] = array($limit);
+  }
+
   if ($field['cardinality'] == 1) {
     // Set the default value.
     $element['#default_value'] = !empty($items) ? $items[0] : $defaults;

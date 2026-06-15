@@ -1726,22 +1726,21 @@ class FileFieldValidateTestCase extends FileTestHelper {
       'files[' . $field_name . '_' . $langcode . '_0][]' => $all_paths,
     ), t('Upload'));
 
-    // Save the node. The cardinality validator fires with 5 items, truncates
-    // to 3, and shows a warning.
-    $this->backdropPost(NULL, array(), t('Save'));
-
-    // Verify the cardinality warning was shown.
-    $this->assertRaw(t('Field %field can only hold @max values but there were @count. The following files have been omitted as a result: %list.', array(
-      '%field' => $field['field_name'],
-      '@max' => $field['cardinality'],
-      '@count' => 5,
-      '%list' => implode(', ', array(
+    // Verify the limit warning was shown.
+    $this->assertRaw(t('@count files have been rejected as the upload limit of @limit has been reached. The following files have been omitted: %file_list', array(
+      '@count' => 2,
+      '@limit' => 3,
+      '%file_list' => implode(', ', array(
         $files[3]->filename,
         $files[4]->filename,
       )),
     )), 'Warning shown when 5 files uploaded at once to a cardinality-3 field.');
 
+    $buttons = $this->xpath('//input[@type="submit" and @value="Remove"]');
+    $this->assertEqual(3, count($buttons), 'Only three files have been added to file field widget');
+
     // Verify only 3 files were saved.
+    $this->backdropPost(NULL, array(), t('Save'));
     $node = node_load($nid, NULL, TRUE);
     $this->assertEqual(3, count($node->{$field_name}[$langcode]), 'Only 3 files saved when 5 uploaded at once to a cardinality 3 field.');
 
@@ -1762,24 +1761,43 @@ class FileFieldValidateTestCase extends FileTestHelper {
       ),
     ), t('Upload'));
 
-    // Save the node. The cardinality validator fires with 5 total items
-    // (2 existing + 3 new), truncates to 3, and shows a warning.
-    $this->backdropPost(NULL, array(), t('Save'));
-
     // Verify the cardinality warning was shown.
-    $this->assertRaw(t('Field %field can only hold @max values but there were @count. The following files have been omitted as a result: %list.', array(
-      '%field' => $field['field_name'],
-      '@max' => $field['cardinality'],
-      '@count' => 5,
-      '%list' => implode(', ', array(
+    $this->assertRaw(t('@count files have been rejected as the upload limit of @limit has been reached. The following files have been omitted: %file_list', array(
+      '@count' => 2,
+      '@limit' => 1,
+      '%file_list' => implode(', ', array(
         $files[3]->filename,
         $files[4]->filename,
       )),
     )), 'Warning shown when 3 more files added to a node with 2 existing files in a cardinality 3 field.');
 
+    $buttons = $this->xpath('//input[@type="submit" and @value="Remove"]');
+    $this->assertEqual(3, count($buttons), 'Only three files have been added to file field widget');
+
     // Verify only 3 files were saved.
+    $this->backdropPost(NULL, array(), t('Save'));
     $node2 = node_load($nid2, NULL, TRUE);
     $this->assertEqual(3, count($node2->{$field_name}[$langcode]), 'Only 3 files saved when 3 more added to node with 2 existing files in a cardinality 3 field.');
+
+    // Now reduce field cardinality and save the node again.
+    $field['cardinality'] = 2;
+    field_update_field($field);
+    $this->backdropGet('node/' . $nid2 . '/edit');
+    $buttons = $this->xpath('//input[@type="submit" and @value="Remove"]');
+    $this->assertEqual(3, count($buttons), 'Three files when opening the node form');
+
+    // Save the node without any changes.
+    $this->backdropPost(NULL, array(), t('Save'));
+    // Node saved, warning message shown.
+    $this->assertRaw(t('Field %field can only hold @max values but there were @count. The following files have been omitted as a result: %list.', array(
+      '%field' => $field['field_name'],
+      '@max' => $field['cardinality'],
+      '@count' => 3,
+      '%list' => $files[2]->filename,
+    )), 'Warning shown after node save when cardinality has been reduced.');
+
+    $node2 = node_load($nid2, NULL, TRUE);
+    $this->assertEqual(2, count($node2->{$field_name}[$langcode]), 'After node save only 2 files are attached to node');
   }
 
   /**
