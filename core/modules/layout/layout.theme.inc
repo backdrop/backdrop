@@ -371,8 +371,11 @@ function layout_preprocess_layout(&$variables) {
   }
 
   // Support deprecated 'layout_info' property until Backdrop 2.0.
-  if (isset($variables['layout_info']) && !isset($variables['layout_template_info'])) {
+  if (!empty($variables['layout_info']) && empty($variables['layout_template_info'])) {
     $variables['layout_template_info'] = $variables['layout_info'];
+  }
+  elseif (empty($variables['layout_info']) && !empty($variables['layout_template_info'])) {
+    $variables['layout_info'] = $variables['layout_template_info'];
   }
 
   // Build HTML for displaying flexible templates.
