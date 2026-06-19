@@ -175,8 +175,7 @@ function comment_admin_overview_validate($form, &$form_state) {
  * Executes the chosen 'Update option' on the selected comments, such as
  * publishing, unpublishing or deleting.
  *
- * The site will stay on the current page after submitting and in the unlikely
- * case there is a ?destination= query, it will respect that.
+ * The site will stay on the current page after submitting action.
  *
  * @see comment_admin_overview_validate()
  */
