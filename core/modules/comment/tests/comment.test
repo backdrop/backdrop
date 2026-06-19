@@ -1722,6 +1722,11 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->backdropPost(NULL, $edit, t('Execute'));
     $this->assertText(t('Unapproved comments (@count)', array('@count' => 0)), 'All comments were approved.');
 
+    // Approving comments no longer redirects to the published comments page,
+    // so navigate there explicitly before performing further operations on
+    // the now-published comments.
+    $this->backdropGet('admin/content/comment');
+
     // Delete multiple comments in one operation.
     $edit = array(
       'operation' => 'delete',
