@@ -253,7 +253,6 @@ function comment_multiple_delete_confirm_submit($form, &$form_state) {
     watchdog('content', 'Deleted @count comments.', array('@count' => $count));
     backdrop_set_message(format_plural($count, 'Deleted 1 comment.', 'Deleted @count comments.'));
   }
-  $form_state['redirect'] = 'admin/content/comment';
 }
 
 /**
