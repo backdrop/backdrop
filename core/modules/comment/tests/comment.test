@@ -1067,6 +1067,19 @@ class CommentInterfaceTest extends CommentHelperCase {
           }
         }
 
+        // Verify that the per-comment reply link includes #comment-form only
+        // when the form is on a separate page, so the user lands directly at
+        // the comment form rather than the top of the reply page.
+        if ($path == "node/$nid" && $info['comment count'] && $info['access comments']) {
+          $cid = $this->comment->cid;
+          if ($info['form'] == COMMENT_FORM_SEPARATE_PAGE) {
+            $this->assertLinkByHref("comment/reply/$nid/$cid#comment-form", 0, 'Reply link includes #comment-form anchor for separate page form.');
+          }
+          else {
+            $this->assertNoLinkByHref("comment/reply/$nid/$cid#comment-form", 'Reply link does not include #comment-form anchor for inline form.');
+          }
+        }
+
         // Also verify that the comment form appears according to the configured
         // location.
         if ($path == "node/$nid") {
