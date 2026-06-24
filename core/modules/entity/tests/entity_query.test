@@ -1272,7 +1272,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
    */
   function testEntityFieldQueryPager() {
     // Test pager in propertyQuery
-    $_GET['page'] = '0,1';
+    $_GET['page'] = '1,2';
     $query = new EntityFieldQuery();
     $query
       ->entityCondition('entity_type', 'test_entity_bundle_key')
@@ -1296,7 +1296,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     ), 'Test pager integration in propertyQuery: page 2.', TRUE);
 
     // Test pager in field storage
-    $_GET['page'] = '0,1';
+    $_GET['page'] = '1,2';
     $query = new EntityFieldQuery();
     $query
       ->entityCondition('entity_type', 'test_entity_bundle_key')

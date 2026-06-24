@@ -2435,7 +2435,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
       $num_pages--;
     }
 
-    for ($page = 1; $page <= $num_pages; ++$page) {
+    for ($page = 0; $page <= $num_pages; ++$page) {
       $this->backdropGet('database_test/pager_query_odd/' . $limit, array('query' => array('page' => $page)));
       $data = json_decode($this->backdropGetContent());
 

@@ -77,9 +77,6 @@ class PagerFunctionalWebTestCase extends BackdropWebTestCase {
     $elements = $this->xpath('//ul[@class=:class]/li', array(':class' => 'pager'));
     $this->assertTrue(!empty($elements), 'Pager found.');
 
-    // Make current page 1-based.
-    $current_page++;
-
     // Extract first/previous and next/last items.
     // first/previous only exist, if the current page is not the first.
     if ($current_page > 1) {
