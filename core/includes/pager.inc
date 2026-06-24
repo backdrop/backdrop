@@ -25,9 +25,11 @@
 function pager_find_page($element = 0) {
   $page = isset($_GET['page']) ? $_GET['page'] : '';
   $page_array = explode(',', $page);
-  if (!isset($page_array[$element])) {
-    $page_array[$element] = 0;
+  if (empty($page_array[$element])) {
+    $page_array[$element] = 1;
   }
+  // Translate human readable page numbers to PHP offset logic.
+  $page_array[$element]--;
   return (int) $page_array[$element];
 }
 
@@ -446,7 +448,8 @@ function theme_pager_link($variables) {
 
   $page = isset($_GET['page']) ? $_GET['page'] : '';
   if ($new_page = implode(',', pager_load_array($page_new[$element], $element, explode(',', $page)))) {
-    $parameters['page'] = $new_page;
+    // Translate PHP offset logic to human readable page numbers.
+    $parameters['page'] = $new_page + 1;
   }
 
   $query = array();

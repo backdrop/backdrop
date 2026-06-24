@@ -319,6 +319,8 @@ class views_plugin_pager_full extends views_plugin_pager {
     $pager_id = $this->get_pager_id();
     for ($i = 0; $i <= $pager_id || $i < count($pager_page_array); $i++) {
       $pager_page_array[$i] = empty($page[$i]) ? 0 : $page[$i];
+      // Translate human readable page numbers to PHP offset logic.
+      $pager_page_array[$i]--;
     }
 
     $this->current_page = intval($pager_page_array[$pager_id]);
