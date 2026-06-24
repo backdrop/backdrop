@@ -2396,11 +2396,6 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
     $correct_number = $limit;
     $num_pages = ceil($count / $limit);
 
-    // If there is no remainder from rounding, subtract 1 since we index from 0.
-    if (!($num_pages * $limit < $count)) {
-      // $num_pages--;
-    }
-
     for ($page = 1; $page <= $num_pages; ++$page) {
       $this->backdropGet('database_test/pager_query_even/' . $limit, array('query' => array('page' => $page)));
       $data = json_decode($this->backdropGetContent());
@@ -2427,13 +2422,8 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
     $limit = 2;
     $count = db_query('SELECT COUNT(*) FROM {test_task}')->fetchField();  //7
 
-    $correct_number = $limit; //2
-    $num_pages = ceil($count / $limit); //3 //4
-
-    // If there is no remainder from rounding, subtract 1 since we index from 0.
-    if (!($num_pages * $limit < $count)) { // 3 * 2 < 7 = TRUE
-      // $num_pages--;
-    }
+    $correct_number = $limit;
+    $num_pages = ceil($count / $limit);
 
     for ($page = 1; $page <= $num_pages; ++$page) {
       $this->backdropGet('database_test/pager_query_odd/' . $limit, array('query' => array('page' => $page)));
