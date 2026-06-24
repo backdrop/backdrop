@@ -35,7 +35,7 @@ class PagerFunctionalWebTestCase extends BackdropWebTestCase {
   function testActiveClass() {
     // Verify first page.
     $this->backdropGet('admin/reports/dblog');
-    $current_page = 0;
+    $current_page = 1;
     $this->assertPagerItems($current_page);
 
     // Verify any page but first/last.

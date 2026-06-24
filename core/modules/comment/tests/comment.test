@@ -479,8 +479,8 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->setCommentsPerPage(2);
     $comment_new_page = $this->postComment($this->node, $this->randomName(), $this->randomName(), TRUE);
     $this->assertTrue($this->commentExists($comment_new_page), 'Page one exists. %s');
-    $this->backdropGet('node/' . $this->node->nid, array('query' => array('page' => 2)));
-    $this->assertTrue($this->commentExists($reply, TRUE), 'Page two exists. %s');
+    $this->backdropGet('node/' . $this->node->nid, array('query' => array('page' => 3)));
+    $this->assertTrue($this->commentExists($reply, TRUE), 'Page three exists. %s');
     $this->setCommentsPerPage(50);
 
     // Attempt to post to node with comments disabled.
@@ -1386,13 +1386,13 @@ class CommentPagerTest extends CommentHelperCase {
     $this->assertFalse($this->commentExists($comments[2]), 'Comment 3 does not appear on page 1.');
 
     // Check the second page.
-    $this->backdropGet('node/' . $node->nid, array('query' => array('page' => 1)));
+    $this->backdropGet('node/' . $node->nid, array('query' => array('page' => 2)));
     $this->assertTrue($this->commentExists($comments[1]), 'Comment 2 appears on page 2.');
     $this->assertFalse($this->commentExists($comments[0]), 'Comment 1 does not appear on page 2.');
     $this->assertFalse($this->commentExists($comments[2]), 'Comment 3 does not appear on page 2.');
 
     // Check the third page.
-    $this->backdropGet('node/' . $node->nid, array('query' => array('page' => 2)));
+    $this->backdropGet('node/' . $node->nid, array('query' => array('page' => 3)));
     $this->assertTrue($this->commentExists($comments[2]), 'Comment 3 appears on page 3.');
     $this->assertFalse($this->commentExists($comments[0]), 'Comment 1 does not appear on page 3.');
     $this->assertFalse($this->commentExists($comments[1]), 'Comment 2 does not appear on page 3.');
