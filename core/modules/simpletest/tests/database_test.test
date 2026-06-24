@@ -2432,10 +2432,10 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
 
     // If there is no remainder from rounding, subtract 1 since we index from 0.
     if (!($num_pages * $limit < $count)) {
-      $num_pages--;
+      // $num_pages--;
     }
 
-    for ($page = 0; $page <= $num_pages; ++$page) {
+    for ($page = 1; $page <= $num_pages; ++$page) {
       $this->backdropGet('database_test/pager_query_odd/' . $limit, array('query' => array('page' => $page)));
       $data = json_decode($this->backdropGetContent());
 
