@@ -2406,7 +2406,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
       $data = json_decode($this->backdropGetContent());
 
       if ($page == $num_pages) {
-        $correct_number = $count - ($limit * $page);
+        $correct_number = ($limit * $page) - $count;
       }
 
       $this->assertEqual(count($data->names), $correct_number, format_string('Correct number of records returned by pager: @number', array('@number' => $correct_number)));
@@ -2440,7 +2440,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
       $data = json_decode($this->backdropGetContent());
 
       if ($page == $num_pages) {
-        $correct_number = $count - ($limit * $page);
+        $correct_number = ($limit * $page) - $count;
       }
 
       $this->assertEqual(count($data->names), $correct_number, format_string('Correct number of records returned by pager: @number', array('@number' => $correct_number)));
