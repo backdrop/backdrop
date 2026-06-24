@@ -2420,7 +2420,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
     // information forward to the actual query on the other side of the
     // HTTP request.
     $limit = 2;
-    $count = db_query('SELECT COUNT(*) FROM {test_task}')->fetchField();  //7
+    $count = db_query('SELECT COUNT(*) FROM {test_task}')->fetchField();
 
     $correct_number = $limit;
     $num_pages = ceil($count / $limit);
