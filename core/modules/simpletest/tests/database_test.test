@@ -2394,7 +2394,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
     $count = db_query('SELECT COUNT(*) FROM {test}')->fetchField();
 
     $correct_number = $limit;
-    $num_pages = ceiling($count / $limit);
+    $num_pages = ceil($count / $limit);
 
     // If there is no remainder from rounding, subtract 1 since we index from 0.
     if (!($num_pages * $limit < $count)) {
@@ -2428,7 +2428,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
     $count = db_query('SELECT COUNT(*) FROM {test_task}')->fetchField();  //7
 
     $correct_number = $limit; //2
-    $num_pages = ceiling($count / $limit); //3 //4
+    $num_pages = ceil($count / $limit); //3 //4
 
     // If there is no remainder from rounding, subtract 1 since we index from 0.
     if (!($num_pages * $limit < $count)) { // 3 * 2 < 7 = TRUE
