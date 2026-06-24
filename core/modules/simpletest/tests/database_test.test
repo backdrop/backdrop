@@ -2405,7 +2405,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
       $this->backdropGet('database_test/pager_query_even/' . $limit, array('query' => array('page' => $page)));
       $data = json_decode($this->backdropGetContent());
 
-      if ($page == $num_pages) {
+      if ($page == $num_pages && ($limit * $page) > $count) {
         $correct_number = ($limit * $page) - $count;
       }
 
@@ -2439,7 +2439,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
       $this->backdropGet('database_test/pager_query_odd/' . $limit, array('query' => array('page' => $page)));
       $data = json_decode($this->backdropGetContent());
 
-      if ($page == $num_pages) {
+      if ($page == $num_pages && ($limit * $page) > $count) {
         $correct_number = ($limit * $page) - $count;
       }
 
