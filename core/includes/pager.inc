@@ -155,7 +155,7 @@ function pager_get_query_parameters() {
  *
  * @ingroup themeable
  */
-function theme_pager($variables) {
+function theme_pager(array $variables) {
   $tags = $variables['tags'];
   $element = $variables['element'];
   $parameters = $variables['parameters'];
@@ -329,7 +329,7 @@ function theme_pager($variables) {
  *
  * @ingroup themeable
  */
-function theme_pager_first($variables) {
+function theme_pager_first(array $variables) {
   $text = $variables['text'];
   $element = $variables['element'];
   $parameters = $variables['parameters'];
@@ -365,7 +365,7 @@ function theme_pager_first($variables) {
  *
  * @ingroup themeable
  */
-function theme_pager_previous($variables) {
+function theme_pager_previous(array $variables) {
   $text = $variables['text'];
   $element = $variables['element'];
   $interval = $variables['interval'];
@@ -416,7 +416,7 @@ function theme_pager_previous($variables) {
  *
  * @ingroup themeable
  */
-function theme_pager_next($variables) {
+function theme_pager_next(array $variables) {
   $text = $variables['text'];
   $element = $variables['element'];
   $interval = $variables['interval'];
@@ -465,7 +465,7 @@ function theme_pager_next($variables) {
  *
  * @ingroup themeable
  */
-function theme_pager_last($variables) {
+function theme_pager_last(array $variables) {
   $text = $variables['text'];
   $element = $variables['element'];
   $parameters = $variables['parameters'];
@@ -510,7 +510,7 @@ function theme_pager_last($variables) {
  *
  * @ingroup themeable
  */
-function theme_pager_link($variables) {
+function theme_pager_link(array $variables) {
   $text = $variables['text'];
   $page_new = $variables['page_new'];
   $element = $variables['element'];
