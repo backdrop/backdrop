@@ -790,6 +790,7 @@ function comment_node_page_additions(Node $node) {
         comment_prepare_thread($comments);
         $build = comment_view_multiple($comments, $node);
         $build['pager']['#theme'] = 'pager';
+        $build['pager']['#fragment'] = 'comments';
         $additions['comments'] = $build;
       }
       elseif ($node->comment_count > 0) {
