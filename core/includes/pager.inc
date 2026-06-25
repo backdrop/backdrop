@@ -199,28 +199,28 @@ function theme_pager(array $variables) {
     'text' => (isset($tags[0]) ? $tags[0] : t('« first')),
     'element' => $element,
     'parameters' => $parameters,
-    'fragment' => $fragment),
-  );
+    'fragment' => $fragment,
+  ));
   $li_previous = theme('pager_previous', array(
     'text' => (isset($tags[1]) ? $tags[1] : t('‹ previous')),
     'element' => $element,
     'interval' => 1,
     'parameters' => $parameters,
-    'fragment' => $fragment),
-  );
+    'fragment' => $fragment,
+  ));
   $li_next = theme('pager_next', array(
     'text' => (isset($tags[3]) ? $tags[3] : t('next ›')),
     'element' => $element,
     'interval' => 1,
     'parameters' => $parameters,
-    'fragment' => $fragment),
-  );
+    'fragment' => $fragment,
+  ));
   $li_last = theme('pager_last', array(
     'text' => (isset($tags[4]) ? $tags[4] : t('last »')),
     'element' => $element,
     'parameters' => $parameters,
-    'fragment' => $fragment),
-  );
+    'fragment' => $fragment,
+  ));
 
   if ($pager_total[$element] > 1) {
     if ($li_first) {
@@ -254,8 +254,8 @@ function theme_pager(array $variables) {
               'element' => $element,
               'interval' => ($pager_current - $i),
               'parameters' => $parameters,
-              'fragment' => $fragment),
-            ),
+              'fragment' => $fragment,
+            )),
           );
         }
         if ($i == $pager_current) {
@@ -272,8 +272,8 @@ function theme_pager(array $variables) {
               'element' => $element,
               'interval' => ($i - $pager_current),
               'parameters' => $parameters,
-              'fragment' => $fragment),
-            ),
+              'fragment' => $fragment,
+            )),
           );
         }
       }
@@ -344,8 +344,8 @@ function theme_pager_first(array $variables) {
       'page_new' => pager_load_array(0, $element, $pager_page_array),
       'element' => $element,
       'parameters' => $parameters,
-      'fragment' => $fragment),
-    );
+      'fragment' => $fragment,
+    ));
   }
 
   return $output;
@@ -384,8 +384,8 @@ function theme_pager_previous(array $variables) {
         'text' => $text,
         'element' => $element,
         'parameters' => $parameters,
-        'fragment' => $fragment),
-      );
+        'fragment' => $fragment,
+      ));
     }
     // The previous page is not the first page.
     else {
@@ -394,8 +394,8 @@ function theme_pager_previous(array $variables) {
         'page_new' => $page_new,
         'element' => $element,
         'parameters' => $parameters,
-        'fragment' => $fragment),
-      );
+        'fragment' => $fragment,
+      ));
     }
   }
 
@@ -434,8 +434,8 @@ function theme_pager_next(array $variables) {
         'text' => $text,
         'element' => $element,
         'parameters' => $parameters,
-        'fragment' => $fragment),
-      );
+        'fragment' => $fragment,
+      ));
     }
     // The next page is not the last page.
     else {
@@ -444,8 +444,8 @@ function theme_pager_next(array $variables) {
         'page_new' => $page_new,
         'element' => $element,
         'parameters' => $parameters,
-        'fragment' => $fragment),
-      );
+        'fragment' => $fragment,
+      ));
     }
   }
 
@@ -480,8 +480,8 @@ function theme_pager_last(array $variables) {
       'page_new' => pager_load_array($pager_total[$element] - 1, $element, $pager_page_array),
       'element' => $element,
       'parameters' => $parameters,
-      'fragment' => $fragment),
-    );
+      'fragment' => $fragment,
+    ));
   }
 
   return $output;
