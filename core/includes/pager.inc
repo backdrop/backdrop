@@ -125,7 +125,7 @@ function pager_default_initialize($total, $limit, $element = 0) {
 /**
  * Compose a URL query parameter array for pager links.
  *
- * @return string
+ * @return array
  *   A URL query parameter array that consists of all components of the current
  *   page request except for those pertaining to paging.
  */
