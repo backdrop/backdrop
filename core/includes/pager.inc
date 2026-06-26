@@ -152,6 +152,9 @@ function pager_get_query_parameters() {
  *   - parameters: An associative array of query string parameters to append to
  *     the pager links.
  *   - quantity: The number of pages in the list.
+ *   - fragment: An optional string for URL anchor.
+ *
+ * @since 1.34.3
  *
  * @ingroup themeable
  */
@@ -326,6 +329,9 @@ function theme_pager(array $variables) {
  *     one page.
  *   - parameters: An associative array of query string parameters to append to
  *     the pager links.
+ *   - fragment: An optional string for URL anchor.
+ *
+ * @since 1.34.3
  *
  * @ingroup themeable
  */
@@ -362,6 +368,9 @@ function theme_pager_first(array $variables) {
  *   - interval: The number of pages to move backward when the link is clicked.
  *   - parameters: An associative array of query string parameters to append to
  *     the pager links.
+ *   - fragment: An optional string for URL anchor.
+ *
+ * @since 1.34.3
  *
  * @ingroup themeable
  */
@@ -413,6 +422,9 @@ function theme_pager_previous(array $variables) {
  *   - interval: The number of pages to move forward when the link is clicked.
  *   - parameters: An associative array of query string parameters to append to
  *     the pager links.
+ *   - fragment: An optional string for URL anchor.
+ *
+ * @since 1.34.3
  *
  * @ingroup themeable
  */
@@ -462,6 +474,9 @@ function theme_pager_next(array $variables) {
  *     one page.
  *   - parameters: An associative array of query string parameters to append to
  *     the pager links.
+ *   - fragment: An optional string for URL anchor.
+ *
+ * @since 1.34.3
  *
  * @ingroup themeable
  */
@@ -505,6 +520,9 @@ function theme_pager_last(array $variables) {
  *     the pager link.
  *   - attributes: An associative array of HTML attributes to apply to the
  *     pager link.
+ *   - fragment: An optional string for URL anchor.
+ *
+ * @since 1.34.3
  *
  * @see theme_pager()
  *
