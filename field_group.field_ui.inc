@@ -285,6 +285,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#type' => 'select',
         '#options' => $formatter_options,
         '#default_value' => 'fieldset',
+        '#description' => t('Groups can have unlimited nesting.'),
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
       ),
       '#cell_attributes' => array('colspan' => 2),
@@ -948,14 +949,6 @@ function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params
     '#value' => t('Clone'),
     '#validate' => array('field_group_field_ui_clone_field_groups_validate'),
     '#submit' => array('field_group_field_ui_clone_field_groups')
-  );
-  $form['additional_settings']['field_group']['help_title'] = array(
-    '#type' => 'item',
-    '#title' => t('Configuring fieldgroups'),
-  );
-  $form['additional_settings']['field_group']['help'] = array(
-    '#type' => 'help',
-    '#markup' => t('<p>Fields can be dragged into groups with unlimited nesting. Each Fieldgroup format comes with a configuration form, specific for that format type.</p><p>Some formats come in pairs. These types have an HTML wrapper to nest its fieldgroup children. For example, place vertical tabs into the vertical tab group. There is one exception to this rule: you can use a vertical tab without a wrapper when the additional settings tabs are available, such as with content type forms.</p>'),
   );
 
 }

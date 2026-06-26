@@ -514,15 +514,15 @@ function _field_group_extra_field_group_field_ui_parent_requirements_alter(&$par
   $parent_requirements = array(
     'multipage' => array(
       'parent' => 'multipage-group',
-      'message' => 'Each Multipage element needs to have a parent Multipage group element.',
+      'message' => 'Each <em>Multipage</em> element needs to have a parent <em>Multipage group</em> element.',
     ),
     'htab' => array(
       'parent' => 'htabs',
-      'message' => 'Each Horizontal tab element needs to have a parent Horizontal tabs group element.',
+      'message' => 'Each <em>Horizontal tab</em> element needs to have a parent <em>Horizontal tabs</em> group element.',
     ),
     'accordion-item' => array(
       'parent' => 'accordion',
-      'message' => 'Each Accordion item element needs to have a parent Accordion group element.',
+      'message' => 'Each <em>Accordion item</em> element needs to have a parent <em>Accordion group</em> element.',
     ),
   );
 }

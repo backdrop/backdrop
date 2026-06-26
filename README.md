@@ -3,10 +3,9 @@ Field Group
 
 This module will group a set of fields with different HTML wrappers on the content type form and/or view. You can add fieldgroups in several types with their own format settings.
 
-Description
------------
+Fields can be dragged into groups with unlimited nesting. Each Fieldgroup format comes with a configuration form, specific for that format type. Note that field_group will only group fields, it can not be used to hide certain fields since this a permission matter.
 
-Field groups have unlimited nesting and display control. Note that field_group will only group fields, it can not be used to hide certain fields since this a permission matter.
+Some formats come in pairs. These types have an HTML wrapper to nest its fieldgroup children. For example, place vertical tabs into the vertical tab group. There is one exception to this rule: you can use a vertical tab without a wrapper when the additional settings tabs are available, such as with content type forms.
 
 Available group types:
 

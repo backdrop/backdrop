@@ -525,7 +525,12 @@ function _field_group_field_group_field_ui_parent_requirements_alter(&$parent_re
   if ($context['display_overview']) {
     $parent_requirements['tab'] = array(
       'parent' => 'tabs',
-      'message' => 'Each Vertical tab element needs to have a parent Vertical tabs group element.',
+      'message' => 'Each <em>Vertical tab</em> element needs to have a parent <em>Vertical tabs</em> group element.',
+    );
+  } else {
+    $parent_requirements['tab'] = array(
+      'parent' => 'tabs',
+      'message' => 'A <em>Vertical tab</em> element without a parent will be shown in the <em>Additional settings</em> tab group. If this was unintended, create a new parent <em>Vertical tabs</em> group element.',
     );
   }
 }
