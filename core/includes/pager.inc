@@ -154,7 +154,7 @@ function pager_get_query_parameters() {
  *   - quantity: The number of pages in the list.
  *   - fragment: An optional string for URL anchor.
  *
- * @since 1.34.3
+ * @since 1.34.3 Added fragment property.
  *
  * @ingroup themeable
  */
@@ -330,7 +330,7 @@ function theme_pager(array $variables) {
  *     the pager links.
  *   - fragment: An optional string for URL anchor.
  *
- * @since 1.34.3
+ * @since 1.34.3 Added fragment property.
  *
  * @ingroup themeable
  */
@@ -369,7 +369,7 @@ function theme_pager_first(array $variables) {
  *     the pager links.
  *   - fragment: An optional string for URL anchor.
  *
- * @since 1.34.3
+ * @since 1.34.3 Added fragment property.
  *
  * @ingroup themeable
  */
@@ -423,7 +423,7 @@ function theme_pager_previous(array $variables) {
  *     the pager links.
  *   - fragment: An optional string for URL anchor.
  *
- * @since 1.34.3
+ * @since 1.34.3 Added fragment property.
  *
  * @ingroup themeable
  */
@@ -475,7 +475,7 @@ function theme_pager_next(array $variables) {
  *     the pager links.
  *   - fragment: An optional string for URL anchor.
  *
- * @since 1.34.3
+ * @since 1.34.3 Added fragment property.
  *
  * @ingroup themeable
  */
@@ -520,7 +520,7 @@ function theme_pager_last(array $variables) {
  *     pager link.
  *   - fragment: An optional string for URL anchor.
  *
- * @since 1.34.3
+ * @since 1.34.3 Added fragment property.
  *
  * @see theme_pager()
  *
