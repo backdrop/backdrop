@@ -310,7 +310,6 @@ function theme_pager(array $variables) {
   return '';
 }
 
-
 /**
  * @defgroup pagerpieces Pager pieces
  * @{
@@ -501,7 +500,6 @@ function theme_pager_last(array $variables) {
 
   return $output;
 }
-
 
 /**
  * Returns HTML for a link to a specific query result page.
