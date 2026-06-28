@@ -1293,3 +1293,34 @@ function file_update_1011() {
     return $message;
   }
 }
+
+/**
+ * Update File Entity Inline settings to core versions and disable contrib
+ * module.
+ */
+function file_update_1012() {
+  $config_names = config_get_names_with_prefix('field.instance.');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    if ($inline_fields_option = $config->get('widget.settings.file_entity_inline')) {
+      $config->set('widget.settings.inline_fields_option', $inline_fields_option);
+      $config->set('widget.settings.inline_fields', $config->get('widget.settings.file_entity_inline_fields'));
+      $config->clear('widget.settings.file_entity_inline');
+      $config->clear('widget.settings.file_entity_inline_fields');
+      $config->save();
+    }
+  }
+
+  // Remove the entry for the file_entity_inline module in the system table.
+  // This will "disable" the module if present. No other configuration was
+  // present for this module.
+  $module = db_query("SELECT name FROM {system} WHERE name = 'file_entity_inline' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'file_entity_inline');
+    db_query("DELETE FROM {system} WHERE name = 'file_entity_inline' AND type = 'module'");
+    backdrop_set_message(t('The contributed module %module has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array(
+      '%module' => 'File Entity Inline',
+      '%path' => BACKDROP_ROOT . '/' . $path,
+    )), 'warning');
+  }
+}
