@@ -472,6 +472,7 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
       );
       $form['instance_settings']['effect'] = array(
         '#title' => t('Effect'),
+        '#description' => t('The effect to use if collapsible.'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'blind' => t('Blind')),
         '#default_value' => isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : $formatter['instance_settings']['effect'],
@@ -479,6 +480,7 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
       );
       $form['instance_settings']['speed'] = array(
         '#title' => t('Speed'),
+        '#description' => t('The speed of the effect if collapsible.'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast')),
         '#default_value' => isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : $formatter['instance_settings']['speed'],
