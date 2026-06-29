@@ -85,6 +85,22 @@ function field_group_menu() {
             'access arguments' => array('administer site configuration'),
           );
 
+          $items["$path/groups/%field_group_menu"] = array(
+            'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_group_configure_form', $group_position),
+            'file' => 'field_group.field_ui.inc',
+          ) + $access;
+          $items["$path/groups/%field_group_menu/configure"] = array(
+            'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
+            'title callback' => 'field_group_menu_configure_title',
+            'title arguments' => array($group_position),
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_group_configure_form', $group_position),
+            'type' => MENU_CALLBACK,
+            'file' => 'field_group.field_ui.inc',
+          ) + $access;
+
           $items["$path/groups/%field_group_menu/delete"] = array(
             'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
             'title' => 'Delete',
@@ -109,6 +125,20 @@ function field_group_menu() {
   }
 
   return $items;
+}
+
+/**
+ * Title callback for configure form.
+ *
+ * @param object $group
+ *   Group definition.
+ *
+ * @return string
+ *
+ * @see field_group_menu()
+ */
+function field_group_menu_configure_title($group) {
+  return t('Configure @label', array('@label' => $group->label));
 }
 
 /**
@@ -322,7 +352,7 @@ function field_group_field_group_format_settings($group) {
 
   if (isset($formatter['instance_settings']['id'])) {
     $form['instance_settings']['id'] = array(
-      '#title' => t('ID'),
+      '#title' => t('ID attribute'),
       '#type' => 'textfield',
       '#default_value' => isset($group->format_settings['instance_settings']['id']) ? $group->format_settings['instance_settings']['id'] : (isset($formatter['instance_settings']['id']) ? $formatter['instance_settings']['id'] : ''),
       '#weight' => 10,
@@ -540,7 +570,7 @@ function field_group_remove_empty_display_groups(&$element, $groups) {
  */
 function field_group_field_group_format_summary($group) {
 
-  $group_form = module_invoke_all('field_group_format_settings', $group);
+  $group_form = (array) module_invoke_all('field_group_format_settings', $group);
 
   backdrop_alter('field_group_format_settings', $group_form, $group);
 
@@ -558,11 +588,11 @@ function field_group_field_group_format_summary($group) {
 
       $output .= '<strong>' . $key . '</strong> ';
 
+      // @todo only for display mode?
       if (isset($group_form['instance_settings'], $group_form['instance_settings'][$key]['#options'])) {
         if (is_array($value)) {
           $value = implode(', ', array_filter($value));
-        }
-        else {
+        } else {
           $value = $group_form['instance_settings'][$key]['#options'][$value];
         }
       }
@@ -796,7 +826,7 @@ function field_group_formatter_info() {
     }
     else {
       $formatters = array();
-      $formatters += module_invoke_all('field_group_formatter_info');
+      $formatters += (array) module_invoke_all('field_group_formatter_info');
       $hidden_region = array(
         'label' => '<' . t('Hidden') . '>',
         'description' => '',

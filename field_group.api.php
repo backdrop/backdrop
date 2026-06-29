@@ -17,7 +17,7 @@
  *   This is done to be sure fieldgroup is not taking fieldsets from profile2, commerce line items,
  *   commerce user profiles, ... .
  *   When trying to merge a programmatically created field wrapper (div, markup, fieldset, ...) into
- *   groups, you might consider adding it in #field_groups as well if you want the element processed
+ *   groups, you might consider adding it in #fieldgroups as well if you want the element processed
  *   by fieldgroup.
  */
 

@@ -1,3 +1,7 @@
+/**
+ * @file
+ * Attaches the behaviors for the Field UI of the Field Group module.
+ */
 
 (function($) {
 
