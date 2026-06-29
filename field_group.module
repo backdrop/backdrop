@@ -238,18 +238,6 @@ function field_group_theme_registry_alter(&$theme_registry) {
   if (isset($theme_registry['entity_plus'])) {
     $entities[] = 'entity_plus';
   }
-
-  foreach ($entities as $entity) {
-    if (isset($theme_registry[$entity])) {
-      $theme_registry[$entity]['preprocess functions'][] = 'field_group_build_entity_groups';
-      // DS support, make sure it comes after field_group.
-      if ($key = array_search('ds_entity_variables', $theme_registry[$entity]['preprocess functions'])) {
-        unset($theme_registry[$entity]['preprocess functions'][$key]);
-        $theme_registry[$entity]['preprocess functions'][] = 'ds_entity_variables';
-      }
-    }
-  }
-
 }
 
 /**
