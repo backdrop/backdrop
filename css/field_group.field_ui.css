@@ -17,10 +17,6 @@ tr.field-group input.form-submit {
   float: none;
 }
 
-.field-ui-overview tr.field-group .field-formatter-settings-edit-wrapper {
-  float: none;
-}
-
 #field-display-overview .field-formatter-settings-edit-wrapper a {
   display: block;
 }
