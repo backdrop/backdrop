@@ -485,7 +485,7 @@ function field_group_format_settings_form(&$group) {
   if (!empty($addition['label']['#description'])) {
     $form['label']['#description'] = $addition['label']['#description'];
   }
-  $form['#validate'] = array('field_group_format_settings_form_validate');
+
   return $form;
 }
 
@@ -897,7 +897,13 @@ function field_group_delete_form($form, &$form_state, $group, $view_mode = 'form
 }
 
 /**
- * Submit handler for removing a group.
+ * Remove group from bundle.
+ *
+ * @param array $form
+ *   An associative array containing the structure of the form.
+ * @param array $form_state
+ *   An associative array containing the current state of the form, which is
+ *   passed by reference.
  */
 function field_group_delete_form_submit($form, &$form_state) {
   $group = $form['#group'];
@@ -913,15 +919,16 @@ function field_group_delete_form_submit($form, &$form_state) {
 }
 
 /**
- * Remove group from bundle.
+ * Configure group on the Manage fields screen.
  *
  * @param array $form
  *   An associative array containing the structure of the form.
  * @param array $form_state
  *   An associative array containing the current state of the form, which is
  *   passed by reference.
- *
- * @todo we'll have to reset all view mode settings.
+ * @param object $group
+ *   Group object.
+ * @param string $view_mode
  */
 function field_group_configure_form($form, &$form_state, $group, $view_mode = 'form') {
   $form['#group'] = $group;
@@ -939,8 +946,10 @@ function field_group_configure_form($form, &$form_state, $group, $view_mode = 'f
   );
 
   $addition = (array) module_invoke_all('field_group_format_settings', $group);
-  $form += $addition;
 
+  backdrop_alter('field_group_format_settings', $addition, $group);
+
+  $form += $addition;
   // Give fieldgroup implementations the chance to alter the description.
   if (!empty($addition['label']['#description'])) {
     $form['label']['#description'] = $addition['label']['#description'];

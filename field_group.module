@@ -588,7 +588,6 @@ function field_group_field_group_format_summary($group) {
 
       $output .= '<strong>' . $key . '</strong> ';
 
-      // @todo only for display mode?
       if (isset($group_form['instance_settings'], $group_form['instance_settings'][$key]['#options'])) {
         if (is_array($value)) {
           $value = implode(', ', array_filter($value));
