@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Test file for Field Group UI.
@@ -9,12 +8,30 @@
  * Provides common functionality for the Field Group UI test classes.
  */
 class GroupTestCase extends BackdropWebTestCase {
+  /**
+   * @var User
+   */
   protected $admin_user;
+
+  /**
+   * @var string
+   */
   protected $group_label;
+
+  /**
+   * @var string
+   */
   protected $group_name;
+
+  /**
+   * @var string
+   */
   protected $group_name_input;
 
-  function setUp() {
+  /**
+   * Set up.
+   */
+  public function setUp() {
     $modules[] = 'node';
     $modules[] = 'field_ui';
     $modules[] = 'field_test';
@@ -23,7 +40,8 @@ class GroupTestCase extends BackdropWebTestCase {
     parent::setUp($modules);
 
     // Create test user.
-    $this->admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer fields'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content', 'administer content types', 'administer fields'));
     $this->backdropLogin($this->admin_user);
   }
 

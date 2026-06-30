@@ -3928,7 +3928,7 @@ function system_update_1106() {
 
 /**
  * Warn that field_group_extra module needs to be downloaded and installed
- * if Accordion, Horizonal Tabs, and Multipage types are enabled.
+ * if Accordion, Horizontal Tabs, and Multipage types are enabled.
  */
 function system_update_1107() {
   $extras_module = db_select('system', 's')
@@ -3940,12 +3940,14 @@ function system_update_1107() {
   $extras_enabled = FALSE;
   $field_groups = config_get_names_with_prefix('field_group.field_group.');
   $extra_types = array(
+    // cspell:disable
     'accordion',
     'accordion-item',
     'htab',
     'htabs',
     'multipage',
     'multipage-group',
+    // cspell:enable
   );
   foreach ($field_groups as $field_group) {
     $config = config($field_group);
@@ -3958,6 +3960,7 @@ function system_update_1107() {
   if ($extras_enabled) {
     if ($extras_module === FALSE) {
       // Field Group Extra is not present so set message to fetch it.
+      // cspell:ignore Multipage
       backdrop_set_message(t('The <em>Accordion</em>, <em>Horizontal tabs</em>, and <em>Multipage</em> field group types have been moved out of the Field Group module. The contrib module !module should be downloaded and enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array('!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra'))));
     } elseif (!$extras_module) {
       // Module exists but isn't enabled.

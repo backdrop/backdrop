@@ -6,16 +6,16 @@
  */
 Backdrop.FieldGroup = Backdrop.FieldGroup || {};
 Backdrop.FieldGroup.Effects = Backdrop.FieldGroup.Effects || {};
-Backdrop.FieldGroup.groupWithfocus = null;
+Backdrop.FieldGroup.groupWithFocus = null;
 
-Backdrop.FieldGroup.setGroupWithfocus = function(element) {
+Backdrop.FieldGroup.setGroupWithFocus = function(element) {
   element.css({display: 'block'});
-  Backdrop.FieldGroup.groupWithfocus = element;
+  Backdrop.FieldGroup.groupWithFocus = element;
 }
 
-Backdrop.FieldGroup.setDetailsWithfocus = function(element) {
+Backdrop.FieldGroup.setDetailsWithFocus = function(element) {
   element.attr('open', 'TRUE');
-  Backdrop.FieldGroup.groupWithfocus = element;
+  Backdrop.FieldGroup.groupWithFocus = element;
 }
 
 /**
@@ -31,7 +31,7 @@ Backdrop.FieldGroup.Effects.processFieldset = {
         }
         if ($('.error', $(this)).length) {
           $('legend span.fieldset-legend', $(this)).eq(0).addClass('error');
-          Backdrop.FieldGroup.setGroupWithfocus($(this));
+          Backdrop.FieldGroup.setGroupWithFocus($(this));
         }
       });
     }
@@ -51,7 +51,7 @@ Backdrop.FieldGroup.Effects.processFieldset = {
         }
         if ($('.error', $(this)).length) {
           $('summary span', $(this)).eq(0).addClass('error');
-          Backdrop.FieldGroup.setDetailsWithfocus($(this));
+          Backdrop.FieldGroup.setDetailsWithFocus($(this));
         }
       });
     }
@@ -76,7 +76,7 @@ Backdrop.FieldGroup.Effects.processTabs = {
           $(this).data('verticalTab').link.parent().addClass('error');
           // Focus the first tab with error.
           if (!errorFocussed) {
-            Backdrop.FieldGroup.setGroupWithfocus($(this));
+            Backdrop.FieldGroup.setGroupWithFocus($(this));
             $(this).data('verticalTab').focus();
             errorFocussed = true;
           }
@@ -150,12 +150,12 @@ Backdrop.behaviors.fieldGroups = {
     $('.fieldset-wrapper .fieldset > legend').css({ display: 'block' });
     $('.vertical-tabs fieldset.fieldset').addClass('default-fallback');
 
-    // Fieldsets: set the hash in url to remember last userselection.
+    // Fieldsets: set the hash in url to remember last user selection.
     $('.group-wrapper ul li').once('group-wrapper-ul-processed', function() {
       var fieldGroupNavigationListIndex = $(this).index();
       $(this).children('a').click(function() {
         var fieldset = $('.group-wrapper fieldset').get(fieldGroupNavigationListIndex);
-        // Grab the first id, holding the wanted hashurl.
+        // Grab the first id, holding the wanted hash url.
         var hashUrl = $(fieldset).attr('id').replace(/^field_group-/, '').split(' ')[0];
         window.location.hash = hashUrl;
       });

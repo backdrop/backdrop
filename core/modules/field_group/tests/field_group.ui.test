@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Test file for Field Group UI.
@@ -12,14 +11,17 @@ include_once('field_group.test');
  */
 class GroupUITestCase extends GroupTestCase {
 
-  function setUp() {
+  /**
+   * Set up.
+   */
+  public function setUp() {
     parent::setUp();
   }
 
   /**
    * Test the creation a group on the post content type.
    */
-  function createGroup() {
+  public function createGroup() {
 
     // Create random group name.
     $this->group_label = $this->randomName(8);
@@ -52,17 +54,23 @@ class GroupUITestCase extends GroupTestCase {
   /**
    * Delete a group.
    */
-  function deleteGroup() {
+  public function deleteGroup() {
 
     $this->backdropPost('admin/structure/types/manage/post/groups/' . $this->group_name . '/delete/form', array(), t('Delete'));
-    $this->assertRaw(t('The group %label has been deleted from the %post content type.', array('%label' => $this->group_label, '%post' => 'Post')), t('Group removal message displayed on screen.'));
+    $this->assertRaw(t('The group %label has been deleted from the %post content type.', array(
+      '%label' => $this->group_label,
+      '%post' => 'Post'),
+    ), t('Group removal message displayed on screen.'));
 
     // Test that group is not in the $groups array.
     $groups = field_group_info_groups('node', 'post', 'form', TRUE);
     $this->assertFalse(array_key_exists($this->group_name, $groups), t('Group not found in groups array while deleting'));
 
     $this->backdropPost('admin/structure/types/manage/post/groups/' . $this->group_name . '/delete/default', array(), t('Delete'));
-    $this->assertRaw(t('The group %label has been deleted from the %post content type.', array('%label' => $this->group_label, '%post' => 'Post')), t('Group removal message displayed on screen.'));
+    $this->assertRaw(t('The group %label has been deleted from the %post content type.', array(
+      '%label' => $this->group_label,
+      '%post' => 'Post',
+    )), t('Group removal message displayed on screen.'));
 
     // Test that group is not in the $groups array.
     $groups = field_group_info_groups('node', 'post', 'default', TRUE);
@@ -72,7 +80,7 @@ class GroupUITestCase extends GroupTestCase {
   /**
    * General CRUD.
    */
-  function testCRUDGroup() {
+  public function testCRUDGroup() {
     $this->createGroup();
     $this->deleteGroup();
   }
@@ -80,7 +88,7 @@ class GroupUITestCase extends GroupTestCase {
   /**
    * Nest a field underneath a group.
    */
-  function testNestField() {
+  public function testNestField() {
 
     $this->createGroup();
 
