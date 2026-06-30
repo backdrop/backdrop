@@ -6,16 +6,16 @@
  */
 Backdrop.FieldGroup = Backdrop.FieldGroup || {};
 Backdrop.FieldGroup.Effects = Backdrop.FieldGroup.Effects || {};
-Backdrop.FieldGroup.groupWithfocus = null;
+Backdrop.FieldGroup.groupWithFocus = null;
 
-Backdrop.FieldGroup.setGroupWithfocus = function(element) {
+Backdrop.FieldGroup.setGroupWithFocus = function(element) {
   element.css({display: 'block'});
-  Backdrop.FieldGroup.groupWithfocus = element;
+  Backdrop.FieldGroup.groupWithFocus = element;
 }
 
-Backdrop.FieldGroup.setDetailsWithfocus = function(element) {
+Backdrop.FieldGroup.setDetailsWithFocus = function(element) {
   element.attr('open', 'TRUE');
-  Backdrop.FieldGroup.groupWithfocus = element;
+  Backdrop.FieldGroup.groupWithFocus = element;
 }
 
 /**
@@ -31,7 +31,7 @@ Backdrop.FieldGroup.Effects.processFieldset = {
         }
         if ($('.error', $(this)).length) {
           $('legend span.fieldset-legend', $(this)).eq(0).addClass('error');
-          Backdrop.FieldGroup.setGroupWithfocus($(this));
+          Backdrop.FieldGroup.setGroupWithFocus($(this));
         }
       });
     }
@@ -51,7 +51,7 @@ Backdrop.FieldGroup.Effects.processFieldset = {
         }
         if ($('.error', $(this)).length) {
           $('summary span', $(this)).eq(0).addClass('error');
-          Backdrop.FieldGroup.setDetailsWithfocus($(this));
+          Backdrop.FieldGroup.setDetailsWithFocus($(this));
         }
       });
     }
@@ -76,7 +76,7 @@ Backdrop.FieldGroup.Effects.processTabs = {
           $(this).data('verticalTab').link.parent().addClass('error');
           // Focus the first tab with error.
           if (!errorFocussed) {
-            Backdrop.FieldGroup.setGroupWithfocus($(this));
+            Backdrop.FieldGroup.setGroupWithFocus($(this));
             $(this).data('verticalTab').focus();
             errorFocussed = true;
           }
