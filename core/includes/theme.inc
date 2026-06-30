@@ -2842,7 +2842,7 @@ function template_preprocess_page(&$variables) {
   // Add a class that provides the layout machine name if layout module is enabled.
   if (module_exists('layout')) {
     $layout = layout_get_layout_by_path();
-    $variables['classes'][] = backdrop_html_class('layout-name-' . $layout->name);
+    $variables['classes'][] = backdrop_html_class('layout-name--' . $layout->name);
   }
 
   // If on an individual node page, add the node type to body classes.
