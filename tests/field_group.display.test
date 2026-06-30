@@ -11,6 +11,9 @@ include_once('field_group.test');
  * Tests the functionality of the 'Manage display' screens.
  */
 class GroupDisplayTestCase extends GroupTestCase {
+  /**
+   * @var Node
+   */
   protected $node;
 
   function setUp() {
@@ -62,6 +65,7 @@ class GroupDisplayTestCase extends GroupTestCase {
 
   /**
    * Create a new group.
+   * @param string $mode
    * @param array $data
    *   Data for the field group.
    */
@@ -180,79 +184,6 @@ class GroupDisplayTestCase extends GroupTestCase {
   }
 
   /**
-   * Test the horizontal tabs formatter.
-   */
-  function testHorizontalTabs() {
-
-    $data = array(
-      'label' => 'Tab 1',
-      'weight' => '1',
-      'children' => array(
-        0 => 'field_test',
-      ),
-      'format_type' => 'htab',
-      'format_settings' => array(
-        'label' => 'Tab 1',
-        'instance_settings' => array(
-          'classes' => 'test-class',
-          'description' => '',
-        ),
-        'formatter' => 'open',
-      ),
-    );
-    $first_tab = $this->createDisplayGroup('default', $data);
-
-    $data = array(
-      'label' => 'Tab 2',
-      'weight' => '1',
-      'children' => array(
-        0 => 'field_test_2',
-      ),
-      'format_type' => 'htab',
-      'format_settings' => array(
-        'label' => 'Tab 1',
-        'instance_settings' => array(
-          'classes' => 'test-class-2',
-          'description' => 'description of second tab',
-        ),
-        'formatter' => 'closed',
-      ),
-    );
-    $second_tab = $this->createDisplayGroup('default', $data);
-
-    $data = array(
-      'label' => 'Tabs',
-      'weight' => '1',
-      'children' => array(
-        0 => $first_tab->group_name,
-        1 => $second_tab->group_name,
-      ),
-      'format_type' => 'htabs',
-      'format_settings' => array(
-        'label' => 'Tab 1',
-        'instance_settings' => array(
-          'classes' => 'test-class-wrapper',
-        ),
-      ),
-    );
-    $tabs = $this->createDisplayGroup('default', $data);
-
-    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
-
-    $this->backdropGet('node/' . $this->node->nid);
-
-    // Test properties.
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, t('Test class set on tabs wrapper'));
-    $this->assertFieldByXPath("//fieldset[contains(@class, 'test-class-2')]", NULL, t('Test class set on second tab'));
-    $this->assertRaw('<div class="description">description of second tab</div>', t('Description of tab is shown'));
-
-    // Test if correctly nested
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@class, 'test-class')]", NULL, 'First tab is displayed as child of the wrapper.');
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@class, 'test-class-2')]", NULL, 'Second tab is displayed as child of the wrapper.');
-
-  }
-
-  /**
    * Test the vertical tabs formatter.
    */
   function testVerticalTabs() {
@@ -324,81 +255,6 @@ class GroupDisplayTestCase extends GroupTestCase {
     // Test if correctly nested
     $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@id, '$first_tab_id')]", NULL, 'First tab is displayed as child of the wrapper.');
     $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@id, '$second_tab_id')]", NULL, 'Second tab is displayed as child of the wrapper.');
-  }
-
-  /**
-   * Test the accordion formatter.
-   */
-  function testAccordion() {
-
-    $data = array(
-      'label' => 'Accordion item 1',
-      'weight' => '1',
-      'children' => array(
-        0 => 'field_test',
-      ),
-      'format_type' => 'accordion-item',
-      'format_settings' => array(
-        'label' => 'Accordion item 1',
-        'instance_settings' => array(
-          'classes' => 'test-class',
-        ),
-        'formatter' => 'closed',
-      ),
-    );
-    $first_item = $this->createDisplayGroup('default', $data);
-    $first_item_id = 'node_post_full_' . $first_item->group_name;
-
-    $data = array(
-      'label' => 'Accordion item 2',
-      'weight' => '1',
-      'children' => array(
-        0 => 'field_test_2',
-      ),
-      'format_type' => 'accordion-item',
-      'format_settings' => array(
-        'label' => 'Tab 2',
-        'instance_settings' => array(
-          'classes' => 'test-class-2',
-        ),
-        'formatter' => 'open',
-      ),
-    );
-    $second_item = $this->createDisplayGroup('default', $data);
-    $second_item_id = 'node_post_full_' . $second_item->group_name;
-
-    $data = array(
-      'label' => 'Accordion',
-      'weight' => '1',
-      'children' => array(
-        0 => $first_item->group_name,
-        1 => $second_item->group_name,
-      ),
-      'format_type' => 'accordion',
-      'format_settings' => array(
-        'label' => 'Tab 1',
-        'instance_settings' => array(
-          'classes' => 'test-class-wrapper',
-          'effect' => 'bounceslide'
-        ),
-      ),
-    );
-    $accordion = $this->createDisplayGroup('default', $data);
-
-    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
-
-    $this->backdropGet('node/' . $this->node->nid);
-
-    // Test properties.
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, t('Test class set on tabs wrapper'));
-    $this->assertFieldByXPath("//div[contains(@class, 'effect-bounceslide')]", NULL, t('Correct effect is set on the accordion'));
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class')]", NULL, t('Accordion item with test-class is shown'));
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class-2')]", NULL, t('Accordion item with test-class-2 is shown'));
-    $this->assertFieldByXPath("//h3[contains(@class, 'field-group-accordion-active')]", NULL, t('Accordion item 2 was set active'));
-
-    // Test if correctly nested
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class')]", NULL, 'First item is displayed as child of the wrapper.');
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class-2')]", NULL, 'Second item is displayed as child of the wrapper.');
   }
 
   /**

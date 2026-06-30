@@ -9,9 +9,24 @@
  * Provides common functionality for the Field Group UI test classes.
  */
 class GroupTestCase extends BackdropWebTestCase {
+  /**
+   * @var User
+   */
   protected $admin_user;
+
+  /**
+   * @var string
+   */
   protected $group_label;
+
+  /**
+   * @var string
+   */
   protected $group_name;
+
+  /**
+   * @var string
+   */
   protected $group_name_input;
 
   function setUp() {
