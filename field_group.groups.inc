@@ -36,7 +36,7 @@ function _field_group_field_group_formatter_info() {
         'label' => t('Details'),
         'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => '', 'label_element' => 'span'),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => '', 'label_element' => 'span', 'name' => '',),
         'default_formatter' => 'closed',
       ),
       'tabs' => array(
@@ -76,7 +76,7 @@ function _field_group_field_group_formatter_info() {
         'label' => t('Details'),
         'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('description' => '', 'label_element' => 'span', 'classes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array('description' => '', 'label_element' => 'span', 'classes' => '', 'required_fields' => 1, 'id' => '', 'name' => ''),
         'default_formatter' => 'closed',
       ),
       'tabs' => array(
@@ -144,6 +144,9 @@ function field_group_pre_render_details(&$element, $group, &$form) {
   );
   if (!empty($element['#id'])) {
     $element['#attributes']['id'] = $element['#id'];
+  }
+  if (!empty($group->format_settings['instance_settings']['name'])) {
+    $element['#attributes']['name'] = $group->format_settings['instance_settings']['name'];
   }
   if (!$group->collapsed) {
     $element['#attributes']['open'] = TRUE;
@@ -498,6 +501,13 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
         '#options' => array('span' => t('Span'), 'strong' => t('Strong'),  'em' => t('Emphasis'), 'h2' => t('Header 2'), 'h3' => t('Header 3')),
         '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
         '#weight' => 2,
+      );
+      $form['instance_settings']['name'] = array(
+        '#title' => t('Name attribute'),
+        '#type' => 'textfield',
+        '#default_value' => isset($group->format_settings['instance_settings']['name']) ? $group->format_settings['instance_settings']['name'] : $formatter['instance_settings']['name'],
+        '#description' => t('The name attribute specifies a group name, as per the <a href="@url">HTML specification</a>. Give multiple <code>details</code> elements the same name value to group them. Only one of the grouped <code>details</code> elements can be open at a time — opening one will cause another to close — so do not use if that behaviour is not desired. If multiple grouped <code>details</code> elements are given the open attribute, only the first one in the source order will be rendered open.', array('@url' => 'https://html.spec.whatwg.org/multipage/interactive-elements.html#the-details-element')),
+        '#weight' => 5,
       );
       break;
     case 'tabs':
