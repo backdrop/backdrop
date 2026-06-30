@@ -1,0 +1,17 @@
+[GroupUITestCase]
+name = Field Group UI tests
+description = Test the Field Group UI.
+group = Field Group
+file = field_group.ui.test
+
+[GroupDisplayTestCase]
+name = Field Group Display tests
+description = Test the field group display for html-element, div, fieldset, details, vertical tabs.
+group = Field Group
+file = field_group.ui.test
+
+[GroupExtraDisplayTestCase]
+name = Field Group Extra Display tests
+description = Test the field group display for horizontal tabs, multipage and accordions.
+group = Field Group
+file = field_group.extra.test
