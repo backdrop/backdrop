@@ -11,9 +11,6 @@
 // Formatters: html-element, div, fieldset, details, vertical tabs.
 require_once dirname(__FILE__) . '/field_group.groups.inc';
 
-// Extra formatters: horizontal tabs, multipage, accordions.
-require_once dirname(__FILE__) . '/extra/field_group.groups.inc';
-
 /**
  * Implements hook_config_info().
  */
@@ -1217,11 +1214,9 @@ function _field_group_preserve_shared_instance_settings($new_instances, $origina
 function field_group_field_group_formatter_info() {
   // Formatters: html-element, div, fieldset, details, vertical tabs.
   $formatters = _field_group_field_group_formatter_info();
-  // Extra formatters: horizontal tabs, multipage, accordions.
-  $extra_formatters = _field_group_extra_field_group_formatter_info();
   return array(
-    'form' => $formatters['form'] + $extra_formatters['form'],
-    'display' => $formatters['display'] + $extra_formatters['display'],
+    'form' => $formatters['form'],
+    'display' => $formatters['display'],
   );
 }
 
@@ -1231,8 +1226,6 @@ function field_group_field_group_formatter_info() {
 function field_group_field_group_format_settings_alter(&$form, &$group) {
   // Formatters: html-element, div, fieldset, details, vertical tabs.
   _field_group_field_group_format_settings_alter($form, $group);
-  // Extra formatters: horizontal tabs, multipage, accordions.
-  _field_group_extra_field_group_format_settings_alter($form, $group);
 }
 
 /**
@@ -1241,8 +1234,6 @@ function field_group_field_group_format_settings_alter(&$form, &$group) {
 function field_group_field_group_build_pre_render_alter(&$element) {
   // Formatters: html-element, div, fieldset, details, vertical tabs.
   _field_group_field_group_build_pre_render_alter($element);
-  // Extra formatters: horizontal tabs, multipage, accordions.
-  _field_group_extra_field_group_build_pre_render_alter($element);
 }
 
 /**
@@ -1251,8 +1242,6 @@ function field_group_field_group_build_pre_render_alter(&$element) {
 function field_group_field_group_field_ui_parent_requirements_alter(&$parent_requirements, &$context) {
   // Formatters: html-element, div, fieldset, details, vertical tabs.
   _field_group_field_group_field_ui_parent_requirements_alter($parent_requirements, $context);
-  // Extra formatters: horizontal tabs, multipage, accordions.
-  _field_group_extra_field_group_field_ui_parent_requirements_alter($parent_requirements, $context);
 }
 
 /**
@@ -1261,6 +1250,4 @@ function field_group_field_group_field_ui_parent_requirements_alter(&$parent_req
 function field_group_field_group_html_classes_alter(&$classes, &$group) {
   // Formatters: html-element, div, fieldset, details, vertical tabs.
   _field_group_field_group_html_classes_alter($classes, $group);
-  // Extra formatters: horizontal tabs, multipage, accordions.
-  _field_group_extra_field_group_html_classes_alter($classes, $group);
 }

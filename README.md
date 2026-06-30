@@ -1,30 +1,43 @@
 Field Group
 ===========
 
-This module will group a set of fields with different HTML wrappers on the content type form and/or view. You can add fieldgroups in several types with their own format settings.
+This module will group a set of fields with different HTML wrappers on the
+content type form and/or view. You can add field groups in several types with
+their own format settings.
 
-Fields can be dragged into groups with unlimited nesting. Each Fieldgroup format comes with a configuration form, specific for that format type. Note that field_group will only group fields, it can not be used to hide certain fields since this a permission matter.
+Fields can be dragged into groups with unlimited nesting. Each Field group
+format comes with a configuration form, specific for that format type. Note that
+field_group will only group fields, it can not be used to hide certain fields
+since this a permission matter.
 
-Some formats come in pairs. These types have an HTML wrapper to nest its fieldgroup children. For example, place vertical tabs into the vertical tab group. There is one exception to this rule: you can use a vertical tab without a wrapper when the additional settings tabs are available, such as with content type forms.
+Some formats come in pairs. These types have an HTML wrapper to nest its field
+group children. For example, place vertical tabs into the vertical tab group.
+There is one exception to this rule: you can use a vertical tab without a
+wrapper when the additional settings tabs are available, such as with content
+type forms.
 
 Available group types:
 
-* Fieldsets
+* Fieldset
 * [HTML Details](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details)
-* Horizontal tabs
 * Vertical tabs
-* Accordions
-* Divs
-* Multipage steps: (Note: This is only client side.)
-* HTML5 group type
-* Html element
+* Div
+* HTML element
 
 Field Group has API functions to add your own formatter and rendering for it.
+
+Update
+------
+
+Some group types have been moved to a separate module [Field Group Extra](https://backdropcms.org/project/field_group_extra).
+Install that module if you require: accordions, horizontal tabs or multipage
+group types.
 
 License
 -------
 
-This project is GPL v2 software. See the LICENSE.txt file in this directory for complete text.
+This project is GPL v2 software. See the LICENSE.txt file in this directory for
+complete text.
 
 Maintainers
 -----------
