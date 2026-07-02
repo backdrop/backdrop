@@ -507,7 +507,7 @@ function filter_admin_format_filter_settings_form_ajax($form, &$form_state) {
     $configure_form = backdrop_get_form('filter_admin_format_filter_settings_form', $format, $name);
     $title = t('Configure filter');
     $options = array(
-      'dialogClass' => 'filter-dialog',
+      'classes' => array('ui-dialog' => 'filter-dialog'),
       'width' => '90%',
     );
 

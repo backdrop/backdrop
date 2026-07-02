@@ -1363,8 +1363,41 @@ function ajax_command_open_dialog($selector, $title, $html, array $dialog_option
 
   $dialog_options['title'] = $title;
 
+  $classes = array();
+  if (isset($dialog_options['classes']['ui-dialog'])) {
+    $classes[] = $dialog_options['classes']['ui-dialog'];
+  }
+  // Support converting the legacy "dialogClass" option to "classes".
+  if (isset($dialog_options['dialogClass'])) {
+    $classes[] = $dialog_options['dialogClass'];
+    unset($dialog_options['dialogClass']);
+  }
+  if ($classes) {
+    $dialog_options['classes']['ui-dialog'] = implode(' ', $classes);
+  }
+
   // For consistency ensure the modal option is set to TRUE or FALSE.
   $dialog_options['modal'] = isset($dialog_options['modal']) && $dialog_options['modal'];
+
+  // Filter the list of buttons.
+  if (isset($dialog_options['buttons'])) {
+    foreach ($dialog_options['buttons'] as $button_index => $button) {
+      // Only allow specific attributes to be defined for a button.
+      $button = array_intersect_key($button, array_flip(array(
+        'disabled',
+        'icons',
+        'label',
+        'text',
+      )));
+      foreach ($button as $attribute => $value) {
+        if (is_string($value)) {
+          // Apply filter_xss() to button attribute values.
+          $button[$attribute] = filter_xss($value);
+        }
+      }
+      $dialog_options['buttons'][$button_index] = $button;
+    }
+  }
 
   return array(
     'command' => 'openDialog',

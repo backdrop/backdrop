@@ -45,7 +45,7 @@ function theme_update_last_check($variables) {
   if (user_access('administer site configuration')) {
     $output .= l(t('Check manually'), 'admin/reports/updates/check', array('attributes' => array('class' => array('button', 'button-secondary')), 'query' => backdrop_get_destination()));
   }
-  if (module_exists('installer') && user_access('access_site_reports')) {
+  if (module_exists('installer') && user_access('access site reports')) {
     // Link to the updates installation page from the available updates report
     // (don't add this link to the "Available updates" Dashboard block).
     if ($variables['theme_hook_original'] == 'update_last_check') {

@@ -3378,6 +3378,8 @@ function user_action_info() {
     'label' => t('Block user(s)'),
     'type' => 'user',
     'callback' => 'user_block_user_action',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer users'),
     'file' => 'user.actions.inc',
     'weight' => -2,
   );
@@ -3385,6 +3387,8 @@ function user_action_info() {
     'label' => t('Unblock user(s)'),
     'type' => 'user',
     'callback' => 'user_unblock_user_action',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer users'),
     'file' => 'user.actions.inc',
     'weight' => -1,
   );
@@ -3392,6 +3396,8 @@ function user_action_info() {
     'label' => t('Cancel user account(s)'),
     'type' => 'user',
     'callback' => 'user_cancel_user_action',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer users'),
     'file' => 'user.actions.inc',
     'weight' => 10,
   );
@@ -3399,18 +3405,13 @@ function user_action_info() {
   $roles = user_roles(TRUE, NULL, TRUE);
   $index = 0;
   foreach ($roles as $role_name => $role) {
-    if ($role_name === BACKDROP_AUTHENTICATED_ROLE) {
-      continue;
-    }
-    if (!user_access('assign roles') && !user_access('administer permissions')) {
-      continue;
-    }
     $index++;
-
     $actions['user_add_role_' . $role_name] = array(
       'label' => t('Add role "@label"', array('@label' => $role->label)),
       'type' => 'user',
       'callback' => 'user_add_role_action',
+      'access callback' => 'user_access',
+      'access arguments' => array('assign roles'),
       'file' => 'user.actions.inc',
       'weight' => 120 + $index,
       'role_name' => $role_name,
@@ -3419,6 +3420,8 @@ function user_action_info() {
       'label' => t('Remove role "@label"', array('@label' => $role->label)),
       'type' => 'user',
       'callback' => 'user_remove_role_action',
+      'access callback' => 'user_access',
+      'access arguments' => array('assign roles'),
       'file' => 'user.actions.inc',
       'weight' => 150 + $index,
       'role_name' => $role_name,
