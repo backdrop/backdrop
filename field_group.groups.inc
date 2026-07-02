@@ -16,27 +16,41 @@ function _field_group_field_group_formatter_info() {
       'html-element' => array(
         'label' => t('HTML element'),
         'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
-        'instance_settings' => array('wrapper' => '', 'wrapper_other' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array(
+          'wrapper' => '', 'wrapper_other' => 'div', 'show_label' => 0,
+          'label_element' => 'div', 'classes' => '', 'attributes' => '',
+          'required_fields' => 1, 'id' => '',
+        ),
       ),
       'div' => array(
         'label' => t('Div'),
         'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array(
+          'description' => '', 'show_label' => 1, 'label_element' => 'h3',
+          'effect' => 'none', 'speed' => 'fast', 'classes' => '',
+          'required_fields' => 1, 'id' => '',
+        ),
         'default_formatter' => 'open',
       ),
       'fieldset' => array(
         'label' => t('Fieldset'),
         'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array(
+          'description' => '', 'classes' => '', 'required_fields' => 1,
+          'id' => '',
+        ),
         'default_formatter' => 'open',
       ),
       'details' => array(
         'label' => t('Details'),
         'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => '', 'label_element' => 'span', 'name' => '',),
+        'instance_settings' => array(
+          'description' => '', 'classes' => '', 'required_fields' => 1,
+          'id' => '', 'label_element' => 'span', 'name' => '',
+        ),
         'default_formatter' => 'closed',
       ),
       'tabs' => array(
@@ -48,7 +62,9 @@ function _field_group_field_group_formatter_info() {
         'label' => t('Vertical tab'),
         'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
+        'instance_settings' => array(
+          'description' => '', 'classes' => '', 'required_fields' => 1,
+        ),
         'default_formatter' => 'closed',
       ),
     ),
@@ -56,27 +72,39 @@ function _field_group_field_group_formatter_info() {
       'html-element' => array(
         'label' => t('HTML element'),
         'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
-        'instance_settings' => array('wrapper' => '', 'wrapper_other' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array(
+          'wrapper' => '', 'wrapper_other' => 'div', 'show_label' => 0,
+          'label_element' => 'div', 'classes' => '', 'attributes' => '',
+          'required_fields' => 1, 'id' => '',
+        ),
       ),
       'div' => array(
         'label' => t('Div'),
         'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'id' => ''),
+        'instance_settings' => array(
+          'description' => '', 'show_label' => 1, 'label_element' => 'h3',
+          'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'id' => '',
+        ),
         'default_formatter' => 'open',
       ),
       'fieldset' => array(
         'label' => t('Fieldset'),
         'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'id' => ''),
+        'instance_settings' => array(
+          'description' => '', 'classes' => '', 'id' => '',
+        ),
         'default_formatter' => 'open',
       ),
       'details' => array(
         'label' => t('Details'),
         'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('description' => '', 'label_element' => 'span', 'classes' => '', 'required_fields' => 1, 'id' => '', 'name' => ''),
+        'instance_settings' => array(
+          'description' => '', 'label_element' => 'span', 'classes' => '',
+          'required_fields' => 1, 'id' => '', 'name' => '',
+        ),
         'default_formatter' => 'closed',
       ),
       'tabs' => array(
@@ -106,7 +134,7 @@ function _field_group_field_group_formatter_info() {
  * @param array $form
  *   The root element or form.
  */
-function field_group_pre_render_fieldset(&$element, $group, &$form) {
+function field_group_pre_render_fieldset(array &$element, $group, array &$form) {
 
   $element += array(
     '#type' => 'fieldset',
@@ -134,7 +162,7 @@ function field_group_pre_render_fieldset(&$element, $group, &$form) {
  * @param array $form
  *   The root element or form.
  */
-function field_group_pre_render_details(&$element, $group, &$form) {
+function field_group_pre_render_details(array &$element, $group, array &$form) {
   $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'span';
   $element += array(
     '#type' => 'details',
@@ -164,7 +192,7 @@ function field_group_pre_render_details(&$element, $group, &$form) {
  * @param array $form
  *   The root element or form.
  */
-function field_group_pre_render_html_element(&$element, $group, &$form) {
+function field_group_pre_render_html_element(array &$element, $group, array &$form) {
   $html_element = isset($group->format_settings['instance_settings']['wrapper_other']) ? $group->format_settings['instance_settings']['wrapper_other'] : 'div';
   $wrapper = $group->format_settings['instance_settings']['wrapper'];
   if (!empty($wrapper) && $wrapper != 'other') {
@@ -226,7 +254,7 @@ function field_group_pre_render_html_element(&$element, $group, &$form) {
  * @param array $form
  *   The root element or form.
  */
-function field_group_pre_render_div(&$element, $group, &$form) {
+function field_group_pre_render_div(array &$element, $group, array &$form) {
 
   $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
   $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'h2';
@@ -272,7 +300,7 @@ function field_group_pre_render_div(&$element, $group, &$form) {
  * @param array $form
  *   The root element or form.
  */
-function field_group_pre_render_tabs(&$element, $group, &$form) {
+function field_group_pre_render_tabs(array &$element, $group, array &$form) {
 
   $classes = 'field-group-' . $group->format_type . '-wrapper';
   if (!empty($group->classes)) {
@@ -288,7 +316,8 @@ function field_group_pre_render_tabs(&$element, $group, &$form) {
     '#suffix' => '</div>',
   );
 
-  // By default vertical_tabs don't have titles but you can override it in the theme.
+  // By default vertical_tabs don't have titles but you can override it in the
+  // theme.
   if (!empty($group->label)) {
     $element['#title'] = check_plain($group->label);
   }
@@ -313,11 +342,10 @@ function field_group_pre_render_tabs(&$element, $group, &$form) {
  * @param array $form
  *   The root element or form.
  */
-function field_group_pre_render_tab(&$element, $group, &$form) {
+function field_group_pre_render_tab(array &$element, $group, array &$form) {
 
   $view_mode = isset($form['#view_mode']) ? $form['#view_mode'] : 'form';
 
-  // Could be it never runs through htab.
   $form['#attached']['js'][] = array(
     'data' => array('field_group' => array('tabs' => $view_mode)),
     'type' => 'setting',
@@ -346,15 +374,15 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
     $add['#group'] = $group->parent_name;
     $element += $add;
   }
-  // Forms "can" have additional settins. We'll try to locate it first, if not
+  // Forms "can" have additional settings. We'll try to locate it first, if not
   // exists, field_group will create a parallel additional settings entry.
   else {
     // Create the fieldgroup element.
     $add['#parents'] = array('additional_settings');
     $add['#group'] = 'additional_settings';
     $add['#weight'] = -30 + $group->weight;
-    // Hardcoded to bring our extra additional vtabs on top.
 
+    // Hardcoded to bring our extra additional vtabs on top.
     // Check if the additional_settings exist for this type of form.
     if (isset($form['additional_settings']['group']['#groups']['additional_settings'])) {
 
@@ -367,8 +395,9 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
         unset($element[$fieldname]);
       }
     }
-    // Assumption the wrapper is in the root. This could be done by field_group itself
-    // in previous loop of tabs in same wrapper or even some other contrib / custom module.
+    // Assumption the wrapper is in the root. This could be done by field_group
+    // itself in previous loop of tabs in same wrapper or even some other
+    // contrib / custom module.
     else {
       if (!isset($form['additional_settings']['#type'])) {
         $form['additional_settings'] = array(
@@ -407,7 +436,11 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
       $form['instance_settings']['wrapper'] = array(
         '#title' => t('Wrapper tag'),
         '#type' => 'select',
-        '#options' => array('section' => t('Section'), 'article' => t('Article'), 'header' => t('Header'), 'footer' => t('Footer'), 'aside' => t('Aside'), 'div' => t('Div'), 'other' => t('Other')),
+        '#options' => array(
+          'section' => t('Section'), 'article' => t('Article'),
+          'header' => t('Header'), 'footer' => t('Footer'),
+          'aside' => t('Aside'), 'div' => t('Div'), 'other' => t('Other'),
+        ),
         '#default_value' => isset($group->format_settings['instance_settings']['wrapper']) ? $group->format_settings['instance_settings']['wrapper'] : 'section',
       );
 
@@ -485,7 +518,9 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
         '#title' => t('Speed'),
         '#description' => t('The speed of the effect if collapsible.'),
         '#type' => 'select',
-        '#options' => array('none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast')),
+        '#options' => array(
+          'none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast'),
+        ),
         '#default_value' => isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : $formatter['instance_settings']['speed'],
         '#weight' => 5,
       );
@@ -498,7 +533,9 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
       $form['instance_settings']['label_element'] = array(
         '#title' => t('Label element'),
         '#type' => 'select',
-        '#options' => array('span' => t('Span'), 'strong' => t('Strong'),  'em' => t('Emphasis'), 'h2' => t('Header 2'), 'h3' => t('Header 3')),
+        '#options' => array(
+          'span' => t('Span'), 'strong' => t('Strong'),  'em' => t('Emphasis'),
+          'h2' => t('Header 2'), 'h3' => t('Header 3')),
         '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
         '#weight' => 2,
       );
@@ -520,7 +557,7 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
 /**
  * Pre render alter
  *
- * @see field_group_field_group_build_pre_render_alter().
+ * @see field_group_field_group_build_pre_render_alter()
  */
 function _field_group_field_group_build_pre_render_alter(&$element) {
   // Add the default field_group javascript.
@@ -530,7 +567,7 @@ function _field_group_field_group_build_pre_render_alter(&$element) {
 /**
  * Parent requirements.
  *
- * @see field_group_field_group_field_ui_parent_requirements_alter().
+ * @see field_group_field_group_field_ui_parent_requirements_alter()
  */
 function _field_group_field_group_field_ui_parent_requirements_alter(&$parent_requirements, &$context) {
   // On display overview tabs need to be checked.
@@ -550,7 +587,7 @@ function _field_group_field_group_field_ui_parent_requirements_alter(&$parent_re
 /**
  * Alters classes.
  *
- * @see field_group_field_group_html_classes_alter().
+ * @see field_group_field_group_html_classes_alter()
  */
 function _field_group_field_group_html_classes_alter(&$classes, &$group) {
   // Open or closed horizontal or vertical tabs will be collapsible by default.

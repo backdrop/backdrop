@@ -1,24 +1,28 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Field Group module.
  *
- * Fieldgroup is a module that will wrap fields and other fieldgroups. Nothing more, nothing less.
+ * Fieldgroup is a module that will wrap fields and other fieldgroups. Nothing
+ * more, nothing less.
+ *
  * For this there are formatters we can create on forms and view modes.
  *
- * Some of the elements defined in fieldgroup will be ported to the elements module.
+ * Some of the elements defined in fieldgroup will be ported to the elements
+ * module.
  *
  * DEVELOPERS NOTES
  *
- * - Fieldgroup uses a ''#fieldgroups' property to know what fieldgroups are to be pre_rendered and
- *   rendered by the field_group module. This means we need to be sure our groups are in #fieldgroups.
- *   #fieldgroups is later merged with the normal #groups that can be used by any other module.
- *   This is done to be sure fieldgroup is not taking fieldsets from profile2, commerce line items,
- *   commerce user profiles, ... .
- *   When trying to merge a programmatically created field wrapper (div, markup, fieldset, ...) into
- *   groups, you might consider adding it in #fieldgroups as well if you want the element processed
- *   by fieldgroup.
+ * - Fieldgroup uses a ''#fieldgroups' property to know what fieldgroups are to
+ *   be pre_rendered and rendered by the field_group module. This means we need
+ *   to be sure our groups are in #fieldgroups.
+ *   #fieldgroups is later merged with the normal #groups that can be used by
+ *   any other module.
+ *   This is done to be sure fieldgroup is not taking fieldsets from profile2,
+ *   commerce line items, commerce user profiles, etc .
+ *   When trying to merge a programmatically created field wrapper (div, markup,
+ *   fieldset, ...) into groups, you might consider adding it in #fieldgroups as
+ *   well if you want the element processed by fieldgroup.
  */
 
 /**
@@ -98,7 +102,9 @@ function hook_field_group_formatter_info() {
         'label' => t('Div'),
         'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('effect' => 'none', 'speed' => 'fast', 'classes' => ''),
+        'instance_settings' => array(
+          'effect' => 'none', 'speed' => 'fast', 'classes' => '',
+        ),
         'default_formatter' => 'collapsible',
       ),
     ),
@@ -108,8 +114,8 @@ function hook_field_group_formatter_info() {
 /**
  * Implements hook_field_group_format_settings().
  *
- * Defines configuration widget for the settings on a field group
- * formatter. Each formatter can have different elements and storage.
+ * Defines configuration widget for the settings on a field group formatter.
+ * Each formatter can have different elements and storage.
  *
  * @param object $group
  *   The Group definition.
@@ -174,7 +180,9 @@ function hook_field_group_format_settings($group) {
       $form['instance_settings']['speed'] = array(
         '#title' => t('Speed'),
         '#type' => 'select',
-        '#options' => array('none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast')),
+        '#options' => array(
+          'none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast'),
+        ),
         '#default_value' => isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : $formatter['instance_settings']['speed'],
         '#weight' => 3,
       );
@@ -206,21 +214,23 @@ function hook_field_group_format_settings($group) {
  *
  * This function gives you the opportunity to create the given
  * wrapper element that can contain the fields.
- * In the example beneath, some variables are prepared and used when building the
- * actual wrapper element. All elements in Backdrop FAPI can be used.
+ * In the example beneath, some variables are prepared and used when building
+ * the actual wrapper element. All elements in Backdrop Form API can be used.
  *
  * Note that at this point, the field group has no notion of the fields in it.
  *
  * There is also an alternative way of handling this. The default implementation
  * within field_group calls "field_group_pre_render_<format_type>".
- * @see field_group_pre_render_fieldset.
+ * @see field_group_pre_render_fieldset()
  *
- * @param array $elements
+ * @param array $element
  *   Elements by address.
  * @param object $group
  *   The field group info.
+ * @param array $form
+ *   The form array.
  */
-function hook_field_group_pre_render(&$element, $group, &$form) {
+function hook_field_group_pre_render(array &$element, $group, array &$form) {
 
   // You can prepare some variables to use in the logic.
   $view_mode = isset($form['#view_mode']) ? $form['#view_mode'] : 'form';
@@ -260,7 +270,6 @@ function hook_field_group_pre_render(&$element, $group, &$form) {
       }
 
       break;
-    break;
   }
 }
 
@@ -271,7 +280,7 @@ function hook_field_group_pre_render(&$element, $group, &$form) {
  */
 function hook_field_group_pre_render_alter(&$element, $group, &$form) {
 
-  if ($group->format_type == 'htab') {
+  if ($group->format_type == 'vtab') {
     $element['#theme_wrappers'] = array('my_vertical_tab');
   }
 
@@ -284,10 +293,10 @@ function hook_field_group_pre_render_alter(&$element, $group, &$form) {
  * this function, you have most likely a very custom case or it is a fix that
  * can be put in field_group core.
  *
- * @param array $elements
+ * @param array $element
  *   Elements by address.
  */
-function hook_field_group_build_pre_render_alter(&$element) {
+function hook_field_group_build_pre_render_alter(array &$element) {
 
   // Prepare variables.
   $display = isset($element['#view_mode']);
@@ -331,7 +340,7 @@ function hook_field_group_format_summary($group) {
  * @param array $groups
  *   Reference to an array of field group definition objects.
  */
-function hook_field_group_info_alter(&$groups) {
+function hook_field_group_info_alter(array &$groups) {
   if (!empty($groups['group_issue_metadata|node|project_issue|form'])) {
     $groups['group_issue_metadata|node|project_issue|form']->data['children'][] = 'taxonomy_vocabulary_9';
   }
@@ -376,7 +385,7 @@ function hook_field_group_create_field_group($group) {
  * @param object $group
  *   The Group definition.
  */
-function hook_field_group_format_settings_alter(&$form, &$group) {
+function hook_field_group_format_settings_alter(array &$form, &$group) {
   // Alter the group format settings that appear in the summary and form.
 }
 
@@ -388,7 +397,7 @@ function hook_field_group_format_settings_alter(&$form, &$group) {
  * @param array $context
  *   Array of the form structure and display overview.
  */
-function hook_field_group_field_ui_parent_requirements_alter(&$parent_requirements, &$context) {
+function hook_field_group_field_ui_parent_requirements_alter(array &$parent_requirements, array &$context) {
   // Alter the parent requirements array used to display warning if a container
   // has not been set up.
 }
@@ -413,7 +422,7 @@ function hook_field_group_html_classes_alter(&$classes, &$group) {
  * @param string $mode
  *   The mode: form or display.
  */
-function hook_field_group_mode_types_excluded_alter(&$excluded_types, $mode) {
+function hook_field_group_mode_types_excluded_alter(array &$excluded_types, $mode) {
   // Alter the excluded types for a mode..
 }
 
@@ -431,12 +440,14 @@ function hook_field_group_mode_types_excluded_alter(&$excluded_types, $mode) {
 /**
  * Get the groups for a given entity type, bundle and view mode.
  *
- * @param String $entity_type
+ * @param string $entity_type
  *   The Entity type where field groups are requested.
- * @param String $bundle
+ * @param string $bundle
  *   The entity bundle for the field groups.
- * @param String $view_mode
+ * @param string $view_mode
  *   The view mode scope for the field groups.
+ * @param bool $reset
+ *   TRUE or FALSE.
  *
  * @see field_group_read_groups()
  */
@@ -447,15 +458,16 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
 /**
  * Get the groups for the given parameters, uncached.
  *
- * @param Array $params
- *   The Entity type where field groups are requested.
- * @param $enabled
- *   Return enabled or disabled groups.*
+ * @param array $conditions
+ *   Parameters for the query, as elements of the $conditions array.
+ *   'entity_type' The name of the entity type.
+ *   'bundle' The name of the bundle.
+ *   'mode' The view mode.
  *
  * @see field_group_info_groups()
  */
-function field_group_read_groups($conditions = array()) {
-  // This function loads the requested groups
+function field_group_read_groups(array $conditions = array()) {
+  // This function loads the requested groups.
 }
 
 /**
@@ -466,7 +478,7 @@ function field_group_read_groups($conditions = array()) {
  * @param array $group_names
  *   An array of field group names that should be hidden.
  */
-function field_group_hide_field_groups(&$element, $group_names) {
+function field_group_hide_field_groups(array &$element, array $group_names) {
 }
 
 /**
