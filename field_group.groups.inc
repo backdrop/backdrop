@@ -17,7 +17,7 @@ function _field_group_field_group_formatter_info() {
         'label' => t('HTML element'),
         'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
         'instance_settings' => array(
-          'wrapper' => '', 'wrapper_other' => 'div', 'show_label' => 0,
+          'wrapper' => '', 'wrapper_other' => '', 'show_label' => 0,
           'label_element' => 'div', 'classes' => '', 'attributes' => '',
           'required_fields' => 1, 'id' => '',
         ),
@@ -73,7 +73,7 @@ function _field_group_field_group_formatter_info() {
         'label' => t('HTML element'),
         'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
         'instance_settings' => array(
-          'wrapper' => '', 'wrapper_other' => 'div', 'show_label' => 0,
+          'wrapper' => '', 'wrapper_other' => '', 'show_label' => 0,
           'label_element' => 'div', 'classes' => '', 'attributes' => '',
           'required_fields' => 1, 'id' => '',
         ),
@@ -193,7 +193,7 @@ function field_group_pre_render_details(array &$element, $group, array &$form) {
  *   The root element or form.
  */
 function field_group_pre_render_html_element(array &$element, $group, array &$form) {
-  $html_element = isset($group->format_settings['instance_settings']['wrapper_other']) ? $group->format_settings['instance_settings']['wrapper_other'] : 'div';
+  $html_element = isset($group->format_settings['instance_settings']['wrapper_other']) ? $group->format_settings['instance_settings']['wrapper_other'] : '';
   $wrapper = $group->format_settings['instance_settings']['wrapper'];
   if (!empty($wrapper) && $wrapper != 'other') {
     $html_element = $wrapper;
@@ -238,7 +238,7 @@ function field_group_pre_render_html_element(array &$element, $group, array &$fo
 
   $element['#prefix'] = '<' . $html_element . $attributes . '>';
   if ($show_label) {
-    $element['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
+    $element['#prefix'] .= '<' . $label_element . ' class="field-group-label">' . check_plain(t($group->label)) . '</' . $label_element . '>';
   }
   $element['#suffix'] = '</' . $html_element . '>';
 }
@@ -275,7 +275,7 @@ function field_group_pre_render_div(array &$element, $group, array &$form) {
 
     $element['#prefix'] = '<div' . $id . $class_attribute . '>';
     if ($show_label) {
-      $element['#prefix'] .= '<' . $label_element . '><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
+      $element['#prefix'] .= '<' . $label_element . ' class="field-group-label"><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
     }
     $element['#suffix'] = '</div>';
   }
@@ -430,6 +430,12 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
   $mode = $group->mode == 'form' ? 'form' : 'display';
   $formatter = $field_group_types[$mode][$group->format_type];
 
+  if ($mode == 'display') {
+    $select_name = 'fields[' . $group->group_name . '][format_settings][settings][instance_settings]';
+  } else {
+    $select_name = 'instance_settings';
+  }
+
   // Add optional instance_settings.
   switch ($group->format_type) {
     case 'html-element':
@@ -452,7 +458,7 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
         '#weight' => 1,
         '#states' => array(
           'visible' => array(
-            'select[name="fields[' . $group->group_name . '][format_settings][settings][instance_settings][wrapper]"]' => array('value' => 'other'),
+            'select[name="' . $select_name . '[wrapper]"]' => array('value' => 'other'),
           ),
         ),
       );
@@ -472,7 +478,7 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
         '#weight' => 3,
         '#states' => array(
           'visible' => array(
-            'select[name="fields[' . $group->group_name . '][format_settings][settings][instance_settings][show_label]"]' => array('value' => 1),
+            'select[name="' . $select_name . '[show_label]"]' => array('value' => 1),
           ),
         ),
       );
@@ -502,7 +508,7 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
         '#weight' => 3,
         '#states' => array(
           'visible' => array(
-            'select[name="fields[' . $group->group_name . '][format_settings][settings][instance_settings][show_label]"]' => array('value' => 1),
+            'select[name="' . $select_name . '[show_label]"]' => array('value' => 1),
           ),
         ),
       );
