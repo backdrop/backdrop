@@ -346,7 +346,7 @@ function field_group_field_ui_overview_form_alter(array &$form, array &$form_sta
         '#description' => t('Groups can have unlimited nesting.'),
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
       ),
-      '#cell_attributes' => array('colspan' => 2),
+      '#cell_attributes' => array('colspan' => 3),
     ),
   );
 
