@@ -146,16 +146,16 @@ Backdrop.FieldGroup.Effects.processDiv = {
 Backdrop.behaviors.fieldGroups = {
   attach: function (context, settings) {
 
-    // Vertical tabs: fixes css for fieldgroups.
+    // Vertical tabs: fixes css for field groups.
     $('.fieldset-wrapper .fieldset > legend').css({ display: 'block' });
     $('.vertical-tabs fieldset.fieldset').addClass('default-fallback');
 
-    // Fieldsets: set the hash in url to remember last user selection.
+    // Fieldsets: set the hash in url to remember last userselection.
     $('.group-wrapper ul li').once('group-wrapper-ul-processed', function() {
       var fieldGroupNavigationListIndex = $(this).index();
       $(this).children('a').click(function() {
         var fieldset = $('.group-wrapper fieldset').get(fieldGroupNavigationListIndex);
-        // Grab the first id, holding the wanted hash url.
+        // Grab the first id, holding the wanted hashurl.
         var hashUrl = $(fieldset).attr('id').replace(/^field_group-/, '').split(' ')[0];
         window.location.hash = hashUrl;
       });

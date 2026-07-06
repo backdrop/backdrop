@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Test file for fieldgroup display.
+ * Test file for field group display.
  */
 
 include_once('field_group.test');
@@ -166,7 +166,7 @@ class GroupDisplayTestCase extends GroupTestCase {
     $this->assertFieldByXPath("//div[contains(@class, 'test-class')]", NULL, t('Test class set on wrapper div') . ' class="' . $group->group_name . ' test-class');
 
     // Test group label.
-    $this->assertNoRaw('<h3><span>' . $data['label'] . '</span></h3>', t('Label is not shown'));
+    $this->assertNoRaw('<h3 class="field-group-label"><span>' . $data['label'] . '</span></h3>', t('Label is not shown'));
 
     // Set show label to true.
     $group->format_settings['instance_settings']['show_label'] = 1;
@@ -175,7 +175,7 @@ class GroupDisplayTestCase extends GroupTestCase {
     field_group_group_save($group, FALSE);
     $groups = field_group_info_groups('node', 'post', 'default', TRUE);
     $this->backdropGet('node/' . $this->node->nid);
-    $this->assertRaw('<h3><span>' . $data['label'] . '</span></h3>', t('Label is shown'));
+    $this->assertRaw('<h3 class="field-group-label"><span>' . $data['label'] . '</span></h3>', t('Label is shown'));
 
     // Change to collapsible.
     $group->format_settings['formatter'] = 'collapsible';

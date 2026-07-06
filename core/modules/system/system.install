@@ -3927,56 +3927,9 @@ function system_update_1106() {
 }
 
 /**
- * Warn that field_group_extra module needs to be downloaded and installed
- * if Accordion, Horizontal Tabs, and Multipage types are enabled.
- */
-function system_update_1107() {
-  $extras_module = db_select('system', 's')
-    ->fields('s', array('status'))
-    ->condition('name', 'field_group_extra')
-    ->execute()
-    ->fetchField();
-
-  $extras_enabled = FALSE;
-  $field_groups = config_get_names_with_prefix('field_group.field_group.');
-  $extra_types = array(
-    // cspell:disable
-    'accordion',
-    'accordion-item',
-    'htab',
-    'htabs',
-    'multipage',
-    'multipage-group',
-    // cspell:enable
-  );
-  foreach ($field_groups as $field_group) {
-    $config = config($field_group);
-    if (in_array($config->get('format_type'), $extra_types)) {
-      $extras_enabled = TRUE;
-      break;
-    }
-  }
-
-  if ($extras_enabled) {
-    if ($extras_module === FALSE) {
-      // Field Group Extra is not present so set message to fetch it.
-      // cspell:ignore Multipage
-      backdrop_set_message(t('The <em>Accordion</em>, <em>Horizontal tabs</em>, and <em>Multipage</em> field group types have been moved out of the Field Group module. The contrib module !module should be downloaded and enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array('!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra'))));
-    } elseif (!$extras_module) {
-      // Module exists but isn't enabled.
-      db_update('system')
-        ->fields(array('status' => 1))
-        ->condition('name', 'field_group_extra')
-        ->execute();
-      backdrop_set_message(t('The contrib module %module has been enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array('%module' => 'Field Group Extra')));
-    }
-  }
-}
-
-/**
  * Notify if a non-core version of Field Group module is present.
  */
-function system_update_1108() {
+function system_update_1107() {
   $path = backdrop_get_path('module', 'field_group');
   if ($path && strpos($path, 'core/modules/field_group') === FALSE) {
     backdrop_set_message(t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array(

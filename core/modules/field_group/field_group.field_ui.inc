@@ -101,6 +101,7 @@ function field_group_field_ui_overview_form_alter(array &$form, array &$form_sta
     }
   }
 
+  $field_group_types = field_group_formatter_info();
   $formatter_options = field_group_field_formatter_options($display_overview ? 'display' : 'form');
 
   $refresh_rows = isset($form_state['values']['refresh_rows']) ? $form_state['values']['refresh_rows'] : (isset($form_state['input']['refresh_rows']) ? $form_state['input']['refresh_rows'] : NULL);
@@ -185,17 +186,27 @@ function field_group_field_ui_overview_form_alter(array &$form, array &$form_sta
       'group_name' => array(
         '#markup' => check_plain($name),
       ),
-      'format' => array(
-        'type' => array(
-          '#type' => 'select',
-          '#options' => $formatter_options,
-          '#default_value' => $group->format_type,
-          '#attributes' => array('class' => array('field-group-type')),
-        ),
-      ),
     );
 
     if (!$display_overview) {
+      $destination = _field_ui_bundle_admin_path($form['#entity_type'], $form['#bundle']);
+      $field_group_types = field_group_formatter_info();
+
+      // Display a link to the format type configure form on the Manage fields
+      // page.
+      $table[$name] += array(
+        'format' => array(
+          'type' => array(
+            '#type' => 'link',
+            '#title' => $field_group_types['form'][$group->format_type]['label'],
+            '#href' => $params->admin_path . '/groups/' . $name . '/format-type/form',
+            '#options' => array(
+              'query' => array('destination' => $destination . '/fields')),
+            '#attributes' => array('class' => array('field-group-type')),
+          ),
+        ),
+      );
+
       // After saving, the settings are updated here as well. First we create
       // the element for the table cell.
       $table[$name]['settings_summary'] = array('#markup' => '');
@@ -224,6 +235,18 @@ function field_group_field_ui_overview_form_alter(array &$form, array &$form_sta
       );
     }
     else {
+      // Display the format type form inline.
+      $table[$name] += array(
+        'format' => array(
+          'type' => array(
+            '#type' => 'select',
+            '#options' => $formatter_options,
+            '#default_value' => $group->format_type,
+            '#attributes' => array('class' => array('field-group-type')),
+          ),
+        ),
+      );
+
       $base_button = array(
         '#submit' => array('field_ui_display_overview_multistep_submit'),
         '#ajax' => array(
@@ -236,13 +259,14 @@ function field_group_field_ui_overview_form_alter(array &$form, array &$form_sta
 
       if ($form_state['formatter_settings_edit'] == $name) {
         $table[$name]['format']['#cell_attributes'] = array('colspan' => $display_overview ? 3 : 2);
+        $format_type_label = $field_group_types['form'][$group->format_type]['label'] ?? '';
         $table[$name]['format']['format_settings'] = array(
           '#type' => 'container',
           '#attributes' => array('class' => array('field-formatter-settings-edit-form')),
           '#parents' => array('fields', $name, 'format_settings'),
           '#weight' => -5,
           'label' => array(
-            '#markup' => t('Field group format:') . ' <span class="formatter-name">' . $group->format_type . '</span>',
+            '#markup' => t('Field group format:') . ' <span class="formatter-name">' . $format_type_label . '</span>',
           ),
           // Create a settings form where hooks can pick in.
           'settings' => $settings,
@@ -322,7 +346,7 @@ function field_group_field_ui_overview_form_alter(array &$form, array &$form_sta
         '#description' => t('Groups can have unlimited nesting.'),
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
       ),
-      '#cell_attributes' => array('colspan' => 2),
+      '#cell_attributes' => array('colspan' => 3),
     ),
   );
 
@@ -351,7 +375,7 @@ function field_group_field_ui_overview_form_alter(array &$form, array &$form_sta
   $form['#validate'][] = 'field_group_field_overview_validate';
   $form['#submit'][] = 'field_group_field_overview_submit';
 
-  // Create the settings for fieldgroup as vertical tabs.
+  // Create the settings for field group as vertical tabs.
   field_group_field_ui_create_vertical_tabs($form, $form_state, $params);
 
   // Show a warning if the user has not set up required containers.
@@ -497,7 +521,7 @@ function field_group_format_settings_form(&$group) {
   backdrop_alter('field_group_format_settings', $addition, $group);
 
   $form += $addition;
-  // Give fieldgroup implementations the chance to alter the description.
+  // Give field group implementations the chance to alter the description.
   if (!empty($addition['label']['#description'])) {
     $form['label']['#description'] = $addition['label']['#description'];
   }
@@ -573,18 +597,7 @@ function field_group_formatter_settings_update(&$group, array $settings) {
     $group->format_settings = _field_group_get_default_formatter_settings($group->format_type, $mode);
     // If the format type is changed, make sure we carry over the unique
     // changes such as classes, ids.
-    $group->format_settings['instance_settings'] = _field_group_preserve_shared_instance_settings($group->format_settings['instance_settings'], $original_formatter_settings['instance_settings']);
-    // Classes are a special case. Need to parse and change "field-group-TYPE"
-    // to the new format type.
-    if (!empty($group->format_settings['instance_settings']['classes'])) {
-      $classes = explode(' ', $group->format_settings['instance_settings']['classes']);
-      foreach ($classes as $class_key => $class) {
-        if (substr($class, 0, 12) === 'field-group-') {
-          $classes[$class_key] = 'field-group-' . $group->format_type;
-        }
-      }
-      $group->format_settings['instance_settings']['classes'] = implode(' ', $classes);
-    }
+    $group->format_settings['instance_settings'] = _field_group_preserve_shared_instance_settings($group->format_settings['instance_settings'], $original_formatter_settings['instance_settings'], $group);
 
   }
   else {
@@ -809,20 +822,25 @@ function field_group_field_overview_submit(array $form, array &$form_state) {
     $group->parent_name = $form_values[$group_name]['parent'];
     $group->weight = $form_values[$group_name]['weight'];
 
-    $old_format_type = $group->format_type;
-    $group->format_type = isset($form_values[$group_name]['format']['type']) ? $form_values[$group_name]['format']['type'] : 'visible';
-    if (isset($form_state['field_group'][$group_name]->format_settings)) {
-      $group->format_settings = $form_state['field_group'][$group_name]->format_settings;
+    if ($mode != 'form') {
+      // On Manage fields the format type can only be changed on a separate
+      // form.
+      $old_format_type = $group->format_type;
+      $group->format_type = isset($form_values[$group_name]['format']['type']) ? $form_values[$group_name]['format']['type'] : 'visible';
+      if (isset($form_state['field_group'][$group_name]->format_settings)) {
+        $group->format_settings = $form_state['field_group'][$group_name]->format_settings;
+      }
+
+      // If the format type is changed, make sure we have all required format
+      // settings.
+      if ($group->format_type != $old_format_type) {
+        $mode = $group->mode == 'form' ? 'form' : 'display';
+        $default_formatter_settings = _field_group_get_default_formatter_settings($group->format_type, $mode);
+        $group->format_settings += $default_formatter_settings;
+        $group->format_settings['instance_settings'] += $default_formatter_settings['instance_settings'];
+      }
     }
 
-    // If the format type is changed, make sure we have all required format
-    // settings.
-    if ($group->format_type != $old_format_type) {
-      $mode = $group->mode == 'form' ? 'form' : 'display';
-      $default_formatter_settings = _field_group_get_default_formatter_settings($group->format_type, $mode);
-      $group->format_settings += $default_formatter_settings;
-      $group->format_settings['instance_settings'] += $default_formatter_settings['instance_settings'];
-    }
     field_group_group_save($group, FALSE);
   }
 
@@ -957,6 +975,19 @@ function field_group_configure_form(array $form, array &$form_state, $group, $vi
   $form['#bundle'] = $group->bundle;
   $form['#view_mode'] = $view_mode;
 
+  $form['#attached']['css'][] = backdrop_get_path('module', 'field_group') . '/css/field_group.field_ui.css';
+
+  $field_group_types = field_group_formatter_info();
+  $format_type_label = $field_group_types['form'][$group->format_type]['label'] ?? '';
+  $form['format_type'] = array(
+    '#markup' => t('Field group format: !format_type', array(
+      '!format_type' => ' <span class="formatter-name">' . $format_type_label . '</span>',
+    )),
+    '#weight' => -6,
+    '#prefix' => '<div class="field-group-formatter">',
+    '#suffix' => '</div>',
+  );
+
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Field group label'),
@@ -971,7 +1002,7 @@ function field_group_configure_form(array $form, array &$form_state, $group, $vi
 
   $form += $addition;
 
-  // Give fieldgroup implementations the chance to alter the description.
+  // Give field group implementations the chance to alter the description.
   if (!empty($addition['label']['#description'])) {
     $form['label']['#description'] = $addition['label']['#description'];
   }
@@ -1003,11 +1034,95 @@ function field_group_configure_form_submit(array $form, array &$form_state) {
   $group->format_settings['instance_settings'] = $form_state['values']['instance_settings'];
   $group->format_settings['formatter'] = isset($form_state['values']['formatter']) ? $form_state['values']['formatter'] : '';
 
-  field_group_group_save($group, FALSE);
+  try {
+    field_group_group_save($group, FALSE);
+    backdrop_set_message(t('Saved configuration for group %label.', array('%label' => $group->group_name)));
+  } catch (Exception $e) {
+    backdrop_set_message(t('There was a problem saving the configuration for group %label.', array('%label' => $group->group_name)), 'error');
+  }
+
   cache_clear_all('field_groups', 'cache_field');
 
   $admin_path = _field_group_get_admin_path($form['#entity_type'], $form['#bundle'], $form['#view_mode']);
   $form_state['redirect'] = $admin_path;
+}
+
+/**
+ * Form constructor for the format type edit page.
+ *
+ * @param array $form
+ *   An associative array containing the structure of the form.
+ * @param array $form_state
+ *   An associative array containing the current state of the form, which is
+ *   passed by reference.
+ * @param object $group
+ *   Group object.
+ *
+ * @see field_group_menu()
+ * @see field_group_format_type_form_submit()
+ * @ingroup forms
+ */
+function field_group_format_type_form($form, &$form_state, $group) {
+  $form = array(
+    '#bundle' => $group->bundle,
+    '#entity_type' => $group->entity_type,
+    '#group' => $group,
+  );
+
+  $form['field_group'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Change format type'),
+  );
+
+  $form['field_group']['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Format type'),
+    '#required' => TRUE,
+    '#options' => field_group_field_formatter_options('form'),
+    '#default_value' => $group->format_type,
+    '#description' => t('Select a new format type for %field_group field group on the form. Each format type has its own settings which can be configured afterwards.', array('%field_group' => $group->label)),
+    '#attributes' => array('class' => array('field-group-type')),
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit', '#value' => t('Continue'),
+  );
+
+  $form['#validate'] = array();
+  $form['#submit'] = array('field_group_format_type_form_submit');
+
+  return $form;
+}
+
+/**
+ * Form submission handler for field_group_format_type_form().
+ */
+function field_group_format_type_form_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
+  $group = $form['#group'];
+  $mode = $group->mode;
+  $original_format_type = $group->format_type;
+  if ($original_format_type == $form_values['type']) {
+    backdrop_set_message(t('The chosen format type is the same as the original. No changes made.'));
+    return;
+  }
+
+  $original_formatter_settings = $group->format_settings;
+  $group->format_type = $form_values['type'];
+  $group->format_settings = _field_group_get_default_formatter_settings($group->format_type, $mode);
+  // If the format type is changed, make sure we carry over the unique
+  // changes such as classes, ids.
+  $group->format_settings['instance_settings'] = _field_group_preserve_shared_instance_settings($group->format_settings['instance_settings'], $original_formatter_settings['instance_settings'], $group);
+
+  try {
+    field_group_group_save($group, FALSE);
+    backdrop_set_message(t('Changed the format type for group %label.', array('%label' => $group->group_name)));
+  } catch (Exception $e) {
+    backdrop_set_message(t('There was a problem changing the format type for group %label.', array('%label' => $group->group_name)), 'error');
+  }
+
+  cache_clear_all('field_groups', 'cache_field');
 }
 
 /**
@@ -1079,13 +1194,13 @@ function field_group_field_ui_create_vertical_tabs(array &$form, array &$form_st
   // Add extra guidelines for administrator.
   $form['additional_settings']['field_group'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Fieldgroups'),
+    '#title' => t('Field groups'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#parents' => array('additional_settings'),
   );
   $form['additional_settings']['field_group']['fieldgroup_clone'] = array(
-    '#title' => t('Clone Fieldgroups'),
+    '#title' => t('Clone Field groups'),
     '#description' => t('Select source view mode or form.'),
     '#type' => 'select',
     '#options' => $view_modes,
@@ -1101,7 +1216,7 @@ function field_group_field_ui_create_vertical_tabs(array &$form, array &$form_st
 }
 
 /**
- * Validate handler to validate saving existing fieldgroups from one view mode
+ * Validate handler to validate saving existing field groups from one view mode
  * or form to another.
  *
  * @param array $form
@@ -1156,7 +1271,7 @@ function field_group_field_ui_clone_field_groups_validate(array $form, array &$f
 }
 
 /**
- * Submit handler to save existing fieldgroups from one view mode or form to
+ * Submit handler to save existing field groups from one view mode or form to
  * another.
  *
  * @param array $form
@@ -1172,7 +1287,7 @@ function field_group_field_ui_clone_field_groups(array $form, array &$form_state
   if (!empty($form_state['#source_groups'])) {
     foreach ($form_state['#source_groups'] as $source_group) {
       if (in_array($source_group->group_name, $fields)) {
-        backdrop_set_message(t('Fieldgroup @group is not cloned since a group already exists with the same name.', array('@group' => $source_group->group_name)), 'warning');
+        backdrop_set_message(t('Field group @group is not cloned since a group already exists with the same name.', array('@group' => $source_group->group_name)), 'warning');
         continue;
       }
 
@@ -1182,7 +1297,7 @@ function field_group_field_ui_clone_field_groups(array $form, array &$form_state
 
       field_group_group_save($source_group, TRUE);
 
-      backdrop_set_message(t('Fieldgroup @group cloned successfully.', array('@group' => $source_group->group_name)));
+      backdrop_set_message(t('Field group @group cloned successfully.', array('@group' => $source_group->group_name)));
 
     }
   }

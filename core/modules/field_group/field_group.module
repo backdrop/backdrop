@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Fieldgroup module.
+ * Field Group module.
  *
  * For an overview of all php and javascript hooks, see field_group.api.php.
  *
@@ -80,13 +80,31 @@ function field_group_menu() {
           )));
           $access += array(
             'access callback' => 'user_access',
-            'access arguments' => array('administer site configuration'),
+            'access arguments' => array('administer fields'),
           );
+
+          // Add the "administer fields" permission on top of the access
+          // restriction because the field UI should only be accessible to
+          // trusted users. The bundle argument is passed to
+          // field_ui_admin_access() to allow for substitution.
+          if ($access['access callback'] != 'user_access' || $access['access arguments'] != array('administer fields')) {
+            $access = array(
+              'access callback' => 'field_ui_admin_access',
+              'access arguments' => array(
+                $access['access callback'],
+                $access['access arguments'],
+                $bundle_pos,
+                $bundle_arg
+              ),
+            );
+          }
 
           $items["$path/groups/%field_group_menu"] = array(
             'load arguments' => array(
               $entity_type, $bundle_arg, $bundle_pos, '%map',
             ),
+            'title callback' => 'field_group_menu_title',
+            'title arguments' => array($group_position),
             'page callback' => 'backdrop_get_form',
             'page arguments' => array(
               'field_group_configure_form', $group_position,
@@ -97,16 +115,24 @@ function field_group_menu() {
             'load arguments' => array(
               $entity_type, $bundle_arg, $bundle_pos, '%map',
             ),
-            'title callback' => 'field_group_menu_configure_title',
-            'title arguments' => array($group_position),
+            'title' => 'Edit',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array(
               'field_group_configure_form', $group_position,
             ),
-            'type' => MENU_CALLBACK,
+            'type' => MENU_DEFAULT_LOCAL_TASK,
             'file' => 'field_group.field_ui.inc',
           ) + $access;
-
+          $items["$path/groups/%field_group_menu/format-type"] = array(
+            'load arguments' => array(
+              $entity_type, $bundle_arg, $bundle_pos, '%map',
+            ),
+            'title' => 'Format type',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_group_format_type_form', $group_position),
+            'type' => MENU_LOCAL_TASK,
+            'file' => 'field_group.field_ui.inc',
+          ) + $access;
           $items["$path/groups/%field_group_menu/delete"] = array(
             'load arguments' => array(
               $entity_type, $bundle_arg, $bundle_pos, '%map',
@@ -132,7 +158,6 @@ function field_group_menu() {
             'type' => MENU_CALLBACK,
             'file' => 'field_group.field_ui.inc',
           ) + $access;
-
         }
       }
     }
@@ -151,8 +176,8 @@ function field_group_menu() {
  *
  * @see field_group_menu()
  */
-function field_group_menu_configure_title($group) {
-  return t('Configure @label', array('@label' => $group->label));
+function field_group_menu_title($group) {
+  return $group->label;
 }
 
 /**
@@ -161,8 +186,8 @@ function field_group_menu_configure_title($group) {
 function field_group_permission() {
   return array(
     'administer fieldgroups' => array(
-      'title' => t('Administer fieldgroups'),
-      'description' => t('Display the administration for fieldgroups.'),
+      'title' => t('Administer field groups'),
+      'description' => t('Display the administration for field groups.'),
     ),
   );
 }
@@ -188,7 +213,9 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
 
   $args = func_get_args();
   $args_pop = array_pop($args);
-  $mode = array_pop($args_pop);
+  // The parent menu router to edit tabs on Manage fields has fewer items, but
+  // it can be hardcoded to "form".
+  $mode = count($args_pop) == 9 ? array_pop($args_pop) : 'form';
 
   if ($bundle_pos > 0) {
     $bundle = $map[$bundle_pos];
@@ -344,10 +371,10 @@ function field_group_field_group_format_settings($group) {
   $mode = $group->mode == 'form' ? 'form' : 'display';
   $formatter = $field_group_types[$mode][$group->format_type];
 
-  // Add the required formatter type selector.
+  // Add the required display type selector.
   if (isset($formatter['format_types'])) {
     $form['formatter'] = array(
-      '#title' => t('Fieldgroup settings'),
+      '#title' => t('Display type'),
       '#type' => 'select',
       '#options' => backdrop_map_assoc($formatter['format_types']),
       '#default_value' => isset($group->format_settings['formatter']) ? $group->format_settings['formatter'] : $formatter['default_formatter'],
@@ -602,7 +629,7 @@ function field_group_field_group_format_summary($group) {
     $last = end($group->format_settings['instance_settings']);
     $output .= '<br />';
     foreach ($group->format_settings['instance_settings'] as $key => $value) {
-      if (empty($value)) {
+      if (!is_numeric($value) && empty($value)) {
         continue;
       }
 
@@ -832,7 +859,7 @@ function field_group_group_save(&$group, $new = TRUE) {
 }
 
 /**
- * Retrieve all format possibilities for the fieldgroups.
+ * Retrieve all format possibilities for the field groups.
  *
  * @return array|null
  *   Array of formatters or NULL. Attempts to retrieve from static cache if set.
@@ -948,7 +975,7 @@ function field_group_build_entity_groups(array &$vars, $type) {
   $display = isset($element['#view_mode']);
   $groups = array_keys($element['#groups']);
 
-  // Dish the fieldgroups with no fields for non-forms.
+  // Ditch the field groups with no fields for non-forms.
   if ($display) {
     field_group_remove_empty_display_groups($element, $groups);
   }
@@ -1232,16 +1259,31 @@ function _field_group_get_default_formatter_settings($format_type, $mode) {
  *   The default instance settings of the new format type.
  * @param array $original_instances
  *   The original instance settings.
+ * @param object $group
+ *   The group being updated.
  *
  * @return array
- *   Updated instance settings
+ *   Updated instance settings.
  */
-function _field_group_preserve_shared_instance_settings(array $new_instances, array $original_instances) {
+function _field_group_preserve_shared_instance_settings(array $new_instances, array $original_instances, $group) {
   foreach ($new_instances as $new_instance_key => $new_instance) {
     if (empty($new_instance) && !empty($original_instances[$new_instance_key])) {
       $new_instances[$new_instance_key] = $original_instances[$new_instance_key];
     }
   }
+
+  // Classes are a special case. Need to parse and change "field-group-TYPE"
+  // to the new format type.
+  if (!empty($new_instances['classes'])) {
+    $classes = explode(' ', $new_instances['classes']);
+    foreach ($classes as $class_key => $class) {
+      if (substr($class, 0, 12) === 'field-group-') {
+        $classes[$class_key] = 'field-group-' . $group->format_type;
+      }
+    }
+    $new_instances['classes'] = implode(' ', $classes);
+  }
+
   return $new_instances;
 }
 

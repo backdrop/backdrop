@@ -1,3 +1,14 @@
+/**
+ * @file
+ * Field UI
+ */
+
+/**
+ * Field overview
+ *
+ * #field-overview is the ID of the "Manage fields" table.
+ * #field-display-overview is the ID of the "Manage displays" table.
+ */
 
 #field-overview tr.field-group .group-label,
 #field-display-overview tr.field-group .group-label {
@@ -6,7 +17,7 @@
 
 #field-overview tr.static-region,
 #field-display-overview tr.static-region {
-	background-color: #ddd;
+  background-color: #ddd;
 }
 
 #edit-refresh {
@@ -41,4 +52,11 @@ tr.field-group input.form-submit {
 #field-display-overview a.field-group-formatter-settings-delete:focus {
   color: white;
   background-color: #97979e;
+}
+
+/**
+ * Field group settings
+ */
+.field-group-formatter .formatter-name {
+  font-weight: bold;
 }
