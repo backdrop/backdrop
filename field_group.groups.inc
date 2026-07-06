@@ -15,7 +15,7 @@ function _field_group_field_group_formatter_info() {
     'form' => array(
       'html-element' => array(
         'label' => t('HTML element'),
-        'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
+        'description' => t('This field group renders the inner content in a HTML element with classes and attributes.'),
         'instance_settings' => array(
           'wrapper' => '', 'wrapper_other' => '', 'show_label' => 0,
           'label_element' => 'div', 'classes' => '', 'attributes' => '',
@@ -24,7 +24,7 @@ function _field_group_field_group_formatter_info() {
       ),
       'div' => array(
         'label' => t('Div'),
-        'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
+        'description' => t('This field group renders the inner content in a simple div with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array(
           'description' => '', 'show_label' => 1, 'label_element' => 'h3',
@@ -35,7 +35,7 @@ function _field_group_field_group_formatter_info() {
       ),
       'fieldset' => array(
         'label' => t('Fieldset'),
-        'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
+        'description' => t('This field group renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array(
           'description' => '', 'classes' => '', 'required_fields' => 1,
@@ -45,7 +45,7 @@ function _field_group_field_group_formatter_info() {
       ),
       'details' => array(
         'label' => t('Details'),
-        'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
+        'description' => t('This field group renders the inner content in a Details element with the title as summary.'),
         'format_types' => array('open', 'closed'),
         'instance_settings' => array(
           'description' => '', 'classes' => '', 'required_fields' => 1,
@@ -55,12 +55,12 @@ function _field_group_field_group_formatter_info() {
       ),
       'tabs' => array(
         'label' => t('Vertical tabs group'),
-        'description' => t('This fieldgroup renders child groups in its own vertical tabs wrapper.'),
+        'description' => t('This field group renders child groups in its own vertical tabs wrapper.'),
         'instance_settings' => array('classes' => '', 'id' => ''),
       ),
       'tab' => array(
         'label' => t('Vertical tab'),
-        'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
+        'description' => t('This field group renders the content in a fieldset, part of vertical tabs group.'),
         'format_types' => array('open', 'closed'),
         'instance_settings' => array(
           'description' => '', 'classes' => '', 'required_fields' => 1,
@@ -71,7 +71,7 @@ function _field_group_field_group_formatter_info() {
     'display' => array(
       'html-element' => array(
         'label' => t('HTML element'),
-        'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
+        'description' => t('This field group renders the inner content in a HTML element with classes and attributes.'),
         'instance_settings' => array(
           'wrapper' => '', 'wrapper_other' => '', 'show_label' => 0,
           'label_element' => 'div', 'classes' => '', 'attributes' => '',
@@ -80,7 +80,7 @@ function _field_group_field_group_formatter_info() {
       ),
       'div' => array(
         'label' => t('Div'),
-        'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
+        'description' => t('This field group renders the inner content in a simple div with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array(
           'description' => '', 'show_label' => 1, 'label_element' => 'h3',
@@ -90,7 +90,7 @@ function _field_group_field_group_formatter_info() {
       ),
       'fieldset' => array(
         'label' => t('Fieldset'),
-        'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
+        'description' => t('This field group renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array(
           'description' => '', 'classes' => '', 'id' => '',
@@ -99,7 +99,7 @@ function _field_group_field_group_formatter_info() {
       ),
       'details' => array(
         'label' => t('Details'),
-        'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
+        'description' => t('This field group renders the inner content in a Details element with the title as summary.'),
         'format_types' => array('open', 'closed'),
         'instance_settings' => array(
           'description' => '', 'label_element' => 'span', 'classes' => '',
@@ -109,12 +109,12 @@ function _field_group_field_group_formatter_info() {
       ),
       'tabs' => array(
         'label' => t('Vertical tabs group'),
-        'description' => t('This fieldgroup renders child groups in its own vertical tabs wrapper.'),
+        'description' => t('This field group renders child groups in its own vertical tabs wrapper.'),
         'instance_settings' => array('classes' => '', 'id' => ''),
       ),
       'tab' => array(
         'label' => t('Vertical tab'),
-        'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
+        'description' => t('This field group renders the content in a fieldset, part of vertical tabs group.'),
         'format_types' => array('open', 'closed'),
         'instance_settings' => array('description' => '', 'classes' => ''),
         'default_formatter' => 'closed',
@@ -368,7 +368,7 @@ function field_group_pre_render_tab(array &$element, $group, array &$form) {
     $add['#parents'] = array($add['#group']);
     $element += $add;
   }
-  // Form fieldgroups which are nested into a vertical tab group
+  // Form field groups which are nested into a vertical tab group
   // are handled a little different.
   elseif (!empty($group->parent_name)) {
     $add['#group'] = $group->parent_name;
@@ -377,7 +377,7 @@ function field_group_pre_render_tab(array &$element, $group, array &$form) {
   // Forms "can" have additional settings. We'll try to locate it first, if not
   // exists, field_group will create a parallel additional settings entry.
   else {
-    // Create the fieldgroup element.
+    // Create the field group element.
     $add['#parents'] = array('additional_settings');
     $add['#group'] = 'additional_settings';
     $add['#weight'] = -30 + $group->weight;
@@ -386,7 +386,7 @@ function field_group_pre_render_tab(array &$element, $group, array &$form) {
     // Check if the additional_settings exist for this type of form.
     if (isset($form['additional_settings']['group']['#groups']['additional_settings'])) {
 
-      // Merge fieldgroups with the core additional settings.
+      // Merge field groups with the core additional settings.
       $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name] = $add;
       $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
       // Nest the fields inside the appropriate structure.

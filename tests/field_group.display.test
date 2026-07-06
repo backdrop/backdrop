@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Test file for fieldgroup display.
+ * Test file for field group display.
  */
 
 include_once('field_group.test');

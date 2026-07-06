@@ -101,6 +101,7 @@ function field_group_field_ui_overview_form_alter(array &$form, array &$form_sta
     }
   }
 
+  $field_group_types = field_group_formatter_info();
   $formatter_options = field_group_field_formatter_options($display_overview ? 'display' : 'form');
 
   $refresh_rows = isset($form_state['values']['refresh_rows']) ? $form_state['values']['refresh_rows'] : (isset($form_state['input']['refresh_rows']) ? $form_state['input']['refresh_rows'] : NULL);
@@ -258,13 +259,14 @@ function field_group_field_ui_overview_form_alter(array &$form, array &$form_sta
 
       if ($form_state['formatter_settings_edit'] == $name) {
         $table[$name]['format']['#cell_attributes'] = array('colspan' => $display_overview ? 3 : 2);
+        $format_type_label = $field_group_types['form'][$group->format_type]['label'] ?? '';
         $table[$name]['format']['format_settings'] = array(
           '#type' => 'container',
           '#attributes' => array('class' => array('field-formatter-settings-edit-form')),
           '#parents' => array('fields', $name, 'format_settings'),
           '#weight' => -5,
           'label' => array(
-            '#markup' => t('Field group format:') . ' <span class="formatter-name">' . $group->format_type . '</span>',
+            '#markup' => t('Field group format:') . ' <span class="formatter-name">' . $format_type_label . '</span>',
           ),
           // Create a settings form where hooks can pick in.
           'settings' => $settings,
@@ -373,7 +375,7 @@ function field_group_field_ui_overview_form_alter(array &$form, array &$form_sta
   $form['#validate'][] = 'field_group_field_overview_validate';
   $form['#submit'][] = 'field_group_field_overview_submit';
 
-  // Create the settings for fieldgroup as vertical tabs.
+  // Create the settings for field group as vertical tabs.
   field_group_field_ui_create_vertical_tabs($form, $form_state, $params);
 
   // Show a warning if the user has not set up required containers.
@@ -519,7 +521,7 @@ function field_group_format_settings_form(&$group) {
   backdrop_alter('field_group_format_settings', $addition, $group);
 
   $form += $addition;
-  // Give fieldgroup implementations the chance to alter the description.
+  // Give field group implementations the chance to alter the description.
   if (!empty($addition['label']['#description'])) {
     $form['label']['#description'] = $addition['label']['#description'];
   }
@@ -973,6 +975,19 @@ function field_group_configure_form(array $form, array &$form_state, $group, $vi
   $form['#bundle'] = $group->bundle;
   $form['#view_mode'] = $view_mode;
 
+  $form['#attached']['css'][] = backdrop_get_path('module', 'field_group') . '/css/field_group.field_ui.css';
+
+  $field_group_types = field_group_formatter_info();
+  $format_type_label = $field_group_types['form'][$group->format_type]['label'] ?? '';
+  $form['format_type'] = array(
+    '#markup' => t('Field group format: !format_type', array(
+      '!format_type' => ' <span class="formatter-name">' . $format_type_label . '</span>',
+    )),
+    '#weight' => -6,
+    '#prefix' => '<div class="field-group-formatter">',
+    '#suffix' => '</div>',
+  );
+
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Field group label'),
@@ -987,7 +1002,7 @@ function field_group_configure_form(array $form, array &$form_state, $group, $vi
 
   $form += $addition;
 
-  // Give fieldgroup implementations the chance to alter the description.
+  // Give field group implementations the chance to alter the description.
   if (!empty($addition['label']['#description'])) {
     $form['label']['#description'] = $addition['label']['#description'];
   }
@@ -1179,13 +1194,13 @@ function field_group_field_ui_create_vertical_tabs(array &$form, array &$form_st
   // Add extra guidelines for administrator.
   $form['additional_settings']['field_group'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Fieldgroups'),
+    '#title' => t('Field groups'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#parents' => array('additional_settings'),
   );
   $form['additional_settings']['field_group']['fieldgroup_clone'] = array(
-    '#title' => t('Clone Fieldgroups'),
+    '#title' => t('Clone Field groups'),
     '#description' => t('Select source view mode or form.'),
     '#type' => 'select',
     '#options' => $view_modes,
@@ -1201,7 +1216,7 @@ function field_group_field_ui_create_vertical_tabs(array &$form, array &$form_st
 }
 
 /**
- * Validate handler to validate saving existing fieldgroups from one view mode
+ * Validate handler to validate saving existing field groups from one view mode
  * or form to another.
  *
  * @param array $form
@@ -1256,7 +1271,7 @@ function field_group_field_ui_clone_field_groups_validate(array $form, array &$f
 }
 
 /**
- * Submit handler to save existing fieldgroups from one view mode or form to
+ * Submit handler to save existing field groups from one view mode or form to
  * another.
  *
  * @param array $form
@@ -1272,7 +1287,7 @@ function field_group_field_ui_clone_field_groups(array $form, array &$form_state
   if (!empty($form_state['#source_groups'])) {
     foreach ($form_state['#source_groups'] as $source_group) {
       if (in_array($source_group->group_name, $fields)) {
-        backdrop_set_message(t('Fieldgroup @group is not cloned since a group already exists with the same name.', array('@group' => $source_group->group_name)), 'warning');
+        backdrop_set_message(t('Field group @group is not cloned since a group already exists with the same name.', array('@group' => $source_group->group_name)), 'warning');
         continue;
       }
 
@@ -1282,7 +1297,7 @@ function field_group_field_ui_clone_field_groups(array $form, array &$form_state
 
       field_group_group_save($source_group, TRUE);
 
-      backdrop_set_message(t('Fieldgroup @group cloned successfully.', array('@group' => $source_group->group_name)));
+      backdrop_set_message(t('Field group @group cloned successfully.', array('@group' => $source_group->group_name)));
 
     }
   }

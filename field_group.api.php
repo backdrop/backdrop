@@ -3,26 +3,26 @@
  * @file
  * Hooks provided by the Field Group module.
  *
- * Fieldgroup is a module that will wrap fields and other fieldgroups. Nothing
+ * Field Group is a module that will wrap fields and other field groups. Nothing
  * more, nothing less.
  *
  * For this there are formatters we can create on forms and view modes.
  *
- * Some of the elements defined in fieldgroup will be ported to the elements
+ * Some of the elements defined in field group will be ported to the elements
  * module.
  *
  * DEVELOPERS NOTES
  *
- * - Fieldgroup uses a ''#fieldgroups' property to know what fieldgroups are to
- *   be pre_rendered and rendered by the field_group module. This means we need
- *   to be sure our groups are in #fieldgroups.
+ * - Field Group uses a ''#fieldgroups' property to know what field groups are
+ *   to be pre_rendered and rendered by the field_group module. This means we
+ *   need to be sure our groups are in #fieldgroups.
  *   #fieldgroups is later merged with the normal #groups that can be used by
  *   any other module.
- *   This is done to be sure fieldgroup is not taking fieldsets from profile2,
+ *   This is done to be sure field group is not taking fieldsets from profile2,
  *   commerce line items, commerce user profiles, etc .
  *   When trying to merge a programmatically created field wrapper (div, markup,
  *   fieldset, ...) into groups, you might consider adding it in #fieldgroups as
- *   well if you want the element processed by fieldgroup.
+ *   well if you want the element processed by field group.
  */
 
 /**
@@ -91,7 +91,7 @@ function hook_field_group_formatter_info() {
     'form' => array(
       'fieldset' => array(
         'label' => t('Fieldset'),
-        'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
+        'description' => t('This field group renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array('classes' => ''),
         'default_formatter' => 'collapsible',
@@ -100,7 +100,7 @@ function hook_field_group_formatter_info() {
     'display' => array(
       'div' => array(
         'label' => t('Div'),
-        'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
+        'description' => t('This field group renders the inner content in a simple div with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array(
           'effect' => 'none', 'speed' => 'fast', 'classes' => '',
@@ -138,7 +138,7 @@ function hook_field_group_format_settings($group) {
   // Add the required formatter type selector.
   if (isset($formatter['format_types'])) {
     $form['formatter'] = array(
-      '#title' => t('Fieldgroup settings'),
+      '#title' => t('Field group settings'),
       '#type' => 'select',
       '#options' => backdrop_map_assoc($formatter['format_types']),
       '#default_value' => isset($group->format_settings['formatter']) ? $group->format_settings['formatter'] : $formatter['default_formatter'],

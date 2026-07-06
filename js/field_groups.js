@@ -146,7 +146,7 @@ Backdrop.FieldGroup.Effects.processDiv = {
 Backdrop.behaviors.fieldGroups = {
   attach: function (context, settings) {
 
-    // Vertical tabs: fixes css for fieldgroups.
+    // Vertical tabs: fixes css for field groups.
     $('.fieldset-wrapper .fieldset > legend').css({ display: 'block' });
     $('.vertical-tabs fieldset.fieldset').addClass('default-fallback');
 
