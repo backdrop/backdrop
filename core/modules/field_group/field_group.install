@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field group module install file.
@@ -22,7 +21,7 @@ function field_group_requirements($phase) {
         $message = $t('The <em>Accordion</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module !module should be downloaded and enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array('!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra')));
       } elseif (!$extras_module) {
         // Module exists but isn't enabled.
-      $message = $t('The <em>Accordion</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module %module should be enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array('%module' => 'Field Group Extra'));
+        $message = $t('The <em>Accordion</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module %module should be enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array('%module' => 'Field Group Extra'));
       }
       $requirements['field_group_extra'] = array(
         'title' => $t('Field Group Extra'),
@@ -56,12 +55,14 @@ function _field_group_extra_status() {
   $extras_enabled = FALSE;
   $field_groups = config_get_names_with_prefix('field_group.field_group.');
   $extra_types = array(
+    // cspell:disable
     'accordion',
     'accordion-item',
     'htab',
     'htabs',
     'multipage',
     'multipage-group',
+    // cspell:enable
   );
   foreach ($field_groups as $field_group) {
     $config = config($field_group);
@@ -139,7 +140,7 @@ function field_group_update_1001() {
 
 /**
  * Warn that field_group_extra module needs to be downloaded and installed
- * if Accordion, Horizonal Tabs, and Multipage types are enabled.
+ * if Accordion, Horizontal Tabs, and Multipage types are enabled.
  */
 function field_group_update_1002() {
   list($extras_module, $extras_enabled) = _field_group_extra_status();

@@ -129,7 +129,9 @@ function field_group_menu() {
             ),
             'title' => 'Format type',
             'page callback' => 'backdrop_get_form',
-            'page arguments' => array('field_group_format_type_form', $group_position),
+            'page arguments' => array(
+              'field_group_format_type_form', $group_position,
+            ),
             'type' => MENU_LOCAL_TASK,
             'file' => 'field_group.field_ui.inc',
           ) + $access;

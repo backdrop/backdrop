@@ -150,12 +150,12 @@ Backdrop.behaviors.fieldGroups = {
     $('.fieldset-wrapper .fieldset > legend').css({ display: 'block' });
     $('.vertical-tabs fieldset.fieldset').addClass('default-fallback');
 
-    // Fieldsets: set the hash in url to remember last userselection.
+    // Fieldsets: set the hash in url to remember last user selection.
     $('.group-wrapper ul li').once('group-wrapper-ul-processed', function() {
       var fieldGroupNavigationListIndex = $(this).index();
       $(this).children('a').click(function() {
         var fieldset = $('.group-wrapper fieldset').get(fieldGroupNavigationListIndex);
-        // Grab the first id, holding the wanted hashurl.
+        // Grab the first id, holding the wanted hash url.
         var hashUrl = $(fieldset).attr('id').replace(/^field_group-/, '').split(' ')[0];
         window.location.hash = hashUrl;
       });
