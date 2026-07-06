@@ -17,8 +17,10 @@ function _field_group_field_group_formatter_info() {
         'label' => t('HTML element'),
         'description' => t('This field group renders the inner content in a HTML element with classes and attributes.'),
         'instance_settings' => array(
+          'description' => '',
           'wrapper' => '', 'wrapper_other' => '', 'show_label' => 0,
-          'label_element' => 'div', 'classes' => '', 'attributes' => '',
+          'label_element' => 'h2', 'label_element_other' => '',
+          'classes' => '', 'attributes' => '',
           'required_fields' => 1, 'id' => '',
         ),
       ),
@@ -73,8 +75,10 @@ function _field_group_field_group_formatter_info() {
         'label' => t('HTML element'),
         'description' => t('This field group renders the inner content in a HTML element with classes and attributes.'),
         'instance_settings' => array(
+          'description' => '',
           'wrapper' => '', 'wrapper_other' => '', 'show_label' => 0,
-          'label_element' => 'div', 'classes' => '', 'attributes' => '',
+          'label_element' => 'h2', 'label_element_other' => '',
+          'classes' => '', 'attributes' => '',
           'required_fields' => 1, 'id' => '',
         ),
       ),
@@ -199,7 +203,11 @@ function field_group_pre_render_html_element(array &$element, $group, array &$fo
     $html_element = $wrapper;
   }
   $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
-  $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'div';
+  $label_element = isset($group->format_settings['instance_settings']['label_element_other']) ? $group->format_settings['instance_settings']['label_element_other'] : '';
+  $label = $group->format_settings['instance_settings']['label_element'];
+  if (!empty($label) && $label != 'other') {
+    $label_element = $label;
+  }
   $configured_attributes = isset($group->format_settings['instance_settings']['attributes']) ? ' ' . $group->format_settings['instance_settings']['attributes'] : '';
   $group->classes = trim($group->classes);
 
@@ -239,6 +247,9 @@ function field_group_pre_render_html_element(array &$element, $group, array &$fo
   $element['#prefix'] = '<' . $html_element . $attributes . '>';
   if ($show_label) {
     $element['#prefix'] .= '<' . $label_element . ' class="field-group-label">' . check_plain(t($group->label)) . '</' . $label_element . '>';
+  }
+  if (!empty($group->description)) {
+    $element['#prefix'] .= '<div class="description">' . $group->description . '</div>';
   }
   $element['#suffix'] = '</' . $html_element . '>';
 }
@@ -448,19 +459,22 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
           'aside' => t('Aside'), 'div' => t('Div'), 'other' => t('Other'),
         ),
         '#default_value' => isset($group->format_settings['instance_settings']['wrapper']) ? $group->format_settings['instance_settings']['wrapper'] : 'section',
+        '#description' => t('The HTML element to use as a wrapper for the fields.'),
       );
 
       $form['instance_settings']['wrapper_other'] = array(
-        '#title' => t('Other'),
+        '#title' => t('Other wrapper'),
         '#type' => 'textfield',
         '#default_value' => isset($group->format_settings['instance_settings']['wrapper_other']) ? $group->format_settings['instance_settings']['wrapper_other'] : $formatter['instance_settings']['wrapper_other'],
-        '#description' => t('For example: p, span'),
+        '#description' => t('For example: <code>p</code>, <code>span</code>.'),
         '#weight' => 1,
+        '#indentation' => 1,
         '#states' => array(
           'visible' => array(
             'select[name="' . $select_name . '[wrapper]"]' => array('value' => 'other'),
           ),
         ),
+        '#element_validate' => array('field_group_format_settings_other_tag_validate'),
       );
 
       $form['instance_settings']['show_label'] = array(
@@ -472,10 +486,20 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
       );
 
       $form['instance_settings']['label_element'] = array(
-        '#title' => t('Label element'),
-        '#type' => 'textfield',
+        '#title' => t('Label tag'),
+        '#type' => 'select',
+        '#options' => array(
+          'h2' => t('Header 2'),
+          'h3' => t('Header 3'),
+          'div' => t('Div'),
+          'p' => t('P'),
+          'span' => t('Span'),
+          'other' => t('Other'),
+        ),
         '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
+        '#description' => t('An HTML element to use for the label.'),
         '#weight' => 3,
+        '#indentation' => 1,
         '#states' => array(
           'visible' => array(
             'select[name="' . $select_name . '[show_label]"]' => array('value' => 1),
@@ -483,12 +507,28 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
         ),
       );
 
+      $form['instance_settings']['label_element_other'] = array(
+        '#title' => t('Other label tag'),
+        '#type' => 'textfield',
+        '#default_value' => isset($group->format_settings['instance_settings']['label_element_other']) ? $group->format_settings['instance_settings']['label_element_other'] : '',
+        '#description' => t('An alternative HTML element to use for the label, without the angle brackets. For example, <code>h4</code>, <code>strong</code>.'),
+        '#weight' => 4,
+        '#indentation' => 1,
+        '#states' => array(
+          'visible' => array(
+            'select[name="' . $select_name . '[show_label]"]' => array('value' => 1),
+            'select[name="' . $select_name . '[label_element]"]' => array('value' => 'other'),
+          ),
+        ),
+        '#element_validate' => array('field_group_format_settings_other_tag_validate'),
+      );
+
       $form['instance_settings']['attributes'] = array(
         '#title' => t('Attributes'),
         '#type' => 'textfield',
         '#default_value' => isset($group->format_settings['instance_settings']['attributes']) ? $group->format_settings['instance_settings']['attributes'] : $formatter['instance_settings']['attributes'],
-        '#description' => t('E.g. name="anchor"'),
-        '#weight' => 4,
+        '#description' => t('For example, <code>name="MY-ANCHOR"</code> to create an anchor that can be used in a link from elsewhere.'),
+        '#weight' => 5,
       );
       break;
     case 'div':
@@ -557,6 +597,51 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
       break;
     case 'tab':
     default:
+  }
+}
+
+/**
+ * Validate the label. Label is required for fieldsets that are collapsible.
+ *
+ * @param array $element
+ *   The element that has the label.
+ * @param array $form_state
+ *   An associative array containing the current state of the form.
+ */
+function field_group_format_settings_other_tag_validate(array $element, array &$form_state) {
+  $display_overview = (isset($form_state['build_info']['form_id']) && $form_state['build_info']['form_id'] == 'field_ui_display_form') ? TRUE : FALSE;
+  $value = '';
+  $validate = FALSE;
+  $required_error = FALSE;
+  $tag_error = FALSE;
+
+  if ($display_overview) {
+    $group = $form_state['values']['fields'][$element['#parents'][1]];
+    $settings = $group['format_settings']['settings']['instance_settings'];
+  } else {
+    $settings = $form_state['values']['instance_settings'];
+  }
+
+  $parents = $element['#parents'];
+  $element_name = implode('][', $element['#parents']);
+  $field_name = array_pop($parents);
+  $main_field_name = substr($field_name, 0, -6);
+  if ($settings[$main_field_name] == 'other') {
+    $validate = TRUE;
+    $value = $settings[$field_name];
+    if (!$value) {
+      $required_error = TRUE;
+    }
+    if (!preg_match('/^[a-z][a-z0-9-]*$/i', $value)) {
+      $tag_error = TRUE;
+    }
+  }
+
+  if ($required_error) {
+    form_set_error($element_name, t('The %field_title field is required.', array('%field_title' => $element['#title'])));
+  }
+  if ($validate && $tag_error) {
+    form_set_error($element_name, t('The %field_title field should be a valid HTML element name <em>without</em> the angle brackets.', array('%field_title' => $element['#title'])));
   }
 }
 

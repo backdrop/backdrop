@@ -159,3 +159,27 @@ function field_group_update_1002() {
     }
   }
 }
+
+/**
+ * HTML element - update label_element and label_element_other.
+ */
+function field_group_update_1003() {
+  $config_names = config_get_names_with_prefix('field_group.field_group.');
+  foreach ($config_names as $config_name) {
+    $field_group_config = config($config_name);
+    if ($field_group_config->get('format_type') == 'html-element') {
+      $label_element = $field_group_config->get('format_settings.instance_settings.label_element');
+      if (!$label_element) {
+        $field_group_config->set('format_settings.instance_settings.label_element', 'h2');
+      }
+      if (!in_array($label_element, array('h2', 'h3', 'div', 'p', 'span'))) {
+        $field_group_config->set('format_settings.instance_settings.label_element', 'other');
+        $field_group_config->set('format_settings.instance_settings.label_element_other', $label_element);
+      }
+      else {
+        $field_group_config->set('format_settings.instance_settings.label_element_other', '');
+      }
+    }
+    $field_group_config->save();
+  }
+}

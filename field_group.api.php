@@ -135,10 +135,10 @@ function hook_field_group_format_settings($group) {
   $mode = $group->mode == 'form' ? 'form' : 'display';
   $formatter = $field_group_types[$mode][$group->format_type];
 
-  // Add the required formatter type selector.
+  // Add the required display type selector.
   if (isset($formatter['format_types'])) {
     $form['formatter'] = array(
-      '#title' => t('Field group settings'),
+      '#title' => t('Display type'),
       '#type' => 'select',
       '#options' => backdrop_map_assoc($formatter['format_types']),
       '#default_value' => isset($group->format_settings['formatter']) ? $group->format_settings['formatter'] : $formatter['default_formatter'],
