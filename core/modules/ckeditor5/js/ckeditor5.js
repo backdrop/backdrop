@@ -43,7 +43,7 @@
           let onEventsPattern = {
             'name': /.*/,
             'attributes': /^on.*/
-          }
+          };
           editorSettings.htmlSupport.disallow.push(onEventsPattern);
         }
         // If filter_html if off, allow all elements and attributes to be used.
@@ -53,7 +53,7 @@
             attributes: true,
             classes: true,
             styles: true
-          }
+          };
           editorSettings.htmlSupport.allow.push(patternAllowAll);
         }
       }
@@ -101,7 +101,7 @@
         });
     },
 
-    detach: function (element, format, trigger) {
+    detach: function (element, format, trigger, windowUnload) {
       // Remove any content modification warning.
       if (element.ckeditor5AttachedWarning && trigger !== 'serialize') {
         element.ckeditor5AttachedWarning.remove();
@@ -121,7 +121,11 @@
 
       // Destroy the instance if fully detaching.
       if (trigger !== 'serialize') {
-        editor.destroy();
+        // If submitting the entire form, skip destroying the editor and let it
+        //  be unloaded by the browser leaving the page.
+        if (!windowUnload) {
+          editor.destroy();
+        }
         Backdrop.ckeditor5.instances.delete(editor.id);
         delete element.ckeditor5AttachedEditor;
         delete element.ckeditor5Processed;

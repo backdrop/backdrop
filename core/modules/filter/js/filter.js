@@ -80,7 +80,9 @@ Backdrop.behaviors.filterEditors = {
         if (event.isDefaultPrevented()) {
           return;
         }
-        Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
+        // Detach the editor with "windowUnload" set to true, as submitting
+        // the form will cause the window to unload.
+        Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor], 'unload', true);
       });
     });
   },
@@ -100,15 +102,42 @@ Backdrop.behaviors.filterEditors = {
   }
 };
 
+/**
+ * Attach an editor to a textarea field.
+ *
+ * @param {Element} field
+ *   The original textarea DOM element.
+ * @param {Object} format
+ *   The text format information.
+ */
 Backdrop.filterEditorAttach = function(field, format) {
   if (format.editor && Backdrop.editors[format.editor]) {
     Backdrop.editors[format.editor].attach(field, format);
   }
 };
 
-Backdrop.filterEditorDetach = function(field, format, trigger) {
+  /**
+   * Detach an editor from the page.
+   *
+   * @param {Element} field
+   *   The original textarea DOM element.
+   * @param {Object} format
+   *   The text format information.
+   * @param {string} trigger
+   *   A string with the value "unload", "move", or "serialize". See
+   *   Backdrop.detachBehaviors() for more information on these strings.
+   * @param {boolean} windowUnload
+   *   Boolean indicating if this detachment is happening right before leaving
+   *   the page. If so, there's no need to free up memory resources because
+   *   the editor will be destroyed by the window unloading.
+   *
+   * @see Backdrop.detachBehaviors()
+   */
+  Backdrop.filterEditorDetach = function(field, format, trigger, windowUnload) {
+  trigger = trigger || 'unload';
+  windowUnload = windowUnload || false;
   if (format.editor && Backdrop.editors[format.editor]) {
-    Backdrop.editors[format.editor].detach(field, format, trigger);
+    Backdrop.editors[format.editor].detach(field, format, trigger, windowUnload);
   }
 };
 
