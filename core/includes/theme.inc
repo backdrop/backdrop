@@ -1823,8 +1823,17 @@ function theme_status_messages($variables) {
     'info' => t('Info message'),
   );
 
+  $message_role = array(
+    'status' => 'status',
+    'error' => 'alert',
+    'warning' => 'alert',
+    'info' => NULL,
+  );
+
   foreach ($message_types as $type => $messages) {
-    $output .= "<div class=\"messages $type\">\n";
+    $output .= "<div class=\"messages $type\"";
+    $output .= is_null($message_role[$type]) ? '' : " role=\"$message_role[$type]\"";
+    $output .= " >\n";
     if (!empty($status_heading[$type])) {
       $output .= '  <h2 class="element-invisible">' . $status_heading[$type] . "</h2>\n";
     }
