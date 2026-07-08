@@ -80,9 +80,8 @@ Backdrop.behaviors.filterEditors = {
         if (event.isDefaultPrevented()) {
           return;
         }
-        // Detach the editor with "windowUnload" set to true, as submitting
-        // the form will cause the window to unload.
-        Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor], 'unload', true);
+        // Detach the editor with "submit" when doing a non-AJAX submit.
+        Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor], 'submit');
       });
     });
   },
@@ -124,20 +123,18 @@ Backdrop.filterEditorAttach = function(field, format) {
    * @param {Object} format
    *   The text format information.
    * @param {string} trigger
-   *   A string with the value "unload", "move", or "serialize". See
-   *   Backdrop.detachBehaviors() for more information on these strings.
-   * @param {boolean} windowUnload
-   *   Boolean indicating if this detachment is happening right before leaving
-   *   the page. If so, there's no need to free up memory resources because
-   *   the editor will be destroyed by the window unloading.
+   *   A string with the value "unload", "move", "serialize" (see
+   *   Backdrop.detachBehaviors() for more information on these), or "submit".
+   *   Submit is used to detach editors when the complete form is submitted
+   *   with non-AJAX behavior, which may be useful to let the browser clean up
+   *   the editor's events and memory.
    *
    * @see Backdrop.detachBehaviors()
    */
-  Backdrop.filterEditorDetach = function(field, format, trigger, windowUnload) {
+  Backdrop.filterEditorDetach = function(field, format, trigger) {
   trigger = trigger || 'unload';
-  windowUnload = windowUnload || false;
   if (format.editor && Backdrop.editors[format.editor]) {
-    Backdrop.editors[format.editor].detach(field, format, trigger, windowUnload);
+    Backdrop.editors[format.editor].detach(field, format, trigger);
   }
 };
 

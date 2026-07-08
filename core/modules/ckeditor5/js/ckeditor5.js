@@ -101,7 +101,7 @@
         });
     },
 
-    detach: function (element, format, trigger, windowUnload) {
+    detach: function (element, format, trigger) {
       // Remove any content modification warning.
       if (element.ckeditor5AttachedWarning && trigger !== 'serialize') {
         element.ckeditor5AttachedWarning.remove();
@@ -123,7 +123,7 @@
       if (trigger !== 'serialize') {
         // If submitting the entire form, skip destroying the editor and let it
         //  be unloaded by the browser leaving the page.
-        if (!windowUnload) {
+        if (trigger === 'submit') {
           editor.destroy();
         }
         Backdrop.ckeditor5.instances.delete(editor.id);
