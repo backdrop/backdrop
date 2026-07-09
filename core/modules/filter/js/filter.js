@@ -79,8 +79,7 @@ Backdrop.behaviors.filterEditors = {
         // Do not detach if the event was canceled.
         if (event.isDefaultPrevented()) {
           return;
-        }
-        Backdrop.settings.formIsSubmitting = true;
+        }        
         Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
       });
     });
