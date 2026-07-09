@@ -450,8 +450,6 @@ Backdrop.behaviors.editorImageLibrary = {
   }  
 };
 
-
-
 /**
  * Command to save the contents of an editor-provided dialog.
  *
