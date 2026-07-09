@@ -288,7 +288,7 @@ Backdrop.behaviors.editorImageLibrary = {
         $form.find('[name="attributes[src]"]').val(relativeImgSrc);
         $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
 
-        // Reset width and height so image is not stretched to the any revious image's dimensions.
+        // Reset width and height so image is not stretched to the any previous image's dimensions.
         $form.find('[name="attributes[width]"]').val('');
         $form.find('[name="attributes[height]"]').val('');
         // Remove style from previous selection.
