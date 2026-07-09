@@ -79,7 +79,7 @@ Backdrop.behaviors.filterEditors = {
         // Do not detach if the event was canceled.
         if (event.isDefaultPrevented()) {
           return;
-        }        
+        }
         Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
       });
     });
@@ -267,7 +267,7 @@ Backdrop.behaviors.editorImageDialog = {
     });
   }
 };
-  
+
 /**
  * Provides behavior for clicking on images within the library browser.
  */
@@ -287,7 +287,8 @@ Backdrop.behaviors.editorImageLibrary = {
         $form.find('[name="attributes[src]"]').val(relativeImgSrc);
         $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
 
-        // Reset width and height so image is not stretched to the any previous image's dimensions.
+        // Reset width and height so image is not stretched to 
+        // the any previous image's dimensions.
         $form.find('[name="attributes[width]"]').val('');
         $form.find('[name="attributes[height]"]').val('');
         // Remove style from previous selection.
@@ -303,7 +304,8 @@ Backdrop.behaviors.editorImageLibrary = {
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');
       });
 
-    // Empty width and height input fields, when an existing file is removed, so a newly uploaded one does not inherit dimensions.
+    // Empty width and height input fields, when an existing file is removed, 
+    // so a newly uploaded one does not inherit dimensions.
     // See Backdrop.behaviors.fileButtons, which triggers mousedown.
     const $imageForm = $('.image-form-wrapper');
     $imageForm.find('.file-remove-button').once('remove-button-listener').on('mousedown', function () {
