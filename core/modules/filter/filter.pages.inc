@@ -216,7 +216,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'height'),
     '#field_suffix' => ' ' . t('pixels'),
   );
-  
+
   $ratio_icons = "";
   // Skip these icons if the user is not allowed to unlock the aspect-ratio functionality:
   if (settings_get('disable_image_aspect_ratio_unlock', FALSE) !== TRUE) {
@@ -225,10 +225,10 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     $ratio_icons .= '<div id="lock-aspect-ratio" class="image-ratio-icon lock-aspect-ratio" style="display:none;" title="' . t('Lock aspect ratio') . '">' . icon('lock-simple-open-fill') . '</div>';
   }
   $ratio_icons .= '<div id="reset-orig" class="image-ratio-icon reset-orig reset-orig-inactive" title="' . t('Reset to original size') . '">' . icon('arrows-clockwise-fill') . '</div>';
-  
+
   // Add ratio icons after the "height" field.
   $form['size']['height']['#field_suffix'] .= $ratio_icons;
-  
+
   // Original values used for reference in submit handler.
   $form['size']['previous_width'] = array(
     '#type' => 'value',
