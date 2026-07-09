@@ -123,7 +123,7 @@
       if (trigger !== 'serialize') {
         // If submitting the entire form, skip destroying the editor and let it
         //  be unloaded by the browser leaving the page.
-        if (trigger === 'submit') {
+        if (trigger !== 'submit') {
           editor.destroy();
         }
         Backdrop.ckeditor5.instances.delete(editor.id);
