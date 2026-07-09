@@ -268,11 +268,7 @@ Backdrop.behaviors.editorImageDialog = {
     });
   }
 };
-
-
-
-
-
+  
 /**
  * Provides behavior for clicking on images within the library browser.
  */
@@ -292,8 +288,7 @@ Backdrop.behaviors.editorImageLibrary = {
         $form.find('[name="attributes[src]"]').val(relativeImgSrc);
         $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
 
-        // Reset width and height so image is not stretched to the any
-        // previous image's dimensions.
+        // Reset width and height so image is not stretched to the any revious image's dimensions.
         $form.find('[name="attributes[width]"]').val('');
         $form.find('[name="attributes[height]"]').val('');
         // Remove style from previous selection.
@@ -309,17 +304,15 @@ Backdrop.behaviors.editorImageLibrary = {
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');
       });
 
-    // Empty width and height input fields, when an existing file is removed,
-    // so a newly uploaded one does not inherit dimensions.
+    // Empty width and height input fields, when an existing file is removed, so a newly uploaded one does not inherit dimensions.
     // See Backdrop.behaviors.fileButtons, which triggers mousedown.
     const $imageForm = $('.image-form-wrapper');
     $imageForm.find('.file-remove-button').once('remove-button-listener').on('mousedown', function () {
       $imageForm.find('[name="attributes[width]"]').val('');
       $imageForm.find('[name="attributes[height]"]').val('');
     });
-    
 
-    // Lock image aspect ratio if the user manually changes width or height
+    // Lock image aspect ratio if the user manually changes width or height.
     var $sizeFormItems = $('.filter-format-editor-image-form .editor-image-size');
     // But first make sure, the form items exist.
     if (!$sizeFormItems.length) {
@@ -329,9 +322,8 @@ Backdrop.behaviors.editorImageLibrary = {
       width: null,
       height: null
     };
-   
-    
-    // Set global variable if we have locked the aspect ratio or not
+
+    // Set global variable if we have locked the aspect ratio or not.
     Backdrop.settings.filter_img_aspectRatioLocked = true;
     $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').on('click', function() {
       $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').hide();
@@ -344,8 +336,7 @@ Backdrop.behaviors.editorImageLibrary = {
       $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').show();
       Backdrop.settings.filter_img_aspectRatioLocked = true;    
     });
-    
-    
+        
     $('.filter-format-editor-image-form .editor-image-size #reset-orig').on('click', function() {
       Backdrop.behaviors.editorImageLibrary.imageDimensionsSet($(this).data('data-dimensions'));
       Backdrop.behaviors.editorImageLibrary.setButtonState($(this).data('data-dimensions'));
@@ -399,9 +390,7 @@ Backdrop.behaviors.editorImageLibrary = {
         Backdrop.behaviors.editorImageLibrary.imageDimensionsEmpty();
       }
       img.src = this.value;
-    });    
-       
-    
+    });
   },
   /**
    * Helper function to empty the width and height form items.
@@ -412,7 +401,7 @@ Backdrop.behaviors.editorImageLibrary = {
     $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
   },
   /**
-   * Helper funtion to set width and height values.
+   * Helper function to set width and height values.
    */
   imageDimensionsSet: function(values) {
     $('.filter-format-editor-image-form [name="attributes[width]"]').val(values.width);
@@ -424,8 +413,7 @@ Backdrop.behaviors.editorImageLibrary = {
    * Keep width and height input values in sync based on the natural image
    * dimensions.
    */
-  syncAspectRatio: function(naturalDimensions) {
-    
+  syncAspectRatio: function(naturalDimensions) {    
     $('.filter-format-editor-image-form [name="attributes[width]"]').off('change').on('change', function() {      
       var newHeight = Math.round(this.value / naturalDimensions.width * naturalDimensions.height);
       if (Backdrop.settings.filter_img_aspectRatioLocked === true) {
@@ -439,9 +427,7 @@ Backdrop.behaviors.editorImageLibrary = {
         $('.filter-format-editor-image-form [name="attributes[width]"]').val(newWidth);
       }
       Backdrop.behaviors.editorImageLibrary.setButtonState(naturalDimensions);
-    });
-    
-    
+    });        
   },
   /**
    * Update the data-dimensions attribute value.
