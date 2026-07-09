@@ -287,7 +287,7 @@ Backdrop.behaviors.editorImageLibrary = {
         $form.find('[name="attributes[src]"]').val(relativeImgSrc);
         $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
 
-        // Reset width and height so image is not stretched to 
+        // Reset width and height so image is not stretched to
         // the any previous image's dimensions.
         $form.find('[name="attributes[width]"]').val('');
         $form.find('[name="attributes[height]"]').val('');
@@ -304,7 +304,7 @@ Backdrop.behaviors.editorImageLibrary = {
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');
       });
 
-    // Empty width and height input fields, when an existing file is removed, 
+    // Empty width and height input fields, when an existing file is removed,
     // so a newly uploaded one does not inherit dimensions.
     // See Backdrop.behaviors.fileButtons, which triggers mousedown.
     const $imageForm = $('.image-form-wrapper');
@@ -326,19 +326,28 @@ Backdrop.behaviors.editorImageLibrary = {
 
     // Set global variable if we have locked the aspect ratio or not.
     Backdrop.settings.filter_img_aspectRatioLocked = true;
-    $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').on('click', function() {
+    $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').off().on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
       $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').hide();
-      $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').show();
+      $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').show().focus();
       Backdrop.settings.filter_img_aspectRatioLocked = false;
     });
-    
-    $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').on('click', function() {
+
+    $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').off().on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
       $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').hide();
-      $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').show();
-      Backdrop.settings.filter_img_aspectRatioLocked = true;    
+      $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').show().focus();
+      Backdrop.settings.filter_img_aspectRatioLocked = true;
     });
-        
-    $('.filter-format-editor-image-form .editor-image-size #reset-orig').on('click', function() {
+
+    $('.filter-format-editor-image-form .editor-image-size #reset-orig').off().on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
       Backdrop.behaviors.editorImageLibrary.imageDimensionsSet($(this).data('data-dimensions'));
       Backdrop.behaviors.editorImageLibrary.setButtonState($(this).data('data-dimensions'));
     });
@@ -414,27 +423,27 @@ Backdrop.behaviors.editorImageLibrary = {
    * Keep width and height input values in sync based on the natural image
    * dimensions.
    */
-  syncAspectRatio: function(naturalDimensions) {    
-    $('.filter-format-editor-image-form [name="attributes[width]"]').off('change').on('change', function() {      
+  syncAspectRatio: function(naturalDimensions) {
+    $('.filter-format-editor-image-form [name="attributes[width]"]').off('change').on('change', function() {
       var newHeight = Math.round(this.value / naturalDimensions.width * naturalDimensions.height);
       if (Backdrop.settings.filter_img_aspectRatioLocked === true) {
         $('.filter-format-editor-image-form [name="attributes[height]"]').val(newHeight);
       }
       Backdrop.behaviors.editorImageLibrary.setButtonState(naturalDimensions);
     });
-    $('.filter-format-editor-image-form [name="attributes[height]"]').off('change').on('change', function() {      
+    $('.filter-format-editor-image-form [name="attributes[height]"]').off('change').on('change', function() {
       var newWidth = Math.round(this.value / naturalDimensions.height * naturalDimensions.width);
       if (Backdrop.settings.filter_img_aspectRatioLocked === true) {
         $('.filter-format-editor-image-form [name="attributes[width]"]').val(newWidth);
       }
       Backdrop.behaviors.editorImageLibrary.setButtonState(naturalDimensions);
-    });        
+    });
   },
   /**
    * Update the data-dimensions attribute value.
    */
   resetDataAttr: function(naturalDimensions) {
-    $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', naturalDimensions);    
+    $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', naturalDimensions);
   },
   /**
    * Update the disabled state of the reset icon
@@ -447,9 +456,9 @@ Backdrop.behaviors.editorImageLibrary = {
       $('.filter-format-editor-image-form .editor-image-size #reset-orig').removeClass('reset-orig-inactive');
     }
     else {
-      $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');      
+      $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
     }
-  }  
+  }
 };
 
 /**
