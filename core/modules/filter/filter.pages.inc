@@ -218,7 +218,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   );
 
   $ratio_icons = "";
-  // Skip these icons if the user is not allowed to unlock the aspect-ratio functionality.  
+  // Skip these icons if the user is not allowed to unlock the aspect-ratio functionality.
   // Modify by adding "$settings['disable_image_aspect_ratio_unlock'] = TRUE;" to settings.php.
   if (settings_get('disable_image_aspect_ratio_unlock', FALSE) !== TRUE) {
     $ratio_icons .= '<div id="unlock-aspect-ratio" class="image-ratio-icon unlock-aspect-ratio" title="' . t('Unlock aspect ratio') . '">' . icon('lock-simple-fill') . '</div>';
