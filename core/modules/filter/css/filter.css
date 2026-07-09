@@ -186,6 +186,9 @@
   margin-left: 10px;
   top: 5px;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
 }
 .image-form-wrapper .image-ratio-icon.reset-orig-inactive {
   opacity: 0.6;
