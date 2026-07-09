@@ -221,10 +221,10 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   // Skip these icons if the user is not allowed to unlock the aspect-ratio functionality.
   // Modify by adding "$settings['disable_image_aspect_ratio_unlock'] = TRUE;" to settings.php.
   if (settings_get('disable_image_aspect_ratio_unlock', FALSE) !== TRUE) {
-    $ratio_icons .= '<div id="unlock-aspect-ratio" class="image-ratio-icon unlock-aspect-ratio" title="' . t('Unlock aspect ratio') . '">' . icon('lock-simple-fill') . '</div>';
-    $ratio_icons .= '<div id="lock-aspect-ratio" class="image-ratio-icon lock-aspect-ratio" style="display:none;" title="' . t('Lock aspect ratio') . '">' . icon('lock-simple-open-fill') . '</div>';
+    $ratio_icons .= '<button id="unlock-aspect-ratio" class="image-ratio-icon unlock-aspect-ratio" title="' . t('Unlock aspect ratio') . '" aria-label="' . t('Unlock aspect ratio') . '">' . icon('lock-simple-fill') . '</button>';
+    $ratio_icons .= '<button id="lock-aspect-ratio" class="image-ratio-icon lock-aspect-ratio" style="display:none;" title="' . t('Lock aspect ratio') . '" aria-label="' . t('Lock aspect ratio') . '">' . icon('lock-simple-open-fill') . '</button>';
   }
-  $ratio_icons .= '<div id="reset-orig" class="image-ratio-icon reset-orig reset-orig-inactive" title="' . t('Reset to original size') . '">' . icon('arrows-clockwise-fill') . '</div>';
+  $ratio_icons .= '<button id="reset-orig" class="image-ratio-icon reset-orig reset-orig-inactive" title="' . t('Reset to original size') . '" aria-label="' . t('Reset to original size') . '">' . icon('arrows-clockwise-fill') . '</button>';
 
   // Add ratio icons after the "height" field.
   $form['size']['height']['#field_suffix'] .= $ratio_icons;
@@ -817,10 +817,10 @@ function _filter_get_file_id($href) {
   // Now find this file name in uri field to get fid.
   if (!empty($filename)) {
     $results = db_select('file_managed')
-      ->fields('file_managed', array('fid', 'uri'))
-      ->condition('uri', '%/' . $filename, 'LIKE')
-      ->orderBy('fid', 'DESC')
-      ->execute();
+    ->fields('file_managed', array('fid', 'uri'))
+    ->condition('uri', '%/' . $filename, 'LIKE')
+    ->orderBy('fid', 'DESC')
+    ->execute();
 
     foreach ($results as $found) {
       $result = $found->fid;
