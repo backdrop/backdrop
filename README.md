@@ -21,8 +21,7 @@ Available group types:
 * Fieldset
 * [HTML Details](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details)
 * Vertical tabs
-* Div
-* HTML element
+* HTML element - tags like `<section>`, `<footer>`, `<div>`
 
 Field Group has API functions to add your own formatter and rendering for it.
 
@@ -30,8 +29,9 @@ Update
 ------
 
 Some group types have been moved to a separate module [Field Group Extra](https://backdropcms.org/project/field_group_extra).
-Install that module if you require: accordions, horizontal tabs or multipage
-group types.
+Install that module if you require: accordions, horizontal tabs, multipages, or
+collapsible divs. Note that you can simulate accordions by using details
+elements and giving each details the same name attribute.
 
 License
 -------
