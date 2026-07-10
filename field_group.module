@@ -7,7 +7,6 @@
  *
  */
 
-// Formatters: html-element, div, fieldset, details, vertical tabs.
 require_once dirname(__FILE__) . '/field_group.groups.inc';
 
 /**
