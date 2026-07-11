@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Display a list of the available code_sign_hash profiles.  Include edit/delete
+ * Display a list of the available code_sign_hash profiles. Include edit/delete
  * controls.
  */
 function code_sign_hash_admin_form($form, &$form_state) {
   $profiles = config_get('code_sign_hash.settings', 'profiles');
   $headers = array(
     'name' => t('Profile name'),
-    'hash_algorithm' => t('Hash Agorithm'),
+    'hash_algorithm' => t('Hash Algorithm'),
     'ops' => t('Operations'),
   );
 
@@ -43,19 +43,19 @@ function code_sign_hash_admin_form($form, &$form_state) {
  * Create a form to create a new Code Sign Hash profile or to edit an existing
  * one.
  *
- * @param $form
+ * @param array $form
  *   The initial form.
- * @param &$form_state
+ * @param array &$form_state
  *   The form state.
- * @param $profile_id
- *   The machine name of the profile to edit.  NULL to create a new entity.
- * @return
+ * @param string $profile_id
+ *   The machine name of the profile to edit. NULL to create a new entity.
+ * @return array
  *   The codesign hash edit profile form.
  */
 function code_sign_hash_edit_profile_form($form, &$form_state, $profile_id = NULL) {
   $all_profiles = config_get('code_sign_hash.settings', 'profiles');
 
-  // Load an existing profile or prep the array for a new one.  Fill in any
+  // Load an existing profile or prep the array for a new one. Fill in any
   // missing fields with reasonable default values.
   $profile = array_key_exists($profile_id, $all_profiles) ? $all_profiles[$profile_id] : array();
   $profile += array(
@@ -108,10 +108,12 @@ function code_sign_hash_edit_profile_form($form, &$form_state, $profile_id = NUL
 }
 
 /**
- * Return if the machine name exists already.
- * @param $profile
+ * Returns whether the machine name already exists.
+ *
+ * @param string $profile
  *   The machine name of the profile.
- * @return
+ *
+ * @return bool
  *   TRUE if it exists, FALSE if it does not.
  */
 function code_sign_hash_profile_name_exists($profile) {
@@ -122,9 +124,9 @@ function code_sign_hash_profile_name_exists($profile) {
 /**
  * Save the new or edited profile.
  *
- * @param $form
+ * @param array $form
  *   The form.
- * @param &$form_state
+ * @param array &$form_state
  *   The submitted form state.
  */
 function code_sign_hash_edit_profile_form_submit($form, &$form_state) {
@@ -155,6 +157,19 @@ function code_sign_hash_edit_profile_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/config/system/code-sign/hash';
 }
 
+/**
+ * Builds a confirmation form for deleting a Code Sign Hash profile.
+ *
+ * @param array $form
+ *   The initial form.
+ * @param array &$form_state
+ *   The form state.
+ * @param string $profile_id
+ *   The machine name of the profile to delete.
+ *
+ * @return array
+ *   The confirmation form.
+ */
 function code_sign_hash_delete_profile_form($form, &$form_state, $profile_id) {
   $form['#profile'] = $profile_id;
   $form['profile_id'] = array(
@@ -169,6 +184,14 @@ function code_sign_hash_delete_profile_form($form, &$form_state, $profile_id) {
     'code_sign_hash_delete_profile_form');
 }
 
+/**
+ * Deletes the profile and returns to the list of profiles.
+ *
+ * @param array $form
+ *   The form.
+ * @param array &$form_state
+ *   The submitted form state.
+ */
 function code_sign_hash_delete_profile_form_submit($form, &$form_state) {
   $profile_id = $form['#profile'];
   config_clear('code_sign_hash.settings', 'profiles.' . $profile_id);

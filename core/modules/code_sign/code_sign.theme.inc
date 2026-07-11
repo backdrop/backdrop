@@ -40,7 +40,7 @@ function theme_code_sign_report($vars) {
 /**
  * Base implementation for theme('code_sign_result').
  *
- * A signing module may overide this with a more complex item including links
+ * A signing module may override this with a more complex item including links
  * to the signing certificate or displaying the identity of the signer.
  */
 function theme_code_sign_result($vars) {

@@ -6,5 +6,5 @@ backdrop = 1.x
 type = module
 dependencies[] = code_sign
 
-; This module is intended for testing and demostration purposes.
+; This module is intended for testing and demonstration purposes.
 hidden = true
