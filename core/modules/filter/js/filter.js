@@ -262,7 +262,7 @@ Backdrop.behaviors.editorImageDialog = {
           $(this).remove();
         });
 
-        // Restore the preious dialog position.
+        // Restore the previous dialog position.
         if (Backdrop.filterModalLeft) {
           $(".editor-dialog").css('left', Backdrop.filterModalLeft + 'px');
           // Re-center the dialog by triggering a window resize.
