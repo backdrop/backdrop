@@ -200,6 +200,16 @@ Backdrop.behaviors.editorImageDialog = {
       $newItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
       $newItem.trigger('editor-image-show');
 
+      if ($newItem.hasClass('form-item-fid')) {
+        // Clear any existing width and height, as well as
+        // previously recorded width and height for the "reset"
+        // button.
+        $('.filter-format-editor-image-form [name="attributes[width]"]').val('');
+        $('.filter-format-editor-image-form [name="attributes[height]"]').val('');
+        $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', {width: null, height: null});
+        $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
+      }
+
       return false;
     });
 
@@ -252,7 +262,7 @@ Backdrop.behaviors.editorImageDialog = {
           $(this).remove();
         });
 
-        // Restore the previous dialog position.
+        // Restore the preious dialog position.
         if (Backdrop.filterModalLeft) {
           $(".editor-dialog").css('left', Backdrop.filterModalLeft + 'px');
           // Re-center the dialog by triggering a window resize.
