@@ -104,20 +104,18 @@ class GroupDisplayTestCase extends GroupTestCase {
       'children' => array(
         0 => 'field_no_access',
       ),
-      'format_type' => 'div',
+      'format_type' => 'html-element',
       'format_settings' => array(
         'label' => 'Link',
         'instance_settings' => array(
+          'wrapper' => 'div',
           'required_fields' => 0,
           'id' => 'wrapper-id',
           'classes' => 'test-class',
           'description' => '',
           'show_label' => FALSE,
           'label_element' => 'h3',
-          'effect' => 'blind',
-          'speed' => 'fast',
         ),
-        'formatter' => 'open',
       ),
     );
     $group = $this->createDisplayGroup('default', $data);
@@ -127,64 +125,6 @@ class GroupDisplayTestCase extends GroupTestCase {
 
     // Test if group is not shown.
     $this->assertNoFieldByXPath("//div[contains(@id, 'wrapper-id')]", NULL, t('Div that contains fields with no access is not shown.'));
-  }
-
-  /**
-   * Test the div formatter.
-   */
-  public function testDiv() {
-
-    $data = array(
-      'label' => 'Wrapper',
-      'weight' => '1',
-      'children' => array(
-        0 => 'field_test',
-      ),
-      'format_type' => 'div',
-      'format_settings' => array(
-        'label' => 'Link',
-        'instance_settings' => array(
-          'required_fields' => 0,
-          'id' => 'wrapper-id',
-          'classes' => 'test-class',
-          'description' => '',
-          'show_label' => 0,
-          'label_element' => 'h3',
-          'effect' => 'blind',
-          'speed' => 'fast',
-        ),
-        'formatter' => 'open',
-      ),
-    );
-    $group = $this->createDisplayGroup('default', $data);
-
-    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
-    $this->backdropGet('node/' . $this->node->nid);
-
-    // Test group ids and classes.
-    $this->assertFieldByXPath("//div[contains(@id, 'wrapper-id')]", NULL, t('Wrapper id set on wrapper div'));
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class')]", NULL, t('Test class set on wrapper div') . ' class="' . $group->group_name . ' test-class');
-
-    // Test group label.
-    $this->assertNoRaw('<h3 class="field-group-label"><span>' . $data['label'] . '</span></h3>', t('Label is not shown'));
-
-    // Set show label to true.
-    $group->format_settings['instance_settings']['show_label'] = 1;
-
-    // backdrop_write_record('field_group', $group, array('identifier'));.
-    field_group_group_save($group, FALSE);
-    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
-    $this->backdropGet('node/' . $this->node->nid);
-    $this->assertRaw('<h3 class="field-group-label"><span>' . $data['label'] . '</span></h3>', t('Label is shown'));
-
-    // Change to collapsible.
-    $group->format_settings['formatter'] = 'collapsible';
-    // backdrop_write_record('field_group', $group, array('identifier'));.
-    field_group_group_save($group, FALSE);
-    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
-    $this->backdropGet('node/' . $this->node->nid);
-    $this->assertFieldByXPath("//div[contains(@class, 'speed-fast')]", NULL, t('Speed class is set'));
-    $this->assertFieldByXPath("//div[contains(@class, 'effect-blind')]", NULL, t('Effect class is set'));
   }
 
   /**

@@ -698,8 +698,7 @@ function system_requirements($phase) {
             break;
 
           case 'field_group':
-            // @set the change notice.
-            // $change_notice = ?;
+            $change_notice = 49214;
             break;
         }
         if ($change_notice) {

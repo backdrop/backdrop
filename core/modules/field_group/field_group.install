@@ -18,10 +18,10 @@ function field_group_requirements($phase) {
     if ($extras_enabled && !$extras_module) {
       if ($extras_module === FALSE) {
         // Module not found.
-        $message = $t('The <em>Accordion</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module !module should be downloaded and enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array('!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra')));
+        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module %module should be enabled to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array('!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra')));
       } elseif (!$extras_module) {
         // Module exists but isn't enabled.
-        $message = $t('The <em>Accordion</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module %module should be enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array('%module' => 'Field Group Extra'));
+        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. Enable the contrib module %module to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array('%module' => 'Field Group Extra'));
       }
       $requirements['field_group_extra'] = array(
         'title' => $t('Field Group Extra'),
@@ -58,6 +58,7 @@ function _field_group_extra_status() {
     // cspell:disable
     'accordion',
     'accordion-item',
+    'div',
     'htab',
     'htabs',
     'multipage',
@@ -67,6 +68,9 @@ function _field_group_extra_status() {
   foreach ($field_groups as $field_group) {
     $config = config($field_group);
     if (in_array($config->get('format_type'), $extra_types)) {
+      if ($config->get('format_type') == 'div' && $config->get('format_settings.formatter') == 'open') {
+        continue;
+      }
       $extras_enabled = TRUE;
       break;
     }
@@ -140,7 +144,7 @@ function field_group_update_1001() {
 
 /**
  * Warn that field_group_extra module needs to be downloaded and installed
- * if Accordion, Horizontal Tabs, and Multipage types are enabled.
+ * if Accordion, Div, Horizontal Tabs, and Multipage types are enabled.
  */
 function field_group_update_1002() {
   list($extras_module, $extras_enabled) = _field_group_extra_status();
@@ -148,15 +152,14 @@ function field_group_update_1002() {
   if ($extras_enabled) {
     if ($extras_module === FALSE) {
       // Module not found.
-      backdrop_set_message(t('The <em>Accordion</em>, <em>Horizontal tabs</em>, and <em>Multipage</em> field group types have been moved out of the Field Group module. The contrib module !module should be downloaded and enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array('!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra'))));
-    }
-    elseif (!$extras_module) {
+      backdrop_set_message(t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, and <em>Multipage</em> field group types have been moved out of the Field Group module. Your website uses one or more of these group types. Download and enable the contrib module !module to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array('!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra'))));
+    } elseif (!$extras_module) {
       // Module exists but isn't enabled.
       db_update('system')
         ->fields(array('status' => 1))
         ->condition('name', 'field_group_extra')
         ->execute();
-      backdrop_set_message(t('The contrib module %module has been enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array('%module' => 'Field Group Extra')));
+      backdrop_set_message(t('The contrib module %module has been enabled to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array('%module' => 'Field Group Extra')));
     }
   }
 }
@@ -180,6 +183,29 @@ function field_group_update_1003() {
       else {
         $field_group_config->set('format_settings.instance_settings.label_element_other', '');
       }
+    }
+    $field_group_config->save();
+  }
+}
+
+/**
+ * Merge Div format type into the HTML Element format type, if the display is
+ * not set to collapsible or collapsed. It can be safely converted.
+ */
+function field_group_update_1004() {
+  $config_names = config_get_names_with_prefix('field_group.field_group.');
+  foreach ($config_names as $config_name) {
+    $field_group_config = config($config_name);
+    if ($field_group_config->get('format_type') == 'div' && $field_group_config->get('format_settings.formatter') == 'open') {
+      $field_group_config->set('format_type', 'html-element');
+      $field_group_config->set('format_settings.instance_settings.wrapper', 'div');
+      $field_group_config->set('format_settings.instance_settings.wrapper_other', '');
+      $field_group_config->set('format_settings.instance_settings.label_element_other', '');
+
+      // Clear unused settings.
+      $field_group_config->clear('format_settings.formatter');
+      $field_group_config->clear('format_settings.instance_settings.effect');
+      $field_group_config->clear('format_settings.instance_settings.speed');
     }
     $field_group_config->save();
   }

@@ -24,17 +24,6 @@ function _field_group_field_group_formatter_info() {
           'required_fields' => 1, 'id' => '',
         ),
       ),
-      'div' => array(
-        'label' => t('Div'),
-        'description' => t('This field group renders the inner content in a simple div with the title as legend.'),
-        'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array(
-          'description' => '', 'show_label' => 1, 'label_element' => 'h3',
-          'effect' => 'none', 'speed' => 'fast', 'classes' => '',
-          'required_fields' => 1, 'id' => '',
-        ),
-        'default_formatter' => 'open',
-      ),
       'fieldset' => array(
         'label' => t('Fieldset'),
         'description' => t('This field group renders the inner content in a fieldset with the title as legend.'),
@@ -81,16 +70,6 @@ function _field_group_field_group_formatter_info() {
           'classes' => '', 'attributes' => '',
           'required_fields' => 1, 'id' => '',
         ),
-      ),
-      'div' => array(
-        'label' => t('Div'),
-        'description' => t('This field group renders the inner content in a simple div with the title as legend.'),
-        'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array(
-          'description' => '', 'show_label' => 1, 'label_element' => 'h3',
-          'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'id' => '',
-        ),
-        'default_formatter' => 'open',
       ),
       'fieldset' => array(
         'label' => t('Fieldset'),
@@ -252,52 +231,6 @@ function field_group_pre_render_html_element(array &$element, $group, array &$fo
     $element['#prefix'] .= '<div class="description">' . $group->description . '</div>';
   }
   $element['#suffix'] = '</' . $html_element . '>';
-}
-
-/**
- * Implements field_group_pre_render_<format-type>.
- * Format type: Div.
- *
- * @param array $element
- *   The field group form element.
- * @param object $group
- *   The Field group object prepared for pre_render.
- * @param array $form
- *   The root element or form.
- */
-function field_group_pre_render_div(array &$element, $group, array &$form) {
-
-  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
-  $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'h2';
-  $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
-
-  $element['#type'] = 'markup';
-  $id = isset($element['#id']) ? ' id="' . $element['#id'] . '"' : '';
-
-  if ($group->format_settings['formatter'] != 'open') {
-
-    $element['#prefix'] = '<div' . $id . ' class="' . $group->classes . '">
-      <' . $label_element . '><span class="field-group-format-toggler">' . check_plain(t($group->label)) . '</span></' . $label_element . '>
-      <div class="field-group-format-wrapper" style="display: ' . (!empty($group->collapsed) ? 'none' : 'block') . ';">';
-    $element['#suffix'] = '</div></div>';
-  }
-  else {
-    $class_attribute = !empty($group->classes) ? ' class="' . $group->classes . '"' : '';
-
-    $element['#prefix'] = '<div' . $id . $class_attribute . '>';
-    if ($show_label) {
-      $element['#prefix'] .= '<' . $label_element . ' class="field-group-label"><span>' . check_plain(t($group->label)) . '</span></' . $label_element . '>';
-    }
-    $element['#suffix'] = '</div>';
-  }
-  if (!empty($group->description)) {
-    $element['#prefix'] .= '<div class="description">' . $group->description . '</div>';
-  }
-
-  if ($effect == 'blind') {
-    $element['#attached']['library'][] = array('system', 'effects.blind');
-  }
-
 }
 
 /**
@@ -531,46 +464,6 @@ function _field_group_field_group_format_settings_alter(&$form, &$group) {
         '#weight' => 5,
       );
       break;
-    case 'div':
-      $form['label']['#description'] = t('Please enter a label for collapsible elements');
-      $form['instance_settings']['show_label'] = array(
-        '#title' => t('Show label'),
-        '#type' => 'select',
-        '#options' => array(0 => t('No'), 1 => t('Yes')),
-        '#default_value' => isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : $formatter['instance_settings']['show_label'],
-        '#weight' => 2,
-      );
-      $form['instance_settings']['label_element'] = array(
-        '#title' => t('Label element'),
-        '#type' => 'select',
-        '#options' => array('h2' => t('Header 2'), 'h3' => t('Header 3')),
-        '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
-        '#weight' => 3,
-        '#states' => array(
-          'visible' => array(
-            'select[name="' . $select_name . '[show_label]"]' => array('value' => 1),
-          ),
-        ),
-      );
-      $form['instance_settings']['effect'] = array(
-        '#title' => t('Effect'),
-        '#description' => t('The effect to use if collapsible.'),
-        '#type' => 'select',
-        '#options' => array('none' => t('None'), 'blind' => t('Blind')),
-        '#default_value' => isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : $formatter['instance_settings']['effect'],
-        '#weight' => 4,
-      );
-      $form['instance_settings']['speed'] = array(
-        '#title' => t('Speed'),
-        '#description' => t('The speed of the effect if collapsible.'),
-        '#type' => 'select',
-        '#options' => array(
-          'none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast'),
-        ),
-        '#default_value' => isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : $formatter['instance_settings']['speed'],
-        '#weight' => 5,
-      );
-      break;
     case 'fieldset':
       $form['label']['#description'] = t('Please enter a label for collapsible elements');
       break;
@@ -684,19 +577,5 @@ function _field_group_field_group_html_classes_alter(&$classes, &$group) {
   // Open or closed horizontal or vertical tabs will be collapsible by default.
   if ($group->format_type == 'tab') {
     $classes->required[] = 'collapsible';
-  }
-
-  if (isset($group->format_settings['instance_settings'])) {
-    // Extra required classes for div.
-    if ($group->format_type == 'div') {
-      if ($group->format_settings['formatter'] != 'open') {
-
-        $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
-        $classes->required[] = 'speed-' . $speed;
-
-        $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
-        $classes->required[] = 'effect-' . $effect;
-      }
-    }
   }
 }
