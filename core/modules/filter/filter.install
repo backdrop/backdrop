@@ -559,7 +559,7 @@ function filter_update_1004() {
   }
 }
 
-/*
+/**
  * Uninstall the editorimgdimensionsync contrib module, now part of core.
  */
 function filter_update_1005() {
