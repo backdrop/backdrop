@@ -15,7 +15,7 @@ class CodeSignHashEngine extends CodeSignEngine {
   /**
    * {@inheritdoc}
    */
-  function sign($profile, $data, array $options = array()) {
+  public function sign($profile, $data, array $options = array()) {
     $private_keychain = $this->getPrivateKeychain();
     if (!array_key_exists($profile, $private_keychain)) {
       return NULL;
@@ -32,7 +32,7 @@ class CodeSignHashEngine extends CodeSignEngine {
   /**
    * {@inheritdoc}
    */
-  function verify($data, $signature = NULL, array $options = array()) {
+  public function verify($data, $signature = NULL, array $options = array()) {
     $sig_parts = explode(':', $signature);
     if (!is_array($sig_parts) || count($sig_parts) != 2) {
       return NULL;
@@ -46,7 +46,7 @@ class CodeSignHashEngine extends CodeSignEngine {
   /**
    * {@inheritdoc}
    */
-  function getStatus() {
+  public function getStatus() {
     $profiles = $this->getPrivateKeychain();
 
     $rows = array();
@@ -69,14 +69,14 @@ class CodeSignHashEngine extends CodeSignEngine {
   /**
    * {@inheritdoc}
    */
-  function getPrivateKeychain() {
+  public function getPrivateKeychain() {
     return config_get('code_sign_hash.settings', 'profiles');
   }
 
   /**
    * {@inheritdoc}
    */
-  function getPublicKeychain() {
+  public function getPublicKeychain() {
     return code_sign_hash_algorithms();
   }
 }

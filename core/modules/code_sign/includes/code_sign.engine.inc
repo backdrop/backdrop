@@ -28,7 +28,7 @@ abstract class CodeSignEngine {
    *   The machine name of the signing engine, as defined by the key used in
    *   hook_code_sign_info().
    */
-  function __construct($name) {
+  public function __construct($name) {
     $this->name = $name;
   }
 
@@ -47,7 +47,7 @@ abstract class CodeSignEngine {
    *   needed to identify the signing key and the signature data. Returns
    *   NULL if the profile does not exist.
    */
-  abstract function sign($profile, $data, array $options = array());
+  abstract public function sign($profile, $data, array $options = array());
 
   /**
    * Verifies a signature.
@@ -63,7 +63,7 @@ abstract class CodeSignEngine {
    *   TRUE if the signature is valid, FALSE if it is invalid, or NULL if the
    *   signature is malformed.
    */
-  abstract function verify($data, $signature = NULL, array $options = array());
+  abstract public function verify($data, $signature = NULL, array $options = array());
 
   /**
    * Returns a render array with the current status of the engine.
@@ -73,7 +73,7 @@ abstract class CodeSignEngine {
    * @return array
    *   A renderable array.
    */
-  abstract function getStatus();
+  abstract public function getStatus();
 
   /**
    * Returns the list of profiles that can be used to sign data.
@@ -83,7 +83,7 @@ abstract class CodeSignEngine {
    *   machine name or a key fingerprint. Each profile must include a 'name'
    *   key with a human-readable name of the profile.
    */
-  abstract function getPrivateKeychain();
+  abstract public function getPrivateKeychain();
 
   /**
    * Returns a list of "keys" that can be used to validate signatures.
@@ -93,7 +93,7 @@ abstract class CodeSignEngine {
    * @return array
    *   An array of available public keys.
    */
-  abstract function getPublicKeychain();
+  abstract public function getPublicKeychain();
 }
 
 /**

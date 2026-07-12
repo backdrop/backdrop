@@ -19,7 +19,7 @@ function code_sign_hash_code_sign_info() {
  */
 function code_sign_hash_autoload_info() {
   return array(
-    'CodeSignHashEngine' => 'includes/code_sign_hash.engine.inc',
+    'CodeSignHashEngine' => 'code_sign_hash.engine.inc',
   );
 }
 
