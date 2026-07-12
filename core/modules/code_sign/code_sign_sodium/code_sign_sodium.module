@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * @file
+ * Signs and verifies data using the Sodium (libsodium) Ed25519 engine.
+ */
+
+/**
+ * Implements hook_code_sign_info().
+ */
+function code_sign_sodium_code_sign_info() {
+  $signers = array();
+
+  $signers['sodium'] = array(
+    'label' => t('Sodium'),
+    'class' => 'CodeSignSodiumEngine',
+  );
+
+  return $signers;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function code_sign_sodium_autoload_info() {
+  return array(
+    'CodeSignSodiumEngine' => 'code_sign_sodium.engine.inc',
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function code_sign_sodium_config_info() {
+  $prefixes['code_sign_sodium.settings'] = array(
+    'label' => t('Code Sign Sodium settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
