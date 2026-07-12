@@ -24,48 +24,6 @@ function code_sign_hash_autoload_info() {
 }
 
 /**
- * Implements hook_menu().
- */
-function code_sign_hash_menu() {
-  $items = array();
-
-  $items['admin/config/system/code-sign/hash'] = array(
-    'title' => 'Hash Signing',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('code_sign_hash_admin_form'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'code_sign_hash.admin.inc',
-  );
-  $items['admin/config/system/code-sign/hash/add'] = array(
-    'title' => 'Add Hash Signature Profile',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('code_sign_hash_edit_profile_form', NULL),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_ACTION,
-    'file' => 'code_sign_hash.admin.inc',
-  );
-  $items['admin/config/system/code-sign/hash/%/edit'] = array(
-    'title' => 'Edit',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('code_sign_hash_edit_profile_form', 5),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-    'file' => 'code_sign_hash.admin.inc',
-  );
-  $items['admin/config/system/code-sign/hash/%/delete'] = array(
-    'title' => 'Delete',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('code_sign_hash_delete_profile_form', 5),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-    'file' => 'code_sign_hash.admin.inc',
-  );
-
-  return $items;
-}
-
-/**
  * Implements hook_config_info().
  */
 function code_sign_hash_config_info() {

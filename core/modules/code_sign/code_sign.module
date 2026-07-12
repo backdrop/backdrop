@@ -23,9 +23,33 @@ function code_sign_menu() {
     'file' => 'code_sign.admin.inc',
   );
   $items['admin/config/system/code-sign/settings'] = array(
-    'title' => 'Settings',
+    'title' => 'Profiles',
     'weight' => -10,
     'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/config/system/code-sign/profile/%/add'] = array(
+    'title' => 'Add profile',
+    'page callback' => 'code_sign_profile_edit_page',
+    'page arguments' => array(5),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'code_sign.admin.inc',
+  );
+  $items['admin/config/system/code-sign/profile/%/%/edit'] = array(
+    'title' => 'Edit profile',
+    'page callback' => 'code_sign_profile_edit_page',
+    'page arguments' => array(5, 6),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'code_sign.admin.inc',
+  );
+  $items['admin/config/system/code-sign/profile/%/%/delete'] = array(
+    'title' => 'Delete profile',
+    'page callback' => 'code_sign_profile_delete_page',
+    'page arguments' => array(5, 6),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'code_sign.admin.inc',
   );
   $items['admin/reports/code-sign'] = array(
     'title' => 'Code Sign',
