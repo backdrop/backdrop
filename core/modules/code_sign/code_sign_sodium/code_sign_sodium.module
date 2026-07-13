@@ -27,14 +27,3 @@ function code_sign_sodium_autoload_info() {
     'CodeSignSodiumEngine' => 'code_sign_sodium.engine.inc',
   );
 }
-
-/**
- * Implements hook_config_info().
- */
-function code_sign_sodium_config_info() {
-  $prefixes['code_sign_sodium.settings'] = array(
-    'label' => t('Code Sign Sodium settings'),
-    'group' => t('Configuration'),
-  );
-  return $prefixes;
-}

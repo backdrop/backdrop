@@ -24,17 +24,6 @@ function code_sign_hash_autoload_info() {
 }
 
 /**
- * Implements hook_config_info().
- */
-function code_sign_hash_config_info() {
-  $prefixes['code_sign_hash.settings'] = array(
-    'label' => t('Code Sign Hash settings'),
-    'group' => t('Configuration'),
-  );
-  return $prefixes;
-}
-
-/**
  * Returns a list of supported hash algorithms suitable for form fields.
  *
  * @return array

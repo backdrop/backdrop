@@ -27,12 +27,11 @@ function code_sign_menu() {
     'weight' => -10,
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
-  $items['admin/config/system/code-sign/profile/%/add'] = array(
+  $items['admin/config/system/code-sign/profile/add'] = array(
     'title' => 'Add profile',
-    'page callback' => 'code_sign_profile_edit_page',
-    'page arguments' => array(5),
+    'page callback' => 'code_sign_profile_add_page',
     'access arguments' => array('administer site configuration'),
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_ACTION,
     'file' => 'code_sign.admin.inc',
   );
   $items['admin/config/system/code-sign/profile/%/%/edit'] = array(
@@ -93,9 +92,21 @@ function code_sign_theme() {
  */
 function code_sign_autoload_info() {
   return array(
-    'CodeSignEngine' => 'includes/code_sign.engine.inc',
-    'CodeSignException' => 'includes/code_sign.engine.inc',
+    'CodeSignEngine' => 'code_sign.engine.inc',
+    'CodeSignException' => 'code_sign.engine.inc',
   );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function code_sign_config_info() {
+  $prefixes['code_sign.profile'] = array(
+    'name_key' => 'profile.machine_name',
+    'label_key' => 'profile.name',
+    'group' => t('Code Sign profiles'),
+  );
+  return $prefixes;
 }
 
 /**

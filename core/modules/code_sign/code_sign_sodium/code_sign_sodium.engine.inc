@@ -19,6 +19,11 @@ class CodeSignSodiumEngine extends CodeSignEngine {
    * {@inheritdoc}
    */
   public function sign($profile, $data, array $options = array()) {
+    if (!$this->isAvailable()) {
+      watchdog('code_sign_sodium', 'The Sodium extension is not available.', array(), WATCHDOG_ERROR);
+      return NULL;
+    }
+
     $private_keychain = $this->getPrivateKeychain();
     if (!array_key_exists($profile, $private_keychain)) {
       return NULL;
@@ -42,6 +47,11 @@ class CodeSignSodiumEngine extends CodeSignEngine {
    * {@inheritdoc}
    */
   public function verify($data, $signature = NULL, array $options = array()) {
+    if (!$this->isAvailable()) {
+      watchdog('code_sign_sodium', 'The Sodium extension is not available.', array(), WATCHDOG_ERROR);
+      return NULL;
+    }
+
     $parts = explode(':', (string) $signature, 2);
     if (count($parts) != 2) {
       return NULL;
@@ -98,8 +108,7 @@ class CodeSignSodiumEngine extends CodeSignEngine {
    * {@inheritdoc}
    */
   public function getPrivateKeychain() {
-    $profiles = config_get('code_sign_sodium.settings', 'profiles');
-    return $profiles ? $profiles : array();
+    return $this->loadProfiles();
   }
 
   /**
@@ -118,12 +127,26 @@ class CodeSignSodiumEngine extends CodeSignEngine {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function isAvailable() {
+    return extension_loaded('sodium');
+  }
+
+  /**
    * Generates a new Ed25519 keypair.
    *
    * @return array
    *   An array with 'public_key' and 'secret_key' keys, both base64-encoded.
+   *
+   * @throws CodeSignException
+   *   Thrown if the Sodium extension is not available.
    */
   public function generateKeypair() {
+    if (!$this->isAvailable()) {
+      throw new CodeSignException(t('The Sodium extension is not available.'));
+    }
+
     $keypair = sodium_crypto_sign_keypair();
 
     $keys = array(
@@ -142,8 +165,15 @@ class CodeSignSodiumEngine extends CodeSignEngine {
   public function form(array &$form, array &$form_state, array $profile = array()) {
     parent::form($form, $form_state, $profile);
 
+    if (empty($profile['machine_name'])) {
+      // Set a default machine name to match the date and algorithm.
+      $date = new BackdropDateTime();
+      $form['name']['#default_value'] = 'ed25519-' . $date->format('Y-m-d');
+      $form['machine_name']['#default_value'] = 'ed25519-' . $date->format('Y-m-d');
+    }
+
     if (!empty($profile['public_key'])) {
-      $form['profile']['public_key'] = array(
+      $form['public_key'] = array(
         '#type' => 'item',
         '#title' => t('Public key'),
         '#markup' => '<pre>' . check_plain($profile['public_key']) . '</pre>',
@@ -151,7 +181,7 @@ class CodeSignSodiumEngine extends CodeSignEngine {
       );
     }
     else {
-      $form['profile']['info'] = array(
+      $form['info'] = array(
         '#type' => 'markup',
         '#markup' => '<p>' . t('A new Ed25519 keypair will be generated automatically when this profile is saved.') . '</p>',
       );
@@ -160,16 +190,16 @@ class CodeSignSodiumEngine extends CodeSignEngine {
 
   /**
    * {@inheritdoc}
+   *
+   * Adds the keypair to the submitted values before they are centrally
+   * persisted: a freshly generated one for a new profile, or the existing
+   * one preserved for a profile being edited (the keypair itself cannot be
+   * changed once created).
    */
   public function formSubmit(array $form, array &$form_state) {
-    $values = $form_state['values']['profile'];
-    $profile_id = $values['machine_name'];
     $original_profile_id = $form_state['values']['profile_id'];
-
     $all_profiles = $this->getPrivateKeychain();
 
-    // Editing an existing profile keeps its existing keypair; a new profile
-    // gets a freshly generated one.
     if (isset($all_profiles[$original_profile_id])) {
       $keypair = array(
         'public_key' => $all_profiles[$original_profile_id]['public_key'],
@@ -180,25 +210,7 @@ class CodeSignSodiumEngine extends CodeSignEngine {
       $keypair = $this->generateKeypair();
     }
 
-    $all_profiles[$profile_id] = array(
-      'name' => $values['name'],
-      'machine_name' => $profile_id,
-      'public_key' => $keypair['public_key'],
-      'secret_key' => $keypair['secret_key'],
-    );
-
-    // If the machine_name changes, delete the original.
-    if ($original_profile_id && $original_profile_id != $profile_id) {
-      unset($all_profiles[$original_profile_id]);
-    }
-
-    config_set('code_sign_sodium.settings', 'profiles', $all_profiles);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function deleteProfile($profile_id) {
-    config_clear('code_sign_sodium.settings', 'profiles.' . $profile_id);
+    $form_state['values']['public_key'] = $keypair['public_key'];
+    $form_state['values']['secret_key'] = $keypair['secret_key'];
   }
 }

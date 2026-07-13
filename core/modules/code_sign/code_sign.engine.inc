@@ -96,6 +96,21 @@ abstract class CodeSignEngine {
   abstract public function getPublicKeychain();
 
   /**
+   * Determines whether this engine is currently usable.
+   *
+   * Implementations should check for required PHP extensions, external
+   * binaries, or other runtime dependencies, without any side effects (such
+   * as logging) since this may be called frequently, including on every page
+   * view of the centralized profile administration pages. Centralized
+   * profile management uses this to skip an engine entirely rather than
+   * calling into it and risking a fatal error.
+   *
+   * @return bool
+   *   TRUE if the engine can be used, FALSE otherwise.
+   */
+  abstract public function isAvailable();
+
+  /**
    * Builds the profile settings form for this engine.
    *
    * Modeled after the way the Block class builds its settings form: this
@@ -121,22 +136,23 @@ abstract class CodeSignEngine {
    */
   public function form(array &$form, array &$form_state, array $profile = array()) {
     $form['#tree'] = TRUE;
-    $form['profile']['name'] = array(
+    $form['name'] = array(
       '#type' => 'textfield',
       '#title' => t('Profile Name'),
       '#required' => TRUE,
       '#default_value' => isset($profile['name']) ? $profile['name'] : '',
       '#description' => t('The human-friendly name of the profile.'),
     );
-    $form['profile']['machine_name'] = array(
+    $form['machine_name'] = array(
       '#type' => 'machine_name',
       '#title' => t('Machine name'),
       '#default_value' => isset($profile['machine_name']) ? $profile['machine_name'] : '',
+      '#disabled' => isset($profile['machine_name']),
       '#description' => t('A unique name for the profile.'),
       '#machine_name' => array(
         'exists' => array($this, 'profileExists'),
         'source' => array('profile', 'name'),
-        'label' => t('URL path'),
+        'label' => t('Machine name'),
         'replace_pattern' => '[^a-z0-9-]+',
         'replace' => '-',
       ),
@@ -159,29 +175,48 @@ abstract class CodeSignEngine {
   }
 
   /**
-   * Processes the submitted profile form and saves the resulting profile.
+   * Processes the submitted profile form before it is centrally persisted.
    *
-   * Implementations are responsible for their own persistence, since the
-   * storage mechanism (configuration, an external keyring, etc.) varies by
-   * engine.
+   * Unlike the rest of the profile lifecycle, persistence is not the
+   * engine's responsibility: code_sign_save_profile() centrally saves the
+   * entire contents of $form_state['values'] (minus internal Form API keys)
+   * into a single configuration file, code_sign.profile.[machine_name]. This
+   * method exists only so an engine can process or augment those values
+   * first - for example, generating a keypair for a new profile, or
+   * preserving one for an existing profile being renamed. The default
+   * implementation does nothing, since most profile fields (such as those
+   * added by self::form()) need no further processing.
    *
    * @param array $form
    *   The form array.
    * @param array $form_state
    *   The form state.
+   *
+   * @see code_sign_save_profile()
    */
-  abstract public function formSubmit(array $form, array &$form_state);
+  public function formSubmit(array $form, array &$form_state) {
+  }
 
   /**
-   * Deletes a profile.
+   * Allows the engine to react to or veto deletion of one of its profiles.
+   *
+   * Removal of the profile's configuration file is handled centrally by
+   * code_sign_delete_profile(); this method exists so an engine can perform
+   * its own cleanup, or refuse the deletion entirely (by throwing
+   * CodeSignException) when its profiles are not simple configuration-backed
+   * records - for example, an engine backed by an external keyring. The
+   * default implementation does nothing, allowing the deletion to proceed.
    *
    * @param string $profile_id
    *   The machine name of the profile to delete.
    *
    * @throws CodeSignException
-   *   Thrown if this engine does not support deleting profiles.
+   *   Thrown if this engine does not allow the profile to be deleted.
+   *
+   * @see code_sign_delete_profile()
    */
-  abstract public function deleteProfile($profile_id);
+  public function deleteProfile($profile_id) {
+  }
 
   /**
    * Determines whether a profile with the given machine name already exists.
@@ -195,6 +230,37 @@ abstract class CodeSignEngine {
   public function profileExists($machine_name) {
     $profiles = $this->getPrivateKeychain();
     return array_key_exists($machine_name, $profiles);
+  }
+
+  /**
+   * Loads all profiles belonging to this engine from the centralized store.
+   *
+   * Profiles are saved by code_sign_save_profile() into individual
+   * configuration files named code_sign.profile.[machine_name], each
+   * recording which engine it belongs to. This helper is available to any
+   * engine whose profiles are stored this way; engines with a different
+   * storage mechanism (such as one backed by an external keyring) should
+   * override getPrivateKeychain() directly instead.
+   *
+   * @return array
+   *   An array of profiles, indexed by machine name.
+   *
+   * @see code_sign_save_profile()
+   */
+  protected function loadProfiles() {
+    $profiles = array();
+
+    foreach (config_get_names_with_prefix('code_sign.profile.') as $config_name) {
+      $config = config($config_name);
+      if ($config->get('engine') === $this->name) {
+        $profile = $config->get('profile');
+        if ($profile) {
+          $profiles[$profile['machine_name']] = $profile;
+        }
+      }
+    }
+
+    return $profiles;
   }
 }
 
