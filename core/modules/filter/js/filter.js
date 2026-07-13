@@ -16,6 +16,18 @@ Backdrop.editors = {};
 Backdrop.filterModalLeft = undefined;
 
 /**
+ * Keep track of whether the image editor has its aspect ratio
+ * "locked" or not.
+ */
+Backdrop.filterAspectRatioLocked = true;
+
+/**
+ * In the image editor, keep track of which "screen" is being
+ * displayed (e.g., the Upload screen or the Select from library screen).
+ */
+Backdrop.filterImageEditorDisplay = undefined;
+
+/**
  * Displays the guidelines of the selected text format automatically.
  */
 Backdrop.behaviors.filterGuidelines = {
@@ -209,8 +221,8 @@ Backdrop.behaviors.editorImageDialog = {
       $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
 
       if ($newItem.hasClass('form-item-fid')) {
-        // The user is now viewing the Upload an image screen.
-        Backdrop.settings.filter_img_display = 'upload';
+        // The user is now viewing the "Upload an image" screen.
+        Backdrop.filterImageEditorDisplay = 'upload';
         // Check if we had previously uploaded an image. If so, populate
         // our width and height fields with its width and height.
         var existingFile = $('.filter-format-editor-image-form .form-managed-file a').attr('href');
@@ -221,7 +233,6 @@ Backdrop.behaviors.editorImageDialog = {
           };
 
           var img = new Image();
-          img.src = existingFile;
           img.onload = function() {
             originalDimensions.width = this.width;
             originalDimensions.height = this.height;
@@ -233,13 +244,15 @@ Backdrop.behaviors.editorImageDialog = {
 
             Backdrop.behaviors.editorImageLibrary.syncAspectRatio(originalDimensions);
             Backdrop.behaviors.editorImageLibrary.setButtonState(originalDimensions);
-
           }
+          // Actually perform the loading of the image last
+          // just in case the listener functions are set yet.
+          img.src = existingFile;
         }
       }
       else if ($newItem.hasClass('form-item-attributes-src')) {
-        // The user is now viewing the Select from library screen.
-        Backdrop.settings.filter_img_display = 'library';
+        // The user is now viewing the "Select from library" screen.
+        Backdrop.filterImageEditorDisplay = 'library';
       }
 
       return false;
@@ -354,15 +367,15 @@ Backdrop.behaviors.editorImageLibrary = {
       height: null
     };
 
-    // Set global variable if we have locked the aspect ratio or not.
-    Backdrop.settings.filter_img_aspectRatioLocked = true;
+    // Set variable if we have locked the aspect ratio or not.
+    Backdrop.filterAspectRatioLocked = true;
     $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').off().on('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
 
       $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').hide();
       $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').show().focus();
-      Backdrop.settings.filter_img_aspectRatioLocked = false;
+      Backdrop.filterAspectRatioLocked = false;
     });
 
     $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').off().on('click', function(e) {
@@ -371,7 +384,7 @@ Backdrop.behaviors.editorImageLibrary = {
 
       $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').hide();
       $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').show().focus();
-      Backdrop.settings.filter_img_aspectRatioLocked = true;
+      Backdrop.filterAspectRatioLocked = true;
     });
 
     $('.filter-format-editor-image-form .editor-image-size #reset-orig').off().on('click', function(e) {
@@ -384,12 +397,12 @@ Backdrop.behaviors.editorImageLibrary = {
 
     // When editing a previously added/selected image, or upload a new one.
     var existingFile = $('.filter-format-editor-image-form .form-managed-file a').attr('href');
-    if (Backdrop.settings.filter_img_display === 'library') {
+    if (Backdrop.filterImageEditorDisplay === 'library') {
       existingFile = $('.filter-format-editor-image-form #edit-attributes-src').val();
     }
     if (typeof existingFile !== 'undefined' && existingFile !== '') {
       var img = new Image();
-      img.src = existingFile;
+      // First, define functions for img.
       img.onload = function() {
         naturalDimensions.width = this.width;
         naturalDimensions.height = this.height;
@@ -404,6 +417,9 @@ Backdrop.behaviors.editorImageLibrary = {
         naturalDimensions.width = null;
         naturalDimensions.height = null;
       }
+      // Perform the loading of the image last, just in case
+      // the listener functions aren't set yet.
+      img.src = existingFile;
     }
     else if ($('.filter-format-editor-image-form [name="attributes[width]"]').length) {
       // After an image has been removed via button, and the managed form item
@@ -459,14 +475,14 @@ Backdrop.behaviors.editorImageLibrary = {
   syncAspectRatio: function(naturalDimensions) {
     $('.filter-format-editor-image-form [name="attributes[width]"]').off('change').on('change', function() {
       var newHeight = Math.round(this.value / naturalDimensions.width * naturalDimensions.height);
-      if (Backdrop.settings.filter_img_aspectRatioLocked === true) {
+      if (Backdrop.filterAspectRatioLocked === true) {
         $('.filter-format-editor-image-form [name="attributes[height]"]').val(newHeight);
       }
       Backdrop.behaviors.editorImageLibrary.setButtonState(naturalDimensions);
     });
     $('.filter-format-editor-image-form [name="attributes[height]"]').off('change').on('change', function() {
       var newWidth = Math.round(this.value / naturalDimensions.height * naturalDimensions.width);
-      if (Backdrop.settings.filter_img_aspectRatioLocked === true) {
+      if (Backdrop.filterAspectRatioLocked === true) {
         $('.filter-format-editor-image-form [name="attributes[width]"]').val(newWidth);
       }
       Backdrop.behaviors.editorImageLibrary.setButtonState(naturalDimensions);
