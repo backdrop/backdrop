@@ -200,14 +200,46 @@ Backdrop.behaviors.editorImageDialog = {
       $newItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
       $newItem.trigger('editor-image-show');
 
+      // Clear any existing width and height, as well as
+      // previously recorded width and height for the "reset"
+      // button.
+      $('.filter-format-editor-image-form [name="attributes[width]"]').val('');
+      $('.filter-format-editor-image-form [name="attributes[height]"]').val('');
+      $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', {width: null, height: null});
+      $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
+
       if ($newItem.hasClass('form-item-fid')) {
-        // Clear any existing width and height, as well as
-        // previously recorded width and height for the "reset"
-        // button.
-        $('.filter-format-editor-image-form [name="attributes[width]"]').val('');
-        $('.filter-format-editor-image-form [name="attributes[height]"]').val('');
-        $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', {width: null, height: null});
-        $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
+        // The user is now viewing the Upload an image screen.
+        Backdrop.settings.filter_img_display = 'upload';
+        // Check if we had previously uploaded an image. If so, populate
+        // our width and height fields with its width and height.
+        var existingFile = $('.filter-format-editor-image-form .form-managed-file a').attr('href');
+        if (typeof existingFile !== 'undefined') {
+          var originalDimensions = {
+            width: null,
+            height: null
+          };
+
+          var img = new Image();
+          img.src = existingFile;
+          img.onload = function() {
+            originalDimensions.width = this.width;
+            originalDimensions.height = this.height;
+            Backdrop.behaviors.editorImageLibrary.resetDataAttr(originalDimensions);
+
+            if (!$('.filter-format-editor-image-form [name="attributes[width]"]').val().length) {
+              Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(originalDimensions);
+            }
+
+            Backdrop.behaviors.editorImageLibrary.syncAspectRatio(originalDimensions);
+            Backdrop.behaviors.editorImageLibrary.setButtonState(originalDimensions);
+
+          }
+        }
+      }
+      else if ($newItem.hasClass('form-item-attributes-src')) {
+        // The user is now viewing the Select from library screen.
+        Backdrop.settings.filter_img_display = 'library';
       }
 
       return false;
@@ -349,10 +381,15 @@ Backdrop.behaviors.editorImageLibrary = {
       Backdrop.behaviors.editorImageLibrary.imageDimensionsSet($(this).data('data-dimensions'));
       Backdrop.behaviors.editorImageLibrary.setButtonState($(this).data('data-dimensions'));
     });
-    // When editing a previously added image or upload a new one.
+
+    // When editing a previously added/selected image, or upload a new one.
     var existingFile = $('.filter-format-editor-image-form .form-managed-file a').attr('href');
-    if (typeof existingFile !== 'undefined') {
+    if (Backdrop.settings.filter_img_display === 'library') {
+      existingFile = $('.filter-format-editor-image-form #edit-attributes-src').val();
+    }
+    if (typeof existingFile !== 'undefined' && existingFile !== '') {
       var img = new Image();
+      img.src = existingFile;
       img.onload = function() {
         naturalDimensions.width = this.width;
         naturalDimensions.height = this.height;
@@ -362,13 +399,11 @@ Backdrop.behaviors.editorImageLibrary = {
         }
         Backdrop.behaviors.editorImageLibrary.syncAspectRatio(naturalDimensions);
         Backdrop.behaviors.editorImageLibrary.setButtonState(naturalDimensions);
-
       }
       img.onerror = function() {
         naturalDimensions.width = null;
         naturalDimensions.height = null;
       }
-      img.src = existingFile;
     }
     else if ($('.filter-format-editor-image-form [name="attributes[width]"]').length) {
       // After an image has been removed via button, and the managed form item
