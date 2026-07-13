@@ -220,6 +220,11 @@ Backdrop.behaviors.editorImageDialog = {
       $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', {width: null, height: null});
       $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
 
+      // Change our default lock status to locked when we change "screens".
+      Backdrop.filterAspectRatioLocked = true;
+      $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').show().focus();
+      $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').hide();
+
       if ($newItem.hasClass('form-item-fid')) {
         // The user is now viewing the "Upload an image" screen.
         Backdrop.filterImageEditorDisplay = 'upload';
@@ -429,6 +434,11 @@ Backdrop.behaviors.editorImageLibrary = {
         naturalDimensions.height = null;
         Backdrop.behaviors.editorImageLibrary.resetDataAttr(naturalDimensions);
         Backdrop.behaviors.editorImageLibrary.imageDimensionsEmpty();
+
+        // Change our default lock status to locked when we remove an image.
+        Backdrop.filterAspectRatioLocked = true;
+        $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').show().focus();
+        $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').hide();
       }
     }
 
