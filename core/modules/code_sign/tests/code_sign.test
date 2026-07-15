@@ -42,7 +42,8 @@ class CodeSignTestCase extends BackdropWebTestCase {
 
   function testCodeSignKeychains() {
     $hashes = hash_algos();
-    $this->assertIdentical(code_sign_get_public_keychain('hash'), array_combine($hashes, $hashes), 'Public keychain list.');
+    $engine = code_sign_get_engine('hash');
+    $this->assertIdentical($engine->getPublicKeychain(), array_combine($hashes, $hashes), 'Public keychain list.');
   }
 
   function testCodeSignAdminInterface() {

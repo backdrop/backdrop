@@ -180,7 +180,7 @@ function code_sign_load_all_profiles() {
     $config_names = config_get_names_with_prefix('code_sign.profile.');
     foreach ($config_names as $config_name) {
       $config_data = config($config_name)->getData();
-      $signing_profiles[$config_data['name']] = $config_data;
+      $signing_profiles[$config_data['machine_name']] = $config_data;
     }
   }
 
@@ -212,7 +212,8 @@ function code_sign_report_page() {
       '#type' => 'markup',
       '#markup' => t('<h2>@label</h2>', array('@label' => $info['label'])),
     );
-    $renderable[$key] = code_sign_get_signer_status($key);
+    $engine = code_sign_get_engine($key);
+    $renderable[$key] = $engine->getStatus();
   }
 
   if (empty($renderable)) {
@@ -273,46 +274,4 @@ function code_sign_verify($signer, $data, $signature = NULL, $options = array())
 
   $engine = code_sign_get_engine($signer);
   return $engine ? $engine->verify($data, $signature, $options) : NULL;
-}
-
-/**
- * Returns the status render array for the given signing engine.
- *
- * @param string $signer
- *   The machine name of the crypto engine to use.
- *
- * @return array|null
- *   A renderable array, or NULL on failure.
- */
-function code_sign_get_signer_status($signer) {
-  $engine = code_sign_get_engine($signer);
-  return $engine ? $engine->getStatus() : NULL;
-}
-
-/**
- * Returns the private keychain for the given signing engine.
- *
- * @param string $signer
- *   The machine name of the crypto engine to use.
- *
- * @return array|null
- *   An array of signing profiles, or NULL on failure.
- */
-function code_sign_get_private_keychain($signer) {
-  $engine = code_sign_get_engine($signer);
-  return $engine ? $engine->getPrivateKeychain() : NULL;
-}
-
-/**
- * Returns the public keychain for the given signing engine.
- *
- * @param string $signer
- *   The machine name of the crypto engine to use.
- *
- * @return array|null
- *   An array of public keys, or NULL on failure.
- */
-function code_sign_get_public_keychain($signer) {
-  $engine = code_sign_get_engine($signer);
-  return $engine ? $engine->getPublicKeychain() : NULL;
 }

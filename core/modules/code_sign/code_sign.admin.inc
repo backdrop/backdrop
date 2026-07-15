@@ -270,12 +270,19 @@ function code_sign_profile_add_form_submit($form, &$form_state) {
     return;
   }
 
-  // Let the engine process or augment the submitted values (for example,
-  // generating a keypair) before they are centrally persisted.
-  $engine->formSubmit($form, $form_state);
-  code_sign_save_profile($form_state['values']);
+  try {
+    // Let the engine process or augment the submitted values (for example,
+    // generating a keypair, or importing an uploaded key) before they are
+    // centrally persisted. An engine may throw CodeSignException to veto
+    // saving the profile entirely (for example, an unparsable key upload).
+    $engine->formSubmit($form, $form_state);
+    code_sign_save_profile($form_state['values']);
+    backdrop_set_message(t('Profile saved.'));
+  }
+  catch (CodeSignException $e) {
+    backdrop_set_message($e->getMessage(), 'error');
+  }
 
-  backdrop_set_message(t('Profile saved.'));
   $form_state['redirect'] = 'admin/config/system/code-sign';
 }
 
@@ -374,12 +381,19 @@ function code_sign_profile_form_submit($form, &$form_state) {
     return;
   }
 
-  // Let the engine process or augment the submitted values (for example,
-  // generating a keypair) before they are centrally persisted.
-  $engine->formSubmit($form, $form_state);
-  code_sign_save_profile($form_state['values']);
+  try {
+    // Let the engine process or augment the submitted values (for example,
+    // generating a keypair, or importing an uploaded key) before they are
+    // centrally persisted. An engine may throw CodeSignException to veto
+    // saving the profile entirely (for example, an unparsable key upload).
+    $engine->formSubmit($form, $form_state);
+    code_sign_save_profile($form_state['values']);
+    backdrop_set_message(t('Profile saved.'));
+  }
+  catch (CodeSignException $e) {
+    backdrop_set_message($e->getMessage(), 'error');
+  }
 
-  backdrop_set_message(t('Profile saved.'));
   $form_state['redirect'] = 'admin/config/system/code-sign';
 }
 
