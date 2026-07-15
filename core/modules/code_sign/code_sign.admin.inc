@@ -78,7 +78,7 @@ function code_sign_admin_form($form, &$form_state) {
       );
 
       $rows[] = array(
-        !empty($profile['name']) ? check_plain($profile['name']) : $profile_name,
+        !empty($profile['label']) ? check_plain($profile['label']) : $profile_name,
         check_plain($info['label']),
         array(
           'data' => array(
@@ -494,7 +494,7 @@ function code_sign_save_profile(array $values) {
   $internal_keys = array('form_build_id', 'form_token', 'form_id', 'op', 'submit', 'actions', 'profile_name');
   $values = array_diff_key($values, array_flip($internal_keys));
 
-  $profile_name = $values['machine_name'];
+  $profile_name = $values['name'];
   config('code_sign.profile.' . $profile_name)->setData($values)->save();
 }
 

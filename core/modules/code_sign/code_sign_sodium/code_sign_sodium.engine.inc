@@ -92,7 +92,7 @@ class CodeSignSodiumEngine extends CodeSignEngine {
     $rows = array();
     foreach ($this->getPrivateKeychain() as $profile) {
       $rows[] = array(
-        check_plain($profile['name']),
+        check_plain($profile['label']),
         check_plain($profile['public_key']),
       );
     }
@@ -118,7 +118,7 @@ class CodeSignSodiumEngine extends CodeSignEngine {
     $keychain = array();
     foreach ($this->getPrivateKeychain() as $key_id => $profile) {
       $keychain[$key_id] = array(
-        'name' => $profile['name'],
+        'label' => $profile['label'],
         'public_key' => $profile['public_key'],
       );
     }
@@ -166,11 +166,11 @@ class CodeSignSodiumEngine extends CodeSignEngine {
   public function form(array &$form, array &$form_state, array $profile = array()) {
     parent::form($form, $form_state, $profile);
 
-    if (empty($profile['machine_name'])) {
+    if (empty($profile['name'])) {
       // Set a default machine name to match the date and algorithm.
       $date = new BackdropDateTime();
+      $form['label']['#default_value'] = 'ed25519-' . $date->format('Y-m-d');
       $form['name']['#default_value'] = 'ed25519-' . $date->format('Y-m-d');
-      $form['machine_name']['#default_value'] = 'ed25519-' . $date->format('Y-m-d');
     }
 
     if (!empty($profile['public_key'])) {

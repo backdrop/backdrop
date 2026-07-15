@@ -80,7 +80,7 @@ abstract class CodeSignEngine {
    *
    * @return array
    *   An array of signing profiles, indexed by a unique ID, such as a
-   *   machine name or a key fingerprint. Each profile must include a 'name'
+   *   machine name or a key fingerprint. Each profile must include a 'label'
    *   key with a human-readable name of the profile.
    */
   abstract public function getPrivateKeychain();
@@ -116,8 +116,8 @@ abstract class CodeSignEngine {
    * Modeled after the way the Block class builds its settings form: this
    * engine is only responsible for adding its own elements to $form, not for
    * the surrounding page, submit button, or persistence. The default
-   * implementation provides the 'name' and 'machine_name' fields common to
-   * most engines.
+   * implementation provides the 'label' and 'name' fields common to most
+   * engines.
    *
    * Subclasses that need additional profile fields (such as a hash algorithm
    * or a generated keypair) should call
@@ -136,22 +136,22 @@ abstract class CodeSignEngine {
    */
   public function form(array &$form, array &$form_state, array $profile = array()) {
     $form['#tree'] = TRUE;
-    $form['name'] = array(
+    $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Profile Name'),
       '#required' => TRUE,
-      '#default_value' => isset($profile['name']) ? $profile['name'] : '',
+      '#default_value' => isset($profile['label']) ? $profile['label'] : '',
       '#description' => t('The human-friendly name of the profile.'),
     );
-    $form['machine_name'] = array(
+    $form['name'] = array(
       '#type' => 'machine_name',
       '#title' => t('Machine name'),
-      '#default_value' => isset($profile['machine_name']) ? $profile['machine_name'] : '',
-      '#disabled' => isset($profile['machine_name']),
+      '#default_value' => isset($profile['name']) ? $profile['name'] : '',
+      '#disabled' => isset($profile['name']),
       '#description' => t('A unique name for the profile.'),
       '#machine_name' => array(
         'exists' => array($this, 'profileExists'),
-        'source' => array('profile', 'name'),
+        'source' => array('label'),
         'label' => t('Machine name'),
         'replace_pattern' => '[^a-z0-9-]+',
         'replace' => '-',
@@ -163,7 +163,7 @@ abstract class CodeSignEngine {
    * Validates the profile settings form for this engine.
    *
    * The default implementation performs no additional validation beyond the
-   * machine name uniqueness check already built into the 'machine_name' form
+   * machine name uniqueness check already built into the 'name' form
    * element added by self::form().
    *
    * @param array $form

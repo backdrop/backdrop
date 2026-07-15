@@ -55,30 +55,35 @@ class CodeSignTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/system/code-sign');
     $this->assertText('sha256', 'Default signing profile is present.');
     $this->assertText('Hash', 'Hash engine label is present.');
-    $this->assertLinkByHref('admin/config/system/code-sign/profile/hash/add');
+    $this->assertLinkByHref('admin/config/system/code-sign/profile/add');
     $this->assertLinkByHref('admin/config/system/code-sign/profile/hash/sha256/edit');
     $this->assertLinkByHref('admin/config/system/code-sign/profile/hash/sha256/delete');
   }
 
   function testCodeSignAddDeleteHash() {
-    $this->backdropGet('admin/config/system/code-sign/profile/hash/add');
+    $this->backdropGet('admin/config/system/code-sign/profile/add');
     $this->assertText('You are not authorized to access this page.', 'Access to code_sign_hash add hash.');
 
     $this->backdropLogin($this->admin_user);
 
     // Create a hash
     $new_hash = array(
-        'profile[name]' => $this->randomString(),
-        'profile[machine_name]' => strtolower($this->randomName()),
-        'profile[hash_algorithm]' => 'md5',
+        'label' => $this->randomString(),
+        'name' => strtolower($this->randomName()),
+        'hash_algorithm' => 'md5',
     );
     $this->backdropGet('admin/config/system/code-sign');
-    $this->assertNoText($new_hash['profile[name]']);
-    $this->backdropPost('admin/config/system/code-sign/profile/hash/add', $new_hash, t('Add profile'));
-    $this->assertText($new_hash['profile[name]'], 'New hash added.');
+    $this->assertNoText($new_hash['label']);
+
+    // The add form is a consolidated, two-step form: choose the engine
+    // first, then fill in the engine-specific fields.
+    $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'hash'), t('Continue'));
+    $this->backdropPost(NULL, $new_hash, t('Add profile'));
+    // The listing shows the human-readable label, not the machine name.
+    $this->assertText($new_hash['label'], 'New hash added.');
 
     // And delete it.
-    $this->backdropPost('admin/config/system/code-sign/profile/hash/' . $new_hash['profile[machine_name]'] . '/delete', array(), t('Delete'));
-    $this->assertNoText($new_hash['profile[name]']);
+    $this->backdropPost('admin/config/system/code-sign/profile/hash/' . $new_hash['name'] . '/delete', array(), t('Delete'));
+    $this->assertNoText($new_hash['label']);
   }
 }

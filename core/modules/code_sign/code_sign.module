@@ -102,8 +102,8 @@ function code_sign_autoload_info() {
  */
 function code_sign_config_info() {
   $prefixes['code_sign.profile'] = array(
-    'name_key' => 'profile.machine_name',
-    'label_key' => 'profile.name',
+    'name_key' => 'name',
+    'label_key' => 'label',
     'group' => t('Code Sign profiles'),
   );
   return $prefixes;
@@ -165,8 +165,8 @@ function code_sign_get_engine($signer) {
  * Each entry includes:
  *
  * - crypto_engine: The machine name of the engine.
- * - name: A name for the profile, intended for humans.
- * - profile_name: The profile ID, typically the private key fingerprint or ID.
+ * - label: A name for the profile, intended for humans.
+ * - name: The unique profile machine name.
  * - signing_key: A structure specific to the crypto engine with additional
  *   information about the profile.
  *
@@ -180,7 +180,7 @@ function code_sign_load_all_profiles() {
     $config_names = config_get_names_with_prefix('code_sign.profile.');
     foreach ($config_names as $config_name) {
       $config_data = config($config_name)->getData();
-      $signing_profiles[$config_data['machine_name']] = $config_data;
+      $signing_profiles[$config_data['name']] = $config_data;
     }
   }
 

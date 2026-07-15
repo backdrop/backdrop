@@ -1,0 +1,95 @@
+<?php
+/**
+ * @file
+ * Tests for the Sodium Code Sign engine.
+ */
+
+/**
+ * Tests profile management for the Sodium Code Sign engine, including the
+ * 'label' (human-readable) / 'name' (machine name) profile keys.
+ */
+class CodeSignSodiumTestCase extends BackdropWebTestCase {
+
+  /**
+   * A user with permission to administer Code Sign.
+   *
+   * @var object
+   */
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('code_sign', 'code_sign_sodium'));
+
+    if (!extension_loaded('sodium')) {
+      $this->fail('The PHP Sodium extension is not available; these tests cannot run.');
+      return;
+    }
+
+    $this->admin_user = $this->backdropCreateUser(array('administer site configuration'));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests that adding a Sodium profile generates a keypair, and that the
+   * resulting profile can sign and verify data through the generic Code
+   * Sign API.
+   */
+  function testAddProfileGeneratesKeypairAndSigns() {
+    $machine_name = strtolower($this->randomName(8));
+
+    $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'sodium'), t('Continue'));
+    $edit = array(
+      'label' => 'Sodium Test Profile',
+      'name' => $machine_name,
+    );
+    $this->backdropPost(NULL, $edit, t('Add profile'));
+    $this->assertText(t('Profile saved.'), 'Profile was saved.');
+
+    $profile = code_sign_load_profile($machine_name);
+    $this->assertEqual($profile['label'], 'Sodium Test Profile', 'The label was recorded on the profile.');
+    $this->assertTrue(!empty($profile['public_key']), 'A public key was generated.');
+    $this->assertTrue(!empty($profile['secret_key']), 'A secret key was generated.');
+
+    $data = $this->randomString(256);
+    $signature = code_sign_sign('sodium', $machine_name, $data);
+    $this->assertTrue(!empty($signature), 'Signed data using the new profile.');
+    $this->assertIdentical(code_sign_verify('sodium', $data, $signature), TRUE, 'Verified the signature produced by the profile.');
+  }
+
+  /**
+   * Tests that editing a Sodium profile updates its label without changing
+   * the underlying keypair.
+   */
+  function testEditProfilePreservesKeypair() {
+    $machine_name = strtolower($this->randomName(8));
+
+    $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'sodium'), t('Continue'));
+    $this->backdropPost(NULL, array('label' => 'Original Label', 'name' => $machine_name), t('Add profile'));
+    $original_profile = code_sign_load_profile($machine_name);
+
+    $this->backdropGet('admin/config/system/code-sign/profile/sodium/' . $machine_name . '/edit');
+    $this->backdropPost(NULL, array('label' => 'Renamed Label'), t('Save profile'));
+    $this->assertText(t('Profile saved.'), 'Profile was re-saved after editing.');
+
+    $updated_profile = code_sign_load_profile($machine_name);
+    $this->assertEqual($updated_profile['label'], 'Renamed Label', 'The label was updated.');
+    $this->assertEqual($updated_profile['public_key'], $original_profile['public_key'], 'The public key is unchanged after editing.');
+    $this->assertEqual($updated_profile['secret_key'], $original_profile['secret_key'], 'The secret key is unchanged after editing.');
+  }
+
+  /**
+   * Tests that deleting a Sodium profile removes its configuration.
+   */
+  function testDeleteProfile() {
+    $machine_name = strtolower($this->randomName(8));
+
+    $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'sodium'), t('Continue'));
+    $this->backdropPost(NULL, array('label' => 'Delete Me', 'name' => $machine_name), t('Add profile'));
+
+    $this->backdropPost('admin/config/system/code-sign/profile/sodium/' . $machine_name . '/delete', array(), t('Delete'));
+    $this->assertText(t('Profile deleted.'), 'Profile deletion succeeded.');
+
+    $profile = code_sign_load_profile($machine_name);
+    $this->assertTrue(empty($profile), 'The profile configuration was removed.');
+  }
+}

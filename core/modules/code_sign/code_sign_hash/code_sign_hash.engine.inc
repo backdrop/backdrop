@@ -51,7 +51,7 @@ class CodeSignHashEngine extends CodeSignEngine {
 
     $rows = array();
     foreach ($profiles as $p) {
-      $rows[] = array_intersect_key($p, array_flip(array('name', 'hash_algorithm')));
+      $rows[] = array_intersect_key($p, array_flip(array('label', 'hash_algorithm')));
     }
 
     $header = array(
@@ -96,9 +96,9 @@ class CodeSignHashEngine extends CodeSignEngine {
     parent::form($form, $form_state, $profile);
 
     // Set a default machine name to match the hashing algorithm.
-    if (empty($profile['name'])) {
+    if (empty($profile['label'])) {
+      $form['label']['#default_value'] = 'sha256';
       $form['name']['#default_value'] = 'sha256';
-      $form['machine_name']['#default_value'] = 'sha256';
     }
 
     $form['hash_algorithm'] = array(
