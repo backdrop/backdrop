@@ -224,6 +224,10 @@ Backdrop.behaviors.editorImageDialog = {
 
       var libraryShown = $('.editor-image-fields').find('[name="attributes[src]"]').is(':visible');
       if (libraryShown) {
+        // Image library already open.
+        if ($('.library-view').length) {
+          return;
+        }
         // Toggle state is set to show 'select an image'
         // so add library view to dialog display.
         // But only for filter-format-edit-image-form.
