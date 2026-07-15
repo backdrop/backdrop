@@ -207,7 +207,7 @@ abstract class CodeSignEngine {
    * records - for example, an engine backed by an external keyring. The
    * default implementation does nothing, allowing the deletion to proceed.
    *
-   * @param string $profile_id
+   * @param string $profile_name
    *   The machine name of the profile to delete.
    *
    * @throws CodeSignException
@@ -215,7 +215,7 @@ abstract class CodeSignEngine {
    *
    * @see code_sign_delete_profile()
    */
-  public function deleteProfile($profile_id) {
+  public function deleteProfile($profile_name) {
   }
 
   /**
@@ -250,13 +250,10 @@ abstract class CodeSignEngine {
   protected function loadProfiles() {
     $profiles = array();
 
-    foreach (config_get_names_with_prefix('code_sign.profile.') as $config_name) {
-      $config = config($config_name);
-      if ($config->get('engine') === $this->name) {
-        $profile = $config->get('profile');
-        if ($profile) {
-          $profiles[$profile['machine_name']] = $profile;
-        }
+    $all_profiles = code_sign_load_all_profiles();
+    foreach ($all_profiles as $profile_name => $profile) {
+      if ($profile['engine'] === $this->name) {
+        $profiles[$profile_name] = $profile;
       }
     }
 

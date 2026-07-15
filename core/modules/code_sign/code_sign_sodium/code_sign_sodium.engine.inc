@@ -140,6 +140,7 @@ class CodeSignSodiumEngine extends CodeSignEngine {
    *   An array with 'public_key' and 'secret_key' keys, both base64-encoded.
    *
    * @throws CodeSignException
+   * @throws SodiumException
    *   Thrown if the Sodium extension is not available.
    */
   public function generateKeypair() {
@@ -197,17 +198,24 @@ class CodeSignSodiumEngine extends CodeSignEngine {
    * changed once created).
    */
   public function formSubmit(array $form, array &$form_state) {
-    $original_profile_id = $form_state['values']['profile_id'];
-    $all_profiles = $this->getPrivateKeychain();
+    $original_profile_name = $form_state['values']['profile_name'];
+    $original_profile = code_sign_load_profile($original_profile_name);
 
-    if (isset($all_profiles[$original_profile_id])) {
+    if ($original_profile) {
       $keypair = array(
-        'public_key' => $all_profiles[$original_profile_id]['public_key'],
-        'secret_key' => $all_profiles[$original_profile_id]['secret_key'],
+        'public_key' => $original_profile['public_key'],
+        'secret_key' => $original_profile['secret_key'],
       );
     }
     else {
-      $keypair = $this->generateKeypair();
+      try {
+        $keypair = $this->generateKeypair();
+      }
+      catch (CodeSignException|SodiumException $e) {
+        backdrop_set_message(t('Could not generate keypair: @error', array('@error' => $e->getMessage())), 'error');
+        watchdog('code_sign_sodium', 'Could not generate keypair: @error', array('@error' => $e->getMessage()), WATCHDOG_ERROR);
+        $keypair = array('public_key' => '', 'secret_key' => '');
+      }
     }
 
     $form_state['values']['public_key'] = $keypair['public_key'];

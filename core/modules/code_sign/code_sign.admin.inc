@@ -65,20 +65,20 @@ function code_sign_admin_form($form, &$form_state) {
       continue;
     }
 
-    foreach ($engine->getPrivateKeychain() as $profile_id => $profile) {
+    foreach ($engine->getPrivateKeychain() as $profile_name => $profile) {
       $operations = array(
         'edit' => array(
           'title' => t('Edit'),
-          'href' => 'admin/config/system/code-sign/profile/' . $engine_name . '/' . $profile_id . '/edit',
+          'href' => 'admin/config/system/code-sign/profile/' . $engine_name . '/' . $profile_name . '/edit',
         ),
         'delete' => array(
           'title' => t('Delete'),
-          'href' => 'admin/config/system/code-sign/profile/' . $engine_name . '/' . $profile_id . '/delete',
+          'href' => 'admin/config/system/code-sign/profile/' . $engine_name . '/' . $profile_name . '/delete',
         ),
       );
 
       $rows[] = array(
-        !empty($profile['name']) ? check_plain($profile['name']) : $profile_id,
+        !empty($profile['name']) ? check_plain($profile['name']) : $profile_name,
         check_plain($info['label']),
         array(
           'data' => array(
@@ -201,7 +201,7 @@ function code_sign_profile_add_form($form, &$form_state) {
     '#type' => 'value',
     '#value' => $engine_name,
   );
-  $form['profile_id'] = array(
+  $form['profile_name'] = array(
     '#type' => 'value',
     '#value' => NULL,
   );
@@ -285,14 +285,14 @@ function code_sign_profile_add_form_submit($form, &$form_state) {
  * @param string $engine_name
  *   The machine name of the signing engine, as defined by
  *   hook_code_sign_info().
- * @param string $profile_id
+ * @param string $profile_name
  *   The machine name of the profile to edit.
  *
  * @return array|int
  *   A form render array, or MENU_NOT_FOUND if the engine or profile is
  *   unknown.
  */
-function code_sign_profile_edit_page($engine_name, $profile_id) {
+function code_sign_profile_edit_page($engine_name, $profile_name) {
   $engine = code_sign_get_engine($engine_name);
   if (!$engine) {
     return MENU_NOT_FOUND;
@@ -301,11 +301,11 @@ function code_sign_profile_edit_page($engine_name, $profile_id) {
     _code_sign_engine_unavailable($engine_name);
   }
   $profiles = $engine->getPrivateKeychain();
-  if (!isset($profiles[$profile_id])) {
+  if (!isset($profiles[$profile_name])) {
     return MENU_NOT_FOUND;
   }
 
-  return backdrop_get_form('code_sign_profile_form', $engine_name, $profile_id);
+  return backdrop_get_form('code_sign_profile_form', $engine_name, $profile_name);
 }
 
 /**
@@ -317,24 +317,24 @@ function code_sign_profile_edit_page($engine_name, $profile_id) {
  *   The form state.
  * @param string $engine_name
  *   The machine name of the signing engine.
- * @param string $profile_id
+ * @param string $profile_name
  *   The machine name of the profile to edit.
  *
  * @return array
  *   The profile form.
  */
-function code_sign_profile_form($form, &$form_state, $engine_name, $profile_id) {
+function code_sign_profile_form($form, &$form_state, $engine_name, $profile_name) {
   $engine = code_sign_get_engine($engine_name);
   $all_profiles = $engine->getPrivateKeychain();
-  $profile = $all_profiles[$profile_id];
+  $profile = $all_profiles[$profile_name];
 
   $form['engine'] = array(
     '#type' => 'value',
     '#value' => $engine_name,
   );
-  $form['profile_id'] = array(
+  $form['profile_name'] = array(
     '#type' => 'value',
-    '#value' => $profile_id,
+    '#value' => $profile_name,
   );
 
   $engine->form($form, $form_state, $profile);
@@ -388,14 +388,14 @@ function code_sign_profile_form_submit($form, &$form_state) {
  *
  * @param string $engine_name
  *   The machine name of the signing engine.
- * @param string $profile_id
+ * @param string $profile_name
  *   The machine name of the profile to delete.
  *
  * @return array|int
  *   A form render array, or MENU_NOT_FOUND if the engine or profile is
  *   unknown.
  */
-function code_sign_profile_delete_page($engine_name, $profile_id) {
+function code_sign_profile_delete_page($engine_name, $profile_name) {
   $engine = code_sign_get_engine($engine_name);
   if (!$engine) {
     return MENU_NOT_FOUND;
@@ -404,11 +404,11 @@ function code_sign_profile_delete_page($engine_name, $profile_id) {
     _code_sign_engine_unavailable($engine_name);
   }
   $profiles = $engine->getPrivateKeychain();
-  if (!isset($profiles[$profile_id])) {
+  if (!isset($profiles[$profile_name])) {
     return MENU_NOT_FOUND;
   }
 
-  return backdrop_get_form('code_sign_profile_delete_form', $engine_name, $profile_id);
+  return backdrop_get_form('code_sign_profile_delete_form', $engine_name, $profile_name);
 }
 
 /**
@@ -420,24 +420,24 @@ function code_sign_profile_delete_page($engine_name, $profile_id) {
  *   The form state.
  * @param string $engine_name
  *   The machine name of the signing engine.
- * @param string $profile_id
+ * @param string $profile_name
  *   The machine name of the profile to delete.
  *
  * @return array
  *   The confirmation form.
  */
-function code_sign_profile_delete_form($form, &$form_state, $engine_name, $profile_id) {
+function code_sign_profile_delete_form($form, &$form_state, $engine_name, $profile_name) {
   $form['engine'] = array(
     '#type' => 'value',
     '#value' => $engine_name,
   );
-  $form['profile_id'] = array(
+  $form['profile_name'] = array(
     '#type' => 'value',
-    '#value' => $profile_id,
+    '#value' => $profile_name,
   );
 
   return confirm_form($form,
-    t('Are you sure you want to delete profile @pid?', array('@pid' => $profile_id)),
+    t('Are you sure you want to delete profile @pid?', array('@pid' => $profile_name)),
     'admin/config/system/code-sign',
     t('This action cannot be undone.'),
     t('Delete'), t('Cancel'));
@@ -457,8 +457,8 @@ function code_sign_profile_delete_form_submit($form, &$form_state) {
   try {
     // Give the engine a chance to veto or react to the deletion before the
     // profile's configuration is centrally removed.
-    $engine->deleteProfile($form_state['values']['profile_id']);
-    code_sign_delete_profile($form_state['values']['profile_id']);
+    $engine->deleteProfile($form_state['values']['profile_name']);
+    code_sign_delete_profile($form_state['values']['profile_name']);
     backdrop_set_message(t('Profile deleted.'));
   }
   catch (CodeSignException $e) {
@@ -477,19 +477,19 @@ function code_sign_profile_delete_form_submit($form, &$form_state) {
  *   engine-specific processing performed by CodeSignEngine::formSubmit().
  */
 function code_sign_save_profile(array $values) {
-  $internal_keys = array('form_build_id', 'form_token', 'form_id', 'op', 'submit', 'actions', 'profile_id');
+  $internal_keys = array('form_build_id', 'form_token', 'form_id', 'op', 'submit', 'actions', 'profile_name');
   $values = array_diff_key($values, array_flip($internal_keys));
 
-  $profile_id = $values['machine_name'];
-  config('code_sign.profile.' . $profile_id)->setData($values)->save();
+  $profile_name = $values['machine_name'];
+  config('code_sign.profile.' . $profile_name)->setData($values)->save();
 }
 
 /**
  * Deletes a profile's configuration centrally.
  *
- * @param string $profile_id
+ * @param string $profile_name
  *   The machine name of the profile to delete.
  */
-function code_sign_delete_profile($profile_id) {
-  config('code_sign.profile.' . $profile_id)->delete();
+function code_sign_delete_profile($profile_name) {
+  config('code_sign.profile.' . $profile_name)->delete();
 }
