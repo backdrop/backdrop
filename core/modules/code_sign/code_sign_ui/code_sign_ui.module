@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides an administrative interface for managing Code Sign profiles.
@@ -19,7 +18,7 @@ function code_sign_ui_menu() {
     'title' => 'Code Sign',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('code_sign_ui_admin_form'),
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer code signing'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'code_sign_ui.admin.inc',
   );
@@ -31,7 +30,7 @@ function code_sign_ui_menu() {
   $items['admin/config/system/code-sign/profile/add'] = array(
     'title' => 'Add profile',
     'page callback' => 'code_sign_ui_profile_add_page',
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer code signing'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'code_sign_ui.admin.inc',
   );
@@ -39,7 +38,7 @@ function code_sign_ui_menu() {
     'title' => 'Edit profile',
     'page callback' => 'code_sign_ui_profile_edit_page',
     'page arguments' => array(5, 6),
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer code signing'),
     'type' => MENU_CALLBACK,
     'file' => 'code_sign_ui.admin.inc',
   );
@@ -47,10 +46,23 @@ function code_sign_ui_menu() {
     'title' => 'Delete profile',
     'page callback' => 'code_sign_ui_profile_delete_page',
     'page arguments' => array(5, 6),
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer code signing'),
     'type' => MENU_CALLBACK,
     'file' => 'code_sign_ui.admin.inc',
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function code_sign_ui_permission() {
+  return array(
+    'administer code signing' => array(
+      'title' => t('Administer code signing'),
+      'description' => t('Create, edit, and delete Code Sign signing profiles.'),
+      'restrict access' => TRUE,
+    ),
+  );
 }

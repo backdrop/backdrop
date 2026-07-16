@@ -4,6 +4,8 @@
  * Contains the Sodium signing engine for Code Sign.
  */
 
+// cspell:ignore PUBLICKEYBYTES publickey secretkey memzero
+
 /**
  * A Code Sign engine that signs and verifies data using Sodium (Ed25519).
  *
@@ -232,13 +234,20 @@ class CodeSignSodiumEngine extends CodeSignEngine {
       try {
         $keypair = $this->generateKeypair();
       }
-      catch (CodeSignException|SodiumException $e) {
+      catch (CodeSignException | SodiumException $e) {
         backdrop_set_message(t('Could not generate keypair: @error', array('@error' => $e->getMessage())), 'error');
         watchdog('code_sign_sodium', 'Could not generate keypair: @error', array('@error' => $e->getMessage()), WATCHDOG_ERROR);
         $keypair = array('public_key' => '', 'secret_key' => '');
       }
     }
 
+    // @todo Do not store the secret key directly in config.
+    // Ideally we would leverage the Key module to store the secret key in
+    // a keystore location. For now, this secret key is stored in config but
+    // should be pulled out of the code_sign.profile.[name].json file and stored
+    // in settings.php as a config override, such as:
+    // $config['code_sign.profile.ed25519-2026-07-15']['secret_key'] = 'secret key value';
+    // See https://github.com/backdrop/backdrop-issues/issues/7082
     $form_state['values']['public_key'] = $keypair['public_key'];
     $form_state['values']['secret_key'] = $keypair['secret_key'];
   }

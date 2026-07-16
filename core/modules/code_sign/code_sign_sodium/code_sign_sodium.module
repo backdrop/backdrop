@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Signs and verifies data using the Sodium (libsodium) Ed25519 engine.
+ * Signs and verifies downloaded projects using the Sodium signing engine.
  */
 
 /**

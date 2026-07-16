@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Theming functions for code_sign.

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides a framework for signing and verification of arbitrary data.

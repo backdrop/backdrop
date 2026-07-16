@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative pages for Code Sign profile management.
@@ -491,7 +490,15 @@ function code_sign_ui_profile_delete_form_submit($form, &$form_state) {
  *   engine-specific processing performed by CodeSignEngine::formSubmit().
  */
 function code_sign_ui_save_profile(array $values) {
-  $internal_keys = array('form_build_id', 'form_token', 'form_id', 'op', 'submit', 'actions', 'profile_name');
+  $internal_keys = array(
+    'form_build_id',
+    'form_token',
+    'form_id',
+    'op',
+    'submit',
+    'actions',
+    'profile_name',
+  );
   $values = array_diff_key($values, array_flip($internal_keys));
 
   $profile_name = $values['name'];

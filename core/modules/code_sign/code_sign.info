@@ -6,4 +6,4 @@ type = module
 backdrop = 1.x
 
 ; This module is enabled by Installer module when needed.
-hidden = true
+;hidden = true

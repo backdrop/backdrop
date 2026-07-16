@@ -4,6 +4,8 @@
  * Tests for the Sodium Code Sign engine.
  */
 
+// @cspell:ignore secretkey
+
 /**
  * Tests profile management for the Sodium Code Sign engine, including the
  * 'label' (human-readable) / 'name' (machine name) profile keys.
@@ -17,15 +19,19 @@ class CodeSignSodiumTestCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp(array('code_sign', 'code_sign_sodium', 'code_sign_ui'));
 
+    // @todo Mark this test as a fail once PHP 7.1 is no longer supported.
     if (!extension_loaded('sodium')) {
-      $this->fail('The PHP Sodium extension is not available; these tests cannot run.');
+      $this->pass('The PHP Sodium extension is not available; these tests cannot run.');
       return;
     }
 
-    $this->admin_user = $this->backdropCreateUser(array('administer site configuration'));
+    $this->admin_user = $this->backdropCreateUser(array('administer code signing'));
     $this->backdropLogin($this->admin_user);
   }
 
@@ -34,7 +40,7 @@ class CodeSignSodiumTestCase extends BackdropWebTestCase {
    * resulting profile can sign and verify data through the generic Code
    * Sign API.
    */
-  function testAddProfileGeneratesKeypairAndSigns() {
+  public function testAddProfileGeneratesKeypairAndSigns() {
     $machine_name = strtolower($this->randomName(8));
 
     $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'sodium'), t('Continue'));
@@ -60,11 +66,14 @@ class CodeSignSodiumTestCase extends BackdropWebTestCase {
    * Tests that editing a Sodium profile updates its label without changing
    * the underlying keypair.
    */
-  function testEditProfilePreservesKeypair() {
+  public function testEditProfilePreservesKeypair() {
     $machine_name = strtolower($this->randomName(8));
 
     $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'sodium'), t('Continue'));
-    $this->backdropPost(NULL, array('label' => 'Original Label', 'name' => $machine_name), t('Add profile'));
+    $this->backdropPost(NULL, array(
+      'label' => 'Original Label',
+      'name' => $machine_name,
+    ), t('Add profile'));
     $original_profile = code_sign_load_profile($machine_name);
 
     $this->backdropGet('admin/config/system/code-sign/profile/sodium/' . $machine_name . '/edit');
@@ -80,11 +89,14 @@ class CodeSignSodiumTestCase extends BackdropWebTestCase {
   /**
    * Tests that deleting a Sodium profile removes its configuration.
    */
-  function testDeleteProfile() {
+  public function testDeleteProfile() {
     $machine_name = strtolower($this->randomName(8));
 
     $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'sodium'), t('Continue'));
-    $this->backdropPost(NULL, array('label' => 'Delete Me', 'name' => $machine_name), t('Add profile'));
+    $this->backdropPost(NULL, array(
+      'label' => 'Delete Me',
+      'name' => $machine_name,
+    ), t('Add profile'));
 
     $this->backdropPost('admin/config/system/code-sign/profile/sodium/' . $machine_name . '/delete', array(), t('Delete'));
     $this->assertText(t('Profile deleted.'), 'Profile deletion succeeded.');
@@ -98,7 +110,7 @@ class CodeSignSodiumTestCase extends BackdropWebTestCase {
    * merged into getPublicKeychain() and trusted for verification, with no
    * profile ever having been created for it.
    */
-  function testBundledKeyIsTrustedForVerification() {
+  public function testBundledKeyIsTrustedForVerification() {
     $keypair = sodium_crypto_sign_keypair();
     $public_key = base64_encode(sodium_crypto_sign_publickey($keypair));
     $secret_key = base64_decode(base64_encode(sodium_crypto_sign_secretkey($keypair)));
@@ -129,7 +141,7 @@ class CodeSignSodiumTestCase extends BackdropWebTestCase {
    * Tests that a malformed bundled key file is skipped rather than breaking
    * the public keychain.
    */
-  function testMalformedBundledKeyIsSkipped() {
+  public function testMalformedBundledKeyIsSkipped() {
     $key_name = 'test-bad-bundled-' . strtolower($this->randomName(8));
     $keys_dir = BACKDROP_ROOT . '/' . backdrop_get_path('module', 'code_sign_sodium') . '/keys';
     $key_file = $keys_dir . '/' . $key_name . '.pub';

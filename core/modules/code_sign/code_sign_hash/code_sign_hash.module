@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Generates and verifies hash signatures (such as MD5 or SHA1) on downloaded projects.
+ */
 
 /**
  * Implements hook_code_sign_info().

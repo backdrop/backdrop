@@ -51,7 +51,10 @@ class CodeSignHashEngine extends CodeSignEngine {
 
     $rows = array();
     foreach ($profiles as $p) {
-      $rows[] = array_intersect_key($p, array_flip(array('label', 'hash_algorithm')));
+      $rows[] = array_intersect_key($p, array_flip(array(
+        'label',
+        'hash_algorithm',
+      )));
     }
 
     $header = array(

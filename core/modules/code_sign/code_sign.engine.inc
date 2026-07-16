@@ -19,7 +19,7 @@ abstract class CodeSignEngine {
    *
    * @var string
    */
-  var $name;
+  public $name;
 
   /**
    * Constructs a signing engine.

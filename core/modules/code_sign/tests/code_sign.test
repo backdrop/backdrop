@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for code_sign.module.
@@ -13,12 +12,19 @@
  * module is fully usable on a verify-only site with no admin UI installed.
  */
 class CodeSignTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp(array('code_sign', 'code_sign_hash'));
   }
 
-  function testCodeSignSignature() {
+  /**
+   * Tests signing and verifying signatures using the hash engine.
+   */
+  public function testCodeSignSignature() {
     $test_data = $this->randomString(1024);
     $good_sig = 'sha256:' . hash('sha256', $test_data);
     $bad_sig = 'sha256:' . hash('sha256', $good_sig);
@@ -34,11 +40,10 @@ class CodeSignTestCase extends BackdropWebTestCase {
     // Test bad input to code_sign_sign();
     $this->assertNull(code_sign_sign('bogus', 'sha256', $test_data), 'Invalid engine.');
     $this->assertNull(code_sign_sign('hash', 'bad_profile', $test_data), 'Invalid profile.');
-  }
 
-  function testCodeSignKeychains() {
+    // Check that the public keychain is populated with all supported hashes.
     $hashes = hash_algos();
     $engine = code_sign_get_engine('hash');
-    $this->assertIdentical($engine->getPublicKeychain(), array_combine($hashes, $hashes), 'Public keychain list.');
+    $this->assertIdentical($engine->getPublicKeychain(), array_combine($hashes, $hashes), 'Public keychain list returns as expected.');
   }
 }
