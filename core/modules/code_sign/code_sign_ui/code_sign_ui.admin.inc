@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Central administrative pages for Code Sign profile management.
+ * Administrative pages for Code Sign profile management.
  *
  * Individual signing engines do not provide their own profile management UI,
  * nor do they save their own configuration. Instead, each engine's class
@@ -21,8 +21,8 @@
  * @see CodeSignEngine::formSubmit()
  * @see CodeSignEngine::deleteProfile()
  * @see CodeSignEngine::isAvailable()
- * @see code_sign_save_profile()
- * @see code_sign_delete_profile()
+ * @see code_sign_ui_save_profile()
+ * @see code_sign_ui_delete_profile()
  */
 
 /**
@@ -31,7 +31,7 @@
  * @param string $engine_name
  *   The machine name of the unavailable signing engine.
  */
-function _code_sign_engine_unavailable($engine_name) {
+function _code_sign_ui_engine_unavailable($engine_name) {
   $all_signers = code_sign_get_engines();
   $label = isset($all_signers[$engine_name]['label']) ? $all_signers[$engine_name]['label'] : $engine_name;
 
@@ -42,13 +42,13 @@ function _code_sign_engine_unavailable($engine_name) {
 /**
  * Page callback: Lists the profiles for every enabled signing engine.
  */
-function code_sign_admin_form($form, &$form_state) {
+function code_sign_ui_admin_form($form, &$form_state) {
   $all_signers = code_sign_get_engines();
 
   if (empty($all_signers)) {
     $form['empty'] = array(
       '#type' => 'markup',
-      '#markup' => t('No algorithm modules have been enabled. Try enabling !code_sign_hash.', array('!code_sign_hash' => l(t('Hashing Code Sign'), 'admin/modules/list'))),
+      '#markup' => t('No algorithm modules have been enabled. Try enabling !code_sign_hash.', array('!code_sign_hash' => l(t('Code Sign Hash'), 'admin/modules/list'))),
     );
     return $form;
   }
@@ -114,7 +114,7 @@ function code_sign_admin_form($form, &$form_state) {
  *   An array of engine labels, keyed by machine name, for engines that are
  *   both registered and currently available.
  */
-function _code_sign_available_engines() {
+function _code_sign_ui_available_engines() {
   $available = array();
 
   foreach (code_sign_get_engines() as $engine_name => $info) {
@@ -133,8 +133,8 @@ function _code_sign_available_engines() {
  * @return array
  *   A form render array.
  */
-function code_sign_profile_add_page() {
-  return backdrop_get_form('code_sign_profile_add_form');
+function code_sign_ui_profile_add_page() {
+  return backdrop_get_form('code_sign_ui_profile_add_form');
 }
 
 /**
@@ -154,8 +154,8 @@ function code_sign_profile_add_page() {
  * @return array
  *   The add-profile form.
  */
-function code_sign_profile_add_form($form, &$form_state) {
-  $available_engines = _code_sign_available_engines();
+function code_sign_ui_profile_add_form($form, &$form_state) {
+  $available_engines = _code_sign_ui_available_engines();
 
   if (empty($available_engines)) {
     $form['empty'] = array(
@@ -181,7 +181,7 @@ function code_sign_profile_add_form($form, &$form_state) {
       'submit' => array(
         '#type' => 'submit',
         '#value' => t('Continue'),
-        '#submit' => array('code_sign_profile_add_form_choose_engine'),
+        '#submit' => array('code_sign_ui_profile_add_form_choose_engine'),
       ),
     );
 
@@ -217,7 +217,7 @@ function code_sign_profile_add_form($form, &$form_state) {
     'back' => array(
       '#type' => 'submit',
       '#value' => t('Back'),
-      '#submit' => array('code_sign_profile_add_form_change_engine'),
+      '#submit' => array('code_sign_ui_profile_add_form_change_engine'),
       '#limit_validation_errors' => array(),
     ),
   );
@@ -228,7 +228,7 @@ function code_sign_profile_add_form($form, &$form_state) {
 /**
  * Submit handler for the "Continue" button: confirms the engine choice.
  */
-function code_sign_profile_add_form_choose_engine($form, &$form_state) {
+function code_sign_ui_profile_add_form_choose_engine($form, &$form_state) {
   $form_state['storage']['engine'] = $form_state['values']['engine'];
   $form_state['rebuild'] = TRUE;
 }
@@ -236,15 +236,15 @@ function code_sign_profile_add_form_choose_engine($form, &$form_state) {
 /**
  * Submit handler for the "Back" button: returns to the engine choice step.
  */
-function code_sign_profile_add_form_change_engine($form, &$form_state) {
+function code_sign_ui_profile_add_form_change_engine($form, &$form_state) {
   unset($form_state['storage']['engine']);
   $form_state['rebuild'] = TRUE;
 }
 
 /**
- * Validate handler for code_sign_profile_add_form().
+ * Validate handler for code_sign_ui_profile_add_form().
  */
-function code_sign_profile_add_form_validate($form, &$form_state) {
+function code_sign_ui_profile_add_form_validate($form, &$form_state) {
   // Nothing to validate yet on the engine-choice step.
   if (empty($form_state['storage']['engine'])) {
     return;
@@ -260,9 +260,9 @@ function code_sign_profile_add_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for code_sign_profile_add_form().
+ * Submit handler for code_sign_ui_profile_add_form().
  */
-function code_sign_profile_add_form_submit($form, &$form_state) {
+function code_sign_ui_profile_add_form_submit($form, &$form_state) {
   $engine = code_sign_get_engine($form_state['values']['engine']);
   if (!$engine || !$engine->isAvailable()) {
     backdrop_set_message(t('This signing engine is currently unavailable. The profile was not saved.'), 'error');
@@ -276,7 +276,7 @@ function code_sign_profile_add_form_submit($form, &$form_state) {
     // centrally persisted. An engine may throw CodeSignException to veto
     // saving the profile entirely (for example, an unparsable key upload).
     $engine->formSubmit($form, $form_state);
-    code_sign_save_profile($form_state['values']);
+    code_sign_ui_save_profile($form_state['values']);
     backdrop_set_message(t('Profile saved.'));
   }
   catch (CodeSignException $e) {
@@ -299,20 +299,20 @@ function code_sign_profile_add_form_submit($form, &$form_state) {
  *   A form render array, or MENU_NOT_FOUND if the engine or profile is
  *   unknown.
  */
-function code_sign_profile_edit_page($engine_name, $profile_name) {
+function code_sign_ui_profile_edit_page($engine_name, $profile_name) {
   $engine = code_sign_get_engine($engine_name);
   if (!$engine) {
     return MENU_NOT_FOUND;
   }
   if (!$engine->isAvailable()) {
-    _code_sign_engine_unavailable($engine_name);
+    _code_sign_ui_engine_unavailable($engine_name);
   }
   $profiles = $engine->getPrivateKeychain();
   if (!isset($profiles[$profile_name])) {
     return MENU_NOT_FOUND;
   }
 
-  return backdrop_get_form('code_sign_profile_form', $engine_name, $profile_name);
+  return backdrop_get_form('code_sign_ui_profile_form', $engine_name, $profile_name);
 }
 
 /**
@@ -330,7 +330,7 @@ function code_sign_profile_edit_page($engine_name, $profile_name) {
  * @return array
  *   The profile form.
  */
-function code_sign_profile_form($form, &$form_state, $engine_name, $profile_name) {
+function code_sign_ui_profile_form($form, &$form_state, $engine_name, $profile_name) {
   $engine = code_sign_get_engine($engine_name);
   $all_profiles = $engine->getPrivateKeychain();
   $profile = $all_profiles[$profile_name];
@@ -358,9 +358,9 @@ function code_sign_profile_form($form, &$form_state, $engine_name, $profile_name
 }
 
 /**
- * Validate handler for code_sign_profile_form().
+ * Validate handler for code_sign_ui_profile_form().
  */
-function code_sign_profile_form_validate($form, &$form_state) {
+function code_sign_ui_profile_form_validate($form, &$form_state) {
   $engine = code_sign_get_engine($form_state['values']['engine']);
   if (!$engine || !$engine->isAvailable()) {
     form_set_error('', t('This signing engine is currently unavailable.'));
@@ -371,9 +371,9 @@ function code_sign_profile_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for code_sign_profile_form().
+ * Submit handler for code_sign_ui_profile_form().
  */
-function code_sign_profile_form_submit($form, &$form_state) {
+function code_sign_ui_profile_form_submit($form, &$form_state) {
   $engine = code_sign_get_engine($form_state['values']['engine']);
   if (!$engine || !$engine->isAvailable()) {
     backdrop_set_message(t('This signing engine is currently unavailable. The profile was not saved.'), 'error');
@@ -387,7 +387,7 @@ function code_sign_profile_form_submit($form, &$form_state) {
     // centrally persisted. An engine may throw CodeSignException to veto
     // saving the profile entirely (for example, an unparsable key upload).
     $engine->formSubmit($form, $form_state);
-    code_sign_save_profile($form_state['values']);
+    code_sign_ui_save_profile($form_state['values']);
     backdrop_set_message(t('Profile saved.'));
   }
   catch (CodeSignException $e) {
@@ -409,20 +409,20 @@ function code_sign_profile_form_submit($form, &$form_state) {
  *   A form render array, or MENU_NOT_FOUND if the engine or profile is
  *   unknown.
  */
-function code_sign_profile_delete_page($engine_name, $profile_name) {
+function code_sign_ui_profile_delete_page($engine_name, $profile_name) {
   $engine = code_sign_get_engine($engine_name);
   if (!$engine) {
     return MENU_NOT_FOUND;
   }
   if (!$engine->isAvailable()) {
-    _code_sign_engine_unavailable($engine_name);
+    _code_sign_ui_engine_unavailable($engine_name);
   }
   $profiles = $engine->getPrivateKeychain();
   if (!isset($profiles[$profile_name])) {
     return MENU_NOT_FOUND;
   }
 
-  return backdrop_get_form('code_sign_profile_delete_form', $engine_name, $profile_name);
+  return backdrop_get_form('code_sign_ui_profile_delete_form', $engine_name, $profile_name);
 }
 
 /**
@@ -440,7 +440,7 @@ function code_sign_profile_delete_page($engine_name, $profile_name) {
  * @return array
  *   The confirmation form.
  */
-function code_sign_profile_delete_form($form, &$form_state, $engine_name, $profile_name) {
+function code_sign_ui_profile_delete_form($form, &$form_state, $engine_name, $profile_name) {
   $form['engine'] = array(
     '#type' => 'value',
     '#value' => $engine_name,
@@ -458,9 +458,9 @@ function code_sign_profile_delete_form($form, &$form_state, $engine_name, $profi
 }
 
 /**
- * Submit handler for code_sign_profile_delete_form().
+ * Submit handler for code_sign_ui_profile_delete_form().
  */
-function code_sign_profile_delete_form_submit($form, &$form_state) {
+function code_sign_ui_profile_delete_form_submit($form, &$form_state) {
   $engine = code_sign_get_engine($form_state['values']['engine']);
   if (!$engine || !$engine->isAvailable()) {
     backdrop_set_message(t('This signing engine is currently unavailable. The profile was not deleted.'), 'error');
@@ -472,7 +472,7 @@ function code_sign_profile_delete_form_submit($form, &$form_state) {
     // Give the engine a chance to veto or react to the deletion before the
     // profile's configuration is centrally removed.
     $engine->deleteProfile($form_state['values']['profile_name']);
-    code_sign_delete_profile($form_state['values']['profile_name']);
+    code_sign_ui_delete_profile($form_state['values']['profile_name']);
     backdrop_set_message(t('Profile deleted.'));
   }
   catch (CodeSignException $e) {
@@ -487,10 +487,10 @@ function code_sign_profile_delete_form_submit($form, &$form_state) {
  *
  * @param array $values
  *   The submitted $form_state['values'], including the 'engine' and
- *   'profile' keys added by code_sign_profile_form(), after any
+ *   'profile' keys added by code_sign_ui_profile_form(), after any
  *   engine-specific processing performed by CodeSignEngine::formSubmit().
  */
-function code_sign_save_profile(array $values) {
+function code_sign_ui_save_profile(array $values) {
   $internal_keys = array('form_build_id', 'form_token', 'form_id', 'op', 'submit', 'actions', 'profile_name');
   $values = array_diff_key($values, array_flip($internal_keys));
 
@@ -504,6 +504,6 @@ function code_sign_save_profile(array $values) {
  * @param string $profile_name
  *   The machine name of the profile to delete.
  */
-function code_sign_delete_profile($profile_name) {
+function code_sign_ui_delete_profile($profile_name) {
   config('code_sign.profile.' . $profile_name)->delete();
 }

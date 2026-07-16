@@ -113,6 +113,12 @@ class CodeSignSodiumEngine extends CodeSignEngine {
 
   /**
    * {@inheritdoc}
+   *
+   * In addition to profile-backed keys, this merges in any public keys
+   * bundled in this module's keys/ directory (files with a .pub extension,
+   * each containing a base64-encoded Ed25519 public key). Bundling a key
+   * this way trusts it for verification only; it never appears in
+   * getPrivateKeychain() and can't be used to sign data.
    */
   public function getPublicKeychain() {
     $keychain = array();
@@ -121,6 +127,21 @@ class CodeSignSodiumEngine extends CodeSignEngine {
         'label' => $profile['label'],
         'public_key' => $profile['public_key'],
       );
+    }
+
+    if ($this->isAvailable()) {
+      foreach ($this->loadBundledKeyFiles('code_sign_sodium', 'pub') as $key_name => $key_data) {
+        $public_key = trim($key_data);
+        $decoded = base64_decode($public_key, TRUE);
+        if ($decoded === FALSE || strlen($decoded) !== SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES) {
+          watchdog('code_sign_sodium', 'Bundled key file %file does not contain a valid Ed25519 public key.', array('%file' => $key_name), WATCHDOG_WARNING);
+          continue;
+        }
+        $keychain['bundled:' . $key_name] = array(
+          'label' => $key_name,
+          'public_key' => $public_key,
+        );
+      }
     }
 
     return $keychain;

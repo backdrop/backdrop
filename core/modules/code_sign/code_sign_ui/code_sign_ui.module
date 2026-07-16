@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Provides an administrative interface for managing Code Sign profiles.
+ *
+ * Most sites only need to verify signatures created elsewhere and have no
+ * need to create or manage signing profiles interactively, so this UI is
+ * kept separate from the base code_sign module and its signing engines.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function code_sign_ui_menu() {
+  $items = array();
+
+  $items['admin/config/system/code-sign'] = array(
+    'title' => 'Code Sign',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('code_sign_ui_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'code_sign_ui.admin.inc',
+  );
+  $items['admin/config/system/code-sign/settings'] = array(
+    'title' => 'Profiles',
+    'weight' => -10,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/config/system/code-sign/profile/add'] = array(
+    'title' => 'Add profile',
+    'page callback' => 'code_sign_ui_profile_add_page',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'code_sign_ui.admin.inc',
+  );
+  $items['admin/config/system/code-sign/profile/%/%/edit'] = array(
+    'title' => 'Edit profile',
+    'page callback' => 'code_sign_ui_profile_edit_page',
+    'page arguments' => array(5, 6),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'code_sign_ui.admin.inc',
+  );
+  $items['admin/config/system/code-sign/profile/%/%/delete'] = array(
+    'title' => 'Delete profile',
+    'page callback' => 'code_sign_ui_profile_delete_page',
+    'page arguments' => array(5, 6),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'code_sign_ui.admin.inc',
+  );
+
+  return $items;
+}

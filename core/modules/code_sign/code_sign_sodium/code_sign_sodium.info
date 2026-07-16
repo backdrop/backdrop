@@ -1,4 +1,4 @@
-name = Sodium Code Sign
+name = Code Sign Sodium
 description = Signs and verifies data using the Sodium (libsodium) Ed25519 signing engine.
 package = Security
 version = BACKDROP_VERSION
@@ -6,3 +6,6 @@ backdrop = 1.x
 type = module
 dependencies[] = code_sign
 php = 7.2
+
+; This module is installed as a dependency of Installer module.
+;hidden = true

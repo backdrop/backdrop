@@ -14,42 +14,6 @@
 function code_sign_menu() {
   $items = array();
 
-  $items['admin/config/system/code-sign'] = array(
-    'title' => 'Code Sign',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('code_sign_admin_form'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-    'file' => 'code_sign.admin.inc',
-  );
-  $items['admin/config/system/code-sign/settings'] = array(
-    'title' => 'Profiles',
-    'weight' => -10,
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-  $items['admin/config/system/code-sign/profile/add'] = array(
-    'title' => 'Add profile',
-    'page callback' => 'code_sign_profile_add_page',
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_ACTION,
-    'file' => 'code_sign.admin.inc',
-  );
-  $items['admin/config/system/code-sign/profile/%/%/edit'] = array(
-    'title' => 'Edit profile',
-    'page callback' => 'code_sign_profile_edit_page',
-    'page arguments' => array(5, 6),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_CALLBACK,
-    'file' => 'code_sign.admin.inc',
-  );
-  $items['admin/config/system/code-sign/profile/%/%/delete'] = array(
-    'title' => 'Delete profile',
-    'page callback' => 'code_sign_profile_delete_page',
-    'page arguments' => array(5, 6),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_CALLBACK,
-    'file' => 'code_sign.admin.inc',
-  );
   $items['admin/reports/code-sign'] = array(
     'title' => 'Code Sign',
     'page callback' => 'code_sign_report_page',
@@ -164,14 +128,13 @@ function code_sign_get_engine($signer) {
  *
  * Each entry includes:
  *
- * - crypto_engine: The machine name of the engine.
+ * - engine: The machine name of the Code Sign engine.
  * - label: A name for the profile, intended for humans.
  * - name: The unique profile machine name.
- * - signing_key: A structure specific to the crypto engine with additional
- *   information about the profile.
+ * - additional keys specific to the engine.
  *
  * @return array
- *   An array of signing profiles, indexed by the profile_name.
+ *   An array of signing profiles, indexed by the profile name.
  */
 function code_sign_load_all_profiles() {
   $signing_profiles = &backdrop_static(__FUNCTION__, array());

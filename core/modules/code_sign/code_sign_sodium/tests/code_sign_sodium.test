@@ -18,7 +18,7 @@ class CodeSignSodiumTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
   function setUp() {
-    parent::setUp(array('code_sign', 'code_sign_sodium'));
+    parent::setUp(array('code_sign', 'code_sign_sodium', 'code_sign_ui'));
 
     if (!extension_loaded('sodium')) {
       $this->fail('The PHP Sodium extension is not available; these tests cannot run.');
@@ -91,5 +91,54 @@ class CodeSignSodiumTestCase extends BackdropWebTestCase {
 
     $profile = code_sign_load_profile($machine_name);
     $this->assertTrue(empty($profile), 'The profile configuration was removed.');
+  }
+
+  /**
+   * Tests that a public key bundled in the module's keys/ directory is
+   * merged into getPublicKeychain() and trusted for verification, with no
+   * profile ever having been created for it.
+   */
+  function testBundledKeyIsTrustedForVerification() {
+    $keypair = sodium_crypto_sign_keypair();
+    $public_key = base64_encode(sodium_crypto_sign_publickey($keypair));
+    $secret_key = base64_decode(base64_encode(sodium_crypto_sign_secretkey($keypair)));
+
+    $key_name = 'test-bundled-' . strtolower($this->randomName(8));
+    $keys_dir = BACKDROP_ROOT . '/' . backdrop_get_path('module', 'code_sign_sodium') . '/keys';
+    $key_file = $keys_dir . '/' . $key_name . '.pub';
+    file_put_contents($key_file, $public_key);
+
+    $engine = code_sign_get_engine('sodium');
+    $public_keychain = $engine->getPublicKeychain();
+    $this->assertTrue(isset($public_keychain['bundled:' . $key_name]), 'The bundled key appears in the public keychain.');
+    $this->assertEqual($public_keychain['bundled:' . $key_name]['public_key'], $public_key, 'The bundled public key value matches the file contents.');
+    $this->assertFalse(isset($engine->getPrivateKeychain()['bundled:' . $key_name]), 'The bundled key does not appear in the private keychain.');
+
+    // Sign data directly with the matching secret key (bypassing a profile,
+    // since none was created) and confirm the generic verify() API trusts
+    // it purely because the public half is bundled.
+    $data = $this->randomString(256);
+    $raw_signature = sodium_crypto_sign_detached($data, $secret_key);
+    $signature = base64_encode(base64_decode($public_key)) . ':' . base64_encode($raw_signature);
+    $this->assertIdentical(code_sign_verify('sodium', $data, $signature), TRUE, 'A signature from the bundled key is trusted.');
+
+    unlink($key_file);
+  }
+
+  /**
+   * Tests that a malformed bundled key file is skipped rather than breaking
+   * the public keychain.
+   */
+  function testMalformedBundledKeyIsSkipped() {
+    $key_name = 'test-bad-bundled-' . strtolower($this->randomName(8));
+    $keys_dir = BACKDROP_ROOT . '/' . backdrop_get_path('module', 'code_sign_sodium') . '/keys';
+    $key_file = $keys_dir . '/' . $key_name . '.pub';
+    file_put_contents($key_file, 'not a valid key');
+
+    $engine = code_sign_get_engine('sodium');
+    $public_keychain = $engine->getPublicKeychain();
+    $this->assertFalse(isset($public_keychain['bundled:' . $key_name]), 'The malformed bundled key was not added to the public keychain.');
+
+    unlink($key_file);
   }
 }

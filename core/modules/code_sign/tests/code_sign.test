@@ -7,19 +7,15 @@
 
 /**
  * Tests the functionality of the Code Sign module.
+ *
+ * These tests only exercise the signing/verification API and engine
+ * keychains, deliberately without enabling code_sign_ui, to confirm the base
+ * module is fully usable on a verify-only site with no admin UI installed.
  */
 class CodeSignTestCase extends BackdropWebTestCase {
-  /**
-   * A user with permission to use the admin interface.
-   *
-   * @var object
-   */
-  protected $admin_user;
 
   function setUp() {
     parent::setUp(array('code_sign', 'code_sign_hash'));
-
-    $this->admin_user = $this->backdropCreateUser(array('administer site configuration'));
   }
 
   function testCodeSignSignature() {
@@ -44,46 +40,5 @@ class CodeSignTestCase extends BackdropWebTestCase {
     $hashes = hash_algos();
     $engine = code_sign_get_engine('hash');
     $this->assertIdentical($engine->getPublicKeychain(), array_combine($hashes, $hashes), 'Public keychain list.');
-  }
-
-  function testCodeSignAdminInterface() {
-    $this->backdropGet('admin/config/system/code-sign');
-    $this->assertText('You are not authorized to access this page.', 'Access to code sign admin.');
-
-    $this->backdropLogin($this->admin_user);
-
-    $this->backdropGet('admin/config/system/code-sign');
-    $this->assertText('sha256', 'Default signing profile is present.');
-    $this->assertText('Hash', 'Hash engine label is present.');
-    $this->assertLinkByHref('admin/config/system/code-sign/profile/add');
-    $this->assertLinkByHref('admin/config/system/code-sign/profile/hash/sha256/edit');
-    $this->assertLinkByHref('admin/config/system/code-sign/profile/hash/sha256/delete');
-  }
-
-  function testCodeSignAddDeleteHash() {
-    $this->backdropGet('admin/config/system/code-sign/profile/add');
-    $this->assertText('You are not authorized to access this page.', 'Access to code_sign_hash add hash.');
-
-    $this->backdropLogin($this->admin_user);
-
-    // Create a hash
-    $new_hash = array(
-        'label' => $this->randomString(),
-        'name' => strtolower($this->randomName()),
-        'hash_algorithm' => 'md5',
-    );
-    $this->backdropGet('admin/config/system/code-sign');
-    $this->assertNoText($new_hash['label']);
-
-    // The add form is a consolidated, two-step form: choose the engine
-    // first, then fill in the engine-specific fields.
-    $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'hash'), t('Continue'));
-    $this->backdropPost(NULL, $new_hash, t('Add profile'));
-    // The listing shows the human-readable label, not the machine name.
-    $this->assertText($new_hash['label'], 'New hash added.');
-
-    // And delete it.
-    $this->backdropPost('admin/config/system/code-sign/profile/hash/' . $new_hash['name'] . '/delete', array(), t('Delete'));
-    $this->assertNoText($new_hash['label']);
   }
 }

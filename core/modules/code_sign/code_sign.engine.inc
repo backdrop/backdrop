@@ -178,7 +178,7 @@ abstract class CodeSignEngine {
    * Processes the submitted profile form before it is centrally persisted.
    *
    * Unlike the rest of the profile lifecycle, persistence is not the
-   * engine's responsibility: code_sign_save_profile() centrally saves the
+   * engine's responsibility: code_sign_ui_save_profile() centrally saves the
    * entire contents of $form_state['values'] (minus internal Form API keys)
    * into a single configuration file, code_sign.profile.[machine_name]. This
    * method exists only so an engine can process or augment those values
@@ -192,7 +192,7 @@ abstract class CodeSignEngine {
    * @param array $form_state
    *   The form state.
    *
-   * @see code_sign_save_profile()
+   * @see code_sign_ui_save_profile()
    */
   public function formSubmit(array $form, array &$form_state) {
   }
@@ -201,7 +201,7 @@ abstract class CodeSignEngine {
    * Allows the engine to react to or veto deletion of one of its profiles.
    *
    * Removal of the profile's configuration file is handled centrally by
-   * code_sign_delete_profile(); this method exists so an engine can perform
+   * code_sign_ui_delete_profile(); this method exists so an engine can perform
    * its own cleanup, or refuse the deletion entirely (by throwing
    * CodeSignException) when its profiles are not simple configuration-backed
    * records - for example, an engine backed by an external keyring. The
@@ -213,7 +213,7 @@ abstract class CodeSignEngine {
    * @throws CodeSignException
    *   Thrown if this engine does not allow the profile to be deleted.
    *
-   * @see code_sign_delete_profile()
+   * @see code_sign_ui_delete_profile()
    */
   public function deleteProfile($profile_name) {
   }
@@ -235,7 +235,7 @@ abstract class CodeSignEngine {
   /**
    * Loads all profiles belonging to this engine from the centralized store.
    *
-   * Profiles are saved by code_sign_save_profile() into individual
+   * Profiles are saved by code_sign_ui_save_profile() into individual
    * configuration files named code_sign.profile.[machine_name], each
    * recording which engine it belongs to. This helper is available to any
    * engine whose profiles are stored this way; engines with a different
@@ -245,7 +245,7 @@ abstract class CodeSignEngine {
    * @return array
    *   An array of profiles, indexed by machine name.
    *
-   * @see code_sign_save_profile()
+   * @see code_sign_ui_save_profile()
    */
   protected function loadProfiles() {
     $profiles = array();
@@ -258,6 +258,49 @@ abstract class CodeSignEngine {
     }
 
     return $profiles;
+  }
+
+  /**
+   * Reads bundled trust-anchor key files from a module's "keys" directory.
+   *
+   * This lets a module ship public keys as trust anchors directly in its own
+   * codebase - for example, the key used to sign the module's own releases -
+   * without requiring a site administrator to import them through the
+   * profile admin UI. Only public key material belongs here; a module's
+   * source tree is not a safe place to store a private signing key.
+   *
+   * @param string $module
+   *   The machine name of the module whose keys/ directory should be
+   *   scanned. This is normally the engine's own owning module, not
+   *   necessarily $this->name (the engine's machine name), since the two do
+   *   not always match.
+   * @param string $extensions_pattern
+   *   A regular expression fragment matching the acceptable file
+   *   extensions, for example 'pub' or 'asc|gpg|pgp'.
+   *
+   * @return array
+   *   The raw contents of each matching file, keyed by the file's basename
+   *   without its extension.
+   */
+  protected function loadBundledKeyFiles($module, $extensions_pattern) {
+    $keys = array();
+
+    $path = backdrop_get_path('module', $module);
+    if (empty($path)) {
+      return $keys;
+    }
+
+    $directory = BACKDROP_ROOT . '/' . $path . '/keys';
+    if (!is_dir($directory)) {
+      return $keys;
+    }
+
+    $files = file_scan_directory($directory, '/\.(' . $extensions_pattern . ')$/', array('key' => 'name'));
+    foreach ($files as $key_name => $file) {
+      $keys[$key_name] = file_get_contents($file->uri);
+    }
+
+    return $keys;
   }
 }
 
