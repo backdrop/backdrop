@@ -2806,6 +2806,7 @@ function _file_sort_array_by_weight(&$a) {
  */
 function file_type_determine($fid) {
   if ($file = file_load($fid)) {
+    $file->keep_timestamp = TRUE;
     // The file type will be automatically determined when saving the file.
     file_save($file);
   }

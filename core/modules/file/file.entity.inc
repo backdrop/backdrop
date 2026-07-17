@@ -87,6 +87,15 @@ class File extends Entity {
   public $timestamp;
 
   /**
+   * Whether to keep the original timestamp when saving the file.
+   *
+   * @var bool
+   *
+   * @since @todo Property added.
+   */
+  public $keep_timestamp = FALSE;
+
+  /**
    * Constructor for file entities.
    */
   public function __construct(array $values = array()) {
@@ -286,6 +295,9 @@ class FileStorageController extends EntityDatabaseStorageController {
    */
   protected function preSave(EntityInterface $entity) {
     $entity->timestamp = REQUEST_TIME;
+    if (!$entity->isNew() && !empty($entity->keep_timestamp)) {
+      $entity->timestamp = $entity->original->timestamp;
+    }
     $entity->filesize = filesize($entity->uri);
     if (!isset($entity->langcode)) {
       // Default the file's language code to none, because files are language
