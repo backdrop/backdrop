@@ -1823,6 +1823,8 @@ function theme_status_messages($variables) {
     'info' => t('Info message'),
   );
 
+  // Define the message role level so screenreader users are alerted to errors
+  // and warnings but not status or info messages.
   $message_role = array(
     'status' => 'status',
     'error' => 'alert',
