@@ -93,7 +93,7 @@ class File extends Entity {
    *
    * @since @todo Property added.
    */
-  public $keep_timestamp = FALSE;
+  public $keepTimestamp = FALSE;
 
   /**
    * Constructor for file entities.
@@ -294,7 +294,7 @@ class FileStorageController extends EntityDatabaseStorageController {
    *   The file entity about to be saved.
    */
   protected function preSave(EntityInterface $entity) {
-    if ($entity->isNew() || !$entity->keep_timestamp) {
+    if ($entity->isNew() || !$entity->keepTimestamp) {
       $entity->timestamp = REQUEST_TIME;
     }
 
