@@ -1023,7 +1023,7 @@ function _file_usage_list_links(File $file, &$known_count, &$unknown_count) {
             // If the entity is in the EFQ result, access is allowed.
             if (isset($result[$entity_type][$entity->id()])) {
               $uri = $entity->uri();
-              $entity_list[] = l($entity->label(), $uri['path'], $uri['options']);
+              $entity_list[] = !empty($uri) ? l($entity->label(), $uri['path'], $uri['options']) : $entity->label();
               $known_count++;
             }
             // If not, do not show a link and consider it an unknown location.
