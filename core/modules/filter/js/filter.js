@@ -80,7 +80,8 @@ Backdrop.behaviors.filterEditors = {
         if (event.isDefaultPrevented()) {
           return;
         }
-        Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
+        // Detach the editor with "submit" when doing a non-AJAX submit.
+        Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor], 'submit');
       });
     });
   },
@@ -100,13 +101,38 @@ Backdrop.behaviors.filterEditors = {
   }
 };
 
+/**
+ * Attach an editor to a textarea field.
+ *
+ * @param {Element} field
+ *   The original textarea DOM element.
+ * @param {Object} format
+ *   The text format information.
+ */
 Backdrop.filterEditorAttach = function(field, format) {
   if (format.editor && Backdrop.editors[format.editor]) {
     Backdrop.editors[format.editor].attach(field, format);
   }
 };
 
-Backdrop.filterEditorDetach = function(field, format, trigger) {
+  /**
+   * Detach an editor from the page.
+   *
+   * @param {Element} field
+   *   The original textarea DOM element.
+   * @param {Object} format
+   *   The text format information.
+   * @param {string} trigger
+   *   A string with the value "unload", "move", "serialize" (see
+   *   Backdrop.detachBehaviors() for more information on these), or "submit".
+   *   Submit is used to detach editors when the complete form is submitted
+   *   with non-AJAX behavior, which may be useful to let the browser clean up
+   *   the editor's events and memory.
+   *
+   * @see Backdrop.detachBehaviors()
+   */
+  Backdrop.filterEditorDetach = function(field, format, trigger) {
+  trigger = trigger || 'unload';
   if (format.editor && Backdrop.editors[format.editor]) {
     Backdrop.editors[format.editor].detach(field, format, trigger);
   }
