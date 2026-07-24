@@ -4086,10 +4086,9 @@ function backdrop_pre_render_styles(array $elements) {
     $elements['#aggregate_callback']($elements['#groups']);
   }
 
-  // A dummy query-string is added to filenames, to gain control over
-  // browser-caching. The string changes on every update or full cache
-  // flush, forcing browsers to load a new copy of the files, as the
-  // URL changed.
+  // A dummy query-string is added to filenames, to gain control over browser
+  // caching. The string changes on every update or full cache flush, forcing
+  // browsers to load a new copy of the files, as the URL changed.
   $query_string = !defined('MAINTENANCE_MODE') ? state_get('css_js_query_string', '0') : '';
 
   // Defaults for LINK and STYLE elements.
@@ -5214,7 +5213,7 @@ function backdrop_pre_render_scripts(array $elements) {
             break;
 
           case 'file':
-            $query_string = empty($item['version']) ? $default_query_string : 'v=' . $item['version'];
+            $query_string = empty($item['version']) || config_get('system.core', 'js_asset_query_random') ? $default_query_string : 'v=' . $item['version'];
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
             $element['#attributes']['src'] = file_create_url($item['data']) . $query_string_separator . ($item['cache'] ? $query_string : REQUEST_TIME);
             break;
