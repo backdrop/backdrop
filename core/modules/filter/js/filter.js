@@ -27,6 +27,15 @@ Backdrop.filterAspectRatioLocked = true;
  */
 Backdrop.filterImageEditorDisplay = undefined;
 
+
+/**
+ * Keeps track of the original dimensions of the image we are manipulating
+ * in the image editor.
+ * // TODO: might need to be an array since we can have multiple images?
+ */
+Backdrop.filterImageOriginalDimensions = {width: null, height: null};
+
+
 /**
  * Displays the guidelines of the selected text format automatically.
  */
@@ -43,6 +52,7 @@ Backdrop.behaviors.filterGuidelines = {
       .trigger('change');
   }
 };
+
 
 /**
  * Enables an editor (if any) when the matching format is selected.
@@ -218,6 +228,15 @@ Backdrop.behaviors.editorImageDialog = {
       $(".editor-dialog").removeClass("editor-dialog-with-library");
       // Set the class for the left-hand part.
       $(".editor-image-fields").addClass("editor-image-fields-full");
+      // When we first open, we're always on the "upload" part of the dialog.
+      Backdrop.filterImageEditorDisplay = 'upload';
+      // If the image is stretched, we need to set the lock icon
+      // and locked status accordingly.
+      if (Backdrop.behaviors.editorImageLibrary.imageIsStretched() === true) {
+        $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').hide();
+        $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').show().focus();
+        Backdrop.filterAspectRatioLocked = false;
+      }
     }
 
     $newToggles.on('click', function(e) {
@@ -258,23 +277,23 @@ Backdrop.behaviors.editorImageDialog = {
         // our width and height fields with its width and height.
         var existingFile = $('.filter-format-editor-image-form .form-managed-file a').attr('href');
         if (typeof existingFile !== 'undefined') {
-          var originalDimensions = {
+          Backdrop.filterImageOriginalDimensions = {
             width: null,
             height: null
           };
 
           var img = new Image();
           img.onload = function() {
-            originalDimensions.width = this.width;
-            originalDimensions.height = this.height;
-            Backdrop.behaviors.editorImageLibrary.resetDataAttr(originalDimensions);
+            Backdrop.filterImageOriginalDimensions.width = this.width;
+            Backdrop.filterImageOriginalDimensions.height = this.height;
+            Backdrop.behaviors.editorImageLibrary.resetDataAttr(Backdrop.filterImageOriginalDimensions);
 
             if (!$('.filter-format-editor-image-form [name="attributes[width]"]').val().length) {
-              Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(originalDimensions);
+              Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(Backdrop.filterImageOriginalDimensions);
             }
 
-            Backdrop.behaviors.editorImageLibrary.syncAspectRatio(originalDimensions);
-            Backdrop.behaviors.editorImageLibrary.setButtonState(originalDimensions);
+            Backdrop.behaviors.editorImageLibrary.syncAspectRatio(Backdrop.filterImageOriginalDimensions);
+            Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
           }
           // Actually perform the loading of the image last
           // just in case the listener functions are set yet.
@@ -353,6 +372,7 @@ Backdrop.behaviors.editorImageDialog = {
         $('.editor-dialog').removeClass('editor-dialog-with-library');
         // Set the class for the dialog part.
         $('.editor-image-fields').addClass('editor-image-fields-full');
+
       }
     });
   }
@@ -397,7 +417,8 @@ Backdrop.behaviors.editorImageLibrary = {
     if (!$sizeFormItems.length) {
       return;
     }
-    var naturalDimensions = {
+
+    Backdrop.filterImageOriginalDimensions = {
       width: null,
       height: null
     };
@@ -420,37 +441,51 @@ Backdrop.behaviors.editorImageLibrary = {
       $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').hide();
       $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').show().focus();
       Backdrop.filterAspectRatioLocked = true;
+      // Because we have just re-locked the aspect ratio from a previously
+      // unlocked state, we need to resize the image, using width as the
+      // dimension to calculate from.
+      if (Backdrop.filterImageOriginalDimensions.width && Backdrop.filterImageOriginalDimensions.height) {
+        $('.filter-format-editor-image-form [name="attributes[width]"]').trigger('input');
+      }
     });
 
     $('.filter-format-editor-image-form .editor-image-size #reset-orig').off().on('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-
       Backdrop.behaviors.editorImageLibrary.imageDimensionsSet($(this).data('data-dimensions'));
-      Backdrop.behaviors.editorImageLibrary.setButtonState($(this).data('data-dimensions'));
+      Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
     });
 
+
+    Backdrop.behaviors.editorImageLibrary.imageLoadExistingFile();
+
+
+  },
+  imageLoadExistingFile: function () {
     // When editing a previously added/selected image, or upload a new one.
-    var existingFile = $('.filter-format-editor-image-form .form-managed-file a').attr('href');
+    var existingFile = $('.filter-format-editor-image-form .form-managed-file .file a').attr('href');
     if (Backdrop.filterImageEditorDisplay === 'library') {
       existingFile = $('.filter-format-editor-image-form #edit-attributes-src').val();
     }
+
     if (typeof existingFile !== 'undefined' && existingFile !== '') {
       var img = new Image();
       // First, define functions for img.
       img.onload = function() {
-        naturalDimensions.width = this.width;
-        naturalDimensions.height = this.height;
-        Backdrop.behaviors.editorImageLibrary.resetDataAttr(naturalDimensions);
+
+
+        Backdrop.filterImageOriginalDimensions.width = this.width;
+        Backdrop.filterImageOriginalDimensions.height = this.height;
+        Backdrop.behaviors.editorImageLibrary.resetDataAttr(Backdrop.filterImageOriginalDimensions);
         if (!$('.filter-format-editor-image-form [name="attributes[width]"]').val().length) {
-          Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(naturalDimensions);
+          Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(Backdrop.filterImageOriginalDimensions);
         }
-        Backdrop.behaviors.editorImageLibrary.syncAspectRatio(naturalDimensions);
-        Backdrop.behaviors.editorImageLibrary.setButtonState(naturalDimensions);
+        Backdrop.behaviors.editorImageLibrary.syncAspectRatio(Backdrop.filterImageOriginalDimensions);
+        Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
       }
       img.onerror = function() {
-        naturalDimensions.width = null;
-        naturalDimensions.height = null;
+        Backdrop.filterImageOriginalDimensions.width = null;
+        Backdrop.filterImageOriginalDimensions.height = null;
       }
       // Perform the loading of the image last, just in case
       // the listener functions aren't set yet.
@@ -460,9 +495,9 @@ Backdrop.behaviors.editorImageLibrary = {
       // After an image has been removed via button, and the managed form item
       // reloads, reset width and height.
       if ($('.filter-format-editor-image-form [name="attributes[width]"]').val().length) {
-        naturalDimensions.width = null;
-        naturalDimensions.height = null;
-        Backdrop.behaviors.editorImageLibrary.resetDataAttr(naturalDimensions);
+        Backdrop.filterImageOriginalDimensions.width = null;
+        Backdrop.filterImageOriginalDimensions.height = null;
+        Backdrop.behaviors.editorImageLibrary.resetDataAttr(Backdrop.filterImageOriginalDimensions);
         Backdrop.behaviors.editorImageLibrary.imageDimensionsEmpty();
 
         // Change our default lock status to locked when we remove an image.
@@ -476,20 +511,21 @@ Backdrop.behaviors.editorImageLibrary = {
     $('.filter-format-editor-image-form [name="attributes[src]"]').once('filter-editor-img-src').on('change', function() {
       var img = new Image();
       img.onload = function() {
-        naturalDimensions.width = this.width;
-        naturalDimensions.height = this.height;
-        Backdrop.behaviors.editorImageLibrary.resetDataAttr(naturalDimensions);
-        Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(naturalDimensions);
-        Backdrop.behaviors.editorImageLibrary.syncAspectRatio(naturalDimensions);
-        Backdrop.behaviors.editorImageLibrary.setButtonState(naturalDimensions);
+        Backdrop.filterImageOriginalDimensions.width = this.width;
+        Backdrop.filterImageOriginalDimensions.height = this.height;
+        Backdrop.behaviors.editorImageLibrary.resetDataAttr(Backdrop.filterImageOriginalDimensions);
+        Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(Backdrop.filterImageOriginalDimensions);
+        Backdrop.behaviors.editorImageLibrary.syncAspectRatio(Backdrop.filterImageOriginalDimensions);
+        Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
       }
       img.onerror = function() {
-        naturalDimensions.width = null;
-        naturalDimensions.height = null;
+        Backdrop.filterImageOriginalDimensions.width = null;
+        Backdrop.filterImageOriginalDimensions.height = null;
         Backdrop.behaviors.editorImageLibrary.imageDimensionsEmpty();
       }
       img.src = this.value;
     });
+
   },
   /**
    * Helper function to empty the width and height form items.
@@ -502,42 +538,75 @@ Backdrop.behaviors.editorImageLibrary = {
   /**
    * Helper function to set width and height values.
    */
-  imageDimensionsSet: function(values) {
-    $('.filter-format-editor-image-form [name="attributes[width]"]').val(values.width);
-    $('.filter-format-editor-image-form [name="attributes[height]"]').val(values.height);
+  imageDimensionsSet: function(imgDimensions) {
+    $('.filter-format-editor-image-form [name="attributes[width]"]').val(imgDimensions.width);
+    $('.filter-format-editor-image-form [name="attributes[height]"]').val(imgDimensions.height);
+  },
+  /**
+   * Based on the aspect ratio of the original dimensions, when we look at
+   * the current dimensions, has this image been "stretched"?
+   *
+   * In other words, are the current dimensions no longer the same aspect
+   * ratio as the original dimensions?
+   *
+   */
+  imageIsStretched: function() {
+
+    if (!Backdrop.filterImageOriginalDimensions.height || Backdrop.filterImageOriginalDimensions.height == 0) {
+      return;
+    }
+
+    var curWidth = parseInt($('.filter-format-editor-image-form [name="attributes[width]"]').val());
+    var curHeight = parseInt($('.filter-format-editor-image-form [name="attributes[height]"]').val());
+
+    if (!curHeight || curHeight == 0) {
+      return;
+    }
+
+    var currentAspectRatio = curWidth / curHeight;
+    var originalAspectRatio = Backdrop.filterImageOriginalDimensions.width / Backdrop.filterImageOriginalDimensions.height;
+
+    if (Math.abs(currentAspectRatio - originalAspectRatio) > 0.01) {
+        // Different aspect ratios. (We have to be a little fuzzy
+        // due to rounding.)
+        return true;
+    }
+
+    return false;
+
   },
   /**
    * Remove previous event listeners, add new ones with current dimensions.
    *
-   * Keep width and height input values in sync based on the natural image
+   * Keep width and height input values in sync based on the supplied image
    * dimensions.
    */
-  syncAspectRatio: function(naturalDimensions) {
-    $('.filter-format-editor-image-form [name="attributes[width]"]').off('change').on('change', function() {
-      var newHeight = Math.round(this.value / naturalDimensions.width * naturalDimensions.height);
+  syncAspectRatio: function(imgDimensions) {
+    $('.filter-format-editor-image-form [name="attributes[width]"]').off('input').on('input', function() {
+      var newHeight = Math.round(this.value / imgDimensions.width * imgDimensions.height);
       if (Backdrop.filterAspectRatioLocked === true) {
         $('.filter-format-editor-image-form [name="attributes[height]"]').val(newHeight);
       }
-      Backdrop.behaviors.editorImageLibrary.setButtonState(naturalDimensions);
+      Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
     });
-    $('.filter-format-editor-image-form [name="attributes[height]"]').off('change').on('change', function() {
-      var newWidth = Math.round(this.value / naturalDimensions.height * naturalDimensions.width);
+    $('.filter-format-editor-image-form [name="attributes[height]"]').off('input').on('input', function() {
+      var newWidth = Math.round(this.value / imgDimensions.height * imgDimensions.width);
       if (Backdrop.filterAspectRatioLocked === true) {
         $('.filter-format-editor-image-form [name="attributes[width]"]').val(newWidth);
       }
-      Backdrop.behaviors.editorImageLibrary.setButtonState(naturalDimensions);
+      Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
     });
   },
   /**
    * Update the data-dimensions attribute value.
    */
-  resetDataAttr: function(naturalDimensions) {
-    $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', naturalDimensions);
+  resetDataAttr: function(imgDimensions) {
+    $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', imgDimensions);
   },
   /**
-   * Update the disabled state of the reset icon
+   * Determine and update the disabled state of the reset icon
    */
-  setButtonState: function(naturalDimensions) {
+  updateResetButtonState: function() {
     var $icon = $('.filter-format-editor-image-form .editor-image-size #reset-orig');
     var curWidth = $('.filter-format-editor-image-form [name="attributes[width]"]').val();
     var curHeight = $('.filter-format-editor-image-form [name="attributes[height]"]').val();
