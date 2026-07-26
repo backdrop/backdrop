@@ -1867,8 +1867,13 @@ function file_managed_file_browser_open($form, $form_state) {
       ));
     }
   }
-  $field = field_info_field($element['#field_name']);
-  $field_cardinality = $field['cardinality'];
+  $field_cardinality = 1;
+  if (!empty($element['#field_name'])) {
+    $field = field_info_field($element['#field_name']);
+    if (!empty($field['cardinality'])) {
+      $field_cardinality = $field['cardinality'];
+    }
+  }
 
   // Add JQuery UI selectable to allow drag and drop selection if the field
   // cardinality is set to multiple.
