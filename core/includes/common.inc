@@ -4925,6 +4925,10 @@ function backdrop_add_js($data = NULL, $options = NULL) {
   }
   $options += backdrop_js_defaults($data);
 
+  // Intentionally hide the version number of the javascript file
+  // as a security measure.
+  $options['version'] = NULL;
+
   // Preprocess can only be set if caching is enabled and no attributes
   // nor defer tag are set.
   $options['preprocess'] = $options['cache'] && empty($options['attributes']) && empty($options['defer']) ? $options['preprocess'] : FALSE;
@@ -4970,7 +4974,6 @@ function backdrop_add_js($data = NULL, $options = NULL) {
           'defer' => FALSE,
           'attributes' => array(),
           'browsers' => array(),
-          'version' => BACKDROP_VERSION,
         ),
       );
       // Backwards-compatibility for JavaScript.
