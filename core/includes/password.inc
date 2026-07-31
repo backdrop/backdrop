@@ -279,13 +279,13 @@ function user_check_password($password, $account) {
  * Alternative implementations of this function might use other criteria based
  * on the fields in $account.
  *
- * @param object $account
+ * @param User|object $account
  *   A user object with at least the fields from the {users} table.
  *
  * @return bool
  *   TRUE or FALSE.
  */
-function user_needs_new_hash(object $account) {
+function user_needs_new_hash($account) {
   // Check whether this was an updated password.
   if ((substr($account->pass, 0, 3) != '$S$') || (strlen($account->pass) != BACKDROP_HASH_LENGTH)) {
     return TRUE;
