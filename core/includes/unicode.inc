@@ -83,6 +83,7 @@ define('PREG_CLASS_UNICODE_WORD_BOUNDARY',
   '\x{FE10}-\x{FE19}\x{FE30}-\x{FE6B}\x{FEFF}-\x{FF0F}\x{FF1A}-\x{FF20}' .
   '\x{FF3B}-\x{FF40}\x{FF5B}-\x{FF65}\x{FFE0}-\x{FFFD}');
   // cspell:enable
+  // phpcs:enable
 
 /**
  * Wrapper around _unicode_check().
@@ -99,9 +100,6 @@ function unicode_check() {
  * not support mbstring function overloading. HTTP input/output conversion must
  * be disabled for similar reasons.
  *
- * @param $errors
- *   Whether to report any fatal errors with form_set_error().
- *
  * @return array
  *   An unindexed array with two values:
  *     - The Unicode support level as a constant.
@@ -113,15 +111,24 @@ function _unicode_check() {
 
   // Check for mbstring extension.
   if (!function_exists('mb_strlen')) {
-    return array(UNICODE_SINGLEBYTE, $t('Operations on Unicode strings are emulated on a best-effort basis. Install the <a href="@url">PHP mbstring extension</a> for improved Unicode support.', array('@url' => 'http://www.php.net/mbstring')));
+    return array(
+      UNICODE_SINGLEBYTE,
+      $t('Operations on Unicode strings are emulated on a best-effort basis. Install the <a href="@url">PHP mbstring extension</a> for improved Unicode support.', array('@url' => 'http://www.php.net/mbstring')),
+    );
   }
 
   // Check mbstring configuration.
   if (ini_get('mbstring.func_overload') != 0) {
-    return array(UNICODE_ERROR, $t('Multibyte string function overloading in PHP is active and must be disabled. Check the php.ini <em>mbstring.func_overload</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')));
+    return array(
+      UNICODE_ERROR,
+      $t('Multibyte string function overloading in PHP is active and must be disabled. Check the php.ini <em>mbstring.func_overload</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')),
+    );
   }
   if (ini_get('mbstring.encoding_translation') != 0) {
-    return array(UNICODE_ERROR, $t('Multibyte string input conversion in PHP is active and must be disabled. Check the php.ini <em>mbstring.encoding_translation</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')));
+    return array(
+      UNICODE_ERROR,
+      $t('Multibyte string input conversion in PHP is active and must be disabled. Check the php.ini <em>mbstring.encoding_translation</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')),
+    );
   }
 
   // Set appropriate configuration.
@@ -132,6 +139,9 @@ function _unicode_check() {
 
 /**
  * Returns Unicode library status and errors.
+ *
+ * @return array
+ *   Unicode library status and errors.
  */
 function unicode_requirements() {
   // Ensure translations don't break during installation.
@@ -175,10 +185,10 @@ function unicode_requirements() {
  * This is also where unsupported encodings will be converted. Callers should
  * take this into account: $data might have been changed after the call.
  *
- * @param $data
+ * @param string $data
  *   The XML data which will be parsed later.
  *
- * @return
+ * @return object|false
  *   An XML parser object or FALSE on error.
  *
  * @ingroup php_wrappers
@@ -223,12 +233,12 @@ function backdrop_xml_parser_create(&$data) {
  *
  * Requires the iconv, GNU recode or mbstring PHP extension.
  *
- * @param $data
+ * @param string $data
  *   The data to be converted.
- * @param $encoding
+ * @param string $encoding
  *   The encoding that the data is in.
  *
- * @return
+ * @return string|false
  *   Converted data or FALSE.
  */
 function backdrop_convert_to_utf8($data, $encoding) {
@@ -260,12 +270,12 @@ function backdrop_convert_to_utf8($data, $encoding) {
  * character boundary (e.g. after using strpos() or similar), you can safely
  * use substr() instead.
  *
- * @param $string
+ * @param string $string
  *   The string to truncate.
- * @param $len
+ * @param int $len
  *   An upper limit on the returned string length.
  *
- * @return
+ * @return string
  *   The truncated string.
  */
 function backdrop_truncate_bytes($string, $len) {
@@ -284,22 +294,22 @@ function backdrop_truncate_bytes($string, $len) {
 /**
  * Truncates a UTF-8-encoded string safely to a number of characters.
  *
- * @param $string
+ * @param string $string
  *   The string to truncate.
- * @param $max_length
+ * @param int $max_length
  *   An upper limit on the returned string length, including trailing ellipsis
  *   if $add_ellipsis is TRUE.
- * @param $wordsafe
+ * @param bool $wordsafe
  *   If TRUE, attempt to truncate on a word boundary. Word boundaries are
  *   spaces, punctuation, and Unicode characters used as word boundaries in
  *   non-Latin languages; see PREG_CLASS_UNICODE_WORD_BOUNDARY for more
  *   information. If a word boundary cannot be found that would make the length
  *   of the returned string fall within length guidelines (see parameters
  *   $max_length and $min_wordsafe_length), word boundaries are ignored.
- * @param $add_ellipsis
+ * @param bool $add_ellipsis
  *   If TRUE, add t('...') to the end of the truncated string (defaults to
  *   FALSE). The string length will still fall within $max_length.
- * @param $min_wordsafe_length
+ * @param int $min_wordsafe_length
  *   If $wordsafe is TRUE, the minimum acceptable length for truncation (before
  *   adding an ellipsis, if $add_ellipsis is TRUE). Has no effect if $wordsafe
  *   is FALSE. This can be used to prevent having a very short resulting string
@@ -369,7 +379,8 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
 /**
  * Encodes MIME/HTTP header values that contain incorrectly encoded characters.
  *
- * For example, mime_header_encode('tést.txt') returns "=?UTF-8?B?dMOpc3QudHh0?=".
+ * For example, mime_header_encode('tést.txt') returns
+ * "=?UTF-8?B?dMOpc3QudHh0?=".
  *
  * See http://www.rfc-editor.org/rfc/rfc2047.txt for more information.
  *
@@ -380,7 +391,7 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
  * - Using \n as the chunk separator may cause problems on some systems and may
  *   have to be changed to \r\n or \r.
  *
- * @param $string
+ * @param string $string
  *   The header to encode.
  *
  * @return string
@@ -408,7 +419,7 @@ function mime_header_encode($string) {
 /**
  * Decodes MIME/HTTP encoded header values.
  *
- * @param $header
+ * @param string $header
  *   The header to decode.
  *
  * @return string
@@ -417,9 +428,10 @@ function mime_header_encode($string) {
  * @see mime_header_encode()
  */
 function mime_header_decode($header) {
-  // First step: encoded chunks followed by other encoded chunks (need to collapse whitespace)
+  // First step: encoded chunks followed by other encoded chunks (need to
+  // collapse whitespace).
   $header = preg_replace_callback('/=\?([^?]+)\?(Q|B)\?([^?]+|\?(?!=))\?=\s+(?==\?)/', '_mime_header_decode', $header);
-  // Second step: remaining chunks (do not collapse whitespace)
+  // Second step: remaining chunks (do not collapse whitespace).
   return preg_replace_callback('/=\?([^?]+)\?(Q|B)\?([^?]+|\?(?!=))\?=/', '_mime_header_decode', $header);
 }
 
@@ -428,7 +440,7 @@ function mime_header_decode($header) {
  *
  * Callback for preg_replace_callback() within mime_header_decode().
  *
- * @param $matches
+ * @param array $matches
  *   The array of matches from preg_replace_callback().
  *
  * @return string
@@ -436,7 +448,7 @@ function mime_header_decode($header) {
  *
  * @see mime_header_decode()
  */
-function _mime_header_decode($matches) {
+function _mime_header_decode(array $matches) {
   // Regexp groups:
   // 1: Character set name
   // 2: Escaping method (Q or B)
@@ -455,10 +467,10 @@ function _mime_header_decode($matches) {
  * , not "<"). Be careful when using this function, as decode_entities can
  * revert previous sanitization efforts (&lt;script&gt; will become <script>).
  *
- * @param $text
+ * @param string $text
  *   The text to decode entities in.
  *
- * @return
+ * @return string
  *   The input $text, with all HTML entities decoded once.
  */
 function decode_entities($text) {
@@ -473,7 +485,7 @@ function decode_entities($text) {
  * @param string $text
  *   The string to run the operation on.
  *
- * @return integer
+ * @return int
  *   The length of the string.
  *
  * @ingroup php_wrappers
@@ -560,7 +572,7 @@ function backdrop_strtolower($text) {
 /**
  * Flips U+C0-U+DE to U+E0-U+FD and back.
  *
- * @param $matches
+ * @param array $matches
  *   An array of matches.
  *
  * @return array
@@ -568,17 +580,17 @@ function backdrop_strtolower($text) {
  *
  * @see backdrop_strtolower()
  */
-function _unicode_caseflip($matches) {
+function _unicode_caseflip(array $matches) {
   return $matches[0][0] . chr(ord($matches[0][1]) ^ 32);
 }
 
 /**
  * Capitalizes the first letter of a UTF-8 string.
  *
- * @param $text
+ * @param string $text
  *   The string to convert.
  *
- * @return
+ * @return string
  *   The string with the first letter as uppercase.
  *
  * @ingroup php_wrappers
