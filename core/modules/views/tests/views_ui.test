@@ -672,7 +672,9 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
    * Helper function to create a comment and return its expected path.
    */
   function createCommentAndGetPath() {
-    $node = $this->backdropCreateNode();
+    $node = $this->backdropCreateNode(array(
+      'type' => 'post',
+    ));
     /** @var Comment $comment */
     $comment = entity_create('comment', array(
       'cid' => NULL,

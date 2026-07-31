@@ -123,6 +123,70 @@ function file_field_instance_settings_form($field, $instance) {
     '#weight' => 11,
   );
 
+  // Check that this widget is supported.
+  if (array_key_exists($instance['widget']['type'], file_field_inline_fields_widgets())) {
+    $widget = $instance['widget'];
+    $settings = $widget['settings'];
+
+    $description = t('These options allow extended file fields to be edited inline after a file has been uploaded into this field. The fields displayed will depend upon the type of file uploaded. Setting or changing a value in these fields will affect the file everywhere throughout the site. More fields may be added in the <a href="!file-types">File types configuration</a>.', array('!file-types' => url('admin/structure/file-types')));
+    if ($instance['entity_type'] == 'file') {
+      $description = t('This option is <strong>disabled</strong>. Inline file fields are disabled for file fields attached to a <em>file type</em>.');
+    }
+
+    $form['inline_fields'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Inline fields'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#description' => $description,
+      '#weight' => 30,
+      '#parents' => array('instance', 'widget', 'settings'),
+    );
+
+    $form['inline_fields']['inline_fields_option'] = array(
+      '#type' => 'select',
+      '#title' => t('Inline fields option'),
+      '#options' => array(
+        FILE_INLINE_FIELDS_ALL => t('All available fields'),
+        FILE_INLINE_FIELDS_SOME => t('Only specific fields'),
+        FILE_INLINE_FIELDS_NONE => t('None (disabled)'),
+      ),
+      '#default_value' => isset($settings['inline_fields_option']) ? $settings['inline_fields_option'] : 0,
+      '#weight' => -9,
+      '#disabled' => ($instance['entity_type'] == 'file'),
+    );
+
+    $options = array();
+    $option_occurences = array();
+    $instance_info = field_info_instances('file');
+    $bundle_info = field_info_bundles('file');
+    foreach ($instance_info as $bundle_name => $bundle_fields) {
+      foreach ($bundle_fields as $field_name => $field_instance) {
+        $options[$field_name] = $field_instance['label'];
+        $option_occurences[$field_name][] = $bundle_info[$bundle_name]['label'];
+      }
+    }
+
+    // Add bundle information to each field name.
+    foreach ($options as $field_name => $field_label) {
+      $options[$field_name] .= ' (' . implode(',', $option_occurences[$field_name]) . ')';
+    }
+
+    $form['inline_fields']['inline_fields'] = array(
+      '#title' => t('Included inline fields'),
+      '#type' => 'checkboxes',
+      '#options' => $options,
+      '#default_value' => isset($settings['inline_fields']) ? $settings['inline_fields'] : array(),
+      '#weight' => 0,
+      '#states' => array(
+        'visible' => array(
+          'select[name="instance[widget][settings][inline_fields_option]"]' => array('value' => 2),
+        ),
+      ),
+      '#element_validate' => array('_file_generic_settings_inline_fields_validate'),
+    );
+  }
+
   return $form;
 }
 
@@ -182,6 +246,21 @@ function _file_generic_settings_file_directory_validate($element, &$form_state) 
 }
 
 /**
+ * Render API callback: Validates the selected fields.
+ *
+ * @param array $element
+ *   The element being validated.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
+ *
+ * @see file_field_instance_settings_form()
+ */
+function _file_generic_settings_inline_fields_validate(array $element, array &$form_state) {
+  $value = array_values(array_filter($element['#value']));
+  form_set_value($element, $value, $form_state);
+}
+
+/**
  * Implements hook_field_load().
  */
 function file_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
@@ -230,6 +309,8 @@ function file_field_prepare_view($entity_type, $entities, $field, $instances, $l
  * Implements hook_field_insert().
  */
 function file_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  $items = file_field_expand_items($items);
+
   // Add a new usage of each uploaded file.
   foreach ($items as $item) {
     if ($file = file_load($item['fid'])) {
@@ -244,10 +325,17 @@ function file_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  * Checks for files that have been removed from the object.
  */
 function file_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  $items = file_field_expand_items($items);
+
+  // Check whether the field is defined on the object.
+  if (!isset($entity->{$field['field_name']})) {
+    // We cannot check for removed files if the field is not defined.
+    return;
+  }
   $id = $entity->id();
 
   // On new revisions, all files are considered to be a new usage and no
-  // deletion of previous file usages are necessary.
+  // deletion of previous file usages is necessary.
   if (!empty($entity->revision)) {
     foreach ($items as $item) {
       if ($file = file_load($item['fid'])) {
@@ -319,6 +407,46 @@ function file_field_delete_revision($entity_type, $entity, $field, $instance, $l
  */
 function file_field_is_empty($item, $field) {
   return empty($item['fid']);
+}
+
+/**
+ * Expands multiple file IDs within a single item into separate item arrays.
+ *
+ * When using a multiple-value file field, an individual $item['fid'] may
+ * contain an array of file IDs. Before saving values, each $item['fid'] should
+ * only contain an integer. This helper converts multiple file IDs within a
+ * single item into separate items.
+ *
+ * Calling this function is only needed when new files may be added, such as on
+ * insert or update operations.
+ *
+ * @param array $items
+ *
+ * @return array
+ *   The modified list of $items.
+ */
+function file_field_expand_items(array $items) {
+  foreach ($items as $i => $item) {
+    if (is_array($item['fid'])) {
+      $multiple_fids = $item['fid'];
+      $new_items = array();
+      foreach ($multiple_fids as $f => $fid) {
+        // The first item should adopt the first file ID.
+        if ($f === 0) {
+          $items[$i]['fid'] = $fid;
+        }
+        // Subsequent file IDs duplicate the first item's properties.
+        else {
+          $item['fid'] = $fid;
+          $new_items[] = $item;
+        }
+      }
+      // Insert the new items in the array after the original item.
+      array_splice($items, $i + 1, 0, $new_items);
+    }
+  }
+
+  return $items;
 }
 
 /**
@@ -599,7 +727,7 @@ function file_field_formatter_settings_summary($field, $instance, $view_mode) {
  * Implements hook_field_widget_info().
  */
 function file_field_widget_info() {
-  return array(
+  $info = array(
     'file_generic' => array(
       'label' => t('File'),
       'field types' => array('file'),
@@ -612,6 +740,18 @@ function file_field_widget_info() {
       ),
     ),
   );
+
+  // Add settings for all widgets that support inline fields.
+  foreach (file_field_inline_fields_widgets() as $widget_type => $widget) {
+    if (isset($info[$widget_type]['settings'])) {
+      $info[$widget_type]['settings'] += array(
+        'inline_fields_option' => 1,
+        'inline_fields' => array(),
+      );
+    }
+  }
+
+  return $info;
 }
 
 /**
@@ -642,8 +782,8 @@ function file_field_widget_settings_form($field, $instance) {
 function file_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
 
   $defaults = array(
-    'fid' => 0,
-    'display' => !empty($field['settings']['display_default']),
+    'fid' => NULL,
+    'display' => empty($field['settings']['display_default']) ? 0 : 1,
     'description' => '',
   );
 
@@ -655,7 +795,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     $items = $field_state['items'];
   }
 
-  // Essentially we use the managed_file type, extended with some enhancements.
+  // Essentially, we use the managed_file type, extended with some enhancements.
   $element_info = element_info('managed_file');
   $element += array(
     '#type' => 'managed_file',
@@ -667,6 +807,14 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     // Allows this field to return an array instead of a single value.
     '#extended' => TRUE,
   );
+
+  // Unlike other validators we need to evaluate the amount of existing files
+  // for upload limits, so this validator gets added here instead of in
+  // file_field_widget_upload_validators().
+  if ($field['cardinality'] != FIELD_CARDINALITY_UNLIMITED && $field['cardinality'] > 1) {
+    $limit = $field['cardinality'] - count($items);
+    $element['#upload_validators']['file_validate_upload_limit'] = array($limit);
+  }
 
   if ($field['cardinality'] == 1) {
     // Set the default value.
@@ -683,6 +831,9 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $elements[$delta] = $element;
       $elements[$delta]['#default_value'] = $item;
       $elements[$delta]['#weight'] = $delta;
+      if ($field['cardinality'] != FIELD_CARDINALITY_UNLIMITED) {
+        $elements[$delta]['#element_validate'] = array('file_field_widget_multiple_count_validate');
+      }
       $delta++;
     }
     // And then add one more empty row for new uploads except when this is a
@@ -692,6 +843,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $elements[$delta]['#default_value'] = $defaults;
       $elements[$delta]['#weight'] = $delta;
       $elements[$delta]['#required'] = ($element['#required'] && $delta == 0);
+      $elements[$delta]['#multiple'] = TRUE;
     }
     // The group of elements all-together need some extra functionality
     // after building up the full list (like draggable table rows).
@@ -708,11 +860,98 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     // Add some properties that will eventually be added to the file upload
     // field. These are added here so that they may be referenced through a
     // hook_form_alter().
-    $elements['#file_upload_title'] = t('Add a new file');
-    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators']));
+    $elements['#file_upload_title'] = format_plural($field['cardinality'], 'Add a new file', 'Add new files');
+    $elements['#file_upload_description'] = theme('file_upload_help', array(
+      'description' => '',
+      'upload_validators' => $elements[0]['#upload_validators'],
+      'cardinality' => $field['cardinality'],
+    ));
+  }
+
+  // Add file entity fields.
+  if (array_key_exists($instance['widget']['type'], file_field_inline_fields_widgets())) {
+    foreach (element_children($elements) as $key) {
+      $elements[$key] = file_field_inline_fields_widget($elements[$key], $form_state, $instance);
+    }
   }
 
   return $elements;
+}
+
+/**
+ * Adds the additional file entity fields to the widget.
+ *
+ * @param array $element
+ *   The element being processed.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
+ * @param array $instance
+ *   The field instance.
+ *
+ * @return array
+ *   The element with fields attached, or just the element if no fields to be
+ *   attached.
+ */
+function file_field_inline_fields_widget(array $element, array &$form_state, array $instance) {
+  $element['#process'] = array_merge($element['#process'], array('file_field_inline_fields_widget_process'));
+
+  // Only act on entity forms, and when a file has been uploaded.
+  $file = (object) $element['#default_value'];
+  if (empty($file->fid) || !isset($element['#entity_type']) || !isset($element['#field_name'])) {
+    return $element;
+  }
+
+  // Sorry, no recursive inline-editing of files. ;)
+  if ($element['#entity_type'] === 'file') {
+    return $element;
+  }
+
+  // Load the settings for this field.
+  $widget_settings = $instance['widget']['settings'];
+
+  // Bail out if inline file entities are not enabled on this field.
+  if (!isset($widget_settings['inline_fields_option']) || $widget_settings['inline_fields_option'] == FILE_INLINE_FIELDS_NONE) {
+    return $element;
+  }
+
+  // File Entity adds some extra requirements that will not be added
+  // by the Plupload module, so manually append all values from the file_managed
+  // table to the $file object.
+  if (!isset($file->type)) {
+    // Fill out the file object so that it has all of the expected data.
+    $query = db_query('SELECT * FROM {file_managed} WHERE fid = :fid', array(
+      ':fid' => $file->fid,
+    ));
+    $results = $query->fetchAssoc();
+    if (!empty($results)) {
+      foreach ($results as $key => $val) {
+        $file->{$key} = $val;
+      }
+    }
+  }
+
+  // Add the entity form for the file.
+  $element['entity'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('file-inline-fields'),
+    ),
+    '#indentation' => ($instance['widget']['type'] == 'file_generic') ? 2 : 0,
+    '#weight' => 10,
+    '#parents' => array('files', $file->fid),
+  );
+  $file = file_load($file->fid);
+  field_attach_form('file', $file, $element['entity'], $form_state, $element['#language']);
+
+  // Reduce the display of fields if only display specific fields.
+  if (isset($widget_settings['inline_fields_option']) && $widget_settings['inline_fields_option'] == FILE_INLINE_FIELDS_SOME) {
+    $disabled_fields = array_diff(element_children($element['entity']), $widget_settings['inline_fields']);
+    foreach ($disabled_fields as $form_key) {
+      $element['entity'][$form_key]['#access'] = FALSE;
+    }
+  }
+
+  return $element;
 }
 
 /**
@@ -721,7 +960,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
  * @param $field
  *   A field array.
  *
- * @return
+ * @return array
  *   An array suitable for passing to file_save_upload() or the file field
  *   element's '#upload_validators' property.
  */
@@ -789,12 +1028,56 @@ function file_field_widget_value($element, $input, $form_state) {
 
   // Ensure that all the required properties are returned even if empty.
   $return += array(
-    'fid' => 0,
+    'fid' => NULL,
     'display' => 1,
     'description' => '',
   );
 
   return $return;
+}
+
+ /**
+ * Validation callback for managed file element on file field widgets.
+ *
+ * Checks if more files than allowed have been uploaded or added via image
+ * library, truncates values to the limit and shows a warning message.
+ * This validator is only used when cardinality not set to 1 or unlimited.
+ *
+ * @see file_field_widget_form()
+ */
+function file_field_widget_multiple_count_validate($element, &$form_state, $form) {
+  $parents = $element['#parents'];
+  array_pop($parents);
+  $values = backdrop_array_get_nested_value($form_state['values'], $parents);
+  $item_count = count($values);
+
+  $field = field_info_field($element['#field_name']);
+  if ($item_count > $field['cardinality']) {
+    $keep_items = array();
+    $remove_item_names = array();
+    foreach ($values as $delta => $value_array) {
+      if ($delta < $field['cardinality']) {
+        $keep_items[] = $value_array;
+      }
+      else {
+        $file = file_load($value_array['fid']);
+        $remove_item_names[] = $file->filename;
+      }
+    }
+    backdrop_array_set_nested_value($form_state['values'], $parents, $keep_items);
+    backdrop_set_message(
+      t(
+        'Field %field can only hold @max values but there were @count. The following files have been omitted as a result: %list.',
+        array(
+          '%field' => $field['field_name'],
+          '@max' => $field['cardinality'],
+          '@count' => $item_count,
+          '%list' => implode(', ', $remove_item_names),
+        )
+      ),
+      'warning'
+    );
+  }
 }
 
 /**
@@ -871,6 +1154,70 @@ function file_field_widget_process($element, &$form_state, $form) {
   }
 
   return $element;
+}
+
+/**
+ * Render API callback: Processes a file_generic field element.
+ *
+ * Expands the file_generic type to include the file entity fields.
+ *
+ * @param array $element
+ *   The element being processed.
+ * @param array $form_state
+ *   A keyed array of the form state.
+ * @param array $form
+ *   The parent form, passed by reference.
+ *
+ * @return array
+ *   The element that is processed.
+ *
+ * @see file_field_inline_fields_widget()
+ */
+function file_field_inline_fields_widget_process(array $element, array &$form_state, array &$form) {
+  // Only act on entity forms, and when a file has been uploaded.
+  if (empty($element['fid']['#value']) || !isset($element['#entity_type']) || !isset($element['#field_name'])) {
+    return $element;
+  }
+
+  // Sorry, no recursive inline-editing of files. ;)
+  if ($element['#entity_type'] === 'file') {
+    return $element;
+  }
+
+  // Add a submit handler to the entire form to handle saving of values.
+  if (array_search('file_field_inline_fields_submit', $form['#submit']) === FALSE) {
+    $form['#submit'][] = 'file_field_inline_fields_submit';
+  }
+
+  return $element;
+}
+
+/**
+ * Callback handler for inline fields submission.
+ *
+ * Saves the file entity field values.
+ *
+ * @param array $form
+ *   The form to be submitted.
+ * @param array $form_state
+ *   A keyed array of the form state.
+ *
+ * @see file_field_inline_fields_widget_process()
+ */
+function file_field_inline_fields_submit(array $form, array &$form_state) {
+  if (!isset($form_state['values']['files'])) {
+    return;
+  }
+
+  // Save any file entities on the page.
+  foreach ($form_state['values']['files'] as $fid => $file_values) {
+    $file = file_load($fid);
+    $file_form_state = array(
+      'values' => $file_values,
+    );
+    field_attach_submit('file', $file, $form, $file_form_state);
+    file_save($file);
+  }
 }
 
 /**
@@ -966,13 +1313,29 @@ function file_field_widget_submit($form, &$form_state) {
 
   $submitted_values = backdrop_array_get_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2));
   foreach ($submitted_values as $delta => $submitted_value) {
-    if (!$submitted_value['fid']) {
+    if (empty($submitted_value['fid'])) {
       unset($submitted_values[$delta]);
     }
   }
 
+  // If there are more files uploaded via the same widget, we have to separate
+  // them, as we display each file in its own widget.
+  $new_values = array();
+  foreach ($submitted_values as $delta => $submitted_value) {
+    if (is_array($submitted_value['fid'])) {
+      foreach ($submitted_value['fid'] as $fid) {
+        $new_value = $submitted_value;
+        $new_value['fid'] = $fid;
+        $new_values[] = $new_value;
+      }
+    }
+    else {
+      $new_values[] = $submitted_value;
+    }
+  }
+
   // Re-index deltas after removing empty items.
-  $submitted_values = array_values($submitted_values);
+  $submitted_values = array_values($new_values);
 
   // Update form_state values.
   backdrop_array_set_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2), $submitted_values);
@@ -1176,4 +1539,46 @@ function file_field_formatter_view($entity_type, $entity, $field, $instance, $la
   }
 
   return $element;
+}
+
+/**
+ * Get a list of all file field widgets that support inline fields.
+ *
+ * @param bool $reset
+ *   TRUE to reset the static cache, FALSE by default.
+ *
+ * @return array
+ *   An array of widgets that can support inline fields.
+ */
+function file_field_inline_fields_widgets($reset = FALSE) {
+  static $widgets;
+
+  if (!isset($widgets) || $reset) {
+    $widgets = array();
+    foreach (module_implements('file_field_inline_fields_widgets') as $module) {
+      $module_widgets = module_invoke($module, 'file_field_inline_fields_widgets');
+      foreach ($module_widgets as $type => $widget) {
+        $module_widgets[$type]['type'] = $type;
+        $module_widgets[$type]['module'] = $module;
+      }
+      $widgets = array_merge($widgets, $module_widgets);
+    }
+    backdrop_alter('file_field_inline_fields_widgets', $widgets);
+  }
+
+  return $widgets;
+}
+
+/**
+ * Implements hook_file_field_inline_fields_widgets().
+ */
+function file_file_field_inline_fields_widgets() {
+  $widgets = array();
+  $widgets['file_generic'] = array(
+    'element_type' => 'managed_file',
+  );
+  $widgets['image_image'] = array(
+    'element_type' => 'managed_file',
+  );
+  return $widgets;
 }

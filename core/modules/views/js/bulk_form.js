@@ -17,7 +17,7 @@ Backdrop.viewsBulkForm.initTableBehaviors = function(form) {
   // markup gets inserted below the table header.
   var $selectAllElement = $('.views-select-all-pages--wrapper', form);
   if ($selectAllElement.length) {
-    $('.views-table > tbody', form).prepend('<tr class="views-select-all-pages--row even">></tr>');
+    $('.views-table > tbody', form).prepend('<tr class="views-select-all-pages--row even"></tr>');
     var colspan = $('table th', form).length;
 
     // Add the select all pages markup as the first row spanning all columns.

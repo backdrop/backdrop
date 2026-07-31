@@ -440,16 +440,16 @@ function field_ui_form_node_type_form_submit($form, &$form_state) {
  *   The name of the access callback function to be called.
  * @param array $access_arguments
  *   An array of arguments to pass to the access callback.
- * @param string $bundle_position
+ * @param string|null $bundle_position
  *   The position within the menu path that contains the bundle name. Note this
  *   is a string value because the menu substitutes integer values.
- * @param mixed $bundle_value
+ * @param mixed|null $bundle_value
  *   The substituted value of the bundle after performing any menu auto-loaders.
  *
  * @return bool
  *   TRUE if access to field UI pages is allowed, FALSE otherwise.
  */
-function field_ui_admin_access($access_callback, $access_arguments, $bundle_position, $bundle_value) {
+function field_ui_admin_access($access_callback, $access_arguments, $bundle_position = NULL, $bundle_value = NULL) {
   // Perform variable substitution for the bundle. This would normally happen
   // by the menu system replacing integers with the bundle value, but since the
   // access callback is wrapped, the substitution needs to be done again before
