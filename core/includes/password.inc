@@ -229,7 +229,7 @@ function user_hash_password($password, $count_log2 = 0) {
  *
  * @param string $password
  *   A plain-text password.
- * @param object $account
+ * @param User|object $account
  *   A user object with at least the fields from the {users} table.
  *
  * @return bool
