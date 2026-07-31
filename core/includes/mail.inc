@@ -487,7 +487,7 @@ function backdrop_html_to_text($string, ?array $allowed_tags = NULL) {
           $indent[] = count($lists) ? ' "' : '>';
           break;
         case 'li':
-          $indent[] = isset($lists[0]) && is_numeric($lists[0]) ? ' ' . (++$lists[0]) . ') ' : ' * ';
+          $indent[] = isset($lists[0]) && is_numeric($lists[0]) ? ' ' . ($lists[0]++) . ') ' : ' * ';
           break;
         case 'dd':
           $indent[] = '    ';
