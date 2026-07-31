@@ -2724,7 +2724,7 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
 
   if (!isset($preferred_links[$path]) && ($item = menu_get_item($path))) {
     // Look for the correct menu link by building a list of candidate paths,
-    // which are ordered by priority (translated hrefs are preferred over
+    // which are ordered by priority (translated href items are preferred over
     // untranslated paths). Afterwards, the most relevant path is picked from
     // the menus, ordered by menu preference.
     $path_candidates = array();
@@ -3369,9 +3369,9 @@ function _menu_delete_item($item, $force = FALSE) {
  *     to insert a new link.
  *   - plid: (optional) The mlid of the parent.
  *   - router_path: (optional) The path of the relevant router item.
- * @param array $existing_item
+ * @param array|null|false $existing_item
  *   Optional, the current record from the {menu_links} table as an array.
- * @param array $parent_candidates
+ * @param array|null $parent_candidates
  *   Optional array of menu links keyed by mlid. Used by
  *   _menu_navigation_links_rebuild() only.
  *
@@ -3379,7 +3379,7 @@ function _menu_delete_item($item, $force = FALSE) {
  *   The mlid of the saved menu link, or FALSE if the menu link could not be
  *   saved.
  */
-function menu_link_save(array &$item, array $existing_item = array(), array $parent_candidates = array()) {
+function menu_link_save(array &$item, $existing_item = array(), $parent_candidates = array()) {
   backdrop_alter('menu_link', $item);
 
   // This is the easiest way to handle the unique internal path '<front>',
