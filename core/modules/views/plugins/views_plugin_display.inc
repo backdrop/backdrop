@@ -348,7 +348,7 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
-   * Does the display have groupby enabled?
+   * Does the display have group_by enabled?
    */
   function use_group_by() {
     return $this->get_option('group_by');
@@ -408,21 +408,35 @@ class views_plugin_display extends views_plugin {
       'cache_options' => array('cache', 'cache_options'),
       'title' => array('title'),
       'css_class' => array('css_class'),
-      'use_ajax' => array('use_ajax'),
+      'use_ajax' => array(
+        'use_ajax', 'enable_ajax_history', 'exclude_ajax_args',
+      ),
       'hide_attachment_summary' => array('hide_attachment_summary'),
       'hide_admin_links' => array('hide_admin_links'),
       'group_by' => array('group_by'),
       'query' => array('query'),
-      'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
-      'use_more_always' => array('use_more', 'use_more_always', 'use_more_text'),
+      'use_more' => array(
+        'use_more', 'use_more_always', 'use_more_text',
+      ),
+      'use_more_always' => array(
+        'use_more', 'use_more_always', 'use_more_text',
+      ),
       'use_more_text' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display', 'link_url'),
 
       // Force these to cascade properly.
-      'style_plugin' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
-      'style_options' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
-      'row_plugin' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
-      'row_options' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
+      'style_plugin' => array(
+        'style_plugin', 'style_options', 'row_plugin', 'row_options',
+      ),
+      'style_options' => array(
+        'style_plugin', 'style_options', 'row_plugin', 'row_options',
+      ),
+      'row_plugin' => array(
+        'style_plugin', 'style_options', 'row_plugin', 'row_options',
+      ),
+      'row_options' => array(
+        'style_plugin', 'style_options', 'row_plugin', 'row_options',
+      ),
 
       'pager' => array('pager', 'pager_options'),
       'pager_options' => array('pager', 'pager_options'),
@@ -475,6 +489,8 @@ class views_plugin_display extends views_plugin {
 
           'display_description' => FALSE,
           'use_ajax' => TRUE,
+          'enable_ajax_history' => TRUE,
+          'exclude_ajax_args' => '',
           'hide_attachment_summary' => TRUE,
           'hide_admin_links' => TRUE,
           'pager' => TRUE,
@@ -530,6 +546,14 @@ class views_plugin_display extends views_plugin {
       'use_ajax' => array(
         'default' => FALSE,
         'bool' => TRUE,
+      ),
+      'enable_ajax_history' => array(
+        'default' => FALSE,
+        'bool' => TRUE,
+      ),
+      'exclude_ajax_args' => array(
+        'default' => '',
+        'translatable' => FALSE,
       ),
       'hide_attachment_summary' => array(
         'default' => FALSE,
@@ -1482,6 +1506,29 @@ class views_plugin_display extends views_plugin {
           '#options' => array(1 => t('Yes'), 0 => t('No')),
           '#default_value' => $this->get_option('use_ajax') ? 1 : 0,
         );
+        $form['enable_ajax_history'] = [
+          '#title' => t('AJAX history'),
+          '#type' => 'checkbox',
+          '#description' => t('Update the URL after AJAX requests.'),
+          '#default_value' => $this->get_option('enable_ajax_history') ? 1 : 0,
+          '#states' => [
+            'visible' => [
+              ':input[name="use_ajax"]' => ['value' => 1],
+            ],
+          ],
+        ];
+        $form['exclude_ajax_args'] = [
+          '#title' => t('Exclude query arguments from the URL'),
+          '#type' => 'textarea',
+          '#description' => t('Add the list of query arguments that you want to exclude from the URL. You need to specify each key in a separated line and they will be excluded with a "Started by" operation.'),
+          '#default_value' => $this->get_option('exclude_ajax_args'),
+          '#states' => [
+            'visible' => [
+              ':input[name="use_ajax"]' => ['value' => 1],
+              ':input[name="enable_ajax_history"]' => ['checked' => TRUE],
+            ],
+          ],
+        ];
         break;
       case 'hide_attachment_summary':
         $form['#title'] .= t('Hide attachments when displaying a contextual filter summary');
@@ -2293,6 +2340,12 @@ class views_plugin_display extends views_plugin {
           $plugin->options_validate($form['pager_options'], $form_state);
         }
         break;
+      case 'use_ajax':
+        if (isset($form_state['values']['use_ajax']) && !$form_state['values']['use_ajax']) {
+          // Prevent use ajax history when ajax for view are disabled.
+          $form_state['values']['enable_ajax_history'] = 0;
+        }
+        break;
     }
 
     foreach ($this->extender as $extender) {
@@ -2384,6 +2437,10 @@ class views_plugin_display extends views_plugin {
         $this->set_option('field_language_add_to_query', $form_state['values']['field_language_add_to_query']);
         break;
       case 'use_ajax':
+        $this->set_option($section, (bool) $form_state['values'][$section]);
+        $this->set_option('enable_ajax_history', (bool) $form_state['values']['enable_ajax_history']);
+        $this->set_option('exclude_ajax_args', $form_state['values']['exclude_ajax_args']);
+        break;
       case 'hide_attachment_summary':
       case 'hide_admin_links':
         $this->set_option($section, (bool)$form_state['values'][$section]);

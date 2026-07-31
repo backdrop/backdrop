@@ -24,8 +24,13 @@ function views_ajax() {
 
     $commands = array();
 
-    // Remove all of this stuff from $_GET so it doesn't end up in pagers and tablesort URLs.
-    foreach (array('view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', 'ajax_html_ids', 'ajax_page_state') as $key) {
+    // Remove all of this stuff from $_GET so it doesn't end up in pagers and
+    // tablesort URLs.
+    foreach (array(
+      'view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id',
+      'pager_element', 'view_base_path', 'ajax_html_ids', 'ajax_page_state',
+      'exposed_form_in_block', 'render_page_item', 'onload_page_item',
+      'enable_ajax_history', 'exclude_ajax_args') as $key) {
       if (isset($_GET[$key])) {
         unset($_GET[$key]);
       }
@@ -214,7 +219,7 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
 
     $title = empty($form_state['title']) ? '' : $form_state['title'];
     $options = array(
-      'dialogClass' => 'views-ui-dialog',
+      'classes' => array('ui-dialog' => 'views-ui-dialog'),
     );
     $commands[] = ajax_command_open_modal_dialog($title, $display, $options);
 

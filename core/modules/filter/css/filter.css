@@ -164,7 +164,8 @@
   border-radius: 3px;
 }
 
-.image-library-choose-file.image-library-image-selected {
+.image-library-choose-file.image-library-image-selected,
+.image-library-choose-file.ui-selecting {
   background-color: #cce8ff;
   border: 1px solid #99d1ff;
 }

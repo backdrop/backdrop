@@ -1392,7 +1392,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
           'type' => 'int',
           'not null' => TRUE,
           'default' => 0,
-          'description' => 'The timestamp this config item was last changed',
+          'description' => 'The timestamp this config item was last changed.',
         ),
       ),
       'primary key' => array('name'),
@@ -1433,7 +1433,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
   }
 
   /**
-   * Create the database table if does not already exist.
+   * Create the database table if it does not already exist.
    *
    * @return bool
    *   TRUE on success, FALSE in case of an error.
@@ -1545,7 +1545,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
         ->execute();
     }
     catch (\Exception $e) {
-      throw new ConfigStorageException('Failed to write configuration to the database: ' . $this->$name, 0, $e);
+      throw new ConfigStorageException('Failed to write configuration to the database: ' . $name, 0, $e);
     }
     return TRUE;
   }

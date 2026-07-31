@@ -25,8 +25,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
   function addMeta() {
     parent::addMeta();
     backdrop_add_library('system', 'ui.sortable');
-    backdrop_add_js(backdrop_get_path('module', 'layout') . '/js/layout.admin.js');
-    backdrop_add_css(backdrop_get_path('module', 'layout') . '/css/layout.admin.css');
+    backdrop_add_library('layout', 'layout.admin');
   }
 
   /**
@@ -186,7 +185,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+          'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
         ),
       );
     }
@@ -197,7 +196,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+          'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
         ),
       );
       $links['configure'] = array(
@@ -206,7 +205,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+          'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
         ),
       );
     }
@@ -244,7 +243,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+          'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
         ),
       );
     }
@@ -256,7 +255,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+          'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
         ),
       );
     }

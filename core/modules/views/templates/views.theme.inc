@@ -118,6 +118,7 @@ function template_preprocess_views_view(&$variables) {
 
   // If using AJAX, send identifying data about this view.
   if ($view->use_ajax && empty($view->is_attachment) && empty($view->live_preview)) {
+
     $settings = array(
       'views' => array(
         'ajax_path' => url('views/ajax'),
@@ -128,17 +129,32 @@ function template_preprocess_views_view(&$variables) {
             'view_args' => check_plain(implode('/', $view->args)),
             'view_path' => check_plain($_GET['q']),
             // Pass through URL to ensure we get e.g. language prefixes.
-//            'view_base_path' => isset($view->display['page']) ? substr(url($view->display['page']->display_options['path']), strlen($base_path)) : '',
             'view_base_path' => $view->get_path(),
             'view_dom_id' => $variables['dom_id'],
             // To fit multiple views on a page, the programmer may have
             // overridden the display's pager_element.
             'pager_element' => isset($view->query->pager) ? $view->query->pager->get_pager_id() : 0,
             'exposed_form_in_block' => $view->display_handler->get_option('exposed_block'),
+            'enable_ajax_history' => $view->display_handler->get_option('enable_ajax_history'),
+            'render_page_item' => isset($_GET['page']) ? $_GET['page'] : 0,
           ),
         ),
       ),
     );
+
+    if ($view->display_handler->get_option('exclude_ajax_args')) {
+      $arguments_to_exclude = preg_split('/[\n\r\s]+/', $view->display_handler->get_option('exclude_ajax_args') ?? '');
+      // Filter empty lines and add to settings.
+      $settings['views']['ajaxViews']['views_dom_id:' . $variables['dom_id']]['exclude_ajax_args'] = $arguments_to_exclude;
+    }
+
+    if (backdrop_is_html()) {
+      $exposed = $view->get_exposed_input();
+      $dom_id = $view->dom_id;
+      foreach ($exposed as $key => $value) {
+        $settings['initial_ajax_exposed_input']['views_dom_id:' . $dom_id][$key] = $value;
+      }
+    }
 
     backdrop_add_js($settings, 'setting');
     views_add_js('ajax_view');
@@ -485,7 +501,7 @@ function template_preprocess_views_view_table(&$variables) {
       $variables['fields'][$field] .= ' active';
     }
 
-    // render the header labels
+    // Render the header labels.
     if ($field == $column && empty($fields[$field]->options['exclude'])) {
       $label = check_plain(!empty($fields[$field]) ? $fields[$field]->label() : '');
       if (empty($options['info'][$field]['sortable']) || !$fields[$field]->click_sortable()) {
@@ -507,7 +523,11 @@ function template_preprocess_views_view_table(&$variables) {
         $query['sort'] = $initial;
         $link_options = array(
           'html' => TRUE,
-          'attributes' => array('title' => $title),
+          'attributes' => array(
+            'title' => $title,
+            'data-sort' => $order,
+            'data-order' => $field,
+          ),
           'query' => $query,
         );
         $variables['header'][$field] = l($label, $_GET['q'], $link_options);
@@ -526,6 +546,10 @@ function template_preprocess_views_view_table(&$variables) {
       // Add a CSS align class to each field if one was set
       if (!empty($options['info'][$field]['align'])) {
         $variables['header_classes'][$field][] = backdrop_clean_css_identifier($options['info'][$field]['align']);
+      }
+      // Set up responsive header class.
+      if (!empty($options['info'][$field]['responsive'])) {
+        $variables['header_classes'][$field][] = $options['info'][$field]['responsive'];
       }
       // Add active class.
       if ($active == $field) {
