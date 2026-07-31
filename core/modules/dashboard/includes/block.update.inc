@@ -197,7 +197,7 @@ class DashboardUpdateBlock extends Block {
       $link_path = 'admin/config/system/updates';
       $link_text = t('Install system updates');
     }
-    elseif (user_access('access_site_reports')) {
+    elseif (user_access('access site reports')) {
       $link_path = 'admin/reports/updates';
       $link_text = t('More info');
     }

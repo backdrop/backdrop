@@ -62,7 +62,7 @@ class FileViewsTestCase extends BackdropWebTestCase {
     );
     foreach ($files as $file_id => $file_info) {
       $edit = array(
-        'files[upload]' => $file_info['path'],
+        'files[upload][]' => $file_info['path'],
       );
       // Upload the file.
       $this->backdropPost('file/add', $edit, t('Upload'));

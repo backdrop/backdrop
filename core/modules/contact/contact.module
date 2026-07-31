@@ -356,6 +356,7 @@ function contact_form_user_admin_settings_alter(&$form, &$form_state) {
  * Implements hook_block_info().
  */
 function contact_block_info() {
+  // cspell:ignore sitewide
   $blocks['sitewide'] = array(
     'info' => t('Contact form'),
     'description' => t('Site-wide contact form.'),

@@ -31,7 +31,9 @@ table.stick-header {
   position: absolute;
   top: 0;
   left: 0; /* LTR */
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 3rem;
   height: 100%;
   margin: 0 0 0 -0.0625em; /* Nudge past the left border */
@@ -63,15 +65,8 @@ table.stick-header {
 }
 
 tr.draggable .handle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  display: block;
-  width: 0.25em;
-  height: 1.5em;
   margin: 0;
   padding: 0;
-  transform: translate(-50%, -50%) scale(0.5, 0.5);
   background: #333333;
   text-decoration: none;
 }
