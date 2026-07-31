@@ -59,7 +59,11 @@ function tablesort_header($cell, array $header, array $ts) {
       $image = '';
     }
     $cell['data'] = l($cell['data'] . $image, $_GET['q'], array(
-      'attributes' => array('title' => $title),
+      'attributes' => array(
+        'title' => $title,
+        'data-sort' => $ts['sort'],
+        'data-order' => $cell['data'],
+      ),
       'query' => array_merge($ts['query'], array(
         'sort' => $ts['sort'],
         'order' => $cell['data'],

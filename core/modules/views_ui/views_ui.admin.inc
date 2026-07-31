@@ -1044,7 +1044,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['#attached']['library'][] = array('system', 'jquery.form');
   // TODO: This should be getting added to the page when an ajax popup calls
   // for it, instead of having to add it manually here.
-  $form['#attached']['js'][] = 'core/misc/tabledrag.js';
+  $form['#attached']['library'][] = array('system', 'backdrop.tabledrag');
 
   $form['#attached']['css'] = views_ui_get_admin_css();
   $module_path = backdrop_get_path('module', 'views_ui');
@@ -1724,6 +1724,14 @@ function views_ui_get_display_tab_details($view, $display) {
       '#description' => t('Display name'),
       '#link' => $display->handler->option_link(check_plain($display_title), 'display_title'),
     );
+    $display_type = $display->display_plugin;
+    if ($display_type != strtolower($display_title)) {
+      $build['top']['display_type'] = array(
+        '#theme' => 'views_ui_display_tab_setting',
+        '#description' => t('Display type'),
+        '#link' => '<span class="display-type">' . ucfirst($display_type) . '</span>',
+      );
+    }
   }
 
   $build['columns'] = array();

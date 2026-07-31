@@ -43,7 +43,7 @@
           let onEventsPattern = {
             'name': /.*/,
             'attributes': /^on.*/
-          }
+          };
           editorSettings.htmlSupport.disallow.push(onEventsPattern);
         }
         // If filter_html if off, allow all elements and attributes to be used.
@@ -53,7 +53,7 @@
             attributes: true,
             classes: true,
             styles: true
-          }
+          };
           editorSettings.htmlSupport.allow.push(patternAllowAll);
         }
       }
@@ -121,7 +121,11 @@
 
       // Destroy the instance if fully detaching.
       if (trigger !== 'serialize') {
-        editor.destroy();
+        // If submitting the entire form, skip destroying the editor and let it
+        //  be unloaded by the browser leaving the page.
+        if (trigger !== 'submit') {
+          editor.destroy();
+        }
         Backdrop.ckeditor5.instances.delete(editor.id);
         delete element.ckeditor5AttachedEditor;
         delete element.ckeditor5Processed;
@@ -194,9 +198,10 @@
       $toolbar.find('.ckeditor5-dialog-loading').remove();
 
       // Add a consistent dialog class.
-      const classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
+      dialogSettings.classes = dialogSettings.classes || {};
+      var classes = dialogSettings.classes['ui-dialog'] ? dialogSettings.classes['ui-dialog'].split(' ') : [];
       classes.push('editor-dialog');
-      dialogSettings.dialogClass = classes.join(' ');
+      dialogSettings.classes['ui-dialog'] = classes.join(' ');
       dialogSettings.autoResize = true;
       dialogSettings.modal = true;
       dialogSettings.target = '#ckeditor5-modal';

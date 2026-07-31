@@ -151,6 +151,11 @@ function system_theme() {
         'machine_name' => NULL,
       ),
     ) + $base,
+    'system_icon_browser_form_icons' => array(
+      'variables' => array(
+        'icons' => array(),
+      ),
+    ) + $base,
   ));
 }
 
@@ -397,13 +402,12 @@ function system_element_info() {
     '#input' => TRUE,
     '#size' => 60,
     '#maxlength' => 128,
-    '#process' => array('ajax_process_form'),
     '#theme' => 'password',
     '#theme_wrappers' => array('form_element'),
     '#password_strength' => FALSE,
     '#password_toggle' => FALSE,
     '#password_shown' => FALSE,
-    '#process' => array('user_form_process_password'),
+    '#process' => array('user_form_process_password', 'ajax_process_form'),
   );
   $types['password_confirm'] = array(
     '#input' => TRUE,
@@ -493,6 +497,8 @@ function system_element_info() {
   );
   $types['file'] = array(
     '#input' => TRUE,
+    '#multiple' => FALSE,
+    '#process' => array('form_process_file'),
     '#size' => 60,
     '#theme' => 'file',
     '#theme_wrappers' => array('form_element'),
@@ -1117,6 +1123,13 @@ function system_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
+  $items['admin/reports/icon-browser'] = array(
+    'title' => 'Icon browser',
+    'description' => 'Browse available icons.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_icon_browser_form'),
+    'access arguments' => array('administer site configuration'),
+  );
 
   // Default page for batch operations.
   $items['batch'] = array(
@@ -1297,6 +1310,22 @@ function system_library_info() {
     'version' => BACKDROP_VERSION,
     'js' => array(
       'core/misc/tableresponsive.js' => array('group' => JS_LIBRARY),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.once'),
+    ),
+  );
+
+  // Backdrop's tabledrag API.
+  $libraries['backdrop.tabledrag'] = array(
+    'title' => 'Backdrop tabledrag API',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/tabledrag.js' => array('group' => JS_LIBRARY),
+    ),
+    'icons' => array(
+      'arrows-out-cardinal-fill' => array(),
+      'arrows-out-line-vertical-fill' => array(),
     ),
     'dependencies' => array(
       array('system', 'jquery.once'),
@@ -1539,7 +1568,7 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.14.0',
+    'version' => '1.14.1',
     'js' => array(
       'core/misc/jquery-ui-compat.js' => array(
         'group' => JS_LIBRARY,
@@ -2192,7 +2221,20 @@ function system_library_info_alter(&$libraries, $module) {
       ),
     );
   }
-
+  elseif ($config->get('jquery_version') == '4.x') {
+    $libraries['jquery']['version'] = '4.0.0';
+    $libraries['jquery']['js'] = array(
+      'core/misc/jquery-4.0.0.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -20,
+      ),
+      // Backwards compatibility.
+      'core/misc/jquery-4-compat.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -19,
+      ),
+    );
+  }
 }
 
 /**
@@ -2845,8 +2887,26 @@ function system_check_directory($form_element) {
     return $form_element;
   }
 
+  // Safety-check that a protected system path is not used as an upload path
+  // that could result in system files getting overwritten.
+  $real_path = backdrop_realpath($directory);
+  $unsafe_directories = file_unsafe_directories();
+
+  foreach ($unsafe_directories as $unsafe_directory) {
+    $is_wildcard = (substr($unsafe_directory, -2) == '/*');
+    $unsafe_directory = ($is_wildcard) ? substr($unsafe_directory, 0, -2) : $unsafe_directory;
+    $unsafe_real_path = backdrop_realpath($unsafe_directory);
+
+    // Match the directory itself, and if a wildcard is present, any child
+    // directories of an unsafe directory.
+    if (($real_path === $unsafe_real_path) || ($is_wildcard && strpos($real_path, $unsafe_real_path) === 0)) {
+      form_set_error($form_element['#parents'][0], t('The directory %directory is not allowed to be an upload destination.', array('%directory' => $directory)));
+      return $form_element;
+    }
+  }
+
   if (!is_dir($directory) && !backdrop_mkdir($directory, NULL, TRUE)) {
-    // If the directory does not exists and cannot be created.
+    // If the directory does not exist and cannot be created.
     form_set_error($form_element['#parents'][0], t('The directory %directory does not exist and could not be created.', array('%directory' => $directory)));
     watchdog('file system', 'The directory %directory does not exist and could not be created.', array('%directory' => $directory), WATCHDOG_ERROR);
   }
@@ -4886,4 +4946,153 @@ function system_transliterate_machine_name($string, $options = array()) {
   }
 
   return $string;
+}
+
+/**
+ * Display the page of icons with filters.
+ */
+function system_icon_browser_form($form, &$form_state) {
+  if (isset($form_state['input']['dialogOptions']['target'])) {
+    $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
+  }
+  $config = config('system.core');
+  backdrop_add_css(backdrop_get_path('module', 'system') . '/css/icon-browser.css');
+
+  $icons = icon_get_all_details();
+
+  $params = array(
+    'project_type' => 'any',
+    'style' => 'any',
+    'keyword' => '',
+  );
+  // Set filter variables from the $_GET variable if set.
+  foreach ($params as $param => $default_value) {
+    if (!empty($_GET[$param])) {
+      ${$param} = $_GET[$param];
+    }
+    else {
+      ${$param} = $default_value;
+    }
+  }
+
+  $results = array();
+  $available_project_types = array();
+  $available_styles = array();
+  foreach ($icons as $icon) {
+    $available_project_types[$icon['project_type']] = $icon['project_type'];
+    $available_styles[$icon['style']] = $icon['style'];
+    if ($project_type != 'any' && $icon['project_type'] != $project_type) {
+      continue;
+    }
+    if ($style != 'any' && ($icon['style'] != $style)) {
+      continue;
+    }
+    $search_text = implode(' ', $icon);
+    if ($keyword && stripos($search_text, $keyword) === FALSE) {
+      continue;
+    }
+    $results[] = $icon;
+  }
+
+  $project_type_options = array_intersect_key(array(
+    'core' => t('Core'),
+    'module' => t('Module'),
+    'theme' => t('Theme'),
+  ), $available_project_types);
+
+  $icon_allowed_styles = icon_allowed_styles();
+  $style_options = array_intersect_key($icon_allowed_styles, $available_styles);
+
+  $form = array(
+    '#icons' => $results,
+    '#prefix' => '<div id="system-icon-browser-form-wrapper">',
+    '#suffix' => '</div>',
+  );
+
+  $form['icon_filters'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('icon-browser-filters-wrapper'),
+    ),
+  );
+  if (count($available_project_types) > 1) {
+    $form['icon_filters']['project_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Project type'),
+      '#options' => array(
+        'any' => t('Any'),
+      ) + $project_type_options,
+      '#default_value' => $project_type,
+    );
+  }
+  $form['icon_filters']['style'] = array(
+    '#type' => 'select',
+    '#title' => t('Style'),
+    '#options' => array(
+      'any' => t('Any'),
+    ) + $style_options,
+    '#default_value' => $style,
+  );
+  $form['icon_filters']['keyword'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Keyword'),
+    '#default_value' => $keyword,
+    '#size' => 10,
+  );
+  $form['icon_filters']['submit'] = array(
+    '#type' => 'submit',
+    '#submit' => array('system_icon_browser_form_submit'),
+    '#value' => t('Filter'),
+  );
+  $form['icon_filters']['reset'] = array(
+    '#type' => 'submit',
+    '#value' => t('Reset'),
+  );
+
+  $icons_per_page = $config->get('icon_browser_icons_per_page');
+  $filter_results = array();
+  if ($results) {
+    $current_page = pager_default_initialize(count($results), $icons_per_page);
+    $chunks = array_chunk($results, $icons_per_page, TRUE);
+    $filter_results = $chunks[$current_page];
+  }
+
+  $form['icons'] = array(
+    '#type' => 'container',
+    '#theme' => 'system_icon_browser_form_icons',
+    '#icons' => $results ? $filter_results : array(),
+  );
+
+  $form['pager'] = array(
+    '#prefix' => '<div id="system-icon-browser-pager">',
+    '#suffix' => '</div>',
+    '#markup' => theme('pager', array(
+      'quantity',
+      count($results),
+      'attributes' => array('class' => array('icon-browser-pager-link'))
+    )),
+  );
+
+  return $form;
+}
+
+/**
+ * Handles the Icon Browser filter form submit.
+ */
+function system_icon_browser_form_submit($form, &$form_state) {
+  if ($form_state['triggering_element']['#parents'][0] == 'reset') {
+    unset($_GET['project_type']);
+    unset($_GET['style']);
+    unset($_GET['keyword']);
+    unset($_GET['page']);
+    $form_state['input'] = array();
+    $form_state['redirect'] = 'admin/reports/icon-browser';
+  }
+  else {
+    if (isset($form_state['values']['project_type'])) {
+      $_GET['project_type'] = $form_state['values']['project_type'];
+    }
+    $_GET['style'] = $form_state['values']['style'];
+    $_GET['keyword'] = $form_state['values']['keyword'];
+  }
 }
