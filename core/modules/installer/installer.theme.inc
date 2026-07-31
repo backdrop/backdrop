@@ -152,7 +152,10 @@ function template_preprocess_installer_browser_project(&$variables) {
     'class' => array('use-ajax'),
     'id' => 'title-ajax',
     'data-dialog' => 'true',
-    'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
+    'data-dialog-options' => json_encode(array(
+      'width' => 700,
+      'classes' => array('ui-dialog' => 'project-dialog'),
+    )),
   );
 
   // If the project has an image, render it.
@@ -236,7 +239,10 @@ function theme_installer_browser_project_description($variables) {
       'class' => array('use-ajax more-link'),
       'id' => array('title-link'),
       'data-dialog' => 'true',
-      'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
+      'data-dialog-options' => json_encode(array(
+        'width' => 700,
+        'classes' => array('ui-dialog' => 'project-dialog'),
+      )),
     ),
   );
   return backdrop_render($form);

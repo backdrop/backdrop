@@ -174,30 +174,74 @@ Backdrop.file = Backdrop.file || {
    */
   dialogOpenEvent: function(e, dialog, $element, settings) {
     var $browserContainer = $element.find(".file-browser");
-    $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
-      var $selectedElement = $(this);
-      if ($selectedElement.is('img')) {
-        $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
-        $selectedElement.parent('.image-library-choose-file').addClass('image-library-image-selected');
-      }
-      else {
-        $browserContainer.find('.file-browser-selected').removeClass('file-browser-selected');
-        $selectedElement.parent('.file-browser-file').addClass('file-browser-selected');
-      }
-      var selectedFid = $(this).data('fid');
-      // Set the FID in the modal submit form.
-      $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
-    }).on('dblclick', '.image-library-choose-file', function() {
-      var $selectedElement = $(this);
-      $selectedElement.click();
-      var $form = $selectedElement.closest('.ui-dialog-content').find('form');
-      var $submit = $form.find('.form-actions input[type=submit]:first');
-      $submit.trigger('mousedown').trigger('click').trigger('mouseup');
-    });
+    let fieldCardinality = 1;
+    let existingFilesCount = 0;
+    if (typeof Backdrop.settings.file !== 'undefined') {
+      fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
+      existingFilesCount = parseInt(Backdrop.settings.file.browser.existingFilesCount);
+    }
+    if (fieldCardinality !== 1) {
+      $browserContainer.selectable({
+        filter: '.image-library-choose-file',
+        classes: {
+          "ui-selected": "image-library-image-selected"
+        },
+        selecting: function(event, ui) {
+          if (fieldCardinality === -1) {
+            return;
+          }
+          let available = fieldCardinality - existingFilesCount;
+          if ($(".image-library-choose-file.ui-selecting").length > available) {
+            $(ui.selecting).removeClass("ui-selecting");
+          }
+          else if ($(".image-library-choose-file.image-library-image-selected").length >= available) {
+            $(".image-library-choose-file.image-library-image-selected").removeClass("image-library-image-selected");
+          }
+        },
+        selected: function(event, ui) {
+          let fids = [];
+          $(".image-library-choose-file.image-library-image-selected").each(function() {
+            fids.push($(this).children("img").data("fid"));
+          });
+          // Set the FID in the modal submit form.
+          $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
+        },
+        unselected: function(event, ui) {
+          let fids = [];
+          $(".image-library-choose-file.image-library-image-selected").each(function() {
+            fids.push($(this).children("img").data("fid"));
+          });
+          // Update values also when unselected.
+          $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
+        }
+      });
+    }
+    else {
+      $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
+        var $selectedElement = $(this);
+        if ($selectedElement.is('img') && fieldCardinality === 1) {
+          $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
+          $selectedElement.parent('.image-library-choose-file').addClass('image-library-image-selected');
+        }
+        else {
+          $browserContainer.find('.file-browser-selected').removeClass('file-browser-selected');
+          $selectedElement.parent('.file-browser-file').addClass('file-browser-selected');
+        }
+        var selectedFid = $(this).data('fid');
+        // Set the FID in the modal submit form.
+        $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
+      }).on('dblclick', '.image-library-choose-file', function() {
+        var $selectedElement = $(this);
+        $selectedElement.trigger('click');
+        var $form = $selectedElement.closest('.ui-dialog-content').find('form');
+        var $submit = $form.find('.form-actions input[type=submit]:first');
+        $submit.trigger('mousedown').trigger('click').trigger('mouseup');
+      });
+    }
   },
 
   /**
-   * After closing a dialog, check if the file ID needs to be updated..
+   * After closing a dialog, check if the file ID needs to be updated.
    */
   dialogCloseEvent: function(e, dialog, $element) {
     var $browserContainer = $element.find(".file-browser");

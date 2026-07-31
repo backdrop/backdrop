@@ -216,18 +216,24 @@ function path_action_info() {
     'type' => 'node',
     'label' => t('Update content URL alias'),
     'callback' => 'path_save_automatic_entity_alias',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer url aliases'),
     'file' => 'path.inc',
   );
   $info['path_taxonomy_term_update_action'] = array(
     'type' => 'taxonomy_term',
     'label' => t('Update taxonomy term URL alias'),
     'callback' => 'path_save_automatic_entity_alias',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer url aliases'),
     'file' => 'path.inc',
   );
   $info['path_user_update_action'] = array(
     'type' => 'user',
     'label' => t('Update user URL alias'),
     'callback' => 'path_save_automatic_entity_alias',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer url aliases'),
     'file' => 'path.inc',
   );
 

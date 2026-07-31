@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.33.x-dev');
+define('BACKDROP_VERSION', '1.35.x-dev');
 
 /**
  * Core API compatibility.
@@ -451,7 +451,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * @param bool $lock
    *   Whether to acquire a lock before writing to cache.
    */
-  protected function set(array $data, $lock = TRUE) {
+  protected function set($data, $lock = TRUE) { // phpcs:ignore
     // Lock cache writes to help avoid stampedes.
     // To implement locking for cache misses, override __construct().
     $lock_name = $this->cid . ':' . $this->bin;

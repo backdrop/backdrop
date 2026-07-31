@@ -1746,6 +1746,7 @@ class SearchTokenizerTestCase extends BackdropWebTestCase {
     // the Unicode tables.
 
     // Beginnings of the character ranges.
+    // cspell:disable
     $starts = array(
       'CJK unified' => 0x4e00,
       'CJK Ext A' => 0x3400,
@@ -1792,6 +1793,7 @@ class SearchTokenizerTestCase extends BackdropWebTestCase {
       'Lisu' => 0xa4fd,
       'Yi' => 0xa48f,
     );
+    // cspell:enable
 
     // Generate characters consisting of starts, midpoints, and ends.
     $chars = array();
@@ -2032,7 +2034,7 @@ class SearchNodeAccessTest extends BackdropWebTestCase {
    */
   function testPhraseSearchPunctuation() {
     $node = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => "The bunny's ears were fuzzy.")))));
-    $node2 = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => 'Dignissim Aliquam &amp; Quieligo meus natu quae quia te. Damnum&copy; erat&mdash; neo pneum. Facilisi feugiat ibidem ratis.')))));
+    $node2 = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => 'Dignissim Aliquam &amp; Quieligo natu quae quia te. Damnum&copy; erat&mdash; neo pneum. Facilisi feugiat ibidem ratis.')))));
 
     // Update the search index.
     module_invoke_all('update_index');
