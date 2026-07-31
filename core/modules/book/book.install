@@ -158,7 +158,10 @@ function book_update_1004() {
   $module = db_query("SELECT name FROM {system} WHERE name = 'book_cache' AND type = 'module'")->fetchField();
   if ($module) {
     $path = backdrop_get_path('module', 'book_cache');
-    backdrop_set_message(t('The contributed module <em>Book Cache</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('The contributed module %module has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array(
+      '%module' => 'Book Cache',
+      '%path' => BACKDROP_ROOT . '/' . $path,
+    )), 'warning');
     // Remove the entry for the Book Cache module from the system table.
     // As this module does not provide any config or settings, there doesn't
     // seem to be anything else left to clean up or migrate.

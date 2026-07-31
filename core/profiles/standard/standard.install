@@ -122,6 +122,7 @@ function standard_install() {
         'sticky_default' => FALSE,
         'revision_enabled' => TRUE,
         'revision_default' => FALSE,
+        'scheduling_enabled' => FALSE,
         'node_submitted' => FALSE,
         'node_user_picture' => FALSE,
         'comment_enabled' => FALSE,

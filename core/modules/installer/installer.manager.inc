@@ -63,6 +63,11 @@ function installer_manager_update_form($form, $form_state) {
 
   $available = update_get_available(TRUE);
 
+  // Show a warning if zip PHP extension not loaded, but allow to browse and
+  // select available releases. Install blocked on downloading updates page.
+  module_load_include('inc', 'installer', 'installer.browser');
+  installer_browser_check_zip_loaded();
+
   // Run some basic health checks, and show messages/warnings accordingly.
   $settings_link = url('admin/reports/updates/settings');
   $update_config = config('update.settings');
@@ -358,9 +363,10 @@ function installer_manager_update_form_submit($form, &$form_state) {
 /**
  * Batch callback: Performs actions when the download batch is completed.
  *
- * @param $success
+ * @param bool $success
  *   TRUE if the batch operation was successful, FALSE if there were errors.
- * @param $results
+ *
+ * @param array $results
  *   An associative array of results from the batch operation.
  */
 function installer_manager_download_batch_finished($success, $results) {
@@ -585,7 +591,10 @@ function installer_manager_install_modal_callback($form, $form_state) {
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
     $title = isset($form['#title']) ? $form['#title'] : 'Manual installation';
-    $commands[] = ajax_command_open_modal_dialog($title, $html, array('width' => 700, 'dialogClass' => 'layout-dialog'));
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array(
+      'width' => 700,
+      'classes' => array('ui-dialog' => 'layout-dialog'),
+    ));
   }
   elseif (!empty($form_state['redirect'])) {
     if (is_array($form_state['redirect'])) {
@@ -608,11 +617,12 @@ function installer_manager_install_modal_callback($form, $form_state) {
  *
  * @param array $form
  *   Reference to the form array we're building.
+ *
  * @param string $operation
  *   The update manager operation we're in the middle of. Can be either 'update'
  *   or 'install'. Use to provide operation-specific interface text.
  *
- * @return
+ * @return bool
  *   TRUE if the update manager should continue to the next step in the
  *   workflow, or FALSE if we've hit a fatal configuration and must halt the
  *   workflow.
@@ -634,10 +644,10 @@ function _installer_manager_check_backends(&$form, $operation) {
   $available_backends = backdrop_get_filetransfer_info();
   if (empty($available_backends)) {
     if ($operation == 'update') {
-      $form['available_backends']['#markup'] = t('Your server does not support updating modules, themes, and layouts from this interface. Instead, update modules, themes, and layouts by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'https://backdropcms.org/guide/modules'));
+      $form['available_backends']['#markup'] = t('Your server does not support updating modules, themes, and layouts from this interface. Instead, update modules, themes, and layouts by uploading the new versions directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'https://docs.backdropcms.org/documentation/core-updates'));
     }
     else {
-      $form['available_backends']['#markup'] = t('Your server does not support installing modules, themes, and layouts from this interface. Instead, install modules, themes, and layouts by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'https://backdropcms.org/guide/modules'));
+      $form['available_backends']['#markup'] = t('Your server does not support installing modules, themes, and layouts from this interface. Instead, install modules, themes, and layouts by uploading them directly to the server, as described in the <a href="@handbook_url">handbook</a>.', array('@handbook_url' => 'https://docs.backdropcms.org/documentation/core-updates'));
     }
     return FALSE;
   }
@@ -694,19 +704,28 @@ function installer_manager_install_form_validate($form, &$form_state) {
     $not_found = array();
     module_load_include('inc', 'installer', 'installer.browser');
 
-    $modules = installer_browser_fetch_results(array('items_per_page' => 999, 'type' => 'module'));
+    $modules = installer_browser_fetch_results(array(
+      'items_per_page' => 999,
+      'type' => 'module',
+    ));
     $all_projects = $modules['projects'];
     if (!empty($modules)) {
       $listed_projects = array_keys($modules['projects']);
       $not_found = array_diff($project_names, $listed_projects);
       if ($not_found) {
-        $themes = installer_browser_fetch_results(array('items_per_page' => 999, 'type' => 'theme'));
+        $themes = installer_browser_fetch_results(array(
+          'items_per_page' => 999,
+          'type' => 'theme',
+        ));
         if (!empty($themes)) {
           $all_projects = array_merge($all_projects, $themes['projects']);
           $listed_projects = array_keys($themes['projects']);
           $not_found = array_diff($not_found, $listed_projects);
           if ($not_found) {
-            $layouts = installer_browser_fetch_results(array('items_per_page' => 999, 'type' => 'layout'));
+            $layouts = installer_browser_fetch_results(array(
+              'items_per_page' => 999,
+              'type' => 'layout',
+            ));
             if (!empty($layouts)) {
               $all_projects = array_merge($all_projects, $layouts['projects']);
               $listed_projects = array_keys($layouts['projects']);
@@ -742,7 +761,7 @@ function installer_manager_install_form_validate($form, &$form_state) {
       }
     }
 
-    // If there are no valid projects left, stop here
+    // If there are no valid projects left, stop here.
     if (!$project_names) {
       form_set_error('bulk', t('Sorry, none of the submitted names are valid projects.'));
     }
@@ -852,7 +871,6 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
     );
   }
 
-
   // Unfortunately, we can only use the directory name to determine the project
   // name. Some archivers list the first file as the directory (i.e., MODULE/)
   // and others list an actual file (i.e., MODULE/README.MD).
@@ -944,7 +962,10 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
       $batch = &batch_get();
       return array(
         'success' => TRUE,
-        'redirect' => array($batch['url'], array('query' => array('op' => 'start', 'id' => $batch['id']))),
+        'redirect' => array(
+          $batch['url'],
+          array('query' => array('op' => 'start', 'id' => $batch['id'])),
+        ),
       );
     }
   }
@@ -959,7 +980,11 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
     }
     else {
       $path = backdrop_get_path('module', 'installer') . '/installer.authorize.inc';
-      system_authorized_init('installer_authorize_run_install', $path, array($project, $updater_name, $project_realpath), t('Update manager'));
+      system_authorized_init('installer_authorize_run_install', $path, array(
+        $project,
+        $updater_name,
+        $project_realpath,
+      ), t('Update manager'));
       return array(
         'success' => TRUE,
         'redirect' => system_authorized_get_url(),
@@ -1052,7 +1077,7 @@ function installer_manager_archive_verify($project, $archive_file, $directory) {
  *
  * Returns the local path if the file has already been downloaded.
  *
- * @param $url
+ * @param string $url
  *   The URL of the file on the server.
  *
  * @return string
@@ -1106,7 +1131,10 @@ function installer_manager_batch_project_get($project, $url, &$context) {
 
   // Actually try to download the file.
   if (!($local_cache = installer_manager_file_get($url))) {
-    $context['results']['errors'][$project] = t('Failed to download %project from %url', array('%project' => $project, '%url' => $url));
+    $context['results']['errors'][$project] = t('Failed to download %project from %url', array(
+      '%project' => $project,
+      '%url' => $url,
+    ));
     return;
   }
 
@@ -1150,7 +1178,7 @@ function installer_manager_batch_project_get($project, $url, &$context) {
  * it. However, it is supported here because it is a common configuration on
  * shared hosting, and there is nothing Backdrop can do to prevent it.
  *
- * @return
+ * @return bool
  *   TRUE if local file transfers are allowed on this server, or FALSE if not.
  *
  * @see installer_manager_update_ready_form_submit()

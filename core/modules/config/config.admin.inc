@@ -45,7 +45,7 @@ function config_sync_form(array $form, array &$form_state) {
         '#attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => 'true',
-          'data-dialog-options' => '{"dialogClass": "config-diff"}',
+          'data-dialog-options' => '{"classes": {"ui-dialog": "config-diff"}}',
         ),
       );
       $row = array(

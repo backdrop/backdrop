@@ -5,7 +5,7 @@ on:
 jobs:
   simpletest-db-config:
     name: SimpleTest
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     # Skip this job if the PR title contains "[skip tests]".
     if: ${{ !contains(github.event.pull_request.title, '[skip tests]') }}
     timeout-minutes: 20
@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up webserver
         uses: ./.github/actions/set-up-webserver
@@ -41,7 +41,7 @@ jobs:
           core/scripts/run-tests.sh --force --cache --verbose --color --group Configuration 2>&1
 
       - name: Save Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: simpletest-db-config-${{ matrix.php-versions }}
