@@ -379,6 +379,7 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
 /**
  * Encodes MIME/HTTP header values that contain incorrectly encoded characters.
  *
+ * cspell:disable-next-line
  * For example, mime_header_encode('tést.txt') returns
  * "=?UTF-8?B?dMOpc3QudHh0?=".
  *
