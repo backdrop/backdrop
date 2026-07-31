@@ -2340,13 +2340,26 @@ class BackdropWebTestCase extends BackdropTestCase {
         if (!$edit && ($submit_matches || !isset($submit))) {
           $post_array = $post;
           if ($upload) {
-            // TODO: cURL handles file uploads for us, but the implementation
-            // is broken. This is a less than elegant workaround. Alternatives
-            // are being explored at #253506.
-            foreach ($upload as $key => $file) {
-              $file = backdrop_realpath($file);
-              if ($file && is_file($file)) {
-                $post[$key] = curl_file_create($file);
+            foreach ($upload as $key => $files) {
+              // Multiple file upload.
+              if (is_array($files)) {
+                // Strip trailing [] from the input name (added by
+                // form_process_file() for #multiple inputs) so that indexed
+                // keys like [0], [1] produce the correct $_FILES structure.
+                $base_key = (substr($key, -2) === '[]') ? substr($key, 0, -2) : $key;
+                foreach ($files as $index => $file) {
+                  $file = backdrop_realpath($file);
+                  if ($file && is_file($file)) {
+                    $post[$base_key . '[' . $index . ']'] = curl_file_create($file);
+                  }
+                }
+              }
+              // Single file upload.
+              else {
+                $file = backdrop_realpath($files);
+                if ($file && is_file($file)) {
+                  $post[$key] = curl_file_create($file);
+                }
               }
             }
           }

@@ -697,7 +697,7 @@ function hook_field_prepare_translation($entity_type, $entity, $field, $instance
  *   An item that may or may not be empty.
  * @param array $field
  *   The field to which $item belongs.
- * @param array $instance
+ * @param array|null $instance
  *   Field API instance definition.
  *
  * @return bool
@@ -706,7 +706,7 @@ function hook_field_prepare_translation($entity_type, $entity, $field, $instance
  *
  * @since 1.33.0 Added parameter $instance.
  */
-function hook_field_is_empty($item, $field, $instance) {
+function hook_field_is_empty($item, $field, $instance = NULL) {
   if (empty($item['value']) && (string) $item['value'] !== '0') {
     return TRUE;
   }

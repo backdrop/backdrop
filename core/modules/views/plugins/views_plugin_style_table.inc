@@ -39,6 +39,7 @@ class views_plugin_style_table extends views_plugin_style {
     $options['caption'] = array('default' => '', 'translatable' => TRUE);
     $options['summary'] = array('default' => '', 'translatable' => TRUE);
     $options['empty_table'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['responsive'] = array('default' => '');
 
     return $options;
   }
@@ -310,6 +311,21 @@ class views_plugin_style_table extends views_plugin_style {
       $form['info'][$field]['empty_column'] = array(
         '#type' => 'checkbox',
         '#default_value' => isset($this->options['info'][$field]['empty_column']) ? $this->options['info'][$field]['empty_column'] : FALSE,
+        '#states' => array(
+          'visible' => array(
+            $column_selector => array('value' => $field),
+          ),
+        ),
+      );
+
+      $form['info'][$field]['responsive'] = array(
+        '#type' => 'select',
+        '#default_value' => !empty($this->options['info'][$field]['responsive']) ? $this->options['info'][$field]['responsive'] : '',
+        '#options' => array(
+          '' => t('High'),
+          RESPONSIVE_PRIORITY_MEDIUM => t('Medium'),
+          RESPONSIVE_PRIORITY_LOW => t('Low'),
+        ),
         '#states' => array(
           'visible' => array(
             $column_selector => array('value' => $field),

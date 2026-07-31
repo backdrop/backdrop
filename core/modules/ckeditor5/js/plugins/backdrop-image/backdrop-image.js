@@ -916,7 +916,7 @@ class BackdropImageCommand extends CKEditor5.Command {
     const dialogSettings = {
       title: config.insertLabel || 'Insert Image',
       uploads: uploadsEnabled,
-      dialogClass: 'editor-image-dialog'
+      classes: {'ui-dialog': 'editor-image-dialog'}
     };
     Backdrop.ckeditor5.openDialog(editor, config.dialogUrl, existingValues, saveCallback, dialogSettings);
   }

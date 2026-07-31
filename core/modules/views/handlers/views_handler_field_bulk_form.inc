@@ -242,7 +242,9 @@ class views_handler_field_bulk_form extends views_handler_field {
    * Returns the available operations for this form.
    *
    * @param bool $filtered
-   *   (optional) Whether to filter actions to selected actions.
+   *   (optional) Whether to filter the list of actions to only those that the
+   *   current user account can access, and remove any actions not defined in
+   *   this view's configuration.
    *
    * @return array
    *   An associative array of operations, suitable for a select element.
@@ -267,7 +269,12 @@ class views_handler_field_bulk_form extends views_handler_field {
         elseif (($this->options['include_exclude'] == 'exclude') && $in_selected) {
           continue;
         }
+        // Check action access.
+        if (!actions_access($action_name)) {
+          continue;
+        }
       }
+
       // Only allow actions that are valid for this entity type.
       if ($action_info['type'] == $entity_type) {
         $options[$action_name] = $action_info['label'];
