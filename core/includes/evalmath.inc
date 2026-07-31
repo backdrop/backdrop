@@ -91,11 +91,18 @@
  * Safely evaluate math expressions.
  */
 class EvalMath {
+  /**
+   * @var bool
+   */
   public $suppress_errors = FALSE;
+
+  /**
+   * @var string|null
+   */
   public $last_error = NULL;
 
   /**
-   * Publiciables (and constants)
+   * Public variables (and constants)
    *
    * @var array
    */
