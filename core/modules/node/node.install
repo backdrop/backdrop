@@ -2753,6 +2753,106 @@ function node_update_1023() {
 }
 
 /**
+ * Fix node initial revision timestamp and user where node created before
+ * revisions enabled on content type.
+ */
+function node_update_1024(&$sandbox) {
+
+  // Define the base query for the node revision records that need updating.
+  $revision_query = db_select('node_revision', 'nr')
+    ->fields('nr', array('nid', 'vid'))
+    ->condition('uid', 0)
+    ->condition('timestamp', 0);
+
+  // Setup a batch process so large numbers of node revision records can be
+  // handled.
+  if (!isset($sandbox['progress'])) {
+    // The count of node revision records processed so far.
+    $sandbox['progress'] = 0;
+    // Total node revision records that must be updated.
+    $sandbox['max'] = $revision_query->countQuery()->execute()->fetchField();
+    // A place to store messages during the run.
+    $sandbox['messages'] = array();
+    // Last node revision record read via the query.
+    $sandbox['current_revision_record'] = -1;
+  }
+
+  // Limit the number of node revision records processed at a time to avoid
+  // timeouts.
+  $limit = 25;
+
+  // Define an array to collect data about each node.
+  $nodes = array();
+
+  // Get the node revision records.
+  $revision_records = $revision_query
+    ->condition('vid', $sandbox['current_revision_record'], ">")
+    ->extend('PagerDefault')
+    ->limit($limit)
+    ->execute();
+
+  // Start to populate the $nodes array with the 'vid' - the node_revision ID.
+  foreach ($revision_records as $row) {
+    $nodes[$row->nid] = array(
+      'vid' => $row->vid,
+    );
+  }
+
+  // Retrieve the relevant node records for the selected node revision records.
+  $node_records = db_select('node', 'n')
+    ->fields('n', array('nid', 'uid', 'created'))
+    ->condition('nid', array_keys($nodes))
+    ->execute();
+
+  // Add the node author and node created timestamp to the $nodes array.
+  foreach ($node_records as $row) {
+    $nodes[$row->nid]['uid'] = $row->uid;
+    $nodes[$row->nid]['timestamp'] = $row->created;
+  }
+
+  // Handle the node revision record updates using a database transaction.
+  $transaction = db_transaction();
+  try {
+    foreach ($nodes as $nid => $node_data) {
+      db_update('node_revision')
+        ->fields(array(
+          'uid' => $node_data['uid'],
+          'timestamp' => $node_data['timestamp'],
+        ))
+        ->condition('vid', $node_data['vid'])
+        ->execute();
+
+      // Update the $sandbox data.
+      $sandbox['current_revision_record'] = $node_data['vid'];
+      $sandbox['progress']++;
+    }
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    watchdog_exception('Node Update', $e);
+  }
+  unset($transaction);
+
+  // Define when the batch process is finished.
+  $sandbox['#finished'] = ($sandbox['progress'] >= $sandbox['max']) ? TRUE : ($sandbox['progress'] / $sandbox['max']);
+
+  // Prepare interim update messages on the progress.
+  $sandbox['messages'][] = t('!progress of !max node revision records updated.', array(
+    '!progress' => $sandbox['progress'],
+    '!max' => $sandbox['max'],
+  ));
+
+  // Once the batch is finished, return a final progress update.
+  if ($sandbox['#finished']) {
+    $final_message = t('!progress of !max node revision records updated.', array(
+      '!progress' => $sandbox['progress'],
+      '!max' => $sandbox['max'],
+    ));
+    return $final_message;
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
