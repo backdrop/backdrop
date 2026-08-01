@@ -2771,6 +2771,10 @@ function node_update_1024(&$sandbox) {
     $sandbox['progress'] = 0;
     // Total node revision records that must be updated.
     $sandbox['max'] = $revision_query->countQuery()->execute()->fetchField();
+    // Exit if no node revision records to update.
+    if ($sandbox['max'] == 0) {
+      return;
+    }
     // A place to store messages during the run.
     $sandbox['messages'] = array();
     // Last node revision record read via the query.
