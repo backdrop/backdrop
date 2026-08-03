@@ -624,6 +624,18 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/bookmarks.html
+  $plugins['bookmark.Bookmark'] = array(
+    'buttons' => array(
+      'bookmark' => array(
+        'label' => t('Bookmark'),
+        'image' => $image_prefix . '/bookmark.svg',
+        'required_html' => array('<a id>'),
+        'plugin_dependencies' => array('bookmark.Bookmark'),
+      ),
+    ),
+  );
+
   // Plugin that converts CKEditor preferred tags to Backdrop preferred tags,
   // such as converting <s> to <del> or <i> to <em>.
   $plugins['backdropBasicStyles.BackdropBasicStyles'] = array(
