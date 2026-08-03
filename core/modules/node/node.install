@@ -2803,15 +2803,30 @@ function node_update_1024(&$sandbox) {
   }
 
   // Retrieve the relevant node records for the selected node revision records.
-  $node_records = db_select('node', 'n')
-    ->fields('n', array('nid', 'uid', 'created'))
-    ->condition('nid', array_keys($nodes))
-    ->execute();
+  $node_records = empty($nodes) ? array() : db_select('node', 'n')
+      ->fields('n', array('nid', 'uid', 'created'))
+      ->condition('nid', array_keys($nodes))
+      ->execute();
 
   // Add the node author and node created timestamp to the $nodes array.
   foreach ($node_records as $row) {
-    $nodes[$row->nid]['uid'] = $row->uid;
-    $nodes[$row->nid]['timestamp'] = $row->created;
+    $nid = $row->nid;
+    $nodes[$nid]['uid'] = $row->uid;
+    $nodes[$nid]['timestamp'] = $row->created;
+
+    // Check for this node if a revision exists with a user id that is different
+    // from the current node owner.
+    $node_revision_uid = db_select('node_revision', 'nr')
+      ->fields('nr', array('uid'))
+      ->condition('nid', $nid)
+      ->condition('uid', 0, ">")
+      ->orderBy('timestamp')
+      ->range(0, 1)
+      ->execute()
+      ->fetchField();
+    if ($node_revision_uid !== FALSE) {
+      $nodes[$nid]['uid'] = $node_revision_uid;
+    }
   }
 
   // Handle the node revision record updates using a database transaction.
