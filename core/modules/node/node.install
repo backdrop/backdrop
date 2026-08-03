@@ -2753,8 +2753,7 @@ function node_update_1023() {
 }
 
 /**
- * Fix node initial revision timestamp and user where node created before
- * revisions enabled on content type.
+ * Fix node initial revision timestamp and user.
  */
 function node_update_1024(&$sandbox) {
 
