@@ -2876,12 +2876,21 @@ function node_update_1024(&$sandbox) {
   $sandbox['#finished'] = ($test_progress_max || $test_revision_record_max) ? TRUE : ($sandbox['progress'] / $sandbox['max']);
 
   // Once the batch is finished, return a final progress update.
-  if ($sandbox['#finished']) {
-    $final_message = t('!progress of !max node revision records updated.', array(
-      '!progress' => $sandbox['progress'],
-      '!max' => $sandbox['max'],
-    ));
-    return $final_message;
+  if ($sandbox['#finished'] === TRUE) {
+    if ($test_progress_max) {
+      $final_message = t('!progress of !max node revision records updated.', array(
+        '!progress' => $sandbox['progress'],
+        '!max' => $sandbox['max'],
+      ));
+      return $final_message;
+    }
+    else {
+      $final_message = t('Only !progress of !max node revision records were updated. Check and re-run the update hook.', array(
+        '!progress' => $sandbox['progress'],
+        '!max' => $sandbox['max'],
+      ));
+      throw new BackdropUpdateException($final_message);
+    }
   }
 }
 
