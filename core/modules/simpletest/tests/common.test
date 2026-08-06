@@ -1547,10 +1547,27 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    * Test JavaScript versioning.
    */
   function testVersionQueryString() {
-    backdrop_add_js('core/misc/collapse.js', array('version' => 'foo'));
-    backdrop_add_js('core/misc/ajax.js', array('version' => 'bar'));
+    $expected = array();
+    $hash_algos = hash_algos();
+    $hash_salt = backdrop_get_hash_salt();
+    $version = array(
+      'ajax' => 'bar',
+      'collapse' => 'foo',
+    );
+    if (in_array('murmur3f', $hash_algos, TRUE)) {
+      $seed = hexdec(backdrop_substr($hash_salt, 0, 16));
+      $expected['ajax'] = hash('murmur3f', $version['ajax'], FALSE, array('seed' => $seed));
+      $expected['collapse'] = hash('murmur3f', $version['collapse'], FALSE, array('seed' => $seed));
+    }
+    else {
+      $seed = backdrop_substr($hash_salt, 0, 8);
+      $expected['ajax'] = hash('crc32', $version['ajax'] . $seed);
+      $expected['collapse'] = hash('crc32', $version['collapse'] . $seed);
+    }
+    backdrop_add_js('core/misc/collapse.js', array('version' => $version['collapse']));
+    backdrop_add_js('core/misc/ajax.js', array('version' => $version['ajax']));
     $javascript = backdrop_get_js();
-    $this->assertTrue(strpos($javascript, 'core/misc/collapse.js?v=foo') > 0 && strpos($javascript, 'core/misc/ajax.js?v=bar') > 0 , t('JavaScript version identifiers correctly appended to URLs'));
+    $this->assertTrue(strpos($javascript, "core/misc/collapse.js?v={$expected['collapse']}") > 0 && strpos($javascript, "core/misc/ajax.js?v={$expected['ajax']}") > 0, t('JavaScript version identifiers correctly appended to URLs'));
   }
 
   /**

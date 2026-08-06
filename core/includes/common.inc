@@ -5213,29 +5213,30 @@ function backdrop_pre_render_scripts(array $elements) {
             $element['#value'] = $item['data'];
             break;
 
-            case 'file':
-              if (!empty($item['version'])) {
-                $hash_algos = hash_algos();
-                $hash_salt = backdrop_get_hash_salt();
+          case 'file':
+            if (!empty($item['version'])) {
+              $hash_algos = hash_algos();
+              $hash_salt = backdrop_get_hash_salt();
 
-                if (in_array('murmur3f', $hash_algos, TRUE)) {
-                  $seed = hexdec(backdrop_substr($hash_salt, 0, 16));
-                  $hash = hash('murmur3f', $item['version'], FALSE, array('seed' => $seed));
-                }
-                else {
-                  $seed = backdrop_substr($hash_salt, 0, 8);
-                  $hash = hash('crc32', $item['version'] . $seed);
-                }
-
-                $query_string = "v=$hash";
+              if (in_array('murmur3f', $hash_algos, TRUE)) {
+                $seed = hexdec(backdrop_substr($hash_salt, 0, 16));
+                $hash = hash('murmur3f', $item['version'], FALSE, array('seed' => $seed));
               }
               else {
-                $query_string = $default_query_string;
+                $seed = backdrop_substr($hash_salt, 0, 8);
+                $hash = hash('crc32', $item['version'] . $seed);
               }
 
-              $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
-              $element['#attributes']['src'] = file_create_url($item['data']) . $query_string_separator . ($item['cache'] ? $query_string : REQUEST_TIME);
-              break;
+              $query_string = "v=$hash";
+            }
+            else {
+              $query_string = $default_query_string;
+            }
+
+            $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
+            $element['#attributes']['src'] = file_create_url($item['data']) . $query_string_separator . ($item['cache'] ? $query_string : REQUEST_TIME);
+            break;
+
           case 'external':
             $element['#attributes']['src'] = $item['data'];
             break;
