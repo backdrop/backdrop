@@ -2756,31 +2756,38 @@ function node_update_1023() {
  * Fix node initial revision timestamp and user.
  */
 function node_update_1024(&$sandbox) {
+
   // Setup a batch process so large numbers of node revision records can be
   // handled.
   if (!isset($sandbox['progress'])) {
     // The count of node revision records processed so far.
     $sandbox['progress'] = 0;
+
     // Define the base query for the node revision records that need updating.
     $revision_query = db_select('node_revision', 'nr')
       ->fields('nr', array('vid', 'nid'))
       ->condition('uid', 0)
       ->condition('timestamp', 0);
+
     // Total node revision records that must be updated.
     $sandbox['max'] = $revision_query->countQuery()->execute()->fetchField();
     // Exit if no node revision records to update.
     if ($sandbox['max'] == 0) {
       return;
     }
+
     // A place to store messages during the run.
     $sandbox['messages'] = array();
+
     // Last node revision record read via the query.
     $sandbox['current_revision_record'] = -1;
+
     // Get the node revision records.
     $revision_results = $revision_query
       ->orderBy('vid')
       ->execute()
       ->fetchAllAssoc('vid');
+
     // Loop through the revision results to find all the node ids.
     $nids = array();
     foreach ($revision_results as $vid => $row) {
@@ -2790,8 +2797,9 @@ function node_update_1024(&$sandbox) {
 
     // Retrieve the node records.
     $node_results = db_select('node', 'n')
-      ->fields('n', array('nid', 'uid', 'created'))
+      ->fields('n', array('nid', 'uid', 'created', 'type'))
       ->condition('nid', $nids)
+      ->orderBy('nid')
       ->execute();
 
     // Check for these nodes if revisions exist with user ids. If so, retrieve
@@ -2799,20 +2807,36 @@ function node_update_1024(&$sandbox) {
     $node_revision_query = db_select('node_revision', 'nr')
       ->fields('nr', array('nid', 'uid'))
       ->condition('nid', $nids, 'IN')
-      ->condition('uid', 0, ">");
+      ->condition('uid', 0, '>');
     $node_revision_query->groupBy('nid');
     $node_revision_query->addExpression('min(`timestamp`)', 'timestamp');
     $node_revision_results = $node_revision_query->execute()->fetchAllAssoc('nid');
 
-    // Add the node author and node created timestamp to the $nodes array.
+    // Check which node types, if any, allow anonymous users to create content.
+    $node_types = array_keys(node_type_get_names());
+    $anon_create_types = array();
+    foreach ($node_types as $node_type) {
+      $create_permission = "create $node_type content";
+      if (user_role_has_permission(BACKDROP_ANONYMOUS_ROLE, $create_permission)) {
+        $anon_create_types[$node_type] = TRUE;
+      }
+    }
+
+    // Collate the node owner and node created timestamp to $node_records.
     $node_records = array();
     foreach ($node_results as $row) {
       $nid = $row->nid;
       $node_records[$nid]['uid'] = $row->uid;
       $node_records[$nid]['timestamp'] = $row->created;
 
-      // If other revisions exist for this node, use the uid from the earliest.
-      if (isset($node_revision_results[$nid])) {
+      // If the current node owner is "Anonymous" AND the node type allows
+      // anonymous node creation, then we assume that the node author was
+      // anonymous.
+      $anon_author = isset($anon_create_types[$row->type]) && $row->uid == "0";
+
+      // If not an anonymous author AND other revisions exist for this node, use
+      // the uid from the earliest valid revision.
+      if (!$anon_author && isset($node_revision_results[$nid])) {
         $node_records[$nid]['uid'] = $node_revision_results[$nid]->uid;
       }
     }
