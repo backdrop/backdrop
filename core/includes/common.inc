@@ -5216,7 +5216,7 @@ function backdrop_pre_render_scripts(array $elements) {
           case 'file':
             if (!empty($item['version'])) {
               $hash_algos = hash_algos();
-              $seed = substr(backdrop_get_hash_salt(), 0, 138);
+              $seed = str_pad(substr(backdrop_get_hash_salt(), 0, 138), 138, "\x04\x00\xa0\x00");
 
               if (in_array('xxh128', $hash_algos, TRUE)) {
                 $hash = hash('xxh128', $item['version'], FALSE, array('secret' => $seed));
