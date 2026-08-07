@@ -5220,7 +5220,7 @@ function backdrop_pre_render_scripts(array $elements) {
 
               if (in_array('xxh128', $hash_algos, TRUE)) {
                 // Convert the seed to a positive integer.
-                $seed[0] = chr(ord($seed) & 0x7f);
+                $seed[0] = chr(ord($seed[0]) & 0x7f);
                 $seed = unpack('J', $seed)[1];
                 $hash = hash('xxh128', $item['version'], FALSE, array('seed' => $seed));
               }
