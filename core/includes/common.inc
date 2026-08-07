@@ -5217,23 +5217,20 @@ function backdrop_pre_render_scripts(array $elements) {
             if (!empty($item['version'])) {
               $hash_algos = hash_algos();
               $seed = substr(backdrop_get_hash_salt(), 0, 8);
-
               if (in_array('xxh128', $hash_algos, TRUE)) {
                 // Convert the seed to a positive integer.
                 $seed[0] = chr(ord($seed[0]) & 0x7f);
                 $seed = unpack('J', $seed)[1];
-                $hash = hash('xxh128', $item['version'], FALSE, array('seed' => $seed));
+                $hash = base_convert(hash('xxh128', $item['version'], FALSE, array('seed' => $seed)), 16, 36);
               }
               else {
                 $hash = hash('crc32', $item['version'] . $seed);
               }
-
               $query_string = "v=$hash";
             }
             else {
               $query_string = $default_query_string;
             }
-
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
             $element['#attributes']['src'] = file_create_url($item['data']) . $query_string_separator . ($item['cache'] ? $query_string : REQUEST_TIME);
             break;

@@ -1562,8 +1562,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
       // Convert the seed to a positive integer.
       $seed[0] = chr(ord($seed[0]) & 0x7f);
       $seed = unpack('J', $seed)[1];
-      $expected['ajax'] = hash('xxh128', $version['ajax'], FALSE, array('seed' => $seed));
-      $expected['collapse'] = hash('xxh128', $version['collapse'], FALSE, array('seed' => $seed));
+      $expected['ajax'] = base_convert(hash('xxh128', $version['ajax'], FALSE, array('seed' => $seed)), 16, 36);
+      $expected['collapse'] = base_convert(hash('xxh128', $version['collapse'], FALSE, array('seed' => $seed)), 16, 36);
     }
     else {
       $seed = substr($seed, 0, 8);
