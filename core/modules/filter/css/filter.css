@@ -191,7 +191,7 @@
   padding: 0;
 }
 .image-form-wrapper .image-ratio-icon.reset-orig-inactive {
-  opacity: 0.6;
+  opacity: 0.5;
 }
 .editor-image-library {
   padding: 0 0 0 20px; /* LTR */
