@@ -151,20 +151,20 @@ function hook_ckeditor5_css_alter(array &$css) {
  * plugins will not work. You may use this hook to provide translated strings
  * for your plugin.
  *
- * @param array $settings
+ * @param array $config
  *   The array of settings that will be passed to CKEditor.
  * @param object $format
  *   The filter format object containing this editor's settings.
  */
-function hook_ckeditor5_settings_alter(array &$settings, $format) {
+function hook_ckeditor5_config_alter(array &$config, $format) {
   foreach ($format->editor_settings['toolbar'] as $row) {
     foreach ($row as $button_group) {
       // If a particular button is enabled, then add extra settings.
       if (array_key_exists('MyPlugin', $button_group)) {
         // Pull settings from the format and pass to the JavaScript settings.
-        $settings['backdrop']['myplugin_settings'] = $format->editor_settings['myplugin_settings'];
+        $config['backdrop']['myplugin_settings'] = $format->editor_settings['myplugin_settings'];
         // Translate a string for use by CKEditor.
-        $settings['backdrop']['myplugin_help'] = t('A translated string example that will be used by CKEditor.');
+        $config['backdrop']['myplugin_help'] = t('A translated string example that will be used by CKEditor.');
       }
     }
   }
