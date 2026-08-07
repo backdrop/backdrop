@@ -16,12 +16,6 @@ Backdrop.editors = {};
 Backdrop.filterModalLeft = undefined;
 
 /**
- * Keep track of whether the image editor has its aspect ratio
- * "locked" or not.
- */
-Backdrop.filterAspectRatioLocked = true;
-
-/**
  * In the image editor, keep track of which "screen" is being
  * displayed (e.g., the Upload screen or the Select from library screen).
  */
@@ -230,13 +224,6 @@ Backdrop.behaviors.editorImageDialog = {
       $(".editor-image-fields").addClass("editor-image-fields-full");
       // When we first open, we're always on the "upload" part of the dialog.
       Backdrop.filterImageEditorDisplay = 'upload';
-      // If the image is stretched, we need to set the lock icon
-      // and locked status accordingly.
-      if (Backdrop.behaviors.editorImageLibrary.imageIsStretched() === true) {
-        $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').hide();
-        $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').show().focus();
-        Backdrop.filterAspectRatioLocked = false;
-      }
     }
 
     $newToggles.on('click', function(e) {
@@ -264,11 +251,6 @@ Backdrop.behaviors.editorImageDialog = {
       $('.filter-format-editor-image-form [name="attributes[height]"]').val('');
       $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', {width: null, height: null});
       $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
-
-      // Change our default lock status to locked when we change "screens".
-      Backdrop.filterAspectRatioLocked = true;
-      $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').show().focus();
-      $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').hide();
 
       if ($newItem.hasClass('form-item-fid')) {
         // The user is now viewing the "Upload an image" screen.
@@ -423,32 +405,6 @@ Backdrop.behaviors.editorImageLibrary = {
       height: null
     };
 
-    // Set variable if we have locked the aspect ratio or not.
-    Backdrop.filterAspectRatioLocked = true;
-    $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').off().on('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').hide();
-      $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').show().focus();
-      Backdrop.filterAspectRatioLocked = false;
-    });
-
-    $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').off().on('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').hide();
-      $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').show().focus();
-      Backdrop.filterAspectRatioLocked = true;
-      // Because we have just re-locked the aspect ratio from a previously
-      // unlocked state, we need to resize the image, using width as the
-      // dimension to calculate from.
-      if (Backdrop.filterImageOriginalDimensions.width && Backdrop.filterImageOriginalDimensions.height) {
-        $('.filter-format-editor-image-form [name="attributes[width]"]').trigger('input');
-      }
-    });
-
     $('.filter-format-editor-image-form .editor-image-size #reset-orig').off().on('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -456,9 +412,7 @@ Backdrop.behaviors.editorImageLibrary = {
       Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
     });
 
-
     Backdrop.behaviors.editorImageLibrary.imageLoadExistingFile();
-
 
   },
   imageLoadExistingFile: function () {
@@ -499,11 +453,6 @@ Backdrop.behaviors.editorImageLibrary = {
         Backdrop.filterImageOriginalDimensions.height = null;
         Backdrop.behaviors.editorImageLibrary.resetDataAttr(Backdrop.filterImageOriginalDimensions);
         Backdrop.behaviors.editorImageLibrary.imageDimensionsEmpty();
-
-        // Change our default lock status to locked when we remove an image.
-        Backdrop.filterAspectRatioLocked = true;
-        $('.filter-format-editor-image-form .editor-image-size #unlock-aspect-ratio').show().focus();
-        $('.filter-format-editor-image-form .editor-image-size #lock-aspect-ratio').hide();
       }
     }
 
@@ -543,39 +492,6 @@ Backdrop.behaviors.editorImageLibrary = {
     $('.filter-format-editor-image-form [name="attributes[height]"]').val(imgDimensions.height);
   },
   /**
-   * Based on the aspect ratio of the original dimensions, when we look at
-   * the current dimensions, has this image been "stretched"?
-   *
-   * In other words, are the current dimensions no longer the same aspect
-   * ratio as the original dimensions?
-   *
-   */
-  imageIsStretched: function() {
-
-    if (!Backdrop.filterImageOriginalDimensions.height || Backdrop.filterImageOriginalDimensions.height == 0) {
-      return;
-    }
-
-    var curWidth = parseInt($('.filter-format-editor-image-form [name="attributes[width]"]').val());
-    var curHeight = parseInt($('.filter-format-editor-image-form [name="attributes[height]"]').val());
-
-    if (!curHeight || curHeight == 0) {
-      return;
-    }
-
-    var currentAspectRatio = curWidth / curHeight;
-    var originalAspectRatio = Backdrop.filterImageOriginalDimensions.width / Backdrop.filterImageOriginalDimensions.height;
-
-    if (Math.abs(currentAspectRatio - originalAspectRatio) > 0.01) {
-        // Different aspect ratios. (We have to be a little fuzzy
-        // due to rounding.)
-        return true;
-    }
-
-    return false;
-
-  },
-  /**
    * Remove previous event listeners, add new ones with current dimensions.
    *
    * Keep width and height input values in sync based on the supplied image
@@ -584,16 +500,12 @@ Backdrop.behaviors.editorImageLibrary = {
   syncAspectRatio: function(imgDimensions) {
     $('.filter-format-editor-image-form [name="attributes[width]"]').off('input').on('input', function() {
       var newHeight = Math.round(this.value / imgDimensions.width * imgDimensions.height);
-      if (Backdrop.filterAspectRatioLocked === true) {
-        $('.filter-format-editor-image-form [name="attributes[height]"]').val(newHeight);
-      }
+      $('.filter-format-editor-image-form [name="attributes[height]"]').val(newHeight);
       Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
     });
     $('.filter-format-editor-image-form [name="attributes[height]"]').off('input').on('input', function() {
       var newWidth = Math.round(this.value / imgDimensions.height * imgDimensions.width);
-      if (Backdrop.filterAspectRatioLocked === true) {
-        $('.filter-format-editor-image-form [name="attributes[width]"]').val(newWidth);
-      }
+      $('.filter-format-editor-image-form [name="attributes[width]"]').val(newWidth);
       Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
     });
   },
