@@ -1549,7 +1549,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   function testVersionQueryString() {
     $expected = array();
     $hash_algos = hash_algos();
-    $seed = str_pad(substr(backdrop_get_hash_salt(), 0, 138), 138, "\x04\x00\xa0\x00");
+    $seed = substr(backdrop_get_hash_salt(), 0, 8);
     $version = array(
       'ajax' => 'bar',
       'collapse' => 'foo',
@@ -1559,8 +1559,11 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     // backdrop_pre_render_scripts(). If the code in that function is changed,
     // the following code needs to be changed too.
     if (in_array('xxh128', $hash_algos, TRUE)) {
-      $expected['ajax'] = hash('xxh128', $version['ajax'], FALSE, array('segret' => $seed));
-      $expected['collapse'] = hash('xxh128', $version['collapse'], FALSE, array('secret' => $seed));
+      // Convert the seed to a positive integer.
+      $seed[0] = chr(ord($seed) & 0x7f);
+      $seed = unpack('J', $seed)[1];
+      $expected['ajax'] = hash('xxh128', $version['ajax'], FALSE, array('seed' => $seed));
+      $expected['collapse'] = hash('xxh128', $version['collapse'], FALSE, array('seed' => $seed));
     }
     else {
       $seed = substr($seed, 0, 8);

@@ -5216,13 +5216,15 @@ function backdrop_pre_render_scripts(array $elements) {
           case 'file':
             if (!empty($item['version'])) {
               $hash_algos = hash_algos();
-              $seed = str_pad(substr(backdrop_get_hash_salt(), 0, 138), 138, "\x04\x00\xa0\x00");
+              $seed = substr(backdrop_get_hash_salt(), 0, 8);
 
               if (in_array('xxh128', $hash_algos, TRUE)) {
-                $hash = hash('xxh128', $item['version'], FALSE, array('secret' => $seed));
+                // Convert the seed to a positive integer.
+                $seed[0] = chr(ord($seed) & 0x7f);
+                $seed = unpack('J', $seed)[1];
+                $hash = hash('xxh128', $item['version'], FALSE, array('seed' => $seed));
               }
               else {
-                $seed = substr($seed, 0, 8);
                 $hash = hash('crc32', $item['version'] . $seed);
               }
 
