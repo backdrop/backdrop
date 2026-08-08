@@ -7,7 +7,7 @@
 /**
  * Maximum length of username text field.
  */
-define('USERNAME_MAX_LENGTH', 60);
+define('USERNAME_MAX_LENGTH', 254);
 
 /**
  * Users can login with username only.
