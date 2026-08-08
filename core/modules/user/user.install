@@ -2374,7 +2374,7 @@ function user_update_1026() {
  * Update the name column to varchar(254), to match email length.
  */
 function user_update_1027() {
-  db_query('ALTER TABLE {users} MODIFY COLUMN `name` VARCHAR(254)");
+  db_query('ALTER TABLE {users} MODIFY COLUMN `name` VARCHAR(254)');
 }
 
 /**
