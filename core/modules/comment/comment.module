@@ -1916,7 +1916,7 @@ function comment_form($form, &$form_state, $comment) {
       '#type' => 'textfield',
       '#title' => t('Authored by'),
       '#default_value' => $author,
-      '#maxlength' => 60,
+      '#maxlength' => USERNAME_MAX_LENGTH,
       '#size' => 30,
       '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get_translated('system.core', 'anonymous'))),
       '#autocomplete_path' => 'user/autocomplete',
@@ -1939,7 +1939,7 @@ function comment_form($form, &$form_state, $comment) {
       '#title' => t('Your name'),
       '#default_value' => $author,
       '#required' => (!$user->uid && $anonymous_contact == COMMENT_ANONYMOUS_MUST_CONTACT),
-      '#maxlength' => 60,
+      '#maxlength' => USERNAME_MAX_LENGTH,
       '#size' => 30,
     );
   }
