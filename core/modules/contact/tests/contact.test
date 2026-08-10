@@ -338,6 +338,7 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
     // Create some normal users with their contact forms enabled by default.
     config_set('contact.settings', 'personal', TRUE);
     config_set('contact.settings', 'contact_default_status', TRUE);
+    menu_rebuild();
 
     $this->web_user = $this->backdropCreateUser(array('access user contact forms'));
     $this->contact_user = $this->backdropCreateUser();
