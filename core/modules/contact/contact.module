@@ -337,30 +337,6 @@ function contact_user_presave($account) {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
- *
- * Add the default personal contact setting on the user settings page.
- *
- * @see user_admin_settings()
- */
-function contact_form_user_admin_settings_alter(&$form, &$form_state) {
-  $config = config('contact.settings');
-
-  $form['contact'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Contact settings'),
-    '#weight' => 0,
-    '#config' => 'contact.settings',
-  );
-  $form['contact']['contact_default_status'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable the personal contact form by default for new users.'),
-    '#description' => t('Changing this setting will not affect existing users.'),
-    '#default_value' => $config->get('contact_default_status'),
-  );
-}
-
-/**
  * Implements hook_block_info().
  */
 function contact_block_info() {
