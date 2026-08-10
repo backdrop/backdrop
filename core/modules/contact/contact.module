@@ -120,16 +120,20 @@ function contact_menu() {
     'type' => MENU_SUGGESTED_ITEM,
     'file' => 'contact.pages.inc',
   );
-  $items['user/%user/contact'] = array(
-    'title' => 'Contact',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('contact_personal_form', 1),
-    'type' => MENU_LOCAL_TASK,
-    'access callback' => '_contact_personal_tab_access',
-    'access arguments' => array(1),
-    'weight' => 2,
-    'file' => 'contact.pages.inc',
-  );
+  $config = config('contact.settings');
+  if ($config->get('personal')) {
+    $items['user/%user/contact'] = array(
+      'title' => 'Contact',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('contact_personal_form', 1),
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => '_contact_personal_tab_access',
+      'access arguments' => array(1),
+      'weight' => 2,
+      'file' => 'contact.pages.inc',
+    );
+  }
+
   return $items;
 }
 
@@ -300,6 +304,10 @@ function contact_mail($key, &$message, $params) {
  */
 function contact_form_user_profile_form_alter(&$form, &$form_state) {
   $config = config('contact.settings');
+  if (!$config->get('personal')) {
+    return;
+  }
+
   $form['contact'] = array(
     '#type' => 'fieldset',
     '#title' => t('Contact form'),
