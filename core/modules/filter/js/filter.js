@@ -248,8 +248,8 @@ Backdrop.behaviors.editorImageDialog = {
       // button.
       $('.filter-format-editor-image-form [name="attributes[width]"]').val('');
       $('.filter-format-editor-image-form [name="attributes[height]"]').val('');
-      $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', {width: null, height: null});
-      $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
+      $('.filter-format-editor-image-form .editor-image-size .image-ratio-reset-original').data('data-dimensions', {width: null, height: null});
+      $('.filter-format-editor-image-form .editor-image-size .image-ratio-reset-original').addClass('image-ratio-reset-original-inactive');
 
       if ($newItem.hasClass('form-item-fid')) {
         // The user is now viewing the "Upload an image" screen.
@@ -402,7 +402,7 @@ Backdrop.behaviors.editorImageLibrary = {
       height: null
     };
 
-    $('.filter-format-editor-image-form .editor-image-size #reset-orig').off().on('click', function(e) {
+    $('.filter-format-editor-image-form .editor-image-size .image-ratio-reset-original').off().on('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
       Backdrop.behaviors.editorImageLibrary.imageDimensionsSet($(this).data('data-dimensions'));
@@ -479,7 +479,7 @@ Backdrop.behaviors.editorImageLibrary = {
   imageDimensionsEmpty: function() {
     $('.filter-format-editor-image-form [name="attributes[width]"]').val('');
     $('.filter-format-editor-image-form [name="attributes[height]"]').val('');
-    $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
+    $('.filter-format-editor-image-form .editor-image-size .image-ratio-reset-original').addClass('image-ratio-reset-original-inactive');
   },
   /**
    * Helper function to set width and height values.
@@ -510,7 +510,7 @@ Backdrop.behaviors.editorImageLibrary = {
    * Update the data-dimensions attribute value.
    */
   resetDataAttr: function(imgDimensions) {
-    $('.filter-format-editor-image-form .editor-image-size #reset-orig').data('data-dimensions', imgDimensions);
+    $('.filter-format-editor-image-form .editor-image-size .image-ratio-reset-original').data('data-dimensions', imgDimensions);
   },
   /**
    * Determine and update the disabled state of the reset icon
@@ -520,10 +520,10 @@ Backdrop.behaviors.editorImageLibrary = {
     var currentWidth = $('.filter-format-editor-image-form [name="attributes[width]"]').val();
     var currentHeight = $('.filter-format-editor-image-form [name="attributes[height]"]').val();
     if ((currentWidth.length && $icon.data('data-dimensions').width != currentWidth) || (currentHeight.length && $icon.data('data-dimensions').height != currentHeight))  {
-      $('.filter-format-editor-image-form .editor-image-size #reset-orig').removeClass('reset-orig-inactive');
+      $('.filter-format-editor-image-form .editor-image-size .image-ratio-reset-original').removeClass('image-ratio-reset-original-inactive');
     }
     else {
-      $('.filter-format-editor-image-form .editor-image-size #reset-orig').addClass('reset-orig-inactive');
+      $('.filter-format-editor-image-form .editor-image-size .image-ratio-reset-original').addClass('image-ratio-reset-original-inactive');
     }
   }
 };
