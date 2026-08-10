@@ -1644,7 +1644,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
 
 class UserAdminSettingsFormTest extends SystemConfigFormCase {
   public function setUp() {
-    parent::setUp('contact');
+    parent::setUp('path');
     module_load_include('admin.inc', 'user');
     $this->form_id = 'user_admin_settings';
     $this->values = array(
@@ -1653,12 +1653,12 @@ class UserAdminSettingsFormTest extends SystemConfigFormCase {
         '#config_name' => 'system.core',
         '#config_key' => 'user_picture_path',
       ),
-      // The contact_default_status item tests saving via
+      // The path_pattern item tests saving via
       // system_config_settings() to a second config file.
-      'contact_default_status' => array(
-        '#value' => NULL,
-        '#config_name' => 'contact.settings',
-        '#config_key' => 'contact_default_status',
+      'path_pattern' => array(
+        '#value' => 'accounts/[user:name]',
+        '#config_name' => 'path.settings',
+        '#config_key' => 'user_pattern',
       ),
     );
   }
