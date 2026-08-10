@@ -90,7 +90,8 @@ function contact_update_1002() {
 }
 
 /**
- * Set default value for new 'Enable personal contact forms' setting.
+ * Set default value for new 'Enable personal contact forms' setting for
+ * existing sites.
  */
 function contact_update_1003() {
   $config = config('contact.settings');

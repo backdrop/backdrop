@@ -1,7 +1,7 @@
 {
     "_config_name": "contact.settings",
     "phone": "",
-    "personal": 1,
+    "personal": 0,
     "contact_default_status": 1,
     "contact_threshold_limit": 5,
     "contact_threshold_window": 3600
