@@ -25,7 +25,6 @@ Backdrop.filterImageEditorDisplay = undefined;
 /**
  * Keeps track of the original dimensions of the image we are manipulating
  * in the image editor.
- * // TODO: might need to be an array since we can have multiple images?
  */
 Backdrop.filterImageOriginalDimensions = {width: null, height: null};
 
@@ -354,7 +353,6 @@ Backdrop.behaviors.editorImageDialog = {
         $('.editor-dialog').removeClass('editor-dialog-with-library');
         // Set the class for the dialog part.
         $('.editor-image-fields').addClass('editor-image-fields-full');
-
       }
     });
   }
@@ -367,7 +365,6 @@ Backdrop.behaviors.editorImageLibrary = {
   attach: function (context, settings) {
     // The context may be the image library div itself, so include the context
     // element in the selector.
-
     $('[data-editor-library-view]')
       .once('editor-library-view')
       .on('click', '.image-library-choose-file', function() {
@@ -519,10 +516,10 @@ Backdrop.behaviors.editorImageLibrary = {
    * Determine and update the disabled state of the reset icon
    */
   updateResetButtonState: function() {
-    var $icon = $('.filter-format-editor-image-form .editor-image-size #reset-orig');
-    var curWidth = $('.filter-format-editor-image-form [name="attributes[width]"]').val();
-    var curHeight = $('.filter-format-editor-image-form [name="attributes[height]"]').val();
-    if ((curWidth.length && $icon.data('data-dimensions').width != curWidth) || (curHeight.length && $icon.data('data-dimensions').height != curHeight))  {
+    var $icon = $('.filter-format-editor-image-form .image-ratio-reset-original');
+    var currentWidth = $('.filter-format-editor-image-form [name="attributes[width]"]').val();
+    var currentHeight = $('.filter-format-editor-image-form [name="attributes[height]"]').val();
+    if ((currentWidth.length && $icon.data('data-dimensions').width != currentWidth) || (currentHeight.length && $icon.data('data-dimensions').height != currentHeight))  {
       $('.filter-format-editor-image-form .editor-image-size #reset-orig').removeClass('reset-orig-inactive');
     }
     else {

@@ -218,7 +218,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   );
 
   // Add reset icon after the "height" field.
-  $form['size']['height']['#field_suffix'] .= '<button id="reset-orig" class="image-ratio-icon reset-orig reset-orig-inactive" title="' . t('Reset to original size') . '" aria-label="' . t('Reset to original size') . '">' . icon('arrows-clockwise-fill') . '</button>';
+  $form['size']['height']['#field_suffix'] .= '<button class="image-ratio-icon image-ratio-reset-original image-ratio-reset-original-inactive" title="' . t('Reset to original size') . '" aria-label="' . t('Reset to original size') . '">' . icon('arrows-clockwise-fill') . '</button>';
 
   // Original values used for reference in submit handler.
   $form['size']['previous_width'] = array(
@@ -808,10 +808,10 @@ function _filter_get_file_id($href) {
   // Now find this file name in uri field to get fid.
   if (!empty($filename)) {
     $results = db_select('file_managed')
-    ->fields('file_managed', array('fid', 'uri'))
-    ->condition('uri', '%/' . $filename, 'LIKE')
-    ->orderBy('fid', 'DESC')
-    ->execute();
+      ->fields('file_managed', array('fid', 'uri'))
+      ->condition('uri', '%/' . $filename, 'LIKE')
+      ->orderBy('fid', 'DESC')
+      ->execute();
 
     foreach ($results as $found) {
       $result = $found->fid;
