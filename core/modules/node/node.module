@@ -2694,8 +2694,8 @@ function node_access($op, $node, $account = NULL) {
  * @param string $table_alias
  *   Optional, the alias to the node access table.
  *
- * @return bool
- *   TRUE if the operation may be performed, FALSE otherwise.
+ * @return DatabaseCondition
+ *   A DatabaseCondition object.
  *
  * @since 1.30.0 Function added.
  */
@@ -3071,7 +3071,9 @@ function _node_query_node_access_alter($query, $type) {
     $table = $tableinfo['table'];
     if (!($table instanceof SelectQueryInterface) && $table == $base_table) {
       // Set the subquery.
+      // Add DISTINCT to make db optimizer less error-prone.
       $subquery = db_select('node_access', 'na')
+       ->distinct()
        ->fields('na', array('nid'));
 
       $grant_conditions = node_add_node_grants_to_query($grants, 'na');
@@ -3088,18 +3090,27 @@ function _node_query_node_access_alter($query, $type) {
         $base_alias = $node_alias;
         $field = 'entity_id';
       }
-      $subquery->where("$node_alias.$field = na.nid");
+      // Use a second subquery which will use the results of the first as a
+      // derived table. Force db optimizers to pre-filter the node_access data
+      // before evaluating the relationships on the outer tables.
+      $wrapper_alias = 'node_access_grants';
+      $wrapper_subquery = db_select($subquery, $wrapper_alias)
+        ->distinct()
+        ->fields('node_access_grants', array('nid'));
 
       // For an entity query, attach the subquery to the entity conditions.
       if (isset($node_conditions)) {
-        $node_conditions->exists($subquery);
+        $wrapper_subquery->where("$node_alias.$field = $wrapper_alias.nid");
+        $node_conditions->exists($wrapper_subquery);
       }
       // Otherwise attach it to the node query itself.
       elseif (empty($tableinfo['join type'])) {
-         $query->exists($subquery);
+         $wrapper_subquery->where("$node_alias.$field = $wrapper_alias.nid");
+        $query->exists($wrapper_subquery);
       }
       else {
         // If it's a join, add the node access check to the join condition.
+        $subquery->where("$node_alias.$field = na.nid");
         $join_cond = db_and()->exists($subquery);
         // Add the existing join conditions into the Condition object.
         if ($tables[$node_alias]['condition'] instanceof QueryConditionInterface) {
