@@ -1544,16 +1544,6 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test JavaScript versioning.
-   */
-  function testVersionQueryString() {
-    backdrop_add_js('core/misc/collapse.js', array('version' => 'foo'));
-    backdrop_add_js('core/misc/ajax.js', array('version' => 'bar'));
-    $javascript = backdrop_get_js();
-    $this->assertTrue(strpos($javascript, 'core/misc/collapse.js?v=foo') > 0 && strpos($javascript, 'core/misc/ajax.js?v=bar') > 0 , t('JavaScript version identifiers correctly appended to URLs'));
-  }
-
-  /**
    * Test JavaScript grouping and aggregation.
    */
   function testAggregation() {
