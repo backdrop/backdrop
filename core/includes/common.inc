@@ -5214,7 +5214,7 @@ function backdrop_pre_render_scripts(array $elements) {
             break;
 
           case 'file':
-            $query_string = $default_query_string;
+            $query_string = empty($item['version']) ? $default_query_string : 'v=' . $default_query_string;
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
             $element['#attributes']['src'] = file_create_url($item['data']) . $query_string_separator . ($item['cache'] ? $query_string : REQUEST_TIME);
             break;
