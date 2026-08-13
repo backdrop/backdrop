@@ -3105,7 +3105,7 @@ function _node_query_node_access_alter($query, $type) {
       }
       // Otherwise attach it to the node query itself.
       elseif (empty($tableinfo['join type'])) {
-         $wrapper_subquery->where("$node_alias.$field = $wrapper_alias.nid");
+        $wrapper_subquery->where("$node_alias.$field = $wrapper_alias.nid");
         $query->exists($wrapper_subquery);
       }
       else {
