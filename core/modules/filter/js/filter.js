@@ -497,11 +497,17 @@ Backdrop.behaviors.editorImageLibrary = {
   syncAspectRatio: function(imgDimensions) {
     $('.filter-format-editor-image-form [name="attributes[width]"]').off('input').on('input', function() {
       var newHeight = Math.round(this.value / imgDimensions.width * imgDimensions.height);
+      if (newHeight == 0) {
+        newHeight = '';
+      }
       $('.filter-format-editor-image-form [name="attributes[height]"]').val(newHeight);
       Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
     });
     $('.filter-format-editor-image-form [name="attributes[height]"]').off('input').on('input', function() {
       var newWidth = Math.round(this.value / imgDimensions.height * imgDimensions.width);
+      if (newWidth == 0) {
+        newWidth = '';
+      }
       $('.filter-format-editor-image-form [name="attributes[width]"]').val(newWidth);
       Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
     });
