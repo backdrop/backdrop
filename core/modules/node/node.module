@@ -3094,9 +3094,8 @@ function _node_query_node_access_alter($query, $type) {
       // derived table. Force db optimizers to pre-filter the node_access data
       // before evaluating the relationships on the outer tables.
       $wrapper_alias = 'node_access_grants';
-      $wrapper_subquery = db_select($subquery, $wrapper_alias)
-        ->distinct()
-        ->fields('node_access_grants', array('nid'));
+      $wrapper_subquery = db_select($subquery, $wrapper_alias);
+      $wrapper_subquery->addExpression('1');
 
       // For an entity query, attach the subquery to the entity conditions.
       if (isset($node_conditions)) {
