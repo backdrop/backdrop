@@ -1562,7 +1562,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     backdrop_add_js('core/misc/collapse.js', array('version' => $version['collapse']));
     backdrop_add_js('core/misc/ajax.js', array('version' => $version['ajax']));
     $javascript = backdrop_get_js();
-    $this->assertTrue(strpos($javascript, "core/misc/collapse.js?v={$expected['collapse']}") > 0 && strpos($javascript, "core/misc/ajax.js?v={$expected['ajax']}") > 0, t('JavaScript version identifiers correctly appended to URLs'));
+    $this->assertTrue(strpos($javascript, "core/misc/collapse.js?{$expected['collapse']}") > 0 && strpos($javascript, "core/misc/ajax.js?{$expected['ajax']}") > 0, t('JavaScript version identifiers correctly appended to URLs'));
   }
 
   /**
