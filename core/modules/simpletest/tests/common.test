@@ -1548,8 +1548,6 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    */
   function testVersionQueryString() {
     $expected = array();
-    $hash_algos = hash_algos();
-    $seed = substr(backdrop_get_hash_salt(), 0, 8);
     $version = array(
       'ajax' => 'bar',
       'collapse' => 'foo',
@@ -1558,18 +1556,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     // The following code is the same code used by
     // backdrop_pre_render_scripts(). If the code in that function is changed,
     // the following code needs to be changed too.
-    if (in_array('xxh128', $hash_algos, TRUE)) {
-      // Convert the seed to a positive integer.
-      $seed[0] = chr(ord($seed[0]) & 0x7f);
-      $seed = unpack('J', $seed)[1];
-      $expected['ajax'] = base_convert(hash('xxh128', $version['ajax'], FALSE, array('seed' => $seed)), 16, 36);
-      $expected['collapse'] = base_convert(hash('xxh128', $version['collapse'], FALSE, array('seed' => $seed)), 16, 36);
-    }
-    else {
-      $seed = substr($seed, 0, 8);
-      $expected['ajax'] = hash('crc32', $version['ajax'] . $seed);
-      $expected['collapse'] = hash('crc32', $version['collapse'] . $seed);
-    }
+    $expected['ajax'] = hash('crc32', $version['ajax'] . backdrop_get_hash_salt());
+    $expected['collapse'] = hash('crc32', $version['collapse'] . backdrop_get_hash_salt());
 
     backdrop_add_js('core/misc/collapse.js', array('version' => $version['collapse']));
     backdrop_add_js('core/misc/ajax.js', array('version' => $version['ajax']));
