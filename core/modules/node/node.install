@@ -2854,7 +2854,7 @@ function node_update_1024(&$sandbox) {
   }
 
   // Set a limit of records to update in each batch.
-  $limit = 25;
+  $limit = 2500;
 
   // Find the starting point within the array based on the progress so far.
   $offset = 0;
