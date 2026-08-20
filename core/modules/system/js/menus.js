@@ -13,6 +13,7 @@ Backdrop.behaviors.menuStyles = {
       var $menu = $(element);
       var style = $menu.data('menuStyle');
       var menuSettings = $menu.data('menuSettings');
+      var expandActiveTrail = $menu.data('expandActiveTrail');
       if ($menu.data('clickdown')) {
         menuSettings = $.extend(menuSettings, {
           noMouseOver: true
@@ -21,6 +22,11 @@ Backdrop.behaviors.menuStyles = {
       menuSettings = $.extend(menuSettings, {
         collapsibleBehavior: ($menu.data('collapse')) ? ($menu.data('collapse')) : 'default'
       });
+      if (expandActiveTrail) {
+        menuSettings = $.extend(menuSettings, {
+          expandActiveTrail: true
+        });
+      }
       if (Backdrop.menuStyles[style]) {
         Backdrop.menuStyles[style].attach(element, menuSettings);
       }
@@ -49,6 +55,13 @@ Backdrop.menuStyles.dropdown = {
       subIndicatorsText: ''
     });
     $(element).addClass('sm').smartmenus(settings);
+    if (settings.expandActiveTrail) {
+      var $menu = $(element);
+      var $activeParents = $menu.find('li.active-trail.has-children > a.has-submenu');
+      $activeParents.each(function() {
+        $menu.smartmenus('itemActivate', $(this));
+      });
+    }
   }
 };
 

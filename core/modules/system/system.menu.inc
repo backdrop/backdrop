@@ -26,6 +26,7 @@ function system_menu_block_defaults($menu_name) {
     'style' => NULL,
     'expand_all' => FALSE,
     'clickdown' => FALSE,
+    'expand_active_trail' => FALSE,
     'collapse' => 'default',
     'toggle_text' => 'Menu',
   );
@@ -199,6 +200,18 @@ function system_menu_block_form($config) {
     ),
   );
 
+  $form['expand_active_trail'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Expand active trail'),
+    '#default_value' => (!empty($config['expand_active_trail'])) ? $config['expand_active_trail'] : FALSE,
+    '#description' => t('When using the Dropdown menu style, start with the active trail expanded.'),
+    '#states' => array(
+      'visible' => array(
+        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
+      ),
+    ),
+  );
+
   return $form;
 }
 
@@ -268,6 +281,7 @@ function system_menu_block_build(array $config) {
         $collapsible_behavior = (empty($config['collapse'])) ? 'default' : $config['collapse'];
       }
       $data['content']['#wrapper_attributes']['data-collapse'] = $collapsible_behavior;
+      $data['content']['#wrapper_attributes']['data-expand-active-trail'] = (int) !empty($config['expand_active_trail']);
       $data['content']['#attached']['library'][] = array(
         'system',
         'backdrop.menus',
