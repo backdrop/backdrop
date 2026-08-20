@@ -22,7 +22,25 @@ class NodeBlock extends Block {
     if (!empty($this->settings['admin_description'])) {
       return filter_xss($this->settings['admin_description']);
     }
-    $preview = '<p>' . t('Displays content of node ID: @nid', array('@nid' => $this->settings['nid'])) . '</p>';
+    $preview = '<p>';
+    $node = $this->loadNode();
+    $entity = entity_get_info('node');
+    $display_mode = t('Full content');
+    if (isset($entity['view modes'][$this->settings['view_mode']])) {
+      $display_mode = $entity['view modes'][$this->settings['view_mode']]['label'];
+    }
+
+    if ($this->settings['current_node']) {
+      $preview .= t('Displays <em>current content</em> with %display_mode display mode.', array('%display_mode' => $display_mode));
+    }
+    elseif ($this->settings['nid'] && $node) {
+      $preview .= t('Displays <em>%title</em> (@nid) with %display_mode display mode', array('%title' => $node->title, '@nid' => $this->settings['nid'], '%display_mode' => $display_mode));
+    }
+    else {
+      $preview .= t('No content selected.');
+    }
+
+    $preview .= '</p>';
     $preview .= $this->getAdminConditionsPreview();
 
     return $preview;
@@ -38,7 +56,7 @@ class NodeBlock extends Block {
     if (module_exists('translation') && !empty($this->settings['translate'])) {
       $node = $this->loadTranslatedNode();
     } else {
-      $node = node_load($this->settings['nid']);
+      $node = $this->loadNode();
     }
 
     if ($this->settings['title_display'] === LAYOUT_TITLE_CUSTOM && $this->settings['title']) {
@@ -66,7 +84,7 @@ class NodeBlock extends Block {
     if (module_exists('translation') && !empty($this->settings['translate'])) {
       $node = $this->loadTranslatedNode();
     } else {
-      $node = node_load($this->settings['nid']);
+      $node = $this->loadNode();
     }
 
     // Prevent display of no access to the node.
@@ -101,7 +119,7 @@ class NodeBlock extends Block {
   function loadTranslatedNode() {
     global $language;
 
-    $node = node_load($this->settings['nid']);
+    $node = $this->loadNode();
 
     if (!empty($node->tnid) && !empty($node->langcode)) {
       $translations = translation_node_get_translations($node->tnid);
@@ -153,12 +171,25 @@ class NodeBlock extends Block {
       $nid_default = $title . ' [' . $settings['nid'] . ']';
     }
 
+    $form['current_node'] = array(
+      '#type' => 'checkbox',
+      '#default_value' => !empty($settings['current_node']),
+      '#title' => t('Use the current content.'),
+      '#description' => t('Display the current content item in the selected display mode. Only relevant if this block is displayed on a content item.'),
+    );
+
     $form['nid'] = array(
       '#title' => t('Content title or ID'),
+      '#description' => t('Select a specific content item by title or ID.'),
       '#type' => 'textfield',
       '#maxlength' => 512,
       '#default_value' => $nid_default,
       '#autocomplete_path' => 'node/autocomplete',
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="current_node"]' => array('checked' => TRUE),
+        ),
+      ),
     );
 
     $entity = entity_get_info('node');
@@ -205,12 +236,14 @@ class NodeBlock extends Block {
   function formValidate($form, &$form_state) {
     parent::formValidate($form, $form_state);
 
-    module_load_include('inc', 'node', 'node.pages');
-    if ($nid = node_autocomplete_validate($form_state['values']['nid'])) {
-      $form_state['values']['nid'] = $nid;
-    }
-    else {
-      form_error($form['nid'], t('Sorry, no content matching <em>%title</em> was found.', array('%title' => $form_state['values']['nid'])));
+    if (!$form_state['values']['current_node'] && $form_state['values']['nid']) {
+      module_load_include('inc', 'node', 'node.pages');
+      if ($nid = node_autocomplete_validate($form_state['values']['nid'])) {
+        $form_state['values']['nid'] = $nid;
+      }
+      else {
+        form_error($form['nid'], t('Sorry, no content matching <em>%title</em> was found.', array('%title' => $form_state['values']['nid'])));
+      }
     }
   }
 
@@ -228,7 +261,11 @@ class NodeBlock extends Block {
       $form_state['values']['link_node_title'] = FALSE;
     }
 
-    $this->settings['nid'] = (int) $form_state['values']['nid'];
+    $this->settings['nid'] = NULL;
+    if ($form_state['values']['nid'] && !$form_state['values']['current_node']) {
+      $this->settings['nid'] = (int) $form_state['values']['nid'];
+    }
+    $this->settings['current_node'] = (bool) $form_state['values']['current_node'];
     $this->settings['links'] = (bool) $form_state['values']['links'];
     $this->settings['leave_node_title'] = (bool) $form_state['values']['leave_node_title'];
     $this->settings['link_node_title'] = (bool) $form_state['values']['link_node_title'];
@@ -237,5 +274,22 @@ class NodeBlock extends Block {
     if (module_exists('translation')) {
       $this->settings['translate'] = (bool) $form_state['values']['translate'];
     }
+  }
+
+  /**
+   * Get the node
+   *
+   * @return Node|null
+   */
+  private function loadNode() {
+    $node = NULL;
+    if ($this->settings['nid']) {
+      $node = node_load($this->settings['nid']);
+    }
+    if ($this->settings['current_node']) {
+      $node = menu_get_object('node');
+    }
+
+    return $node;
   }
 }
