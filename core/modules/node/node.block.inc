@@ -24,17 +24,21 @@ class NodeBlock extends Block {
     }
     $preview = '<p>';
     $node = $this->loadNode();
-    $entity = entity_get_info('node');
+    $entity_info = entity_get_info('node');
     $display_mode = t('Full content');
-    if (isset($entity['view modes'][$this->settings['view_mode']])) {
-      $display_mode = $entity['view modes'][$this->settings['view_mode']]['label'];
+    if (isset($entity_info['view modes'][$this->settings['view_mode']])) {
+      $display_mode = $entity_info['view modes'][$this->settings['view_mode']]['label'];
     }
 
     if ($this->settings['current_node']) {
       $preview .= t('Displays <em>current content</em> with %display_mode display mode.', array('%display_mode' => $display_mode));
     }
     elseif ($this->settings['nid'] && $node) {
-      $preview .= t('Displays <em>%title</em> (@nid) with %display_mode display mode', array('%title' => $node->title, '@nid' => $this->settings['nid'], '%display_mode' => $display_mode));
+      $preview .= t('Displays <em>%title</em> (@nid) with %display_mode display mode', array(
+        '%title' => $node->title,
+        '@nid' => $this->settings['nid'],
+        '%display_mode' => $display_mode,
+      ));
     }
     else {
       $preview .= t('No content selected.');
@@ -62,11 +66,11 @@ class NodeBlock extends Block {
     if ($this->settings['title_display'] === LAYOUT_TITLE_CUSTOM && $this->settings['title']) {
       $title = check_plain($this->settings['title']);
     }
-    elseif ($this->settings['title_display'] === LAYOUT_TITLE_DEFAULT) {
+    elseif ($this->settings['title_display'] === LAYOUT_TITLE_DEFAULT && $node) {
       $title = $node->title;
     }
 
-    if ($title && $this->settings['link_node_title']) {
+    if ($title && $this->settings['link_node_title'] && $node) {
       $title = l($title, 'node/' . $node->nid);
     }
     else {
@@ -88,12 +92,16 @@ class NodeBlock extends Block {
     }
 
     // Prevent display of no access to the node.
-    if (!node_access('view', $node)) {
+    if (!node_access('view', $node) || !$node) {
       return;
     }
 
     // Use a clone of the node so we can hide the title safely.
-    $clone = clone($node);
+    $clone = $node ? clone($node) : NULL;
+
+    if (!$clone) {
+      return array();
+    }
 
     // Hide node title if not required.
     if (empty($this->settings['leave_node_title'])) {
@@ -116,7 +124,12 @@ class NodeBlock extends Block {
     return $content;
   }
 
-  function loadTranslatedNode() {
+  /**
+   * Translated node
+   *
+   * @return Node|null
+   */
+  public function loadTranslatedNode() {
     global $language;
 
     $node = $this->loadNode();
@@ -192,9 +205,9 @@ class NodeBlock extends Block {
       ),
     );
 
-    $entity = entity_get_info('node');
+    $entity_info = entity_get_info('node');
     $view_mode_options = array();
-    foreach ($entity['view modes'] as $mode => $option) {
+    foreach ($entity_info['view modes'] as $mode => $option) {
       $view_mode_options[$mode] = $option['label'];
     }
     // Remove view-modes that do not make sense for block display.
@@ -283,11 +296,14 @@ class NodeBlock extends Block {
    */
   private function loadNode() {
     $node = NULL;
-    if ($this->settings['nid']) {
+    if ($this->settings['nid'] && !$this->settings['current_node']) {
       $node = node_load($this->settings['nid']);
     }
     if ($this->settings['current_node']) {
       $node = menu_get_object('node');
+      if (!is_a($node, 'Node')) {
+        $node = NULL;
+      }
     }
 
     return $node;
