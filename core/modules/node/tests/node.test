@@ -2942,6 +2942,18 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Read more text now found.
     $this->assertText('Read more');
+
+    // Test the current content options.
+    $edit = array(
+      'current_node' => TRUE,
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('node/' . $node1->nid);
+
+    // Check that $node1 title now appears twice on $node1 path.
+    $elements = $this->xpath('//*[text()="' . $node1->title . '"]');
+    $this->assertEqual(count($elements), 2, 'The node title appears twice on the page.');
   }
 }
 
