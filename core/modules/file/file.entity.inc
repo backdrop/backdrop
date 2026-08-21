@@ -91,7 +91,7 @@ class File extends Entity {
    *
    * @var bool
    *
-   * @since @todo Property added.
+   * @since 1.35.0 Property added.
    */
   public $keepTimestamp = FALSE;
 
