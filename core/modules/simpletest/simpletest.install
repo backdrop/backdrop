@@ -173,6 +173,7 @@ function simpletest_schema() {
 function simpletest_uninstall() {
   backdrop_load('module', 'simpletest');
   simpletest_clean_database();
+  simpletest_clean_profile_cache_tables();
 
   // Remove generated files.
   file_unmanaged_delete_recursive('public://simpletest');
