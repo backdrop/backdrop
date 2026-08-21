@@ -17,7 +17,7 @@
 $database = array(
   'database' => 'database_name',
   'username' => 'user',
-  'password' => 'password',
+  'password' => 'pass',
   'host' => 'localhost',
 );
 
