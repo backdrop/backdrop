@@ -810,10 +810,10 @@ function _filter_get_file_id($href) {
   // Now find this file name in uri field to get fid.
   if (!empty($filename)) {
     $results = db_select('file_managed')
-     ->fields('file_managed', array('fid', 'uri'))
-     ->condition('uri', '%/' . $filename, 'LIKE')
-     ->orderBy('fid', 'DESC')
-     ->execute();
+      ->fields('file_managed', array('fid', 'uri'))
+      ->condition('uri', '%/' . $filename, 'LIKE')
+      ->orderBy('fid', 'DESC')
+      ->execute();
 
     foreach ($results as $found) {
       $result = $found->fid;
