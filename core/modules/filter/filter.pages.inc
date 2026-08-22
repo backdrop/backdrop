@@ -202,6 +202,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#type' => 'number',
     '#default_value' => $values['width'],
     '#max' => 99999,
+    '#min' => 0,
     '#attributes' => array('placeholder' => t('width')),
     '#parents' => array('attributes', 'width'),
     '#field_suffix' => ' &times; ',
@@ -212,6 +213,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#type' => 'number',
     '#default_value' => $values['height'],
     '#max' => 99999,
+    '#min' => 0,
     '#attributes' => array('placeholder' => t('height')),
     '#parents' => array('attributes', 'height'),
     '#field_suffix' => ' ' . t('pixels'),
@@ -808,10 +810,10 @@ function _filter_get_file_id($href) {
   // Now find this file name in uri field to get fid.
   if (!empty($filename)) {
     $results = db_select('file_managed')
-      ->fields('file_managed', array('fid', 'uri'))
-      ->condition('uri', '%/' . $filename, 'LIKE')
-      ->orderBy('fid', 'DESC')
-      ->execute();
+     ->fields('file_managed', array('fid', 'uri'))
+     ->condition('uri', '%/' . $filename, 'LIKE')
+     ->orderBy('fid', 'DESC')
+     ->execute();
 
     foreach ($results as $found) {
       $result = $found->fid;
