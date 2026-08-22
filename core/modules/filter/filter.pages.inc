@@ -133,16 +133,32 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['image']['src'] = array(
-    '#title' => t('Select from library'),
+    '#title' => t('Select image'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => '/example/image.jpg',
     '#default_value' => $values['src'],
     '#parents' => array('attributes', 'src'),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Select from library'),
+      'data-editor-image-toggle' => t('Select image'),
     ),
     '#weight' => -8,
+    '#maxlength' => 2048,
+  );
+
+
+  // Use a "textfield" rather than "url" to allow relative paths.
+  $form['image']['icon_src'] = array(
+    '#title' => t('Select icon'),
+    '#type' => 'textfield',
+    '#element_validate' => array('_filter_format_editor_link_url_validate'),
+    '#placeholder' => 'icon-name',
+    '#default_value' => $values['src'],
+    '#parents' => array('attributes', 'icon_src'),
+    '#wrapper_attributes' => array(
+      'data-editor-image-toggle' => t('Select icon'),
+    ),
+    '#weight' => -7,
     '#maxlength' => 2048,
   );
 
@@ -265,6 +281,23 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#validate' => array(),
     '#submit' => array(),
   );
+  // This button is hidden from display and clicked via JavaScript in
+  // Backdrop.behaviors.editorImageDialog in filter.js.
+  $form['icon_library_open'] = array(
+    '#type' => 'submit',
+    '#value' => t('Select from library'),
+    '#name' => 'icon_library_open',
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+    '#ajax' => array(
+      'callback' => '_filter_icon_library_ajax',
+      'event' => 'click',
+    ),
+    '#limit_validation_errors' => array(),
+    '#validate' => array(),
+    '#submit' => array(),
+  );
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
@@ -305,6 +338,25 @@ function _filter_image_library_ajax() {
 }
 
 /**
+ * Render the icon library.
+ */
+function _filter_icon_library_ajax() {
+  $system_icon_browser_form = backdrop_get_form('system_icon_browser_form');
+  $rendered_icon_form = backdrop_render($system_icon_browser_form);
+
+  $rendered_library = '<div class="library-view" data-editor-library-view="true">' . $rendered_icon_form . '</div>';
+  $error_messages = theme('status_messages');
+
+  $commands = array();
+  $commands[] = ajax_command_prepend('.editor-image-library', $error_messages . $rendered_library);
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
+/**
  * Submit handler for filter_format_editor_image_form().
  */
 function filter_format_editor_image_form_submit($form, &$form_state) {
@@ -313,6 +365,9 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
   $file = NULL;
   $fid = 0;
   $attributes = $form_state['values']['attributes'] ?? array();
+  if (!empty($attributes['icon_src']) && empty($attributes['src'])) {
+    $attributes['src'] = $attributes['icon_src'];
+  }
   if (!empty($form_state['values']['fid']) && empty($attributes['src'])) {
     $file = file_load($form_state['values']['fid']);
     $fid = $form_state['values']['fid'];

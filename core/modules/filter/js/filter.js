@@ -186,6 +186,9 @@ Backdrop.behaviors.editorImageDialog = {
           if (n > m) {
             $toggleItems.eq(n).find('label:first').before($toggleLink);
           }
+          else if (m-n == 2) {
+            $toggleItems.eq(n).find('label:first').next('a').after($toggleLink);
+          }
           else if (n < m) {
             $toggleItems.eq(n).find('label:first').after($toggleLink);
           }
@@ -224,7 +227,7 @@ Backdrop.behaviors.editorImageDialog = {
       // Focus the first shown new element. This keeps focus on the dialog and
       // allows it to be closed with the escape key.
       $newItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
-      $newItem.trigger('editor-image-show');
+      $newItem.trigger('editor-image-show', [$link]);
 
       return false;
     });
@@ -238,7 +241,7 @@ Backdrop.behaviors.editorImageDialog = {
       });
     });
 
-    $newToggles.on('editor-image-show', function() {
+    $newToggles.on('editor-image-show', function(e, $link) {
       var $input, previousValue;
       $(this).find('input[type="url"], input[type="text"], textarea').each(function() {
         $input = $(this);
@@ -248,7 +251,7 @@ Backdrop.behaviors.editorImageDialog = {
         }
       });
 
-      var libraryShown = $('.editor-image-fields').find('[name="attributes[src]"]').is(':visible');
+      var libraryShown = $('.editor-image-fields').find('[name="attributes[src]"], [name="attributes[icon_src]"]').is(':visible');
       if (libraryShown) {
         // Image library already open.
         if ($('.library-view').length) {
@@ -271,8 +274,18 @@ Backdrop.behaviors.editorImageDialog = {
 
           // Display the library view.
           $('.editor-image-fields').removeClass('editor-image-fields-full');
+          // Remove the library part of the dialog form.
+          $('.editor-image-library').each(function() {
+            Backdrop.detachBehaviors(this);
+            $(this).remove();
+          });
           $('form.filter-format-editor-image-form').append('<div class="editor-image-library"></div>');
-          $('[name=library_open]').trigger('click');
+          if ($link && $link.text() === "Select image") {
+            $('[name=library_open]').trigger('click');
+          }else{
+            $('[name=icon_library_open]').trigger('click');
+          }
+            
         }
       }
       else {
@@ -334,6 +347,19 @@ Backdrop.behaviors.editorImageLibrary = {
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');
       });
 
+    $('#system-icon-browser-form-wrapper')
+      .once('system-icon-browser-view')
+      .on('click', '.icon-wrapper', function() {
+        var icon = $(this).data('icon-url');
+        var $form = $('.filter-format-editor-image-form');
+        $form.find('[name="attributes[icon_src]"]').val(icon);
+
+        // Remove style from previous selection.
+        $('.image-library-icon-selected').removeClass('image-library-icon-selected');
+        // Add style to this selection.
+        $(this).addClass('image-library-icon-selected');
+      });
+
     // Empty width and height input fields, when an existing file is removed,
     // so a newly uploaded one does not inherit dimensions.
     // See Backdrop.behaviors.fileButtons, which triggers mousedown.
@@ -362,8 +388,10 @@ $(window).on('dialog:aftercreate', function () {
   var $visibleItems = $('[data-editor-image-toggle]').filter(':visible');
   if ($visibleItems.length > 1) {
     var $fidField = $visibleItems.find('[name="fid[fid]"]');
-    var $srcField = $visibleItems.find('[name="attributes[src]"]');
-    var $srcItem = $visibleItems.find($srcField).closest('[data-editor-image-toggle]');
+    var $imgSrcField = $visibleItems.find('[name="attributes[src]"]');
+    var $imgSrcItem = $visibleItems.find($imgSrcField).closest('[data-editor-image-toggle]');
+    var $iconSrcField = $visibleItems.find('[name="attributes[icon_src]"]');
+    var $iconSrcItem = $visibleItems.find($iconSrcField).closest('[data-editor-image-toggle]');
     var $errorItem = $visibleItems.find('.error').closest('[data-editor-image-toggle]');
 
     // If any errors are present in the form, pre-select that tab.
@@ -374,7 +402,28 @@ $(window).on('dialog:aftercreate', function () {
     }
     // If an FID is not provided but a src attribute is, highlight the tab
     // that contains the src attribute field.
-    if (($fidField.val() === '0' || !$fidField.val()) && $srcField.length > 0 && $srcField.val().length > 0) {
+    if (($fidField.val() === '0' || !$fidField.val()) && $imgSrcField.length > 0 && $imgSrcField.val().length > 0) {
+      // If this is an SVG image, it could be an icon or an uploaded SVG file.
+      // Check the path with icon API to test which it is, and open the
+      // appropriate tab.
+      var fileBaseName = $imgSrcField.val().split('\\').pop().split('/').pop().split('.');
+      let fileIsIcon = null;
+      if ($fileBaseName[1] == 'svg') {
+        $.ajax({
+          async: false,
+          url: Backdrop.settings.basePath + 'system/icon-path-ajax/'+$fileBaseName[0],
+          type: 'POST',
+          dataType: 'json',
+          success: function (response) {
+            fileIsIcon = response.message;
+          },
+          error: function (xhr, status, error) {
+            console.error('AJAX Error: ' + error);
+          }
+        });
+      }
+
+      $srcItem = fileIsIcon ? $iconSrcItem : $imgSrcItem;
       $visibleItems.not($srcItem).hide().trigger('editor-image-hide');
       $srcItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
       $srcItem.trigger('editor-image-show');

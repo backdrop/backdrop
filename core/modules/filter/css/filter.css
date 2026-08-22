@@ -175,7 +175,7 @@
   flex-direction: row;
 }
 .image-form-wrapper {
-  width: 350px;
+  width: 400px;
   flex-grow: 0;
   padding-top: 0;
 }
@@ -206,4 +206,10 @@
 }
 .view-image-library .view-header p {
   margin: 0;
+}
+.filter-format-editor-image-form .icon-wrapper:hover {
+  border: 2px solid #ddd;
+}
+.filter-format-editor-image-form .icon-wrapper.image-library-icon-selected {
+  border: 2px solid #000;
 }
