@@ -256,14 +256,14 @@ Backdrop.behaviors.editorImageDialog = {
         Backdrop.filterImageEditorDisplay = 'upload';
         // Check if we had previously uploaded an image. If so, populate
         // our width and height fields with its width and height.
-        var existingFile = $('.filter-format-editor-image-form .form-managed-file a').attr('href');
-        if (typeof existingFile !== 'undefined') {
+        let existingFile = $('.filter-format-editor-image-form .form-managed-file a').attr('href');
+        if (typeof existingFile !== 'undefined' && existingFile !== '') {
           Backdrop.filterImageOriginalDimensions = {
             width: null,
             height: null
           };
 
-          var img = new Image();
+          let img = new Image();
           img.onload = function() {
             Backdrop.filterImageOriginalDimensions.width = this.width;
             Backdrop.filterImageOriginalDimensions.height = this.height;
@@ -391,7 +391,7 @@ Backdrop.behaviors.editorImageLibrary = {
       });
 
     // Lock image aspect ratio if the user manually changes width or height.
-    var $sizeFormItems = $('.filter-format-editor-image-form .editor-image-size');
+    let $sizeFormItems = $('.filter-format-editor-image-form .editor-image-size');
     // But first make sure, the form items exist.
     if (!$sizeFormItems.length) {
       return;
@@ -414,13 +414,13 @@ Backdrop.behaviors.editorImageLibrary = {
   },
   imageLoadExistingFile: function () {
     // When editing a previously added/selected image, or upload a new one.
-    var existingFile = $('.filter-format-editor-image-form .form-managed-file .file a').attr('href');
+    let existingFile = $('.filter-format-editor-image-form .form-managed-file .file a').attr('href');
     if (Backdrop.filterImageEditorDisplay === 'library') {
       existingFile = $('.filter-format-editor-image-form #edit-attributes-src').val();
     }
 
     if (typeof existingFile !== 'undefined' && existingFile !== '') {
-      var img = new Image();
+      let img = new Image();
       // First, define functions for img.
       img.onload = function() {
 
@@ -455,7 +455,7 @@ Backdrop.behaviors.editorImageLibrary = {
 
     // Selecting an image from library updates width and height values.
     $('.filter-format-editor-image-form [name="attributes[src]"]').once('filter-editor-img-src').on('change', function() {
-      var img = new Image();
+      let img = new Image();
       img.onload = function() {
         Backdrop.filterImageOriginalDimensions.width = this.width;
         Backdrop.filterImageOriginalDimensions.height = this.height;
@@ -496,19 +496,30 @@ Backdrop.behaviors.editorImageLibrary = {
    */
   syncAspectRatio: function(imgDimensions) {
     $('.filter-format-editor-image-form [name="attributes[width]"]').off('input').on('input', function() {
-      var newHeight = Math.round(this.value / imgDimensions.width * imgDimensions.height);
-      if (newHeight == 0) {
+      let newHeight = Math.round(this.value / imgDimensions.width * imgDimensions.height);
+      if (newHeight <= 0) {
         newHeight = '';
       }
       $('.filter-format-editor-image-form [name="attributes[height]"]').val(newHeight);
+
+      // If the user set the width to zero (or below), erase value.
+      if ($('.filter-format-editor-image-form [name="attributes[width]"]').val() <= 0) {
+        $('.filter-format-editor-image-form [name="attributes[width]"]').val('');
+      }
+
       Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
     });
     $('.filter-format-editor-image-form [name="attributes[height]"]').off('input').on('input', function() {
-      var newWidth = Math.round(this.value / imgDimensions.height * imgDimensions.width);
-      if (newWidth == 0) {
+      let newWidth = Math.round(this.value / imgDimensions.height * imgDimensions.width);
+      if (newWidth <= 0) {
         newWidth = '';
       }
       $('.filter-format-editor-image-form [name="attributes[width]"]').val(newWidth);
+
+      // If the user set the height to zero (or below), erase value.
+      if ($('.filter-format-editor-image-form [name="attributes[height]"]').val() <= 0) {
+        $('.filter-format-editor-image-form [name="attributes[height]"]').val('');
+      }
       Backdrop.behaviors.editorImageLibrary.updateResetButtonState();
     });
   },
@@ -522,9 +533,9 @@ Backdrop.behaviors.editorImageLibrary = {
    * Determine and update the disabled state of the reset icon
    */
   updateResetButtonState: function() {
-    var $icon = $('.filter-format-editor-image-form .image-ratio-reset-original');
-    var currentWidth = $('.filter-format-editor-image-form [name="attributes[width]"]').val();
-    var currentHeight = $('.filter-format-editor-image-form [name="attributes[height]"]').val();
+    let $icon = $('.filter-format-editor-image-form .image-ratio-reset-original');
+    let currentWidth = $('.filter-format-editor-image-form [name="attributes[width]"]').val();
+    let currentHeight = $('.filter-format-editor-image-form [name="attributes[height]"]').val();
     if ((currentWidth.length && $icon.data('data-dimensions').width != currentWidth) || (currentHeight.length && $icon.data('data-dimensions').height != currentHeight))  {
       $('.filter-format-editor-image-form .editor-image-size .image-ratio-reset-original').removeClass('image-ratio-reset-original-inactive');
     }
