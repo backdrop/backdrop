@@ -375,7 +375,7 @@ class SearchQuery extends SelectQueryExtender {
       $or = db_or();
       foreach ($this->words as $word) {
         if ($search_partial_words) {
-          $or->condition('i.word', '%' . $word . '%', 'LIKE');
+          $or->condition('i.word', "%$word%", 'LIKE');
         }
         else {
           $or->condition('i.word', $word);
