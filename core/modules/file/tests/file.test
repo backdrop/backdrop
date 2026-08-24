@@ -2449,6 +2449,64 @@ class FileUnitTestCase extends FileTestHelper {
   }
 
   /**
+   * Test keeping timestamp by property in file_save().
+   */
+  public function testFileKeepTimestamp() {
+    $file = $this->getTestFile('text');
+    $file->uid = 1;
+    $file->status = FILE_STATUS_PERMANENT;
+    /** @var File $file */
+    $file = entity_create('file', (array) $file);
+    file_save($file);
+
+    // Directly make this file "old".
+    $date = new DateTime('1 week ago');
+    $old_timestamp = (int) $date->format('U');
+    db_update('file_managed')
+      ->fields(array('timestamp' => $old_timestamp))
+      ->condition('fid', $file->fid)
+      ->execute();
+    entity_get_controller('file')->resetCache();
+
+    $file = file_load($file->fid);
+    $this->assertEqual($file->timestamp, $old_timestamp, 'File has the old timestamp set');
+    $file->keepTimestamp = TRUE;
+    file_save($file);
+    $this->assertEqual($file->timestamp, $old_timestamp, 'Setting keepTimestamp to TRUE prevents updating the timestamp.');
+    // Load fresh with default keepTimestamp value.
+    $file = file_load($file->fid);
+    file_save($file);
+    $this->assertEqual($file->timestamp, REQUEST_TIME, 'Default value of keepTimestamp lets the timestamp update.');
+  }
+
+  /**
+   * Verify that file_type_determine() does not change the timestamp.
+   */
+  public function testFileTypeDetermineTimestamp() {
+    $file_type = 'document';
+    $file = $this->createFile(array('type' => $file_type));
+
+    // Directly make this file "old" and simulate an upgraded site with file
+    // types not classified, yet.
+    $date = new DateTime('1 month ago');
+    $old_timestamp = (int) $date->format('U');
+    db_update('file_managed')
+      ->fields(array('timestamp' => $old_timestamp, 'type' => FILE_TYPE_NONE))
+      ->condition('fid', $file->fid)
+      ->execute();
+    entity_get_controller('file')->resetCache();
+    $file = file_load($file->fid);
+
+    $this->assertEqual($file->timestamp, $old_timestamp, 'File has the old timestamp set.');
+    $this->assertEqual($file->type, FILE_TYPE_NONE, 'No file type is set yet');
+
+    file_type_determine($file->fid);
+    $file = file_load($file->fid);
+    $this->assertEqual($file->timestamp, $old_timestamp, 'File has the old timestamp set after running file_type_determine() on it.');
+    $this->assertEqual($file->type, $file_type, 'File type is set after running file_type_determine() on it.');
+  }
+
+  /**
    * Tests storing image height and width as file metadata.
    */
   function testImageDimensions() {
