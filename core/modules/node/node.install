@@ -2769,44 +2769,31 @@ function node_update_1024(&$sandbox) {
     // Last node revision record read via the query.
     $sandbox['current_revision_record'] = -1;
 
-    // Get the node revision records.
-    $revision_results = db_select('node_revision', 'nr')
+    // Get the node revision and node records.
+    $query = db_select('node_revision', 'nr')
       ->fields('nr', array('vid', 'nid'))
-      ->condition('uid', 0)
-      ->condition('timestamp', 0)
-      ->orderBy('vid')
-      ->execute()
-      ->fetchAllAssoc('vid');
+      ->condition('nr.uid', 0)
+      ->condition('nr.timestamp', 0)
+      ->orderBy('nr.vid');
+    $query->innerJoin('node', 'n', 'nr.nid = n.nid');
+    $query->fields('n', array('uid', 'created', 'type'));
+    $revision_results = $query->execute()->fetchAllAssoc('nid');
 
     // Total node revision records that must be updated.
-    $sandbox['max'] = count($revision_results);
+    $sandbox['max'] = count(array_keys($revision_results));
     // Exit if no node revision records to update.
     if ($sandbox['max'] == 0) {
       return;
     }
 
-    // Loop through the revision results to find all the node ids.
-    $nids = array();
-    foreach ($revision_results as $vid => $row) {
-      $nids[] = $row->nid;
-    }
-    $nids = array_unique($nids);
-
-    // Retrieve the node records.
-    $node_results = db_select('node', 'n')
-      ->fields('n', array('nid', 'uid', 'created', 'type'))
-      ->condition('nid', $nids)
-      ->orderBy('nid')
-      ->execute();
-
     // Check for these nodes if revisions exist with user ids. If so, retrieve
     // the uid from the earliest revision.
     $node_revision_query = db_select('node_revision', 'nr')
       ->fields('nr', array('nid', 'uid'))
-      ->condition('nid', $nids, 'IN')
-      ->condition('uid', 0, '>');
-    $node_revision_query->groupBy('nid');
-    $node_revision_query->addExpression('min(`timestamp`)', 'timestamp');
+      ->condition('nid', array_keys($revision_results), 'IN')
+      ->condition('uid', 0, '>')
+      ->groupBy('nid');
+    $node_revision_query->addExpression('MIN(timestamp)', 'timestamp');
     $node_revision_results = $node_revision_query->execute()->fetchAllAssoc('nid');
 
     // Check which node types, if any, allow anonymous users to create content.
@@ -2819,33 +2806,29 @@ function node_update_1024(&$sandbox) {
       }
     }
 
-    // Collate the node owner and node created timestamp to $node_records.
-    $node_records = array();
-    foreach ($node_results as $row) {
-      $nid = $row->nid;
-      $node_records[$nid]['uid'] = $row->uid;
-      $node_records[$nid]['timestamp'] = $row->created;
-
+    // Combine the revision results and node records into a single array.
+    $revision_records = array();
+    foreach ($revision_results as $nid => $row) {
       // If the current node owner is "Anonymous" AND the node type allows
       // anonymous node creation, then we assume that the node author was
       // anonymous.
       $anon_author = isset($anon_create_types[$row->type]) && $row->uid == "0";
 
-      // If not an anonymous author AND other revisions exist for this node, use
-      // the uid from the earliest valid revision.
       if (!$anon_author && isset($node_revision_results[$nid])) {
-        $node_records[$nid]['uid'] = $node_revision_results[$nid]->uid;
+        // If not an anonymous author AND other revisions exist for this node,
+        // use the uid from the earliest valid revision.
+        $uid = $node_revision_results[$nid]->uid;
       }
-    }
-
-    // Combine the revision results and node records into a single array.
-    $revision_records = array();
-    foreach ($revision_results as $vid => $row) {
-      $revision_records[$vid] = array(
-        'vid' => $vid,
-        'nid' => $row->nid,
-        'uid' => $node_records[$row->nid]['uid'],
-        'timestamp' => $node_records[$row->nid]['timestamp'],
+      else {
+        // If no other revisions exist OR the node owner is anonymous, use the
+        // uid from the node.
+        $uid = $row->uid;
+      }
+      $revision_records[$row->vid] = array(
+        'vid' => $row->vid,
+        'nid' => $nid,
+        'uid' => $uid,
+        'timestamp' => $row->created,
       );
     }
     // Store the compiled revision records in the $sandbox.
