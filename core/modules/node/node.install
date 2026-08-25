@@ -2867,9 +2867,10 @@ function node_update_1024(&$sandbox) {
   }
   catch (Exception $e) {
     $transaction->rollback();
-    // Allow the update to continue by skipping the failed records if there is
-    // a failure. Retrieve what would have been the last vid in this batch.
-    $sandbox['current_revision_record'] = array_keys(array_slice($sandbox['revision_records'], $offset + $limit, 1, TRUE))[0];
+    // If there has been a failure set the current revision record to the
+    // last used revision id so the next batch can attempt to continue from the
+    // next record.
+    $sandbox['current_revision_record'] = $vid;
     watchdog_exception('Node Update', $e);
   }
   unset($transaction);
