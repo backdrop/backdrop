@@ -22,7 +22,7 @@ function template_preprocess_search_results(&$variables) {
   }
   foreach ($variables['results'] as $result) {
     $info = array();
-    if (empty($result['attributes']))  {
+    if (empty($result['attributes'])) {
       $attributes = '';
     }
     else {
