@@ -18,7 +18,7 @@
  *   pager page and the pager's configured number of items per page so that
  *   numbering is sequential across pages.
  *
- * @since 1.34.4 Added ol_start attribute.
+ * @since 1.34.4 Added $ol_start attribute.
  *
  * @see template_preprocess_search_results()
  *
