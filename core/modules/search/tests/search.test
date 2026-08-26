@@ -664,6 +664,25 @@ class SearchExactTestCase extends BackdropWebTestCase {
     $this->assertLinkByHref('page=3', 0, '4th page link is found for keyword search.');
     $this->assertNoLinkByHref('page=4', '5th page link is not found for keyword search.');
 
+    // Verify that result numbering continues on the next page without
+    // assuming a particular number of results per page.
+    $first_page_start = $this->xpath('//ol[contains(@class, "search-results")]/@start');
+    $this->assertEqual((string) $first_page_start[0], '1', 'Search results on the first page start at 1.');
+    $first_page_count = count($this->xpath('//ol[contains(@class, "search-results")]/li'));
+
+    $this->backdropGet('search/node', array(
+      'query' => array(
+        'keys' => 'love pizza',
+        'page' => 1,
+      ),
+    ));
+    $second_page_start = $this->xpath('//ol[contains(@class, "search-results")]/@start');
+    $this->assertEqual(
+      (string) $second_page_start[0],
+      (string) ($first_page_count + 1),
+      'Search result numbering continues on the second page.'
+    );
+
     // Test that the correct number of pager links are found for exact phrase search.
     $edit = array('keys' => '"love pizza"');
     $this->backdropPost('search/node', $edit, t('Search'));

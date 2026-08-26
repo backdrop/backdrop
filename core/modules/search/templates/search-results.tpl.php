@@ -14,7 +14,8 @@
  * - $search_results: Array of data for each result
  * - $module: The machine-readable name of the module (tab) being searched, such
  *   as "node" or "user".
- *
+ * - $ol_start: The starting number for the ordered list, based on the current
+ *   pager page and the pager's configured number of items per page.
  *
  * @see template_preprocess_search_results()
  *
@@ -23,7 +24,7 @@
 ?>
 <?php if (!empty($search_results)): ?>
   <h2><?php print t('Search results');?></h2>
-  <ol class="search-results <?php print $module; ?>-results">
+  <ol class="search-results <?php print $module; ?>-results" start="<?php print $ol_start; ?>">
     <?php foreach ($search_results as $result): ?>
       <li <?php print $result['attributes']; ?>>
         <?php print render($result['title_prefix']); ?>
