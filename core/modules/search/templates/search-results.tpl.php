@@ -15,7 +15,10 @@
  * - $module: The machine-readable name of the module (tab) being searched, such
  *   as "node" or "user".
  * - $ol_start: The starting number for the ordered list, based on the current
- *   pager page and the pager's configured number of items per page.
+ *   pager page and the pager's configured number of items per page so that
+ *   numbering is sequential across pages.
+ *
+ * @since 1.34.4 Added ol_start attribute.
  *
  * @see template_preprocess_search_results()
  *
