@@ -37,7 +37,7 @@ class ContactSiteWideTestCase extends BackdropWebTestCase {
     // Set settings.
     $edit = array();
     $edit['contact_default_status'] = TRUE;
-    $this->backdropPost('admin/config/people/settings', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/contact/settings', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), 'Setting successfully saved.');
 
     // Delete old categories to ensure that new categories are used.
@@ -336,7 +336,9 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer contact forms', 'administer users', 'administer account settings'));
 
     // Create some normal users with their contact forms enabled by default.
+    config_set('contact.settings', 'personal', TRUE);
     config_set('contact.settings', 'contact_default_status', TRUE);
+    menu_rebuild();
 
     $this->web_user = $this->backdropCreateUser(array('access user contact forms'));
     $this->contact_user = $this->backdropCreateUser();
@@ -395,7 +397,7 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
     // Disable the personal contact form.
     $this->backdropLogin($this->admin_user);
     $edit = array('contact_default_status' => FALSE);
-    $this->backdropPost('admin/config/people/settings', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/contact/settings', $edit, t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'), 'Setting successfully saved.');
     $this->backdropLogout();
 

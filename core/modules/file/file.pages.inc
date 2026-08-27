@@ -719,7 +719,7 @@ function file_manage_form_submit($form, &$form_state) {
   /** @var File $file */
   $file = $form_state['file'];
   /** @var File $temporary_upload */
-  $temporary_upload = $form_state['values']['replace_upload'] ? file_load($form_state['values']['replace_upload'][0]) : NULL;
+  $temporary_upload = $form_state['values']['replace_upload'] ? file_load($form_state['values']['replace_upload']) : NULL;
   $orphaned_uri = '';
 
   // Check if a replacement file has been uploaded.
@@ -1023,7 +1023,14 @@ function _file_usage_list_links(File $file, &$known_count, &$unknown_count) {
             // If the entity is in the EFQ result, access is allowed.
             if (isset($result[$entity_type][$entity->id()])) {
               $uri = $entity->uri();
-              $entity_list[] = l($entity->label(), $uri['path'], $uri['options']);
+
+              if (!empty($uri['path'])) {
+                $entity_list[] = l($entity->label(), $uri['path'], $uri['options']);
+              }
+              else {
+                $entity_list[] = check_plain($entity->label());
+              }
+
               $known_count++;
             }
             // If not, do not show a link and consider it an unknown location.
