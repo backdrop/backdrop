@@ -3044,7 +3044,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
    *
    * @covers ::formatDiff
    */
-  public function testformatDiff() {
+  public function testFormatDiff() {
     $test_data = $this->providerTestFormatDiff();
     foreach ($test_data as $data) {
       list($expected, $timestamp1, $timestamp2, $options) = $data;
@@ -3054,7 +3054,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Data provider for testformatDiff().
+   * Data provider for testFormatDiff().
    */
   public function providerTestFormatDiff() {
     // This is the fixed request time in the test.
