@@ -77,4 +77,3 @@ function template_preprocess_search_results(&$variables) {
   $variables['pager'] = theme($pager_theme, array('tags' => NULL));
   $variables['theme_hook_suggestions'][] = 'search_results__' . $variables['module'];
 }
-
