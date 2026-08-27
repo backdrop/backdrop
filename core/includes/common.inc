@@ -2582,6 +2582,10 @@ function format_size($size, $langcode = NULL) {
  * Works best if the interval is short, that is, less than 30 days. For larger
  * intervals use format_time_diff() for more precise time spans.
  *
+ * For intervals over 30 days, the output is approximate: a "month" is always
+ * exactly 30 days, and a "year" is always 365 days. It is not possible to make
+ * a more exact representation, given that there is only one input in seconds.
+ *
  * @param int $interval
  *   The length of the interval in seconds.
  * @param int $granularity
@@ -2764,7 +2768,7 @@ function format_time_diff($from, $to, $options = array()) {
             $granularity--;
           }
 
-          if ($granularity > 0 && $days > 0) {
+          if ((!$output || $weeks > 0) && $granularity > 0 && $days > 0) {
             $interval_output .= ($interval_output ? ' ' : '') . format_plural($days, '1 day', '@count days', array(), array('langcode' => $options['langcode']));
           } else {
             // If we did not output days, set the granularity to 0 so that we
@@ -2789,7 +2793,7 @@ function format_time_diff($from, $to, $options = array()) {
       $granularity--;
     } elseif ($output) {
       // Break if there was previous output but not any output at this level,
-      // to avoid skipping levels and getting output like "1 year 1 second".
+      // to avoid skipping levels and getting output like "1 year 1 sec".
       break;
     }
 

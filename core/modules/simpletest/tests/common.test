@@ -2971,6 +2971,458 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     date_default_timezone_set(backdrop_get_user_timezone());
     backdrop_save_session(TRUE);
   }
+
+  /**
+   * Tests the formatInterval method.
+   *
+   * @covers ::formatInterval
+   */
+  public function testFormatInterval() {
+    $test_data = $this->providerTestFormatInterval();
+    foreach ($test_data as $data) {
+      list($interval, $granularity, $expected, $langcode) = $data;
+      // Check if the granularity is specified.
+      if ($granularity) {
+        $result = format_interval($interval, $granularity, $langcode);
+      } else {
+        $result = format_interval($interval);
+      }
+
+      $this->assertEqual($expected, $result);
+    }
+  }
+
+  /**
+   * Provides some test data for the format interval test.
+   */
+  public function providerTestFormatInterval() {
+    $data = array(
+      // Checks for basic seconds.
+      array(1, 1, '1 sec', NULL),
+      array(1, 2, '1 sec', NULL),
+      array(2, 1, '2 sec', NULL),
+      array(2, 2, '2 sec', NULL),
+      // Checks for minutes with seconds.
+      array(61, 1, '1 min', NULL),
+      array(61, 2, '1 min 1 sec', NULL),
+      array(62, 2, '1 min 2 sec', NULL),
+      array(121, 1, '2 min', NULL),
+      array(121, 2, '2 min 1 sec', NULL),
+      // Check for hours with minutes and seconds.
+      array(3601, 1, '1 hour', NULL),
+      array(3601, 2, '1 hour 1 sec', NULL),
+      // Check for higher units.
+      array(86401, 1, '1 day', NULL),
+      array(604800, 1, '1 week', NULL),
+      array(2592000 * 2, 1, '2 months', NULL),
+      array(31536000 * 2, 1, '2 years', NULL),
+      // Check for a complicated one with months weeks and days.
+      array(
+        2592000 * 2 + 604800 * 3 + 86400 * 4, 3,
+        '2 months 3 weeks 4 days', NULL,
+      ),
+      // Check for the langcode.
+      array(61, 1, '1 min', self::LANGCODE),
+      // Check with an unspecified granularity.
+      array(61, NULL, '1 min 1 sec', NULL),
+    );
+
+    return $data;
+  }
+
+  /**
+   * Tests the formatInterval method for 0 second.
+   */
+  public function testFormatIntervalZeroSecond() {
+    $result = format_interval(0, 1, self::LANGCODE);
+
+    $this->assertEqual('0 sec', $result);
+  }
+
+  /**
+   * Tests the formatDiff method.
+   *
+   * @covers ::formatDiff
+   */
+  public function testformatDiff() {
+    $test_data = $this->providerTestFormatDiff();
+    foreach ($test_data as $data) {
+      list($expected, $timestamp1, $timestamp2, $options) = $data;
+
+      $this->assertEqual($expected, format_time_diff($timestamp1, $timestamp2, $options));
+    }
+  }
+
+  /**
+   * Data provider for testformatDiff().
+   */
+  public function providerTestFormatDiff() {
+    // This is the fixed request time in the test.
+    $request_time = $this->createTimestamp('2013-12-11 10:09:08');
+
+    $granularity_3 = array('granularity' => 3);
+    $granularity_4 = array('granularity' => 4);
+
+    $langcode_en = array('langcode' => 'en');
+    $langcode_xx = array('langcode' => self::LANGCODE);
+
+    $non_strict = array('strict' => FALSE);
+
+    $data = array(
+      // Checks for equal timestamps.
+      array('0 sec', $request_time, $request_time, array(),),
+
+      // Checks for seconds only.
+      array(
+        '1 sec', $this->createTimestamp('2013-12-11 10:09:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 sec', $this->createTimestamp('2013-12-11 10:09:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 sec', $this->createTimestamp('2013-12-11 10:09:07'),
+        $request_time, $granularity_3 + $langcode_en,
+      ),
+      array(
+        '1 sec', $this->createTimestamp('2013-12-11 10:09:07'),
+        $request_time, $granularity_4 + $langcode_xx,
+      ),
+      array(
+        '2 sec', $this->createTimestamp('2013-12-11 10:09:06'),
+        $request_time, array(),
+      ),
+      array(
+        '59 sec', $this->createTimestamp('2013-12-11 10:08:09'),
+        $request_time, array(),
+      ),
+      array(
+        '59 sec', $this->createTimestamp('2013-12-11 10:08:09'),
+        $request_time, array(),
+      ),
+
+      // Checks for minutes and possibly seconds.
+      array(
+        '1 min', $this->createTimestamp('2013-12-11 10:08:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 min', $this->createTimestamp('2013-12-11 10:08:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 min 1 sec', $this->createTimestamp('2013-12-11 10:08:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 min 59 sec', $this->createTimestamp('2013-12-11 10:07:09'),
+        $request_time, array(),
+      ),
+      array(
+        '2 min', $this->createTimestamp('2013-12-11 10:07:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 min 1 sec', $this->createTimestamp('2013-12-11 10:07:07'),
+        $request_time, array(),
+      ),
+      array(
+        '2 min 2 sec', $this->createTimestamp('2013-12-11 10:07:06'),
+        $request_time, array(),
+      ),
+      array(
+        '2 min 2 sec', $this->createTimestamp('2013-12-11 10:07:06'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '2 min 2 sec', $this->createTimestamp('2013-12-11 10:07:06'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '30 min', $this->createTimestamp('2013-12-11 09:39:08'),
+        $request_time, array(),
+      ),
+      array(
+        '59 min 59 sec', $this->createTimestamp('2013-12-11 09:09:09'),
+        $request_time, array(),
+      ),
+      array(
+        '59 min 59 sec', $this->createTimestamp('2013-12-11 09:09:09'),
+        $request_time, array(),
+      ),
+
+      // Checks for hours and possibly minutes or seconds.
+      array(
+        '1 hour', $this->createTimestamp('2013-12-11 09:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 hour', $this->createTimestamp('2013-12-11 09:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 hour', $this->createTimestamp('2013-12-11 09:09:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 hour', $this->createTimestamp('2013-12-11 09:09:06'),
+        $request_time, array(),
+      ),
+      array(
+        '1 hour 1 min', $this->createTimestamp('2013-12-11 09:08:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 hour 1 min 1 sec', $this->createTimestamp('2013-12-11 09:08:07'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '1 hour 1 min 2 sec', $this->createTimestamp('2013-12-11 09:08:06'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '1 hour 30 min', $this->createTimestamp('2013-12-11 08:39:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 hours', $this->createTimestamp('2013-12-11 08:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '23 hours 59 min', $this->createTimestamp('2013-12-10 10:10:08'),
+        $request_time, array(),
+      ),
+
+      // Checks for days and possibly hours, minutes or seconds.
+      array(
+        '1 day', $this->createTimestamp('2013-12-10 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 day', $this->createTimestamp('2013-12-10 10:09:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 day 1 hour', $this->createTimestamp('2013-12-10 09:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 day 1 hour 1 min', $this->createTimestamp('2013-12-10 09:08:07'),
+        $request_time, $granularity_3 + $langcode_en,
+      ),
+      array(
+        '1 day 1 hour 1 min 1 sec',
+        $this->createTimestamp('2013-12-10 09:08:07'),
+        $request_time, $granularity_4 + $langcode_xx,
+      ),
+      array(
+        '1 day 2 hours 2 min 2 sec',
+        $this->createTimestamp('2013-12-10 08:07:06'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '2 days', $this->createTimestamp('2013-12-09 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 days', $this->createTimestamp('2013-12-09 10:07:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 days 2 hours', $this->createTimestamp('2013-12-09 08:09:08'),
+        $request_time, array(),),
+      array(
+        '2 days 2 hours 2 min', $this->createTimestamp('2013-12-09 08:07:06'),
+        $request_time, $granularity_3 + $langcode_en,
+      ),
+      array(
+        '2 days 2 hours 2 min 2 sec',
+        $this->createTimestamp('2013-12-09 08:07:06'),
+        $request_time, $granularity_4 + $langcode_xx,
+      ),
+
+      // Checks for weeks and possibly days, hours, minutes or seconds.
+      array(
+        '1 week', $this->createTimestamp('2013-12-04 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 week 1 day', $this->createTimestamp('2013-12-03 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 weeks', $this->createTimestamp('2013-11-27 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 weeks 2 days', $this->createTimestamp('2013-11-25 08:07:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 weeks 2 days 2 hours 2 min',
+        $this->createTimestamp('2013-11-25 08:07:08'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '4 weeks', $this->createTimestamp('2013-11-13 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '4 weeks 1 day', $this->createTimestamp('2013-11-12 10:09:08'),
+        $request_time, array(),
+      ),
+
+      // Checks for months and possibly days, hours, minutes or seconds.
+      array(
+        '1 month', $this->createTimestamp('2013-11-11 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 month', $this->createTimestamp('2013-11-11 10:09:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 month', $this->createTimestamp('2013-11-11 09:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 month', $this->createTimestamp('2013-11-11 09:08:07'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '1 month', $this->createTimestamp('2013-11-11 09:08:07'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '1 month 4 weeks', $this->createTimestamp('2013-10-13 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 month 4 weeks 1 day', $this->createTimestamp('2013-10-13 10:09:08'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '1 month 4 weeks', $this->createTimestamp('2013-10-12 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 month 4 weeks 2 days', $this->createTimestamp('2013-10-12 10:09:08'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '2 months', $this->createTimestamp('2013-10-11 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 months', $this->createTimestamp('2013-10-10 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 months', $this->createTimestamp('2013-10-09 08:07:06'),
+        $request_time, array(),
+      ),
+      array(
+        '2 months', $this->createTimestamp('2013-10-09 08:07:06'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '2 months', $this->createTimestamp('2013-10-09 08:07:06'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '6 months', $this->createTimestamp('2013-06-09 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '11 months', $this->createTimestamp('2013-01-11 07:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '11 months 4 weeks', $this->createTimestamp('2012-12-12 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '11 months 4 weeks 2 days',
+        $this->createTimestamp('2012-12-12 10:09:08'),
+        $request_time, $granularity_3,
+      ),
+
+      // Checks for years and possibly months, days, hours, minutes or seconds.
+      array(
+        '1 year', $this->createTimestamp('2012-12-11 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 year', $this->createTimestamp('2012-12-11 10:08:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 year', $this->createTimestamp('2012-12-10 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 years', $this->createTimestamp('2011-12-11 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 years', $this->createTimestamp('2011-12-11 10:07:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 years', $this->createTimestamp('2011-12-09 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 years 2 months', $this->createTimestamp('2011-10-09 08:07:06'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '2 years 2 months', $this->createTimestamp('2011-10-09 08:07:06'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '10 years', $this->createTimestamp('2003-12-11 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '100 years', $this->createTimestamp('1913-12-11 10:09:08'),
+        $request_time, array(),
+      ),
+
+      // Checks the non-strict option vs. strict (default).
+      array(
+        '1 sec', $this->createTimestamp('2013-12-11 10:09:08'),
+        $this->createTimestamp('2013-12-11 10:09:07'), $non_strict,
+      ),
+      array(
+        '0 sec', $this->createTimestamp('2013-12-11 10:09:08'),
+        $this->createTimestamp('2013-12-11 10:09:07'), array(),
+      ),
+
+      // Checks granularity limit.
+      array(
+        '2 years 3 months 1 week', $this->createTimestamp('2011-08-30 11:15:57'),
+        $request_time, $granularity_3,
+      ),
+    );
+
+    return $data;
+  }
+
+  /**
+   * Creates a UNIX timestamp given a date and time string in the format
+   * year-month-day hour:minute:seconds (e.g. 2013-12-11 10:09:08).
+   *
+   * @param string $dateTimeString
+   *   The formatted date and time string.
+   *
+   * @return int
+   *   The UNIX timestamp.
+   */
+  private function createTimestamp($dateTimeString) {
+    return \DateTime::createFromFormat('Y-m-d G:i:s', $dateTimeString)->getTimestamp();
+  }
 }
 
 /**
