@@ -36,7 +36,31 @@ function contact_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t("Allow users to send themselves a copy of the submission."),
     '#description' => t("Include a 'Send yourself a copy' checkbox on site-wide and personal contact forms."),
-    '#default_value' => contact_show_personal_copy_checkbox()
+    '#default_value' => contact_show_personal_copy_checkbox(),
+  );
+
+  $form['personal_contact_form'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#title' => t('Personal contact form'),
+  );
+  $form['personal_contact_form']['personal'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Enable personal contact forms."),
+    '#description' => t("Enables personal contact forms for all user accounts."),
+    '#default_value' => $config->get('personal'),
+  );
+  $form['personal_contact_form']['contact_default_status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable the personal contact form by default for new users.'),
+    '#description' => t('Changing this setting will not affect existing users.'),
+    '#default_value' => $config->get('contact_default_status'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="personal"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $form['permissions_wrapper'] = array(
@@ -96,6 +120,12 @@ function contact_settings_form_submit($form, &$form_state) {
 
   // Remove permissions from default #config store (contact.settings).
   unset($form_state['values']['permissions']);
+
+  // Clear cache to update the personal contact form tab.
+  // Ensure that the enable personal contact form setting is saved before
+  // rebuilding the tab.
+  config_set('contact.settings', 'personal', $form_state['values']['personal']);
+  menu_rebuild();
 }
 
 /**
