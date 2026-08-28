@@ -543,7 +543,7 @@ function comment_update_1009() {
 }
 
 /**
- * Modify name db field to varchar 254, to match user's mail length
+ * Change the name field length to the user's mail length.
  */
 function comment_update_1010() {
   db_change_field('comment', 'name', 'name',
