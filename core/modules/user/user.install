@@ -2371,7 +2371,7 @@ function user_update_1026() {
 }
 
 /**
- * Update the users table `name` column to match `mail` column length.
+ * Change the name field length to the user's mail length.
  */
 function user_update_1027() {
   db_drop_unique_key('users', 'name');
