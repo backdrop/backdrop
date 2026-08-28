@@ -551,7 +551,7 @@ function comment_update_1010() {
       'type' => 'varchar',
       'length' => 254,
       'default' => NULL,
-      'description' => 'The comment author’s name. Uses users.name if the user is logged in, otherwise uses the value typed into the comment form.',
+      'description' => 'The comment author's name. Uses {users}.name if the user is logged in, otherwise uses the value typed into the comment form.',
     )
   );
 }
