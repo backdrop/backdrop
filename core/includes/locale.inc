@@ -107,7 +107,7 @@ define('LANGUAGE_NEGOTIATION_URL_DOMAIN', 'domain');
 /**
  * Identifies the language from the current interface language.
  *
- * @return
+ * @return string
  *   The current interface language code.
  */
 function locale_language_from_interface() {
@@ -121,13 +121,13 @@ function locale_language_from_interface() {
  * We perform browser accept-language parsing only if page cache is disabled,
  * otherwise we would cache a user-specific preference.
  *
- * @param $languages
+ * @param array $languages
  *   An array of language objects for enabled languages ordered by weight.
  *
- * @return
+ * @return string|false
  *   A valid language code on success, FALSE otherwise.
  */
-function locale_language_from_browser($languages) {
+function locale_language_from_browser(array $languages) {
   if (empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
     return FALSE;
   }
@@ -135,10 +135,12 @@ function locale_language_from_browser($languages) {
   // The Accept-Language header contains information about the language
   // preferences configured in the user's browser / operating system.
   // RFC 2616 (section 14.4) defines the Accept-Language header as follows:
+  // @code
   //   Accept-Language = "Accept-Language" ":"
   //                  1#( language-range [ ";" "q" "=" qvalue ] )
   //   language-range  = ( ( 1*8ALPHA *( "-" 1*8ALPHA ) ) | "*" )
-  // Samples: "hu, en-us;q=0.66, en;q=0.33", "hu,en-us;q=0.5"
+  // @endcode
+  // Samples: "hu, en-us;q=0.66, en;q=0.33", "hu,en-us;q=0.5".
   $browser_langcodes = array();
   if (preg_match_all('@(?<=[, ]|^)([a-zA-Z-]+|\*)(?:;q=([0-9.]+))?(?:$|\s*,\s*)@', trim($_SERVER['HTTP_ACCEPT_LANGUAGE']), $matches, PREG_SET_ORDER)) {
     foreach ($matches as $match) {
@@ -180,7 +182,8 @@ function locale_language_from_browser($languages) {
     $qvalue = isset($browser_langcodes['*']) ? $browser_langcodes['*'] : 0;
 
     // Find the longest possible prefix of the browser-supplied language
-    // ('the language-range') that matches this site language ('the language tag').
+    // ('the language-range') that matches this site language ('the language
+    // tag').
     $prefix = $langcode;
     do {
       if (isset($browser_langcodes[$prefix])) {
@@ -203,13 +206,13 @@ function locale_language_from_browser($languages) {
 /**
  * Identify language from the user preferences.
  *
- * @param $languages
+ * @param array $languages
  *   An array of valid language objects.
  *
- * @return
+ * @return string|false
  *   A valid language code on success, FALSE otherwise.
  */
-function locale_language_from_user($languages) {
+function locale_language_from_user(array $languages) {
   // User preference (only for logged users).
   global $user;
 
@@ -224,13 +227,13 @@ function locale_language_from_user($languages) {
 /**
  * Identify language from a request/session parameter.
  *
- * @param $languages
+ * @param array $languages
  *   An array of valid language objects.
  *
- * @return
+ * @return string|false
  *   A valid language code on success, FALSE otherwise.
  */
-function locale_language_from_session($languages) {
+function locale_language_from_session(array $languages) {
   $param = config_get('locale.settings', 'language_negotiation_session_parameter');
 
   // Request parameter: we need to update the session parameter only if we have
@@ -254,13 +257,13 @@ function locale_language_from_session($languages) {
 /**
  * Identify language via URL prefix or domain.
  *
- * @param $languages
+ * @param array $languages
  *   An array of valid language objects.
  *
- * @return
+ * @return string|false
  *   A valid language code on success, FALSE otherwise.
  */
-function locale_language_from_url($languages) {
+function locale_language_from_url(array $languages) {
   $language_url = FALSE;
 
   if (!language_negotiation_get_any(LANGUAGE_NEGOTIATION_URL)) {
@@ -289,7 +292,7 @@ function locale_language_from_url($languages) {
         // Skip check if the language doesn't have a domain.
         if (!empty($domains[$language->langcode])) {
           // Only compare the domains not the protocols or ports.
-          // Remove protocol and add http:// so parse_url works
+          // Remove protocol and add http:// so parse_url works.
           $host = 'http://' . str_replace(array('http://', 'https://'), '', $domains[$language->langcode]);
           $host = parse_url($host, PHP_URL_HOST);
           if ($http_host == $host) {
@@ -325,18 +328,18 @@ function locale_language_from_url($languages) {
  *     fixed. This is done by introducing a prefix or domain in the rendered
  *     page matching the detected interface language.
  *
- * @param $languages
+ * @param array|null $languages
  *   (optional) An array of valid language objects. This is passed by
  *   language_provider_invoke() to every language provider callback, but it is
  *   not actually needed here. Defaults to NULL.
- * @param $language_type
+ * @param string $language_type
  *   (optional) The language type to fall back to. Defaults to the interface
  *   language.
  *
- * @return
+ * @return string
  *   A valid language code.
  */
-function locale_language_url_fallback($languages = NULL, $language_type = LANGUAGE_TYPE_INTERFACE) {
+function locale_language_url_fallback(?array $languages = NULL, $language_type = LANGUAGE_TYPE_INTERFACE) {
   $default = language_default();
   $prefix = (config_get('locale.settings', 'language_negotiation_url_part') == LANGUAGE_NEGOTIATION_URL_PREFIX);
 
@@ -357,6 +360,14 @@ function locale_language_url_fallback($languages = NULL, $language_type = LANGUA
  * Return links for the URL language switcher block.
  *
  * Translation links may be provided by other modules.
+ *
+ * @param string $type
+ *   Language negotiation type.
+ * @param string $path
+ *   URL path.
+ *
+ * @return array
+ *   Array of links.
  */
 function locale_language_switcher_url($type, $path) {
   // Get the enabled languages only.
@@ -377,6 +388,14 @@ function locale_language_switcher_url($type, $path) {
 
 /**
  * Return the session language switcher block.
+ *
+ * @param string $type
+ *   Language negotiation type.
+ * @param string $path
+ *   URL path.
+ *
+ * @return array
+ *   Array of links.
  */
 function locale_language_switcher_session($type, $path) {
   backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
@@ -411,8 +430,13 @@ function locale_language_switcher_session($type, $path) {
 
 /**
  * Rewrite URLs for the URL language provider.
+ *
+ * @param string $path
+ *   URL path.
+ * @param array $options
+ *   URL options. Updated by reference.
  */
-function locale_language_url_rewrite_url(&$path, &$options) {
+function locale_language_url_rewrite_url(&$path, array &$options) {
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
     $backdrop_static_fast['languages'] = &backdrop_static(__FUNCTION__);
@@ -495,6 +519,8 @@ function locale_language_url_rewrite_url(&$path, &$options) {
 
 /**
  * Reads language prefixes and uses the langcode if no prefix is set.
+ *
+ * @return array
  */
 function locale_language_negotiation_url_prefixes() {
   return config_get('locale.settings', 'language_negotiation_url_prefixes');
@@ -509,6 +535,8 @@ function locale_language_negotiation_url_prefixes_save(array $prefixes) {
 
 /**
  * Reads language domains.
+ *
+ * @return array
  */
 function locale_language_negotiation_url_domains() {
   return config_get('locale.settings', 'language_negotiation_url_domains');
@@ -523,8 +551,13 @@ function locale_language_negotiation_url_domains_save(array $domains) {
 
 /**
  * Rewrite URLs for the Session language provider.
+ *
+ * @param string $path
+ *   URL path.
+ * @param array $options
+ *   URL options. Updated by reference.
  */
-function locale_language_url_rewrite_session(&$path, &$options) {
+function locale_language_url_rewrite_session(&$path, array &$options) {
   static $query_rewrite, $query_param, $query_value;
 
   // The following values are not supposed to change during a single page
@@ -573,6 +606,11 @@ function locale_language_url_rewrite_session(&$path, &$options) {
  * The allowed tag list is like filter_xss_admin(), but omitting div and img as
  * not needed for translation and likely to cause layout issues (div) or a
  * possible attack vector (img).
+ *
+ * @param string $string
+ *   String to check if it is safe.
+ *
+ * @return bool
  */
 function locale_string_is_safe($string) {
   // Some strings have tokens in them. For tokens in the first part of href or
@@ -591,7 +629,14 @@ function locale_string_is_safe($string) {
   //   alter the string. https://www.drupal.org/node/2372127
   $string = preg_replace('/\[[a-z0-9_-]+(:[a-z0-9_-]+)+\]/i', '', $string);
 
-  return decode_entities($string) == decode_entities(filter_xss($string, array('a', 'abbr', 'acronym', 'address', 'b', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'del', 'dfn', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'ins', 'kbd', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var')));
+  return decode_entities($string) == decode_entities(filter_xss($string, array(
+    'a', 'abbr', 'acronym', 'address', 'b', 'bdo', 'big', 'blockquote', 'br',
+    'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'del', 'dfn', 'dl',
+    'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'ins', 'kbd',
+    'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'sub',
+    'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul',
+    'var',
+  )));
 }
 
 /**
@@ -657,7 +702,8 @@ function _locale_parse_js_file($filepath) {
       'context' => $plural_matches[3][$key],
     );
 
-    // If there is also a plural version of this string, add it to the strings array.
+    // If there is also a plural version of this string, add it to the strings
+    // array.
     if (isset($plural_matches[2][$key])) {
       $matches[] = array(
         'string'  => $plural_matches[2][$key],
@@ -670,10 +716,13 @@ function _locale_parse_js_file($filepath) {
   foreach ($matches as $key => $match) {
 
     // Remove the quotes and string concatenations from the string and context.
-    $string =  implode('', preg_split('~(?<!\\\\)[\'"]\s*\+\s*[\'"]~s', substr($match['string'], 1, -1)));
+    $string = implode('', preg_split('~(?<!\\\\)[\'"]\s*\+\s*[\'"]~s', substr($match['string'], 1, -1)));
     $context = implode('', preg_split('~(?<!\\\\)[\'"]\s*\+\s*[\'"]~s', substr($match['context'], 1, -1)));
 
-    $source = db_query("SELECT lid, location FROM {locales_source} WHERE source = :source AND context = :context", array(':source' => $string, ':context' => $context))->fetchObject();
+    $source = db_query("SELECT lid, location FROM {locales_source} WHERE source = :source AND context = :context", array(
+      ':source' => $string,
+      ':context' => $context,
+    ))->fetchObject();
     if ($source) {
       // We already have this source string and now have to add the location
       // to the location column, if this file is not yet present in there.
@@ -693,7 +742,8 @@ function _locale_parse_js_file($filepath) {
       }
     }
     else {
-      // We don't have the source string yet, thus we insert it into the database.
+      // We don't have the source string yet, thus we insert it into the
+      // database.
       db_insert('locales_source')
         ->fields(array(
           'location'  => $filepath,
@@ -713,10 +763,10 @@ function _locale_parse_js_file($filepath) {
  * files are rebuilt (with locale_update_js_files()) the next time a
  * request is served in that language.
  *
- * @param $langcode
+ * @param string $langcode
  *   The language code for which the file needs to be refreshed.
  *
- * @return
+ * @return array
  *   New content of the 'javascript_parsed' variable.
  */
 function _locale_invalidate_js($langcode = NULL) {
@@ -788,7 +838,8 @@ function _locale_rebuild_js($langcode = NULL) {
   // Construct the filepath where JS translation files are stored.
   $dir = 'public://' . settings_get('locale_js_directory', 'languages');
 
-  // Delete old file, if we have no translations anymore, or a different file to be saved.
+  // Delete old file, if we have no translations anymore, or a different file to
+  // be saved.
   $locale_javascripts = state_get('locale_translation_javascript', array());
   $changed_hash = !isset($locale_javascripts[$language->langcode]) || ($locale_javascripts[$language->langcode] != $data_hash);
   if (!empty($locale_javascripts[$language->langcode]) && (!$data || $changed_hash)) {
@@ -863,7 +914,7 @@ function _locale_rebuild_js($langcode = NULL) {
 /**
  * Get list of all predefined and custom countries.
  *
- * @return
+ * @return array
  *   An array of all country code => country name pairs.
  */
 function country_get_list() {
@@ -877,7 +928,7 @@ function country_get_list() {
 /**
  * Get list of all predefined and custom timezone countries.
  *
- * @return
+ * @return array
  *   An array of all timezone => country code pairs.
  */
 function timezone_country_get_list() {

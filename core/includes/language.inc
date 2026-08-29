@@ -100,15 +100,15 @@ define('LANGUAGE_NEGOTIATION_DEFAULT', 'language-default');
 /**
  * Chooses a language based on language negotiation provider settings.
  *
- * @param $type
+ * @param string $type
  *   The type of language to retrieve as provided by hook_language_types_info().
  *   In Backdrop core, the available language types will be one of the
  *   following:
  *   - language
  *   - language_content
- *   - language_url
+ *   - language_url.
  *
- * @return
+ * @return object
  *   The negotiated language object.
  */
 function language_types_initialize($type) {
@@ -141,11 +141,11 @@ function language_types_initialize($type) {
 /**
  * Returns all the defined language types.
  *
- * @return
+ * @return array
  *   An associative array of language type information arrays keyed by type
  *   names. Based on information from hook_language_types_info().
  *
- * @see hook_language_types_info().
+ * @see hook_language_types_info()
  */
 function language_types_info() {
   $language_types = &backdrop_static(__FUNCTION__);
@@ -166,7 +166,7 @@ function language_types_info() {
  * whose language negotiation providers are module-defined and not altered
  * through the user interface.
  *
- * @return
+ * @return array
  *   An array of language type names.
  */
 function language_types_get_configurable() {
@@ -185,19 +185,20 @@ function language_types_get_configurable() {
 }
 
 /**
- * Checks whether a language negotiation provider is enabled for a language type.
+ * Checks whether a language negotiation provider is enabled for a language
+ * type.
  *
  * This has two possible behaviors:
  *  - If $provider_id is given return its ID if enabled, FALSE otherwise.
  *  - If no ID is passed the first enabled language negotiation provider is
  *    returned.
  *
- * @param $type
+ * @param string $type
  *   The language negotiation provider type.
- * @param $provider_id
+ * @param string|null $provider_id
  *   The language negotiation provider ID.
  *
- * @return
+ * @return string|false
  *   The provider ID if it is enabled, FALSE otherwise.
  */
 function language_negotiation_get($type, $provider_id = NULL) {
@@ -221,10 +222,10 @@ function language_negotiation_get($type, $provider_id = NULL) {
 /**
  * Checks if the language negotiation provider is enabled for any language type.
  *
- * @param $provider_id
+ * @param string $provider_id
  *   The language negotiation provider ID.
  *
- * @return
+ * @return bool
  *   TRUE if there is at least one language type for which the given language
  *   provider is enabled, FALSE otherwise.
  */
@@ -241,9 +242,9 @@ function language_negotiation_get_any($provider_id) {
 /**
  * Returns the language switch links for the given language.
  *
- * @param $type
+ * @param string $type
  *   The language negotiation type.
- * @param $path
+ * @param string $path
  *   The internal path the switch links will be relative to.
  *
  * @return object|bool
@@ -264,7 +265,8 @@ function language_negotiation_get_switch_links($type, $path) {
       $callback = $provider['callbacks']['switcher'];
       $result = $callback($type, $path);
 
-      // Add support for WCAG 2.0's Language of Parts to add language identifiers.
+      // Add support for WCAG 2.0's Language of Parts to add language
+      // identifiers.
       // http://www.w3.org/TR/UNDERSTANDING-WCAG20/meaning-other-lang-id.html
       foreach ($result as $langcode => $link) {
         $result[$langcode]['attributes']['lang'] = $langcode;
@@ -323,14 +325,14 @@ function language_negotiation_purge() {
 /**
  * Saves a list of language negotiation providers.
  *
- * @param $type
+ * @param string $type
  *   The language negotiation type.
- * @param $negotiation
+ * @param array $negotiation
  *   An array of language negotiation providers in the order they should be
  *   executed.
  *
  */
-function language_negotiation_set($type, $negotiation) {
+function language_negotiation_set($type, array $negotiation) {
   $defined_providers = language_negotiation_info();
   $default_types = language_types_get_configurable();
   $negotiation_data = array();
@@ -354,7 +356,7 @@ function language_negotiation_set($type, $negotiation) {
 /**
  * Get the language negotiator provider order for a language type.
  *
- * @param $type
+ * @param string $type
  *   The language negotiation type.
  * @return array
  *   An array of language negotiation providers.
@@ -375,7 +377,7 @@ function language_negotiation_order($type) {
 /**
  * Returns all the defined language negotiation providers.
  *
- * @return
+ * @return array
  *   An array of language negotiation providers.
  */
 function language_negotiation_info() {
@@ -390,7 +392,9 @@ function language_negotiation_info() {
       'callbacks' => array('language' => 'language_from_default'),
       'weight' => 10,
       'name' => t('Default language'),
-      'description' => t('Use the default site language (@language_name).', array('@language_name' => language_default()->name)),
+      'description' => t('Use the default site language (@language_name).', array(
+        '@language_name' => language_default()->name,
+      )),
       'config' => 'admin/config/regional/language',
     );
 
@@ -404,17 +408,17 @@ function language_negotiation_info() {
 /**
  * Helper function used to cache the language negotiation providers results.
  *
- * @param $provider_id
+ * @param string $provider_id
  *   The language negotiation provider's identifier.
- * @param $provider
+ * @param array|null $provider
  *   (optional) An associative array of information about the provider to be
  *   invoked (see hook_language_negotiation_info() for details). If not passed
  *   in, it will be loaded through language_negotiation_info().
  *
- * @return
+ * @return object
  *   A language object representing the language chosen by the provider.
  */
-function language_provider_invoke($provider_id, $provider = NULL) {
+function language_provider_invoke($provider_id, ?array $provider = NULL) {
   $results = &backdrop_static(__FUNCTION__);
 
   if (!isset($results[$provider_id])) {
@@ -452,7 +456,7 @@ function language_provider_invoke($provider_id, $provider = NULL) {
 /**
  * Returns the default language negotiation provider.
  *
- * @return
+ * @return string
  *   The default language code.
  */
 function language_from_default() {
@@ -465,18 +469,18 @@ function language_from_default() {
  * Parse the given path and return the language object identified by the prefix
  * and the actual path.
  *
- * @param $path
+ * @param string $path
  *   The path to split.
- * @param $languages
+ * @param array $languages
  *   An array of valid languages.
  *
- * @return
+ * @return array
  *   An array composed of:
  *    - A language object corresponding to the identified prefix on success,
  *      FALSE otherwise.
  *    - The path without the prefix on success, the given path otherwise.
  */
-function language_url_split_prefix($path, $languages) {
+function language_url_split_prefix($path, array $languages) {
   $args = empty($path) ? array() : explode('/', $path);
   $prefix = array_shift($args);
 
@@ -495,10 +499,10 @@ function language_url_split_prefix($path, $languages) {
 /**
  * Returns the possible fallback languages ordered by language weight.
  *
- * @param $type
+ * @param string $type
  *   (optional) The language type. Defaults to LANGUAGE_TYPE_CONTENT.
  *
- * @return
+ * @return array
  *   The identifier of the first language negotiation method for the given
  *   language type, or the default method if none exists.
  */

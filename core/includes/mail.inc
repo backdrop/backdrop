@@ -83,42 +83,42 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || (isset($_SERVER['SERVER
  *   }
  * @endcode
  *
- * @param $module
+ * @param string $module
  *   A module name to invoke hook_mail() on. The {$module}_mail() hook will be
  *   called to complete the $message structure which will already contain common
  *   defaults.
- * @param $key
+ * @param string $key
  *   A key to identify the email sent. The final email id for email altering
  *   will be {$module}_{$key}.
- * @param $to
+ * @param string $to
  *   The email address or addresses where the message will be sent to. The
  *   formatting of this string must comply with RFC 2822. Some examples are:
  *   - user@example.com
  *   - user@example.com, anotheruser@example.com
  *   - User <user@example.com>
- *   - User <user@example.com>, Another User <anotheruser@example.com>
- * @param $language
+ *   - User <user@example.com>, Another User <anotheruser@example.com>.
+ * @param stdClass $language
  *   Language object to use to compose the email.
- * @param $params
+ * @param array $params
  *   Optional parameters to build the email.
  * @param string $reply
  *   Optional email address to be used to answer.
- * @param $send
- *   If TRUE, backdrop_mail() will call backdrop_mail_system()->mail() to deliver
- *   the message, and store the result in $message['result']. Modules
+ * @param bool $send
+ *   If TRUE, backdrop_mail() will call backdrop_mail_system()->mail() to
+ *   deliver the message, and store the result in $message['result']. Modules
  *   implementing hook_mail_alter() may cancel sending by setting
  *   $message['send'] to FALSE.
  *
- * @return
+ * @return array
  *   The $message array structure containing all details of the
  *   message. If already sent ($send = TRUE), then the 'result' element
  *   will contain the success indicator of the email, failure being already
  *   written to the watchdog. (Success means nothing more than the message being
  *   accepted at php-level, which still doesn't guarantee it to be delivered.)
  */
-function backdrop_mail($module, $key, $to, $language, $params = array(), $reply = NULL, $send = TRUE) {
+function backdrop_mail($module, $key, $to, stdClass $language, array $params = array(), $reply = NULL, $send = TRUE) {
   $from = config_get('system.core', 'site_mail');
-  if (empty($from))  {
+  if (empty($from)) {
     $from = ini_get('sendmail_from');
   }
 
@@ -134,7 +134,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
     'params'   => $params,
     'send'     => TRUE,
     'subject'  => '',
-    'body'     => array()
+    'body'     => array(),
   );
 
   // Build the default headers. Note that the first letter of each word is
@@ -143,12 +143,12 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
     'MIME-Version'              => '1.0',
     'Content-Type'              => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
     'Content-Transfer-Encoding' => '8Bit',
-    'X-Mailer'                  => 'Backdrop CMS'
+    'X-Mailer'                  => 'Backdrop CMS',
   );
   if ($from) {
     // To prevent email from looking like spam, the addresses in the Sender and
-    // Return-Path headers should have a domain authorized to use the originating
-    // SMTP server.
+    // Return-Path headers should have a domain authorized to use the
+    // originating SMTP server.
     $headers['From'] = $headers['Sender'] = $headers['Return-Path'] = $from;
   }
   if ($reply) {
@@ -185,7 +185,10 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
       $message['result'] = $system->mail($message);
       // Log errors.
       if (!$message['result']) {
-        watchdog('mail', 'Error sending email (from %from to %to).', array('%from' => $message['from'], '%to' => $message['to']), WATCHDOG_ERROR);
+        watchdog('mail', 'Error sending email (from %from to %to).', array(
+          '%from' => $message['from'],
+          '%to' => $message['to'],
+        ), WATCHDOG_ERROR);
         backdrop_set_message(t('Unable to send email.'), 'error');
       }
     }
@@ -249,9 +252,9 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
  * sending or for sending via a remote gateway so as to reduce the load
  * on the local server.
  *
- * @param $module
+ * @param string $module
  *   The module name which was used by backdrop_mail() to invoke hook_mail().
- * @param $key
+ * @param string $key
  *   A key to identify the email sent. The final email ID for the email
  *   alter hook in backdrop_mail() would have been {$module}_{$key}.
  *
@@ -287,7 +290,10 @@ function backdrop_mail_system($module, $key) {
       $instances[$class] = new $class();
     }
     else {
-      throw new Exception(t('Class %class does not implement interface %interface', array('%class' => $class, '%interface' => 'MailSystemInterface')));
+      throw new Exception(t('Class %class does not implement interface %interface', array(
+        '%class' => $class,
+        '%interface' => 'MailSystemInterface',
+      )));
     }
   }
   return $instances[$class];
@@ -300,21 +306,21 @@ interface MailSystemInterface {
   /**
    * Format a message composed by backdrop_mail() prior sending.
    *
-   * @param $message
+   * @param array $message
    *   A message array, as described in hook_mail_alter().
    *
-   * @return
+   * @return array
    *   The formatted $message.
    */
-   public function format(array $message);
+  public function format(array $message);
 
   /**
    * Send a message composed by backdrop_mail().
    *
-   * @param $message
+   * @param array $message
    *   Message array with at least the following elements:
-   *   - id: A unique identifier of the email type. Examples: 'contact_user_copy',
-   *     'user_password_reset'.
+   *   - id: A unique identifier of the email type. Examples:
+   *     'contact_user_copy', 'user_password_reset'.
    *   - to: The mail address or addresses where the message will be sent to.
    *     The formatting of this string must comply with RFC 2822. Some examples:
    *     - user@example.com
@@ -330,10 +336,10 @@ interface MailSystemInterface {
    *      defined by one of the other parameters.  PHP's mail() looks for Cc
    *      and Bcc headers and sends the mail to addresses in these headers too.
    *
-   * @return
+   * @return bool
    *   TRUE if the mail was successfully accepted for delivery, otherwise FALSE.
    */
-   public function mail(array $message);
+  public function mail(array $message);
 }
 
 /**
@@ -346,9 +352,9 @@ interface MailSystemInterface {
  *
  * @param string $text
  *   The plain text to process.
- * @param string $indent (optional)
- *   A string to indent the text with. Only '>' characters are repeated on
- *   subsequent wrapped lines. Others are replaced by spaces.
+ * @param string $indent
+ *   (Optional) A string to indent the text with. Only '>' characters are
+ *   repeated on subsequent wrapped lines. Others are replaced by spaces.
  *
  * @return string
  *   The content of the email as a string with formatting applied.
@@ -366,12 +372,18 @@ function backdrop_wrap_mail($text, $indent = '') {
     $text = preg_replace('/(?(?<!^--) +\n|  +\n)/m', "\n", $text);
     // Wrap each line at the needed width.
     $lines = explode("\n", $text);
-    array_walk($lines, '_backdrop_wrap_mail_line', array('soft' => $soft, 'length' => strlen($indent)));
+    array_walk($lines, '_backdrop_wrap_mail_line', array(
+      'soft' => $soft,
+      'length' => strlen($indent),
+    ));
     $text = implode("\n", $lines);
   }
   else {
     // Wrap this line.
-    _backdrop_wrap_mail_line($text, 0, array('soft' => $soft, 'length' => strlen($indent)));
+    _backdrop_wrap_mail_line($text, 0, array(
+      'soft' => $soft,
+      'length' => strlen($indent),
+    ));
   }
   // Empty lines with nothing but spaces.
   $text = preg_replace('/^ +\n/m', "\n", $text);
@@ -395,26 +407,30 @@ function backdrop_wrap_mail($text, $indent = '') {
  * <a> <em> <i> <strong> <b> <br> <p> <blockquote> <ul> <ol> <li> <dl> <dt>
  * <dd> <h1> <h2> <h3> <h4> <h5> <h6> <hr>
  *
- * @param $string
+ * @param string $string
  *   The string to be transformed.
- * @param $allowed_tags (optional)
- *   If supplied, a list of tags that will be transformed. If omitted, all
- *   all supported tags are transformed.
+ * @param array|null $allowed_tags
+ *   (Optional). If supplied, a list of tags that will be transformed. If
+ *   omitted, all supported tags are transformed.
  *
- * @return
+ * @return string
  *   The transformed string.
  */
-function backdrop_html_to_text($string, $allowed_tags = NULL) {
+function backdrop_html_to_text($string, ?array $allowed_tags = NULL) {
   // Cache list of supported tags.
   static $supported_tags;
   if (empty($supported_tags)) {
-    $supported_tags = array('a', 'em', 'i', 'strong', 'b', 'br', 'p', 'blockquote', 'ul', 'ol', 'li', 'dl', 'dt', 'dd', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr');
+    $supported_tags = array(
+      'a', 'em', 'i', 'strong', 'b', 'br', 'p', 'blockquote', 'ul', 'ol', 'li',
+      'dl', 'dt', 'dd', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr',
+    );
   }
 
   // Make sure only supported tags are kept.
   $allowed_tags = isset($allowed_tags) ? array_intersect($supported_tags, $allowed_tags) : $supported_tags;
 
-  // Make sure tags, entities and attributes are well-formed and properly nested.
+  // Make sure tags, entities and attributes are well-formed and properly
+  // nested.
   $string = _filter_htmlcorrector(filter_xss($string, $allowed_tags));
 
   // Apply inline styles.
@@ -440,12 +456,11 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
   $split = preg_split('/<([^>]+?)>/', $string, -1, PREG_SPLIT_DELIM_CAPTURE);
   // Note: PHP ensures the array consists of alternating delimiters and literals
   // and begins and ends with a literal (inserting $null as required).
-
   $tag = FALSE; // Odd/even counter (tag or no tag)
-  $casing = NULL; // Case conversion function
+  $casing = NULL; // Case conversion function.
   $output = '';
-  $indent = array(); // All current indentation string chunks
-  $lists = array(); // Array of counters for opened lists
+  $indent = array(); // All current indentation string chunks.
+  $lists = array(); // Array of counters for opened lists.
   foreach ($split as $value) {
     $chunk = NULL; // Holds a string ready to be formatted and output.
 
@@ -453,7 +468,7 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
     if ($tag) {
       list($tagname) = explode(' ', strtolower($value), 2);
       switch ($tagname) {
-        // List counters
+        // List counters.
         case 'ul':
           array_unshift($lists, '*');
           break;
@@ -466,13 +481,13 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
           $chunk = ''; // Ensure blank new-line.
           break;
 
-        // Quotation/list markers, non-fancy headers
+        // Quotation/list markers, non-fancy headers.
         case 'blockquote':
           // Format=flowed indentation cannot be mixed with lists.
           $indent[] = count($lists) ? ' "' : '>';
           break;
         case 'li':
-          $indent[] = isset($lists[0]) && is_numeric($lists[0]) ? ' ' . $lists[0]++ . ') ' : ' * ';
+          $indent[] = isset($lists[0]) && is_numeric($lists[0]) ? ' ' . ($lists[0]++) . ') ' : ' * ';
           break;
         case 'dd':
           $indent[] = '    ';
@@ -489,7 +504,7 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
             $output = rtrim($output, "> \n") . "\"\n";
             $chunk = ''; // Ensure blank new-line.
           }
-          // Fall-through
+          // Fall-through.
         case '/li':
         case '/dd':
           array_pop($indent);
@@ -502,7 +517,7 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
           $chunk = ''; // Ensure blank new-line.
           break;
 
-        // Fancy headers
+        // Fancy headers.
         case 'h1':
           $indent[] = '======== ';
           $casing = 'backdrop_strtoupper';
@@ -520,14 +535,14 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
           $chunk = ''; // Ensure blank new-line.
           break;
 
-        // Horizontal rulers
+        // Horizontal rulers.
         case 'hr':
           // Insert immediately.
           $output .= backdrop_wrap_mail('', implode('', $indent)) . "\n";
           $output = _backdrop_html_to_text_pad($output, '-');
           break;
 
-        // Paragraphs and definition lists
+        // Paragraphs and definition lists.
         case '/p':
         case '/dl':
           $chunk = ''; // Ensure blank new-line.
@@ -566,8 +581,15 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
  * Wraps words on a single line.
  *
  * Callback for array_walk() within backdrop_wrap_mail().
+ *
+ * @param string $line
+ *   Mail line, updated by reference.
+ * @param string $key
+ *   Array element key.
+ * @param array $values
+ *   Values to apply for wrapping words.
  */
-function _backdrop_wrap_mail_line(&$line, $key, $values) {
+function _backdrop_wrap_mail_line(&$line, $key, array $values) {
   // Use soft-breaks only for purely quoted or unindented text.
   $line = wordwrap($line, 77 - $values['length'], $values['soft'] ? "  \n" : "\n");
   // Break really long words at the maximum width allowed.
@@ -578,6 +600,13 @@ function _backdrop_wrap_mail_line(&$line, $key, $values) {
  * Keeps track of URLs and replaces them with placeholder tokens.
  *
  * Callback for preg_replace_callback() within backdrop_html_to_text().
+ *
+ * @param array|null $match
+ *   (Optional) Matches found.
+ * @param bool $reset
+ *   If TRUE, reset internal URL list.
+ *
+ * @return array
  */
 function _backdrop_html_to_mail_urls($match = NULL, $reset = FALSE) {
   global $base_url, $base_path;
@@ -605,6 +634,11 @@ function _backdrop_html_to_mail_urls($match = NULL, $reset = FALSE) {
  * Replaces non-quotation markers from a given piece of indentation with spaces.
  *
  * Callback for array_map() within backdrop_html_to_text().
+ *
+ * @param string $indent
+ *   Indent string from which to replace non-quotation markers.
+ * @return string
+ *   Cleaned indent string.
  */
 function _backdrop_html_to_text_clean($indent) {
   return preg_replace('/[^>]/', ' ', $indent);
@@ -612,6 +646,15 @@ function _backdrop_html_to_text_clean($indent) {
 
 /**
  * Pads the last line with the given character.
+ *
+ * @param string $text
+ *   Test to pad.
+ * @param string $pad
+ *   String to pad text with.
+ * @param string $prefix
+ *   (Optional) Add a prefix to the text.
+ *
+ * @return string
  *
  * @see backdrop_html_to_text()
  */
