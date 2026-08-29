@@ -62,13 +62,14 @@ function basis_preprocess_page(&$variables) {
   // The version must be one of the values from basis_updated_css_versions().
   // This may also be an empty string, to signify "No updates".
   $update_version = theme_get_setting('css_update_version');
-
-  // Process supplemental CSS versions as body classes.
-  $update_css_versions = basis_updated_css_versions();
-  foreach ($update_css_versions as $update_css_version) {
-    if ($update_preference === 'all' || version_compare($update_version, $update_css_version, '>=')) {
-      $update_css_version_class = 'update-' . str_replace('.', '-', $update_css_version);
-      $variables['classes'][] = $update_css_version_class;
+  if (isset($update_version)) {
+    // Process supplemental CSS versions as body classes.
+    $update_css_versions = basis_updated_css_versions();
+    foreach ($update_css_versions as $update_css_version) {
+      if ($update_preference === 'all' || version_compare($update_version, $update_css_version, '>=')) {
+        $update_css_version_class = 'update-' . str_replace('.', '-', $update_css_version);
+        $variables['classes'][] = $update_css_version_class;
+      }
     }
   }
 }
