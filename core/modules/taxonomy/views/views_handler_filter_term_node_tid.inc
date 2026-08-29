@@ -312,6 +312,8 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $names = array();
     $missing = array();
     foreach ($values as $value) {
+      dpm('strtolower($value)');
+      dvm(strtolower($value));
       $missing[strtolower($value)] = TRUE;
       $names[] = $value;
     }
@@ -327,9 +329,10 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $query->addTag('taxonomy_term_access');
     $result = $query->execute();
     foreach ($result as $term) {
-      unset($missing[strtolower($term->name)]);
+      unset($missing[trim(strtolower($term->name))]);
       $tids[] = $term->tid;
     }
+
 
     if ($missing && !empty($this->options['error_message'])) {
       form_error($form, format_plural(count($missing), 'Unable to find term: @terms', 'Unable to find terms: @terms', array('@terms' => implode(', ', array_keys($missing)))));
