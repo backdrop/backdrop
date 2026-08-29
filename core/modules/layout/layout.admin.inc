@@ -13,6 +13,8 @@ function layout_list_page() {
   $layouts = layout_load_all();
   $layout_template_info = layout_get_layout_template_info();
 
+  backdrop_add_js(backdrop_get_path('module', 'layout') . '/js/layout.admin.js');
+
   // Group layouts by path.
   $layout_paths = array();
   $path_groups = array();
@@ -30,6 +32,11 @@ function layout_list_page() {
     // Build a list of all layout paths to check callbacks for.
     if ($path && !in_array($path, $layout_paths)) {
       $layout_paths[] = $path;
+    }
+    foreach ($layout->additional_paths as $additional_path) {
+      if ($additional_path && !in_array($additional_path, $layout_paths)) {
+        $layout_paths[] = $additional_path;
+      }
     }
   }
 
@@ -59,43 +66,8 @@ function layout_list_page() {
   $default_rows = array();
 
   foreach ($path_groups as $path => $group) {
-    // Print a row for rearranging a group of layouts.
-    $operations = array(
-      '#type' => 'dropbutton',
-      '#links' => _layout_get_group_operations($path, $group),
-    );
-    $row = array();
-    // Generate the heading row for non-default layout path groups.
-    if ($path !== '') {
-      if (strpos($path, '%') === FALSE) {
-        $path_link = t('Path: ') . l($path, $path);
-      }
-      else {
-        $path_link = t('System path: ') . check_plain($path);
-      }
-      $class = array();
-      if (empty($page_callbacks[$path])) {
-        $class[] = 'missing-path';
-        $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
-      }
-      $menu_item = layout_menu_item_load_multiple_by_path($path);
-      $row[] = array('data' => $path_link, 'class' => $class);
-      // Empty columns are intentional so that they may be hidden with
-      // priority-low class on the $header array.
-      $row[] = '';
-      $row[] = theme('layout_condition_info', array(
-        'layout' => $menu_item,
-        'show_empty' => FALSE,
-      ));
-      $row[] = '';
+    $row = _layout_build_group_row($path, $group, $page_callbacks);
 
-      if (count($operations['#links']) !== 0) {
-        $row[] = backdrop_render($operations);
-      }
-      else {
-        $row[] = '';
-      }
-    }
     // Add the heading row to the non-default layout path groups.
     if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
       $stand_alone_rows[] = array(
@@ -145,6 +117,24 @@ function layout_list_page() {
       }
       else {
         $override_rows[] = array('data' => $row, 'class' => $class);
+      }
+
+      if (isset($layout->additional_paths)) {
+        foreach ($layout->additional_paths as $additional_path) {
+          $additional_row = array(
+            'data' => _layout_build_group_row($additional_path, $group, $page_callbacks),
+            'class' => array('layout-group', 'additional'),
+          );
+
+          // Add the heading row to the non-default layout path groups.
+          if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
+            $stand_alone_rows[] = $additional_row;
+          }
+          elseif ($path !== '') {
+            $additional_row['class'][] = 'hidden';
+            $override_rows[] = $additional_row;
+          }
+        }
       }
     }
   }
@@ -231,6 +221,56 @@ function layout_list_page() {
     '#weight' => 5,
   );
   return $page;
+}
+
+/**
+ * Output a layout group row in the layout list page.
+ *
+ * @see layout_list_page()
+ */
+function _layout_build_group_row(string $path, array $group, array $page_callbacks) {
+  // Print a row for rearranging a group of layouts.
+  $operations = array(
+    '#type' => 'dropbutton',
+    '#links' => _layout_get_group_operations($path, $group),
+  );
+  $row = array();
+  // Generate the heading row for non-default layout path groups.
+  if ($path !== '') {
+    if (strpos($path, '%') === FALSE) {
+      $path_link = t('Path: ') . l($path, $path);
+    }
+    else {
+      $path_link = t('System path: ') . check_plain($path);
+    }
+    $class = array();
+    if (empty($page_callbacks[$path])) {
+      $class[] = 'missing-path';
+      $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
+    }
+    $menu_item = layout_menu_item_load_multiple_by_path($path);
+    $row[] = array('data' => $path_link, 'class' => $class);
+    // Some empty columns are intentional so that they may be hidden with
+    // priority-low class on the $header array.
+    $row[] = '';
+    // This row spans two columns.
+    $row[] = array(
+      'colspan' => 2,
+      'data' => theme('layout_condition_info', array(
+        'layout' => $menu_item,
+        'show_empty' => FALSE,
+      )),
+    );
+
+    if (count($operations['#links']) !== 0) {
+      $row[] = backdrop_render($operations);
+    }
+    else {
+      $row[] = '';
+    }
+  }
+
+  return $row;
 }
 
 /**

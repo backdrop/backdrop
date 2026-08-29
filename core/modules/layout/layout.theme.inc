@@ -65,6 +65,13 @@ function theme_layout_info($variables) {
   $output .= '<div class="layout-detail">' . $label . '</div>';
   $output .= '</div>';
 
+  if (!empty($layout->additional_paths)) {
+    $link_options = array(
+      'html' => TRUE,
+      'attributes' => array('class' => array('more-paths-toggle')),
+    );
+    $output .=  l('Show additional paths<span class="arrow"></span>', '#', $link_options);
+  }
   return $output;
 }
 
