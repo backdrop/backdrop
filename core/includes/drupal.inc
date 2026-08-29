@@ -258,7 +258,8 @@ function drupal_set_title($title = NULL, $output = CHECK_PLAIN) {
 }
 
 /**
- * Returns a URL-safe, base64 encoded string of highly randomized bytes (over the full 8-bit range).
+ * Returns a URL-safe, base64 encoded string of highly randomized bytes (over
+ * the full 8-bit range).
  *
  * @deprecated since 1.0.0
  * @see backdrop_random_key()
@@ -314,7 +315,8 @@ function drupal_hash_base64($data) {
  * @see backdrop_array_merge_deep()
  */
 function drupal_array_merge_deep() {
-  $args = func_get_args(); // pass $args to function
+  // Pass $args to function.
+  $args = func_get_args();
   return call_user_func_array('backdrop_array_merge_deep', $args);
 }
 
@@ -474,7 +476,7 @@ function drupal_autoload_class($class) {
  * @deprecated since 1.0.0
  * @see backdrop_static()
  */
-function &drupal_static($name, $default_value = NULL, $reset = FALSE) {
+function &drupal_static($name, $default_value = NULL, $reset = FALSE) { // phpcs:ignore
   return backdrop_static($name, $default_value, $reset);
 }
 
@@ -514,7 +516,7 @@ function drupal_placeholder($text) {
  * @deprecated since 1.0.0
  * @see backdrop_register_shutdown_function()
  */
-function &drupal_register_shutdown_function($callback = NULL) {
+function &drupal_register_shutdown_function($callback = NULL) { // phpcs:ignore
   return backdrop_register_shutdown_function($callback);
 }
 
@@ -916,7 +918,13 @@ function drupal_delete_file_if_stale($uri) {
  * @deprecated since 1.0.0
  * @see backdrop_clean_css_identifier()
  */
-function drupal_clean_css_identifier($identifier, $filter = array(' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '')) {
+function drupal_clean_css_identifier($identifier, $filter = array(
+  ' ' => '-',
+  '_' => '-',
+  '/' => '-',
+  '[' => '-',
+  ']' => '',
+)) {
   return backdrop_clean_css_identifier($identifier, $filter);
 }
 
@@ -981,7 +989,8 @@ function drupal_get_js($scope = 'header', $javascript = NULL, $skip_alter = FALS
 }
 
 /**
- * #pre_render callback to add the elements needed for JavaScript tags to be rendered.
+ * #pre_render callback to add the elements needed for JavaScript tags to be
+ * rendered.
  *
  * @deprecated since 1.0.0
  * @see backdrop_pre_render_scripts()
@@ -1159,6 +1168,7 @@ function drupal_valid_token($token, $value = '', $skip_anonymous = FALSE) {
  * @see backdrop_page_set_cache()
  */
 function drupal_page_set_cache() {
+  // phpcs:ignore
   return backdrop_page_set_cache();
 }
 
@@ -1380,7 +1390,7 @@ function drupal_sort_title($a, $b) {
  * @deprecated since 1.0.0
  * @see backdrop_array_get_nested_value()
  */
-function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) {
+function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) { // phpcs:ignore
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_array_get_nested_value($array, $parents, $key_exists);
 }
@@ -1728,7 +1738,8 @@ function file_create_htaccess($directory, $private = TRUE, $force_overwrite = FA
  */
 function drupal_get_form() {
   watchdog_deprecated_function('drupal', __FUNCTION__);
-  $args = func_get_args(); // pass $args to form function
+  // Pass $args to form function.
+  $args = func_get_args();
   return call_user_func_array('backdrop_get_form', $args);
 }
 
@@ -2213,8 +2224,7 @@ function drupal_match_path($path, $patterns) {
  *
  * @deprecated since 1.0.0
  */
-// cspell:disable-next-line
-function drupal_path_alias_whitelist_rebuild($source = NULL) {
+function drupal_path_alias_whitelist_rebuild($source = NULL) { // cspell:disable-line
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return array();
 }
@@ -2227,7 +2237,7 @@ function drupal_path_alias_whitelist_rebuild($source = NULL) {
 function drupal_path_alias_allowlist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   // cspell:disable-next-line
-  return drupal_path_alias_whitelist_rebuild();
+  return drupal_path_alias_whitelist_rebuild(); // phpcs:ignore
 }
 
 /**
@@ -2587,7 +2597,12 @@ function system_get_date_types($type = NULL) {
  * @deprecated since 1.0.0
  * @since 1.13.1 Function added.
  */
-function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '')) {
+function views_clean_css_identifier($identifier, $filter = array(
+  ' ' => '-',
+  '/' => '-',
+  '[' => '-',
+  ']' => '',
+)) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_clean_css_identifier($identifier, $filter);
 }

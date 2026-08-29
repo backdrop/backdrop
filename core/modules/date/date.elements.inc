@@ -1063,7 +1063,7 @@ function _date_popup_process_date_part(&$element) {
   // even though the Date API can handle them, so rework the value
   // we pass to the datepicker to use defaults it can accept (such as +0:+1)
   // date_range_string() adds the necessary +/- signs to the range string.
-  $date = '';
+  $date = NULL;
   if (!empty($element['#value']['date'])) {
     $date = new BackdropDateTime($element['#value']['date'], $element['#date_timezone'], _date_popup_date_format($element));
   }
