@@ -649,7 +649,7 @@ function system_modules($form, $form_state = array()) {
   foreach ($visible_files as $filename => $module) {
     $extra = array();
     $extra['enabled'] = (bool) $module->status;
-    $extra['disabled'] = (array_key_exists('disabled', $module->info)) ? $module->info['disabled'] : FALSE;
+    $extra['disabled'] = (array_key_exists('locked', $module->info)) ? $module->info['locked'] : FALSE;
     if ($extra['disabled'] && !empty($module->info['explanation']) ) {
       $extra['required_by'][] = $module->info['explanation'];
     }
