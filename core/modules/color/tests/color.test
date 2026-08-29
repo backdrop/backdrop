@@ -63,6 +63,8 @@ class ColorTestCase extends BackdropWebTestCase {
       $this->backdropGet($settings_path);
       $this->assertResponse(200);
       $edit['scheme'] = '';
+      backdrop_static_reset('theme_get_setting');
+
       $edit[$test_values['palette_input']] = '#123456';
       $this->backdropPost($settings_path, $edit, t('Save theme settings'));
 
@@ -144,6 +146,7 @@ class ColorTestCase extends BackdropWebTestCase {
     $data = array_merge(array('_config_name' => 'bartik.settings'), $config->get());
     $data['color']['palette']['top'] = '#654321';
     $edit = array('import' => json_encode($data));
+    backdrop_static_reset('theme_get_setting');
     $this->backdropPost($import_path, $edit, t('Import'));
 
     // Check that the new color shows up in the css files.
@@ -153,6 +156,44 @@ class ColorTestCase extends BackdropWebTestCase {
       $stylesheet_content .= implode("\n", file($stylesheet));
     }
     $this->assertTrue(strpos($stylesheet_content, 'color: #654321') !== FALSE, 'Make sure the color we changed is in the color stylesheet.');
+  }
+
+  /**
+   * Test the Bartik legacy color mode.
+   */
+  public function testUIAndConfig() {
+    $theme = 'bartik';
+    config_set('system.core', 'theme_default', $theme);
+    $settings_path = "admin/appearance/settings/$theme";
+    $this->backdropLogin($this->bigUser);
+
+    // Create a new scheme with no custom name.
+    $config_names = config_get_names_with_prefix($theme . '.color.');
+    $edit = array(
+      'scheme' => '',
+      'palette[top]' => '#123456',
+    );
+    $this->backdropPost($settings_path, $edit, t('Save theme settings'));
+    $config_names = config_get_names_with_prefix($theme . '.color.');
+    $this->assertTrue(count($config_names) === 1, 'One new color config found.');
+    $this->assertTrue(in_array("$theme.color.custom_scheme_1", $config_names), 'Config with custom name found.');
+    $this->assertTrue(config_get("$theme.color.custom_scheme_1", 'schemes.custom_scheme_1.colors.top') === $edit['palette[top]'], 'Color palette altered as expected.');
+
+    // Create a new scheme with a custom name.
+    $edit = array(
+      'scheme' => '',
+      'custom_name' => 'New scheme',
+      'palette[top]' => '#654321',
+    );
+    $this->backdropPost($settings_path, $edit, t('Save theme settings'));
+    $config_names = config_get_names_with_prefix($theme . '.color.');
+    $this->assertTrue(count($config_names) === 2, 'Two color configs now found.');
+    $this->assertTrue(in_array("$theme.color.new_scheme", $config_names), 'Config with custom name found.');
+    $this->assertTrue(config_get("$theme.color.new_scheme", 'schemes.new_scheme.colors.top') === $edit['palette[top]'], 'Color palette altered as expected.');
+    // Test that the two new schemes are in the scheme select list.
+    $this->backdropGet($settings_path);
+    $this->assertOption('edit-scheme', 'custom_scheme_1');
+    $this->assertOption('edit-scheme', 'new_scheme');
   }
 
   /**
@@ -202,7 +243,7 @@ class ColorTestCase extends BackdropWebTestCase {
     }
     $this->backdropPost($settings_path, $edit, t('Save theme settings'));
     $this->assertFalse(config_get('bartik.settings', 'color_legacy'), 'Legacy color flag set to FALSE in Bartik configuration.');
-    $this->assertNull(config_get('bartik.settings', 'color'), 'Color settings emptied out.');
+    $this->assertNull(config_get('bartik.settings', 'color.files'), 'Color settings emptied out.');
     $this->assertNoRaw('bartik/css/colors-legacy.css', 'Legacy color CSS correctly not found found on the homepage.');
     $this->assertRaw('bartik/css/colors.css', 'Default color CSS found on the homepage.');
   }
