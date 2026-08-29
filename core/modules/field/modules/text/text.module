@@ -276,6 +276,15 @@ function text_field_formatter_info() {
       'label' => t('Plain text'),
       'field types' => array('text', 'text_long', 'text_with_summary'),
     ),
+    'text_list' => array(
+      'label' => t('List of items'),
+      'field types' => array('text'),
+      'settings' => array(
+        'list_type' => 'comma',
+        'list_comma_and' => 0,
+        'list_comma_period' => 0,
+      ),
+    ),
 
     // The text_trimmed formatter displays the trimmed version of the
     // full element of the field. It is intended to be used with text
@@ -326,6 +335,10 @@ function text_field_formatter_settings_form($field, $instance, $view_mode, $form
     $element['trim_length']['#description'] = t('The trimmed %label field will be shorter than this character limit.', array('%label' => $instance['label']));
   }
 
+  if ($display['type'] == 'text_list') {
+    _field_list_formatter_settings_form($field, $instance, $view_mode, $form, $form_state, $element);
+  }
+
   return $element;
 }
 
@@ -342,6 +355,10 @@ function text_field_formatter_settings_summary($field, $instance, $view_mode) {
     $summary = t('Trimmed limit: @trim_length characters', array('@trim_length' => $settings['trim_length']));
   }
 
+  if ($display['type'] == 'text_list') {
+    _field_list_formatter_settings_summary($field, $instance, $view_mode, $summary);
+  }
+
   return $summary;
 }
 
@@ -354,6 +371,7 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
   switch ($display['type']) {
     case 'text_default':
     case 'text_trimmed':
+    case 'text_list':
       foreach ($items as $delta => $item) {
         if (empty($item['value'])) {
           continue;
@@ -384,9 +402,18 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
 
     case 'text_plain':
       foreach ($items as $delta => $item) {
-        $element[$delta] = array('#markup' => strip_tags($item['value']));
+        $output = _text_sanitize($instance, $langcode, $item, 'value');
+
+        $element[$delta] = array('#markup' => $output);
       }
       break;
+  }
+
+  if ($display['type'] == 'text_list') {
+    $list = _field_list_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display, $element);
+    $element = array(
+      '0' => $list,
+    );
   }
 
   return $element;

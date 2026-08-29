@@ -1050,6 +1050,11 @@ function link_field_formatter_info() {
       'field types' => array('link_field'),
       'multiple values' => FIELD_BEHAVIOR_DEFAULT,
     ),
+    'link_list' => array(
+      'label' => t('List of Links'),
+      'field types' => array('link_field'),
+      'settings' => _field_list_formatter_info_settings(),
+    ),
   );
 }
 
@@ -1066,6 +1071,9 @@ function link_field_formatter_settings_form($field, $instance, $view_mode, $form
       '#type' => 'checkbox',
       '#default_value' => $settings['strip_www'],
     );
+  }
+  else if ($display['type'] == 'link_list') {
+    _field_list_formatter_settings_form($field, $instance, $view_mode, $form, $form_state, $element);
   }
   return $element;
 }
@@ -1093,7 +1101,7 @@ function link_field_formatter_view($entity_type, $entity, $field, $instance, $la
   $elements = array();
   foreach ($items as $delta => $item) {
     $elements[$delta] = array(
-      '#theme' => 'link_formatter_' . $display['type'],
+      '#theme' => 'link_formatter_link_default',
       '#element' => $item,
       '#field' => $instance,
       '#display' => array(
@@ -1101,6 +1109,14 @@ function link_field_formatter_view($entity_type, $entity, $field, $instance, $la
       ),
     );
   }
+
+  if ($display['type'] == 'link_list') {
+    $list = _field_list_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display, $elements);
+    $elements = array(
+      '0' => $list,
+    );
+  }
+
   return $elements;
 }
 

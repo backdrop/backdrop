@@ -247,7 +247,7 @@ function number_field_formatter_info() {
     'number_integer' => array(
       'label' => t('Default'),
       'field types' => array('number_integer'),
-      'settings' =>  array(
+      'settings' => array(
         'thousand_separator' => '',
         // The 'decimal_separator' and 'scale' settings are not configurable
         // through the UI, and will therefore keep their default values. They
@@ -261,11 +261,24 @@ function number_field_formatter_info() {
     'number_decimal' => array(
       'label' => t('Default'),
       'field types' => array('number_decimal', 'number_float'),
-      'settings' =>  array(
+      'settings' => array(
         'thousand_separator' => '',
         'decimal_separator' => '.',
         'scale' => 2,
         'prefix_suffix' => TRUE,
+      ),
+    ),
+    'number_list' => array(
+      'label' => t('List of numbers'),
+      'field types' => array('number_integer', 'number_decimal', 'number_float'),
+      'settings' => array(
+        'thousand_separator' => '',
+        'decimal_separator' => '.',
+        'scale' => 2,
+        'prefix_suffix' => TRUE,
+        'list_type' => 'comma',
+        'list_comma_and' => 0,
+        'list_comma_period' => 0,
       ),
     ),
     'number_unformatted' => array(
@@ -283,7 +296,7 @@ function number_field_formatter_settings_form($field, $instance, $view_mode, $fo
   $settings = $display['settings'];
   $element = array();
 
-  if ($display['type'] == 'number_decimal' || $display['type'] == 'number_integer') {
+  if ($display['type'] == 'number_decimal' || $display['type'] == 'number_integer' || $display['type'] == 'number_list') {
     $options = array(
       ''  => t('- None -'),
       '.' => t('Decimal point'),
@@ -311,6 +324,10 @@ function number_field_formatter_settings_form($field, $instance, $view_mode, $fo
         '#default_value' => $settings['scale'],
         '#description' => t('The number of digits to the right of the decimal.'),
       );
+
+      if ($display['type'] == 'number_list') {
+        _field_list_formatter_settings_form($field, $instance, $view_mode, $form, $form_state, $element);
+      }
     }
 
     $element['prefix_suffix'] = array(
@@ -338,6 +355,10 @@ function number_field_formatter_settings_summary($field, $instance, $view_mode) 
     }
   }
 
+  if ($display['type'] == 'text_list') {
+    _field_list_formatter_settings_summary($field, $instance, $view_mode, $summary);
+  }
+
   return implode('<br />', $summary);
 }
 
@@ -351,6 +372,7 @@ function number_field_formatter_view($entity_type, $entity, $field, $instance, $
   switch ($display['type']) {
     case 'number_integer':
     case 'number_decimal':
+    case 'number_list':
       foreach ($items as $delta => $item) {
         $output = number_format($item['value'], $settings['scale'], $settings['decimal_separator'], $settings['thousand_separator']);
         if ($settings['prefix_suffix']) {
@@ -361,6 +383,12 @@ function number_field_formatter_view($entity_type, $entity, $field, $instance, $
           $output = $prefix . $output . $suffix;
         }
         $element[$delta] = array('#markup' => $output);
+      }
+      if ($display['type'] == 'number_list') {
+        $list = _field_list_formatter_view($entity_type, $entity, $field, $instance, $langcode,$items, $display, $element);
+        $element = array(
+          '0' => $list,
+        );
       }
       break;
 

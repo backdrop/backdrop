@@ -1506,3 +1506,155 @@ function _field_create_entity_from_ids($ids) {
   }
   return entity_create($ids->entity_type, $id_properties);
 }
+
+/**
+ * Helper to format to get all settings for list formatters.
+ */
+function _field_list_formatter_info_settings() {
+  return array(
+    'list_type' => 'comma',
+    'list_comma_and' => 0,
+    'list_comma_period' => 0,
+  );
+}
+
+/**
+ * Helper to format all list field settings forms.
+ */
+function _field_list_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state, &$element) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $element['list_type'] = array(
+    '#title' => t('List type'),
+    '#type' => 'select',
+    '#options' => array(
+      'comma' => t('Comma separated list'),
+      'ul' => t('Bulleted List (ul)'),
+      'ol' => t('Numbered list (ol)'),
+    ),
+    '#default_value' => (!empty($settings['list_type'])) ? $settings['list_type'] : 'comma',
+    '#required' => TRUE,
+  );
+  $element['list_comma_and'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Add 'and' before the last item"),
+    '#default_value' => (!empty($settings['list_comma_and'])) ? $settings['list_comma_and'] : '',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][list_type]"]' => array('value' => 'comma'),
+      ),
+    ),
+  );
+  $element['list_comma_period'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Add '.' after the last item"),
+    '#default_value' => (!empty($settings['list_comma_period'])) ? $settings['list_comma_period'] : '',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][list_type]"]' => array('value' => 'comma'),
+      ),
+    ),
+  );
+}
+
+function _field_list_formatter_settings_summary($field, $instance, $view_mode, &$summary) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $summary_items = array();
+
+  switch ($settings['list_type']) {
+    case 'ul':
+      $summary_items[] = t('Bulleted list');
+      break;
+    case 'ol':
+      $summary_items[] = t('Numbered list');
+      break;
+    case 'comma':
+      $summary_items[] = t('Comma separated list');
+      if ($settings['list_comma_and']) {
+        $summary_items[] =  t("with 'and' before the last item");
+      }
+      if ($settings['list_comma_period']) {
+        $summary_items[] =  t("with '.' after the last item");
+      }
+      break;
+  }
+
+
+  $summary = theme('item_list', array('type' => 'ul', 'items' => $summary_items));
+}
+
+/**
+ * Helper to format all list fields.
+ */
+function _field_list_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display, $element) {
+  $settings = $display['settings'];
+  $module = $field['module'];
+  $list_items = $element;
+  $element = array();
+
+  foreach ($items as $delta => $item) {
+    $list_items = _field_list_default_list($entity_type, $entity, $field, $instance, $langcode, $items, $display);
+  }
+
+  // If there are no list items, return and render nothing.
+  if (empty($list_items)) {
+    return;
+  }
+
+  switch ($settings['list_type']) {
+    case 'ul':
+    case 'ol':
+      // Render elements as one piece of markup and theme as item list.
+      $list = array(
+        '#theme' => 'item_list',
+        '#type' => $settings['list_type'],
+        '#items' => $list_items,
+      );
+    break;
+    case 'comma':
+      $dot = '';
+      if ($settings['list_comma_period']) {
+        $dot = '.';
+      }
+      // Render as one element as comma separated list.
+      $list = array(
+        '#theme' => 'container',
+        '#children' => implode(', ', $list_items) . $dot,
+        '#settings' => $settings,
+      );
+    break;
+  }
+
+  return $list;
+}
+
+/**
+ * Default listing callback.
+ */
+function _field_list_default_list($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $list_items = array();
+
+  // Use our helper function to get the value key dynamically.
+  $value_key = _field_list_get_value_key($field);
+
+  foreach ($items as $delta => $item) {
+    $list_items[$delta] = check_plain($item[$value_key]);
+  }
+
+  return $list_items;
+}
+
+/**
+ * Helper to return the value key for a field instance.
+ *
+ * @param $field array
+ *  The whole array of field instance info provided by the field api.
+ *
+ * @return string
+ *  The value key for the field.
+ */
+function _field_list_get_value_key(array $field) {
+  return (array_key_exists('columns', $field) && is_array($field['columns'])) ? key($field['columns']) : 'value';
+}
