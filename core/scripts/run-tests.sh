@@ -56,6 +56,11 @@
  *
  *              If provided, test results will be written as xml files to this path.
  *
+ *  --prefix    <prefix>
+ *
+ *              If provided, test class will try to use this database prefix. Only
+ *              used when running one test class.
+ *
  *  --color     Output text format results with color highlighting.
  *
  *  --verbose   Output detailed assertion messages in addition to summary.
@@ -95,7 +100,7 @@ if ($args['help'] || $count == 0) {
 if ($args['execute-test']) {
   // Masquerade as Apache for running tests.
   simpletest_script_init("Apache");
-  simpletest_script_run_one_test($args['test-id'], $args['execute-test']);
+  simpletest_script_run_one_test($args['test-id'], $args['execute-test'], $args['prefix']);
 }
 else {
   // Run administrative functions as CLI.
@@ -297,6 +302,11 @@ All arguments are long options.
 
               If provided, test results will be written as xml files to this path.
 
+ --prefix     <prefix>
+
+              If provided, test class will try to use this database prefix. Only
+              used when running one test class.
+
   --color     Output text format results with color highlighting.
 
   --verbose   Output detailed assertion messages in addition to summary.
@@ -361,6 +371,7 @@ function simpletest_script_parse_args() {
     'xml' => '',
     'summary' => '',
     'directory' => NULL,
+    'prefix' => NULL,
   );
 
   // Override with set values.
@@ -509,7 +520,12 @@ function simpletest_script_init($server_software) {
 function simpletest_script_execute_batch($test_id, $test_classes) {
   global $args;
 
+  backdrop_page_is_cacheable(FALSE);
+  backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
+  backdrop_page_is_cacheable(TRUE);
+
   // Multi-process execution.
+  $prefixes = array();
   $children = array();
   while (!empty($test_classes) || !empty($children)) {
     while (count($children) < $args['concurrency']) {
@@ -519,6 +535,34 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
 
       // Fork a child process.
       $test_class = array_shift($test_classes);
+
+      // Get the test profile.
+      $info = simpletest_test_get_by_class($test_class);
+      include_once BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
+      $test = new $test_class(0);
+      $profile = $test->getProfile();
+
+      // Make sure there is an array to keep track of prefixes for each profile.
+      if (!isset($prefixes[$profile])) {
+        $prefixes[$profile] = array();
+      }
+
+      // Look for an unused prefix in our list.
+      $prefix = FALSE;
+      foreach ($prefixes[$profile] as $prefix_id => $class) {
+        if ($class === FALSE) {
+          $prefix = $prefix_id;
+          break;
+        }
+      }
+
+      // If we don't have a spare prefix, make a new one.
+      if ($prefix === FALSE) {
+        $prefix = $test->prepareDatabasePrefix();
+        $test->releaseDatabasePrefix();
+      }
+      $prefixes[$profile][$prefix] = $test_class;
+
       $command = simpletest_script_command($test_id, $test_class);
       $process = proc_open($command, array(), $pipes, NULL, NULL, array('bypass_shell' => TRUE));
 
@@ -531,8 +575,13 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
       $children[] = array(
         'process' => $process,
         'class' => $test_class,
+        'profile' => $profile,
+        'prefix' => $prefix,
         'pipes' => $pipes,
       );
+
+      // Delay for 10ms to avoid forking multiple processes at once.
+      usleep(10000);
     }
 
     // Wait for children every 200ms.
@@ -547,6 +596,7 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
         if ($status['exitcode']) {
           simpletest_script_print_error('FATAL ' . $test_class . ': test runner returned a non-zero error code (' . $status['exitcode'] . ').');
         }
+        $prefixes[$child['profile']][$child['prefix']] = FALSE;
         unset($children[$cid]);
       }
     }
@@ -556,7 +606,7 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
 /**
  * Bootstrap Backdrop and run a single test.
  */
-function simpletest_script_run_one_test($test_id, $test_class) {
+function simpletest_script_run_one_test($test_id, $test_class, $prefix = NULL) {
   try {
     // Bootstrap Backdrop. Disable the fast return of the page cache.
     backdrop_page_is_cacheable(FALSE);
@@ -566,6 +616,9 @@ function simpletest_script_run_one_test($test_id, $test_class) {
     $info = simpletest_test_get_by_class($test_class);
     include_once BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
     $test = new $test_class($test_id);
+    if ($prefix !== NULL) {
+      $test->prepareDatabasePrefix($prefix);
+    }
     $test->run();
 
     $had_fails = (isset($test->results['#fail']) && $test->results['#fail'] > 0);
@@ -590,7 +643,7 @@ function simpletest_script_run_one_test($test_id, $test_class) {
  * @param $test_class
  *  The name of the test class to run.
  */
-function simpletest_script_command($test_id, $test_class) {
+function simpletest_script_command($test_id, $test_class, $prefix = NULL) {
   global $args, $php;
 
   $command = escapeshellarg($php) . ' ' . escapeshellarg('./core/scripts/' . $args['script']) . ' --url ' . escapeshellarg($args['url']);
@@ -598,6 +651,9 @@ function simpletest_script_command($test_id, $test_class) {
     $command .= ' --color';
   }
   $command .= " --php " . escapeshellarg($php) . " --test-id $test_id --execute-test $test_class";
+  if ($prefix !== NULL) {
+    $command .= " --prefix $prefix";
+  }
   return $command;
 }
 
