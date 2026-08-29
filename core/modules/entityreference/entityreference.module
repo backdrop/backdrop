@@ -695,6 +695,7 @@ function entityreference_field_widget_info() {
     'settings' => array(
       'match_operator' => 'CONTAINS',
       'size' => 60,
+      'limit' => 10,
       'hide_ids' => FALSE,
       // We don't have a default here, because it's not the same between
       // the two widgets, and the Field API doesn't update default
@@ -710,6 +711,7 @@ function entityreference_field_widget_info() {
     'settings' => array(
       'match_operator' => 'CONTAINS',
       'size' => 60,
+      'limit' => 10,
       'hide_ids' => FALSE,
       // We don't have a default here, because it's not the same between
       // the two widgets, and the Field API doesn't update default
@@ -753,6 +755,14 @@ function entityreference_field_widget_settings_form($field, $instance) {
         'CONTAINS' => t('Contains'),
       ),
       '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
+    );
+    $form['limit'] = array(
+      '#type' => 'number',
+      '#title' => t('Number of items to display'),
+      '#default_value' => isset($settings['limit']) ? $settings['limit'] : 10,
+      '#min' => 1,
+      '#required' => TRUE,
+      '#description' => t('The maximum number of items to display in the autocomplete results.'),
     );
     $form['size'] = array(
       '#type' => 'number',
@@ -1072,7 +1082,8 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
 
   if (isset($tag_last)) {
     // Get an array of matching entities.
-    $entity_labels = $handler->getReferencableEntities($tag_last, $instance['widget']['settings']['match_operator'], 10);
+    $limit = !empty($instance['widget']['settings']['limit']) ? $instance['widget']['settings']['limit'] : 10;
+    $entity_labels = $handler->getReferencableEntities($tag_last, $instance['widget']['settings']['match_operator'], $limit);
     $denied_label = t(ENTITYREFERENCE_DENIED);
     // Loop through the products and convert them into autocomplete output.
     foreach ($entity_labels as $values) {
