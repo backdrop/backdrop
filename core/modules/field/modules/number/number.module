@@ -46,17 +46,19 @@ function number_field_settings_form($field, $instance, $has_data) {
 
   if ($field['type'] == 'number_decimal') {
     $form['precision'] = array(
-      '#type' => 'select',
+      '#type' => 'number',
       '#title' => t('Precision'),
-      '#options' => backdrop_map_assoc(range(10, 32)),
+      '#min' => 10,
+      '#max' => 32,
       '#default_value' => $settings['precision'],
       '#description' => t('The total number of digits to store in the database, including those to the right of the decimal.'),
       '#disabled' => $has_data,
     );
     $form['scale'] = array(
-      '#type' => 'select',
+      '#type' => 'number',
       '#title' => t('Scale'),
-      '#options' => backdrop_map_assoc(range(0, 10)),
+      '#min' => 0,
+      '#max' => 10,
       '#default_value' => $settings['scale'],
       '#description' => t('The number of digits to the right of the decimal.'),
       '#disabled' => $has_data,
@@ -305,9 +307,10 @@ function number_field_formatter_settings_form($field, $instance, $view_mode, $fo
         '#default_value' => $settings['decimal_separator'],
       );
       $element['scale'] = array(
-        '#type' => 'select',
+        '#type' => 'number',
         '#title' => t('Scale'),
-        '#options' => backdrop_map_assoc(range(0, 10)),
+        '#min' => 0,
+        '#max' => 10,
         '#default_value' => $settings['scale'],
         '#description' => t('The number of digits to the right of the decimal.'),
       );
