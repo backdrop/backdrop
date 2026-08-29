@@ -2070,7 +2070,7 @@ class CommentHostnameTestCase extends CommentHelperCase {
   /**
    * Tests that an explicitly set hostname is preserved on save.
    */
-  function testCommentPresetHostnamePreserved() {
+  public function testCommentPresetHostnamePreserved() {
     $preset_hostname = '192.168.1.100';
     $comment = entity_create('comment', array(
       'nid' => $this->node->nid,
@@ -2089,7 +2089,7 @@ class CommentHostnameTestCase extends CommentHelperCase {
   /**
    * Tests that the hostname still defaults to the request IP when unset.
    */
-  function testCommentDefaultHostnameFromRequest() {
+  public function testCommentDefaultHostnameFromRequest() {
     $comment = entity_create('comment', array(
       'nid' => $this->node->nid,
       'uid' => $this->web_user->uid,
