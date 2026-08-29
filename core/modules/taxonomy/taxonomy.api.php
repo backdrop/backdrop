@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Hooks provided by the Taxonomy module.
+ * Hooks and callbacks provided by the Taxonomy module.
  */
 
 /**
@@ -292,3 +292,40 @@ function hook_taxonomy_term_page_alter(&$build) {
 /**
  * @} End of "addtogroup hooks".
  */
+
+/**
+ * Returns the set of valid terms for a taxonomy field.
+ *
+ * Callback for taxonomy_options_list() if it is included in a taxonomy field's
+ * settings, assigned to the `options_list_callback`.
+ *
+ * @param array $field
+ *   The field definition.
+ * @param array $instance
+ *   The instance definition. It is recommended to only use instance level
+ *   properties to filter out values from a list defined by field level
+ *   properties.
+ * @param string $entity_type
+ *   The entity type the field is attached to.
+ * @param EntityInterface|null $entity
+ *   The entity object the field is attached to, or NULL if no entity
+ *   exists (e.g. in field settings page).
+ *
+ * @return array
+ *   The array of valid terms for this field, keyed by term id.
+ *
+ * @ingroup callbacks
+ */
+function callback_taxonomy_options_list(array $field, array $instance, string $entity_type, ?EntityInterface $entity) {
+  $options = array();
+  foreach ($field['settings']['allowed_values'] as $tree) {
+    if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
+      if ($terms = taxonomy_get_tree($vocabulary->vid, $tree['parent'])) {
+        foreach ($terms as $term) {
+          $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
+        }
+      }
+    }
+  }
+  return $options;
+}
