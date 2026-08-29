@@ -56,13 +56,14 @@ function theme_taxonomy_vocabulary_description($variables) {
  */
 function theme_taxonomy_overview_terms($variables) {
   $form = $variables['form'];
+  $vocabulary = $form['#vocabulary'];
 
   $page_increment = $form['#page_increment'];
   $page_entries = $form['#page_entries'];
   $back_step = $form['#back_step'];
   $forward_step = $form['#forward_step'];
 
-  if (taxonomy_vocabulary_access('update', $form['#vocabulary'])) {
+  if (taxonomy_vocabulary_access('update', $vocabulary)) {
     // Add drag and drop if parent fields are present in the form.
     if ($form['#parent_fields']) {
       backdrop_add_tabledrag('taxonomy', 'match', 'parent', 'term-parent', 'term-parent', 'term-id', FALSE);
@@ -88,13 +89,13 @@ function theme_taxonomy_overview_terms($variables) {
         $term['depth']['#attributes']['class'] = array('term-depth');
         $row[0] .= backdrop_render($term['parent']) . backdrop_render($term['tid']) . backdrop_render($term['depth']);
       }
-      if (taxonomy_vocabulary_access('update', $form['#vocabulary'])) {
+      if (taxonomy_vocabulary_access('update', $vocabulary)) {
         $term['weight']['#attributes']['class'] = array('term-weight');
       }
-      if (module_exists('language') && $form['#vocabulary']->language == TAXONOMY_LANGUAGE_ENABLED) {
+      if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
         $row[] = backdrop_render($term['langcode']);
       }
-      if (taxonomy_vocabulary_access('update', $form['#vocabulary'])) {
+      if (taxonomy_vocabulary_access('update', $vocabulary)) {
         $row[] = backdrop_render($term['weight']);
       }
       $row[] = backdrop_render($term['operations']);
