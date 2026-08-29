@@ -1189,19 +1189,29 @@ function theme_views_mini_pager($variables) {
   $tags = $variables['tags'];
   $element = $variables['element'];
   $parameters = $variables['parameters'];
+  $use_count_query = $variables['use_count_query'];
 
   // Pager is only needed if there are results.
-  if (!isset($pager_page_array[$element]) || empty($pager_total)) {
+  if (!isset($pager_page_array[$element]) || ($use_count_query && empty($pager_total))) {
     return '';
   }
 
   // Current is the page we are currently paged to.
   $pager_current = $pager_page_array[$element] + 1;
-  // Max is the maximum page number.
-  $pager_max = $pager_total[$element];
-  // End of marker calculations.
 
-  if ($pager_total[$element] > 1) {
+  if (!$use_count_query) {
+    $data = format_plural($pager_current, 'Page 1', 'Page @count');
+  }
+  else {
+    // Max is the maximum page number.
+    $pager_max = $pager_total[$element];
+    $data = t('@current of @max', array(
+      '@current' => $pager_current,
+      '@max' => $pager_max,
+    ));
+  }
+
+  if (!$use_count_query || $pager_total[$element] > 1) {
     $li_previous = theme('pager_previous',
       array(
         'text' => isset($tags[1]) ? $tags[1] : t('‹‹'),
@@ -1217,26 +1227,33 @@ function theme_views_mini_pager($variables) {
         'element' => $element,
         'interval' => 1,
         'parameters' => $parameters,
+        'use_count_query' => $use_count_query,
       )
     );
 
+    $li_previous_classes = array('pager-previous');
+    if (empty($li_previous)) {
+      $li_previous_classes[] = 'pager-previous-empty';
+    }
     if ($li_previous) {
       $items[] = array(
-        'class' => array('pager-previous'),
+        'class' => $li_previous_classes,
         'data' => $li_previous,
       );
     }
     $items[] = array(
       'class' => array('pager-current'),
-      'data' => t('@current of @max', array('@current' => $pager_current, '@max' => $pager_max)),
+      'data' => $data,
     );
 
-    if ($li_next) {
-      $items[] = array(
-        'class' => array('pager-next'),
-        'data' => $li_next,
-      );
+    $li_next_classes = array('pager-next');
+    if (empty($li_next)) {
+      $li_next_classes[] = 'pager-next-empty';
     }
+    $items[] = array(
+      'class' => $li_next_classes,
+      'data' => $li_next,
+    );
 
     return theme('item_list',
       array(
