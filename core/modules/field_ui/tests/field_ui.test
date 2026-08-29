@@ -66,7 +66,7 @@ class FieldUITestCase extends BackdropWebTestCase {
 
     // Second step : 'Field settings' form.
     if (state_get('field_ui_test_field_settings', TRUE)) {
-      $this->assertRaw(format_string('These settings apply to the %label field everywhere it is used.', array('%label' => $label)), 'Field settings page was displayed.');
+      $this->assertRaw(format_string('The %label field is not being used anywhere else.', array('%label' => $label)), 'Field settings page was displayed.');
       $this->backdropPost(NULL, $field_edit, t('Save field settings'));
       $this->assertRaw(format_string('Updated field %label field settings.', array('%label' => $label)), 'Redirected to instance and widget settings page.');
     }
