@@ -64,6 +64,12 @@ description = Test actions provided by the comment module.
 group = Comment
 file = comment.test
 
+[CommentHostnameTestCase]
+name = Comment hostname
+description = Test that the comment hostname is set correctly on save.
+group = Comment
+file = comment.test
+
 [CommentFieldsTest]
 name = Comment fields
 description = Tests fields on comments.
