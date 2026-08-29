@@ -214,17 +214,89 @@ function backdrop_cache_system_paths() {
  * @return
  *   An aliased path if one was found, or the original path if no alias was
  *   found.
+ *
+ * @since 1.28.0: Added support for sub-path aliases.
  */
 function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
   // If no path is specified, use the current page's path.
   if ($path == NULL) {
     $path = $_GET['q'];
   }
-  $result = $path;
-  if ($alias = backdrop_lookup_path('alias', $path, $langcode)) {
-    $result = $alias;
+
+  $path_alias = $path;
+
+  // Sub-path alias functionality. Start by assuming that this is not a
+  // sub-path.
+  $sub_path = '';
+  $path_parts = explode('/', $path);
+  // Only consider providing sub-path aliases for non-admin paths and paths that
+  // have a depth of greater then 2 (entity type path / entity ID / sub-path).
+  $is_admin_path = in_array($path_parts[0], array('admin', 'batch', 'js'));
+
+  // Exclude the login and logout paths.
+  $exclude = count($path_parts) > 1 && $path_parts[0] == 'user' && in_array($path_parts[1], array('login', 'logout'));
+
+  if (!$is_admin_path && !$exclude && count($path_parts) > 2) {
+    // Special handling for taxonomy term sub-paths. Makes sure that the
+    // $path_parts array is reduced to 3 items, which is what the equivalent
+    // array for a user or node path would have:
+    // - $path_parts[0] holds the entire path for the specific entity type.
+    // - $path_parts[1] holds the entity ID.
+    // - $path_parts[2] and the rest of the array items hold the sub-path.
+    if ($path_parts[0] == 'taxonomy' && $path_parts[1] == 'term' && count($path_parts) > 3) {
+      // Append the "/term" path part to "taxonomy" in the first item of the
+      // array.
+      $path_parts[0] = 'taxonomy/term';
+      // Remove the array item that used to hold the individual "term" part.
+      unset($path_parts[1]);
+      // Re-index the array.
+      $path_parts = array_values($path_parts);
+    }
+
+    $path_parent_part = $path_parts[0];
+    // Check if the first path part is any of the paths for the known/supported
+    // core entity types.
+    $known_entity_type_paths = array('node', 'user', 'taxonomy/term');
+    // @to-do:
+    // - Consider providing a hook to allow checking for and handling
+    //   sub-paths for other entity types.
+    // - Can we get the list of possible entity type paths programmatically
+    //   instead of hard-coding it? Calling entity_get_info() here in order to
+    //   get a list of entity types is too expensive. Perhaps a helper function
+    //   that caches the results?
+    // - Consider sub-path support to files (when we have file paths) and
+    //   comments?
+    if (in_array($path_parent_part, $known_entity_type_paths)) {
+      // Check whether the second part of the path is an integer (which is what
+      // entity IDs are). is_int() does not work as expected here, since the
+      // expected numeric path part is actually a string; and is_numeric() is
+      // also less than ideal, since it returns TRUE for more than just
+      // integers. Since the path part we are checking is a actually a string
+      // representation of an integer, we are checking if the string consists of
+      // all digits instead.
+      if (ctype_digit($path_parts[1])) {
+        // Safe to assume that this is a sub-path. Reconstruct the main part
+        // from the entity type path and the entity ID.
+        $path_entity_id = $path_parts[1];
+        $path = $path_parent_part . '/' . $path_entity_id;
+        // Remove the parent and entity ID from the array, and use the rest of
+        // the path parts to construct the sub-path.
+        unset($path_parts[0]);
+        unset($path_parts[1]);
+        $sub_path = '/' . implode('/', $path_parts);
+      }
+    }
   }
-  return $result;
+
+  // Lookup the alias for the path. In the case of sub-paths, the check is
+  // performed against the "parent" path + the entity ID portion (constructed
+  // earlier), and then the sub-path portion is appended to the parent alias if
+  // found.
+  if ($alias = backdrop_lookup_path('alias', $path, $langcode)) {
+    $path_alias = $alias . $sub_path;
+  }
+
+  return $path_alias;
 }
 
 /**
@@ -242,14 +314,51 @@ function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
 function backdrop_get_normal_path($path, $langcode = NULL) {
   $original_path = $path;
 
-  // Lookup the URL alias first.
+  // First, lookup the source path of the entire provided alias and use that if
+  // found.
   if ($source = backdrop_lookup_path('source', $path, $langcode)) {
     $path = $source;
   }
+  else {
+    // If no matching source path was found for the provided alias, consider
+    // whether this is a sub-path alias.
+    $path_parts = explode('/', $path);
+    $is_admin_path = in_array($path_parts[0], array('admin', 'batch', 'js'));
 
-  // Allow other modules to alter the inbound URL. We cannot use backdrop_alter()
-  // here because we need to run hook_url_inbound_alter() in the reverse order
-  // of hook_url_outbound_alter().
+    // Exclude the login and logout paths.
+    $exclude = count($path_parts) > 1 && $path_parts[0] == 'user' && in_array($path_parts[1], array('login', 'logout'));
+
+    // Only consider non-admin paths and paths that have a depth of greater then
+    // 1 (we need at the very least a path alias + a sub-path).
+    if (!$is_admin_path && !$exclude && count($path_parts) > 1) {
+      // Start with the simplest possible case of a single path item, and assume
+      // that the rest of the path items are the sub-path.
+      $sub_path_parts = array();
+      $source = FALSE;
+      while (count($path_parts) > 1 && $source == FALSE) {
+        // Assume that the last array item is the sub-path. Store that and
+        // remove it from the array.
+        $sub_path_parts[] = array_pop($path_parts);
+        // Assume that the rest of the array items are the actual path alias.
+        $path = implode('/', $path_parts);
+        // Try to find a source match for that remaining assumed path alias.
+        if ($source = backdrop_lookup_path('source', $path, $langcode)) {
+          $path = $source;
+          $sub_path = implode('/', array_reverse($sub_path_parts));
+          // If a match is found, append the sub-path to it.
+          $path .= '/' . $sub_path;
+        }
+        else {
+          // If no match is fount, fall back to the original path.
+          $path = $original_path;
+        }
+      }
+    }
+  }
+
+  // Allow other modules to alter the inbound URL. backdrop_alter() cannot be
+  // used here, because we need to run hook_url_inbound_alter() in the reverse
+  // order of hook_url_outbound_alter().
   foreach (array_reverse(module_implements('url_inbound_alter')) as $module) {
     $function = $module . '_url_inbound_alter';
     $function($path, $original_path, $langcode);
