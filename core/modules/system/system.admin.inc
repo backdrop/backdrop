@@ -2471,6 +2471,7 @@ function system_get_debug_info() {
     // Intentionally not translated to match the trademark.
     'Backdrop CMS:' => $core_version,
     t('Installation profile:') => backdrop_get_profile(),
+    t('Initial version:') => config_get('system.core', 'install_version'),
     t('PHP version:') => phpversion(),
     t('Drupal 7 compatibility:') => settings_get('backdrop_drupal_compatibility') ? t('on') : t('off'),
     t('Database server:') => Database::getConnection()->version(),
