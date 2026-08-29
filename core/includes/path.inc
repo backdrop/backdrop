@@ -210,16 +210,36 @@ function backdrop_cache_system_paths() {
  *   An internal Backdrop path.
  * @param $langcode
  *   An optional language code to look up the path in.
+ * @param array $options
+ *   (optional) An associative array of additional options. See url() for more.
  *
  * @return
  *   An aliased path if one was found, or the original path if no alias was
  *   found.
+ *
+ * @since 1.31.0 The $options array may now be passed in to make the
+ * url_outbound alter functional.
  */
-function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
+function backdrop_get_path_alias($path = NULL, $langcode = NULL, array $options = array()) {
+  // Merge in defaults.
+  $options += array(
+    'fragment' => '',
+    'query' => array(),
+    'absolute' => FALSE,
+    'alias' => FALSE,
+    'prefix' => '',
+  );
   // If no path is specified, use the current page's path.
   if ($path == NULL) {
     $path = $_GET['q'];
   }
+  $original_path = $path;
+  // Allow other modules to alter the outbound URL and options.
+  // See url() as well.
+  if (!empty($path) && !$options['alias']) {
+    backdrop_alter('url_outbound', $path, $options, $original_path);
+  }
+
   $result = $path;
   if ($alias = backdrop_lookup_path('alias', $path, $langcode)) {
     $result = $alias;

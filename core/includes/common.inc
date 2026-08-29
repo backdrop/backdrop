@@ -2833,6 +2833,7 @@ function url($path = NULL, array $options = array()) {
     'alias' => FALSE,
     'prefix' => '',
   );
+  $get_path_alias = (!empty($path) && !$options['alias']);
 
   // Determine whether this is an external link, but ensure that the current
   // path is always treated as internal by default (to prevent external link
@@ -2844,8 +2845,12 @@ function url($path = NULL, array $options = array()) {
   // Preserve the original path before altering or aliasing.
   $original_path = $path;
 
-  // Allow other modules to alter the outbound URL and options.
-  backdrop_alter('url_outbound', $path, $options, $original_path);
+  if (!$get_path_alias) {
+    // Allow other modules to alter the outbound URL and options. If we are
+    // looking up an alias later, we'll do this then, within
+    // backdrop_get_path_alias.
+    backdrop_alter('url_outbound', $path, $options, $original_path);
+  }
 
   if (isset($options['fragment']) && $options['fragment'] !== '') {
     $options['fragment'] = '#' . $options['fragment'];
@@ -2904,9 +2909,9 @@ function url($path = NULL, array $options = array()) {
   if ($path == '<front>') {
     $path = '';
   }
-  elseif (!empty($path) && !$options['alias']) {
+  elseif ($get_path_alias) {
     $langcode = isset($options['language']) && isset($options['language']->langcode) ? $options['language']->langcode : '';
-    $alias = backdrop_get_path_alias($original_path, $langcode);
+    $alias = backdrop_get_path_alias($original_path, $langcode, $options);
     if ($alias != $original_path) {
       // Strip leading slashes from internal URL aliases to prevent them
       // becoming external URLs without protocol. /example.com should not be
