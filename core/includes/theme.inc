@@ -2442,19 +2442,23 @@ function theme_mark($variables) {
  *     - children: A list of nested child items to render that behave
  *       identically to 'items', but any non-numeric string keys are treated as
  *       HTML attributes for the child list that wraps 'children'.
+ *     - type: (optional) The type of list to return for the children ('ul' or
+ *       'ol'). If no type is specified, the type is inherited from the parent
+ *       list.
  *     Any other key/value pairs are used as HTML attributes for the list item
  *     in 'data'.
  *   - title: The title of the list.
- *   - type: The type of list to return (e.g. "ul", "ol").
- *   - attributes: The attributes applied to the list element.
+ *   - type: The type of list to return for the parent list ('ul' or 'ol').
+ *   - attributes: The attributes applied to the parent list element.
  *   - wrapper_attributes: Any additional attributes that should be applied to
- *       the wrapper DIV around the list element (the "item-list" CSS class is
- *       added by default).
+ *     the wrapper DIV around the list element (the "item-list" CSS class is
+ *     added by default).
  *   - empty: A message to display when there are no items. Allowed value is a
  *     string or render array.
  *
  * @since 1.21.0: added the "empty" variable.
  * @since 1.27.0: added the "wrapper_attributes" variable.
+ * @since 1.28.3: added support for a "type" variable in nested/children items.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
@@ -2478,7 +2482,7 @@ function theme_item_list($variables) {
         if (isset($item['data'])) {
           $value .= $item['data'];
         }
-        $attributes = array_diff_key($item, array('data' => 0, 'children' => 0));
+        $attributes = array_diff_key($item, array('data' => 0, 'children' => 0, 'type' => 0));
 
         // Append nested child list, if any.
         if (isset($item['children'])) {
@@ -2494,7 +2498,7 @@ function theme_item_list($variables) {
           }
           $value .= theme('item_list', array(
             'items' => $item['children'],
-            'type' => $type,
+            'type' => isset($item['type']) ? $item['type'] : $type,
             'attributes' => $child_list_attributes,
           ));
         }
