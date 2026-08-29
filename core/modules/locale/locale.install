@@ -364,23 +364,28 @@ function locale_update_1004() {
  */
 function locale_update_1005() {
   db_drop_index('locales_source', 'source_context');
-  db_change_field('locales_source', 'source', 'source',
-    array(
-      'type' => 'text',
-      'not null' => TRUE,
-      'description' => 'The original string in English.',
-    ),
-    array('indexes' => array(
-      'source_context' => array(array('source', 30), 'context'),
-    )
-  ));
-  db_change_field('locales_target', 'translation', 'translation',
-    array(
-      'type' => 'text',
-      'not null' => TRUE,
-      'description' => 'Translation string value in this language.',
-    )
+  $locales_source_spec = array(
+    'type' => 'text',
+    'not null' => TRUE,
+    'description' => 'The original string in English.',
   );
+  db_change_field('locales_source', 'source', 'source', $locales_source_spec);
+  // While It is possible to do add indexes in a single step with
+  // db_change_field(), we are doing it separately to avoid issues with older
+  // versions of MariaDB.
+  // @see https://github.com/backdrop/backdrop-issues/issues/5496
+  // @todo: revert this workaround once the minimum version of MySQL/MariaDB in
+  // the Backdrop official system requirements is bumped to a version that
+  // doesn't exhibit this problem.
+  db_add_index('locales_source', 'source_context', array(
+    array('source', 30), 'context'));
+
+  $locales_target_spec = array(
+    'type' => 'text',
+    'not null' => TRUE,
+    'description' => 'Translation string value in this language.',
+  );
+  db_change_field('locales_target', 'translation', 'translation', $locales_target_spec);
 }
 
 /**

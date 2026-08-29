@@ -94,7 +94,21 @@ class SchemaTestCase extends BackdropWebTestCase {
     $this->checkSchemaComment('Added column description.', 'test_table', 'test_serial');
 
     // Change the new field to a serial column.
-    db_change_field('test_table', 'test_serial', 'test_serial', array('type' => 'serial', 'not null' => TRUE, 'description' => 'Changed column description.'), array('primary key' => array('test_serial')));
+    $spec = array(
+      'type' => 'serial',
+      'not null' => TRUE,
+      'description' => 'Changed column description.'
+    );
+    db_drop_index('test_table', 'primary key');
+    db_change_field('test_table', 'test_serial', 'test_serial', $spec);
+    // While It is possible to do add indexes in a single step with
+    // db_change_field(), we are doing it separately to avoid issues with older
+    // versions of MariaDB.
+    // @see https://github.com/backdrop/backdrop-issues/issues/5496
+    // @todo: revert this workaround once the minimum version of MySQL/MariaDB
+    // in the Backdrop official system requirements is bumped to a version that
+    // doesn't exhibit this problem.
+    db_add_index('test_table', 'primary key', array('test_serial'));
 
     // Assert that the column comment has been set.
     $this->checkSchemaComment('Changed column description.', 'test_table', 'test_serial');
