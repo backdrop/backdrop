@@ -151,6 +151,20 @@ div.date-calendar-day span.year {
   margin-left: 1.3em;
 }
 
+/* Reduce spacing between the group of radios and the pseudo-radio after it. */
+.form-item-field-settings-cache-enabled {
+  margin-bottom: 0;
+}
+#edit-field-settings-cache-count-wrapper span.label-suffix {
+  /* Adjust field suffix font size like other .form-item label.option text. */
+  font-size: 0.923em;
+}
+#edit-field-settings-cache-count-help {
+  /* Adjust margins like other description text. */
+  margin-top: 0;
+  margin-left: 1.5em;
+}
+
 #edit-field-settings-granularity .form-type-checkbox {
   margin-right: .6em; /* LTR */
 }
