@@ -2178,7 +2178,7 @@ function _form_builder_handle_input_element($form_id, &$element, &$form_state) {
       }
     }
     // Load defaults.
-    if (!isset($element['#value'])) {
+    if (!isset($element['#value']) || empty($element['#value'])) {
       // Call #type_value without a second argument to request default_value handling.
       if (function_exists($value_callback)) {
         $element['#value'] = $value_callback($element, FALSE, $form_state);
