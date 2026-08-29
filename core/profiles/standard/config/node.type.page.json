@@ -1,0 +1,31 @@
+{
+    "_config_name": "node.type.page",
+    "type": "page",
+    "name": "Page",
+    "description": "Add a page with static content, like the 'About' page.",
+    "settings": {
+        "node_preview": "1",
+        "node_options": [
+            "status",
+            "promote",
+            "revision"
+        ],
+        "language_content_type": "0",
+        "comment_default": "1",
+        "menu_options": [
+            "main-menu"
+        ],
+        "menu_parent": "main-menu:0",
+        "node_submitted": 0,
+        "node_submitted_format": "[node:created:medium] by [node:author]",
+        "hidden_path": "0"
+    },
+    "base": "node_content",
+    "module": "node",
+    "help": "",
+    "modified": true,
+    "disabled": false,
+    "has_title": true,
+    "title_label": "Title",
+    "orig_type": "page"
+}

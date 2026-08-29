@@ -1,0 +1,31 @@
+{
+    "_config_name": "node.type.card",
+    "type": "card",
+    "name": "Card",
+    "description": "Add a card for use on an existing page. Display as a block or in a view.",
+        "settings": {
+        "node_preview": "1",
+        "node_options": [
+            "status",
+            "promote",
+            "revision"
+        ],
+        "language_content_type": "0",
+        "comment_default": "1",
+        "menu_options": [
+            "main-menu"
+        ],
+        "menu_parent": "main-menu:0",
+        "node_submitted": 0,
+        "node_submitted_format": "[node:created:medium] by [node:author]",
+        "hidden_path": "0"
+    },
+    "base": "node_content",
+    "module": "node",
+    "help": "",
+    "modified": true,
+    "disabled": false,
+    "has_title": true,
+    "title_label": "Title",
+    "orig_type": "card"
+}
