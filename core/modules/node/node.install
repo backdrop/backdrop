@@ -2849,10 +2849,8 @@ function node_update_1024(&$sandbox) {
   // Retrieve the records to process in this batch.
   $revision_records = array_slice($sandbox['revision_records'], $offset, $limit, TRUE);
 
-  // Handle the node revision record updates using a database transaction.
-  $transaction = db_transaction();
-  try {
-    foreach ($revision_records as $vid => $record) {
+  foreach ($revision_records as $vid => $record) {
+    try {
       db_update('node_revision')
         ->fields(array(
           'uid' => $record['uid'],
@@ -2864,16 +2862,14 @@ function node_update_1024(&$sandbox) {
       $sandbox['current_revision_record'] = $vid;
       $sandbox['progress']++;
     }
+    catch (Exception $e) {
+      // If there has been a failure in updating that record, set the current
+      // revision record to the $vid but do not advance progress so we can
+      // continue, but know that not every record successfully updated.
+      $sandbox['current_revision_record'] = $vid;
+      watchdog_exception('Node Update (nid:' . $record['nid'] . ', vid:' . $vid . ')', $e);
+    }
   }
-  catch (Exception $e) {
-    $transaction->rollback();
-    // If there has been a failure set the current revision record to the
-    // last used revision id so the next batch can attempt to continue from the
-    // next record.
-    $sandbox['current_revision_record'] = $vid;
-    watchdog_exception('Node Update', $e);
-  }
-  unset($transaction);
 
   // Define when the batch process is finished.
   $test_progress_max = $sandbox['progress'] >= $sandbox['max'];
@@ -2890,7 +2886,7 @@ function node_update_1024(&$sandbox) {
       return $final_message;
     }
     else {
-      $final_message = t('Only !progress of !max node revision records were updated. Check and re-run the update hook.', array(
+      $final_message = t('Only !progress of !max node revision records were updated. Check the logs and re-run the update hook.', array(
         '!progress' => $sandbox['progress'],
         '!max' => $sandbox['max'],
       ));
