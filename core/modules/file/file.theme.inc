@@ -284,7 +284,8 @@ function theme_file_upload_help($variables) {
     $descriptions[] = t('Files must be less than !size.', array('!size' => '<strong>' . format_size($upload_validators['file_validate_size'][0]) . '</strong>'));
   }
   if (isset($upload_validators['file_validate_extensions'])) {
-    $descriptions[] = t('Allowed file types: !extensions.', array('!extensions' => '<strong>' . check_plain($upload_validators['file_validate_extensions'][0]) . '</strong>'));
+    $extensions = explode(' ', check_plain($upload_validators['file_validate_extensions'][0]));
+    $descriptions[] = t('Allowed file types: !extensions.', array('!extensions' => '<strong>' . implode(', ', $extensions) . '</strong>'));
   }
   if (isset($cardinality)) {
     if ($cardinality == -1) {
