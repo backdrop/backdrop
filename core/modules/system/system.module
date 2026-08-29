@@ -3196,6 +3196,9 @@ function _system_rebuild_module_data() {
       }
     }
 
+    // Add modules source info (core/contrib/custom).
+    $modules[$key]->source = system_get_project_source($modules[$key]);
+
     // Invoke hook_system_info_alter() to give installed modules a chance to
     // modify the data in the .info files if necessary.
     $type = 'module';
@@ -3213,6 +3216,107 @@ function _system_rebuild_module_data() {
   }
 
   return $modules;
+}
+
+/**
+ * Identifies the source of a given project (core/contrib/custom).
+ *
+ * @param array $project
+ *   An associative array of project information, as returned by functions like
+ *   _system_rebuild_module_data() or _system_rebuild_theme_data() etc.
+ *
+ * @return string
+ *   Either 'core', 'contrib', 'custom', or 'other' if the source could not be
+ *   identified.
+ *
+ * @since 1.28.1 Function added.
+ */
+function system_get_project_source($project) {
+  if (system_project_is_core($project)) {
+    return 'core';
+  }
+  elseif (system_project_is_contrib($project)) {
+    return 'contrib';
+  }
+  elseif (system_project_is_custom($project)) {
+    return 'custom';
+  }
+  else {
+    // Is this really needed, or can we simply always assume that if not core
+    // nor contrib, then custom. Then should this just default to '' (blank).
+    return 'other';
+  }
+}
+
+/**
+ * Identifies whether a given project is core or not.
+ *
+ * @param array $project
+ *   An associative array of project information, as returned by functions like
+ *   _system_rebuild_module_data() or _system_rebuild_theme_data() etc.
+ *
+ * @return bool
+ *   TRUE if the specified project is a core project; otherwise FALSE.
+ *
+ * @since 1.28.1 Function added.
+ */
+function system_project_is_core($project) {
+  return strstr($project->uri, 'core/') ? TRUE : FALSE;
+}
+
+/**
+ * Identifies whether a given project is contrib or not.
+ *
+ * @param array $project
+ *   An associative array of project information, as returned by functions like
+ *   _system_rebuild_module_data() or _system_rebuild_theme_data() etc.
+ *
+ * @return bool
+ *   TRUE if the specified project is a contributed project; otherwise FALSE.
+ *
+ * @since 1.28.1 Function added.
+ */
+function system_project_is_contrib($project) {
+  $is_contrib = FALSE;
+
+  // Bail early if this is a core project.
+  if (system_project_is_core($project)) {
+    return FALSE;
+  }
+  else {
+    $project_type = $project->info['type'];
+
+    // Identify the project as contrib in the following cases:
+    // - When explicitly placed inside a "contrib" subdirectory (note that
+    //   $project_type is always singular ('module', 'theme', 'layout'), whereas
+    //   the respective directories are plural ('modules', 'themes', 'layouts').
+    $inside_contrib_dir = strstr($project->uri, $project_type . 's/contrib/');
+    // - If 'project', 'version' and 'timestamp' are provided in the .info file.
+    $expected_data_in_info_file = isset($project->info['project']) && isset($project->info['version']) && isset($project->info['timestamp']);
+
+    if ($inside_contrib_dir || $expected_data_in_info_file) {
+      $is_contrib = TRUE;
+    }
+  }
+
+  return $is_contrib;
+}
+
+/**
+ * Identifies whether a given project is custom or not.
+ *
+ * @param array $project
+ *   An associative array of project information, as returned by functions like
+ *   _system_rebuild_module_data() or _system_rebuild_theme_data() etc.
+ *
+ * @return bool
+ *   TRUE if the specified project is a custom project (not core nor contrib);
+ *   otherwise FALSE.
+ *
+ * @since 1.28.1 Function added.
+ */
+function system_project_is_custom($project) {
+  return !system_project_is_contrib($project) && !system_project_is_core($project);
 }
 
 /**
@@ -3271,7 +3375,7 @@ function _system_update_bootstrap_status() {
  *   An associative array of themes information.
  */
 function _system_rebuild_theme_data() {
-  // Find themes
+  // Find themes.
   $themes = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'themes');
   // Allow modules to add further themes.
   if ($module_themes = module_invoke_all('system_theme_info')) {
@@ -3285,7 +3389,7 @@ function _system_rebuild_theme_data() {
     }
   }
 
-  // Find theme engines
+  // Find theme engines.
   $engines = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.engine$/', 'themes/engines');
 
   // Set defaults for theme info.
@@ -3296,10 +3400,11 @@ function _system_rebuild_theme_data() {
     'php' => BACKDROP_MINIMUM_PHP,
     'stylesheets' => array(),
     'scripts' => array(),
+    'source' => '',
   );
 
   $sub_themes = array();
-  // Read info files for each theme
+  // Read .info files for each theme.
   foreach ($themes as $key => $theme) {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
@@ -3314,9 +3419,12 @@ function _system_rebuild_theme_data() {
     // we set a reasonable default if it is not provided.
     $themes[$key]->info += array('name' => $key);
 
-    // Add the info file modification time, so it becomes available for
+    // Add the .info file modification time, so it becomes available for
     // contributed modules to use for ordering theme lists.
     $themes[$key]->info['mtime'] = filemtime($theme->uri);
+
+    // Add themes source info (core/contrib/custom).
+    $themes[$key]->source = system_get_project_source($themes[$key]);
 
     // Invoke hook_system_info_alter() to give installed modules a chance to
     // modify the data in the .info files if necessary.
