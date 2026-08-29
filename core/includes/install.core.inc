@@ -62,7 +62,7 @@ define('INSTALL_LOCALIZATION_SERVER_PATTERN', 'https://localize.backdropcms.org/
  * an error is thrown, (b) a new page needs to be displayed, or (c) the
  * installation finishes (whichever happens first).
  *
- * @param $settings
+ * @param array $settings
  *   An optional array of installation settings. Leave this empty for a normal,
  *   interactive, browser-based installation intended to occur over multiple
  *   page requests. Alternatively, if an array of settings is passed in, the
@@ -75,7 +75,7 @@ define('INSTALL_LOCALIZATION_SERVER_PATTERN', 'https://localize.backdropcms.org/
  *
  * @throws Exception
  */
-function install_backdrop($settings = array()) {
+function install_backdrop(array $settings = array()) {
   global $install_state;
   // Initialize the installation state with the settings that were passed in,
   // as well as a boolean indicating whether or not this is an interactive
@@ -132,6 +132,8 @@ function install_backdrop($settings = array()) {
  * of each element indicate the name of the installation task that the form
  * submission is for, and the values are used as the $form_state['values']
  * array that is passed on to the form submission via backdrop_form_submit()).
+ *
+ * @return array
  *
  * @see backdrop_form_submit()
  */
@@ -223,7 +225,7 @@ function install_state_defaults() {
  *
  * @throws Exception
  */
-function install_begin_request(&$install_state) {
+function install_begin_request(array &$install_state) {
   // Add any installation parameters passed in via the URL.
   $install_state['parameters'] += $_GET;
 
@@ -335,10 +337,10 @@ function install_begin_request(&$install_state) {
  *   An array of information about the current installation state. This is
  *   passed along to each task, so it can be modified if necessary.
  *
- * @return
+ * @return string
  *   HTML output from the last completed task.
  */
-function install_run_tasks(&$install_state) {
+function install_run_tasks(array &$install_state) {
   do {
     // Obtain a list of tasks to perform. The list of tasks itself can be
     // dynamic (e.g., some might be defined by the installation profile,
@@ -377,19 +379,19 @@ function install_run_tasks(&$install_state) {
 /**
  * Runs an individual installation task.
  *
- * @param $task
+ * @param array $task
  *   An array of information about the task to be run as returned by
  *   hook_install_tasks().
  * @param array $install_state
  *   An array of information about the current installation state. This is
  *   passed in by reference so that it can be modified by the task.
  *
- * @return string|NULL
+ * @return string|null
  *   The output of the task function, if there is any.
  *
  * @throws Exception
  */
-function install_run_task($task, &$install_state) {
+function install_run_task(array $task, array &$install_state) {
   $function = $task['function'];
 
   if ($task['type'] == 'form') {
@@ -507,11 +509,11 @@ function install_run_task($task, &$install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   A list of tasks to be performed, with associated metadata as returned by
  *   hook_install_tasks().
  */
-function install_tasks_to_perform($install_state) {
+function install_tasks_to_perform(array $install_state) {
   // Start with a list of all currently available tasks.
   $tasks = install_tasks($install_state);
   foreach ($tasks as $name => $task) {
@@ -541,10 +543,10 @@ function install_tasks_to_perform($install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   A list of tasks, with associated metadata.
  */
-function install_tasks($install_state) {
+function install_tasks(array $install_state) {
   // Determine whether translation import tasks will need to be performed.
   $needs_translations = count($install_state['translations']) > 1 && !empty($install_state['parameters']['langcode']) && $install_state['parameters']['langcode'] != 'en';
 
@@ -563,7 +565,7 @@ function install_tasks($install_state) {
   if (isset($install_state['parameters']['langcode']) && $install_state['parameters']['langcode'] != 'en') {
     if (isset($install_state['translations'])) {
       $local_file_found = FALSE;
-      foreach($install_state['translations'] as $translation_file) {
+      foreach ($install_state['translations'] as $translation_file) {
         if ($translation_file->langcode == $install_state['parameters']['langcode']) {
           $local_file_found = TRUE;
           break;
@@ -690,13 +692,13 @@ function install_tasks($install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   A list of tasks, with keys equal to the machine-readable task name and
  *   values equal to the name that should be displayed.
  *
  * @see theme_task_list()
  */
-function install_tasks_to_display($install_state) {
+function install_tasks_to_display(array $install_state) {
   $displayed_tasks = array();
   foreach (install_tasks($install_state) as $name => $task) {
     if ($task['display']) {
@@ -714,12 +716,12 @@ function install_tasks_to_display($install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return string
  *   The URL to redirect to.
  *
  * @see install_full_redirect_url()
  */
-function install_redirect_url($install_state) {
+function install_redirect_url(array $install_state) {
   return 'core/install.php?' . backdrop_http_build_query($install_state['parameters']);
 }
 
@@ -729,12 +731,12 @@ function install_redirect_url($install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return string
  *   The complete URL to redirect to.
  *
  * @see install_redirect_url()
  */
-function install_full_redirect_url($install_state) {
+function install_full_redirect_url(array $install_state) {
   global $base_url;
   return $base_url . '/' . install_redirect_url($install_state);
 }
@@ -746,12 +748,12 @@ function install_full_redirect_url($install_state) {
  * title, but otherwise this function takes care of generating the page output
  * during every step of the installation.
  *
- * @param $output
+ * @param string $output
  *   The content to display on the main part of the page.
  * @param array $install_state
  *   An array of information about the current installation state.
  */
-function install_display_output($output, $install_state) {
+function install_display_output($output, array $install_state) {
   backdrop_page_header();
 
   // Prevent install.php from being indexed when installed in a sub folder.
@@ -775,12 +777,18 @@ function install_display_output($output, $install_state) {
     // Let the theme function know when every step of the installation has
     // been completed.
     $active_task = $install_state['installation_finished'] ? NULL : $install_state['active_task'];
-    $task_list = theme('task_list', array('items' => install_tasks_to_display($install_state), 'active' => $active_task));
+    $task_list = theme('task_list', array(
+      'items' => install_tasks_to_display($install_state),
+      'active' => $active_task,
+    ));
   }
   else {
     $task_list = NULL;
   }
-  print theme('install_page', array('content' => $output, 'sidebar' => $task_list));
+  print theme('install_page', array(
+    'content' => $output,
+    'sidebar' => $task_list,
+  ));
   exit;
 }
 
@@ -790,10 +798,10 @@ function install_display_output($output, $install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return string|NULL
+ * @return string|null
  *   A themed status report, or an exception if there are requirement errors.
  */
-function install_verify_requirements(&$install_state) {
+function install_verify_requirements(array &$install_state) {
   // Check the installation requirements for Backdrop and this profile.
   $requirements = install_check_requirements($install_state);
 
@@ -809,7 +817,7 @@ function install_verify_requirements(&$install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  */
-function install_system_module(&$install_state) {
+function install_system_module(array &$install_state) {
   // Install system.module.
   backdrop_install_system();
 
@@ -848,9 +856,9 @@ function install_system_module(&$install_state) {
 /**
  * Verifies and returns the last installation task that was completed.
  *
- * @return string|NULL
- *   The last completed task, if there is one. An exception is thrown if Backdrop
- *   is already installed.
+ * @return string|null
+ *   The last completed task, if there is one. An exception is thrown if
+ *   Backdrop is already installed.
  *
  * @throws Exception
  */
@@ -891,6 +899,8 @@ function install_verify_database_utf8mb4() {
 
 /**
  * Verifies the existing settings in settings.php.
+ *
+ * @return bool
  */
 function install_verify_settings() {
   global $databases;
@@ -910,6 +920,8 @@ function install_verify_settings() {
 
 /**
  * Verifies the PDO library.
+ *
+ * @return bool
  */
 function install_verify_pdo() {
   // PDO was moved to PHP core in 5.2.0, but the old extension (targeting 5.0
@@ -936,7 +948,8 @@ function install_hash_salt() {
     try {
       backdrop_rewrite_settings($update_settings);
     }
-    catch (Exception $e) {}
+    catch (Exception $e) {
+    }
   }
 }
 
@@ -967,21 +980,28 @@ function install_backup_location(&$install_state) {
     try {
       backdrop_rewrite_settings($update_settings);
     }
-    catch (Exception $e) {}
+    catch (Exception $e) {
+    }
   }
 }
 
 /**
  * Form constructor for a form to configure and rewrite settings.php.
  *
+ * @param array $form
+ *   An array which stores information about the form.
+ * @param array $form_state
+ *   Array of metadata about state of form processing.
  * @param array $install_state
  *   An array of information about the current installation state.
+ *
+ * @return array
  *
  * @see install_settings_form_validate()
  * @see install_settings_form_submit()
  * @ingroup forms
  */
-function install_settings_form($form, &$form_state, &$install_state) {
+function install_settings_form(array $form, array &$form_state, array &$install_state) {
   global $databases;
 
   // Do not let Backdrop attempt to save this form to tempstore, since the
@@ -1035,9 +1055,14 @@ function install_settings_form($form, &$form_state, &$install_state) {
 /**
  * Form validation handler for install_settings_form().
  *
+ * @param array $form
+ *   An array which stores information about the form.
+ * @param array $form_state
+ *   Array of metadata about state of form processing.
+ *
  * @see install_settings_form_submit()
  */
-function install_settings_form_validate($form, &$form_state) {
+function install_settings_form_validate(array $form, array &$form_state) {
   $driver = $form_state['values']['driver'];
   $database = $form_state['values'][$driver];
   $database['driver'] = $driver;
@@ -1051,18 +1076,29 @@ function install_settings_form_validate($form, &$form_state) {
 
 /**
  * Checks a database connection and returns any errors.
+ *
+ * @param array $database
+ *   Database configuration.
+ * @param string $settings_file
+ *   Settings file name.
+ *
+ * @return array
  */
-function install_database_errors($database, $settings_file) {
+function install_database_errors(array $database, $settings_file) {
   global $databases;
   $errors = array();
 
   // Check database type.
   $driver = $database['driver'];
   if (!$mysql_driver = backdrop_load_database_driver()) {
-    $errors['driver'] = st("In your %settings_file file you have configured @profile to use a %driver server, however your PHP installation currently does not support this database type.", array('%settings_file' => $settings_file, '@profile' => backdrop_install_profile_distribution_name(), '%driver' => $driver));
+    $errors['driver'] = st("In your %settings_file file you have configured @profile to use a %driver server, however your PHP installation currently does not support this database type.", array(
+      '%settings_file' => $settings_file,
+      '@profile' => backdrop_install_profile_distribution_name(),
+      '%driver' => $driver,
+    ));
   }
   else {
-    // Run driver specific validation
+    // Run driver specific validation.
     $errors += $mysql_driver->validateDatabaseSettings($database);
 
     // Run tasks associated with the database type. Any errors are caught in the
@@ -1139,6 +1175,8 @@ function install_settings_form_submit($form, &$form_state) {
 
 /**
  * Finds all .profile files.
+ *
+ * @return array
  */
 function install_find_profiles() {
   $core_profiles = file_scan_directory('./core/profiles', '/\.profile$/', array('key' => 'name'));
@@ -1161,7 +1199,7 @@ function install_find_profiles() {
  *
  * @throws Exception
  */
-function install_select_profile(&$install_state) {
+function install_select_profile(array &$install_state) {
   if (empty($install_state['parameters']['profile'])) {
     // Try to find a profile.
     $profile = _install_select_profile($install_state['profiles']);
@@ -1190,14 +1228,16 @@ function install_select_profile(&$install_state) {
 /**
  * Selects an installation profile from a list or from a $_POST submission.
  *
- * @return string|NULL
+ * @param array $profiles
+ *   A list of installation profiles.
+ * @return string|null
  *   The selected profile from $_POST, or the automatically selected profile if
  *   possible to determine one without prompting the user. If no profile can
  *   be selected, NULL is returned.
  *
  * @throws Exception
  */
-function _install_select_profile($profiles) {
+function _install_select_profile(array $profiles) {
   if (sizeof($profiles) == 0) {
     throw new Exception(install_no_profile_error());
   }
@@ -1242,14 +1282,18 @@ function _install_select_profile($profiles) {
 /**
  * Form constructor for the profile selection form.
  *
- * @param $form_state
+ * @param array $form
+ *   An array which stores information about the form.
+ * @param array $form_state
  *   Array of metadata about state of form processing.
- * @param $profile_files
+ * @param array $profile_files
  *   Array of .profile files, as returned from file_scan_directory().
+ *
+ * @return array
  *
  * @ingroup forms
  */
-function install_select_profile_form($form, &$form_state, $profile_files) {
+function install_select_profile_form(array $form, array &$form_state, array $profile_files) {
   $profiles = array();
   $names = array();
 
@@ -1302,7 +1346,7 @@ function install_select_profile_form($form, &$form_state, $profile_files) {
     );
   }
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] =  array(
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => st('Save and continue'),
   );
@@ -1311,6 +1355,8 @@ function install_select_profile_form($form, &$form_state, $profile_files) {
 
 /**
  * Find all .po files useful for the installer.
+ *
+ * @return array
  */
 function install_find_translations() {
   $files = install_find_translation_files();
@@ -1326,12 +1372,12 @@ function install_find_translations() {
 /**
  * Find installer translations either for a specific langcode or all languages.
  *
- * @param $langcode
+ * @param string|null $langcode
  *   (optional) The language code corresponding to the language for which we
  *   want to find translation files. If omitted, information on all available
  *   files will be returned.
  *
- * @return
+ * @return array
  *   An associative array of file information objects keyed by file URIs as
  *   returned by file_scan_directory().
  *
@@ -1354,7 +1400,7 @@ function install_find_translation_files($langcode = NULL) {
  *   langcode will be added here, if it was not already selected previously, as
  *   will a list of all available languages.
  *
- * @return string|NULL
+ * @return string|null
  *   For interactive installations, a form or other page output allowing the
  *   language to be selected or providing information about language selection,
  *   if a language has not been chosen. For non-interactive installs, nothing
@@ -1363,7 +1409,7 @@ function install_find_translation_files($langcode = NULL) {
  *
  * @throws Exception
  */
-function install_select_language(&$install_state) {
+function install_select_language(array &$install_state) {
   // Find all available translations.
   $files = install_find_translations();
   $install_state['translations'] += $files;
@@ -1486,7 +1532,7 @@ function install_select_language_form($form, &$form_state, $files, $standard_lan
     );
   }
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] =  array(
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => st('Save and continue'),
   );
@@ -1513,7 +1559,7 @@ function install_get_available_translations($files) {
     $available_translations = array_keys($data);
   }
   elseif (count($files) > 1) {
-    foreach($files as $translation_file) {
+    foreach ($files as $translation_file) {
       $available_translations[] = $translation_file->langcode;
     }
   }
@@ -1825,8 +1871,10 @@ function install_check_translation_download($langcode) {
  *
  * @param array $install_state
  *   An array of information about the current installation state.
+ * @param array $requirements
+ *   An array of requirements.
  *
- * @return string|NULL
+ * @return string|null
  *   A themed status report, or an exception if there are requirement errors.
  *   If there are only requirement warnings, a themed status report is shown
  *   initially, but the user is allowed to bypass it by providing 'continue=1'
@@ -1835,7 +1883,7 @@ function install_check_translation_download($langcode) {
  *
  * @throws Exception
  */
-function install_display_requirements($install_state, $requirements) {
+function install_display_requirements(array $install_state, array $requirements) {
   // Check the severity of the requirements reported.
   $severity = backdrop_requirements_severity($requirements);
 
@@ -1879,6 +1927,9 @@ function install_display_requirements($install_state, $requirements) {
 
 /**
  * Indicates that there are no profiles available.
+ *
+ * @return string
+ *   Error message.
  */
 function install_no_profile_error() {
   backdrop_set_title(st('No profiles available'));
@@ -1887,6 +1938,9 @@ function install_no_profile_error() {
 
 /**
  * Indicates that Backdrop has already been installed.
+ *
+ * @return string
+ *   Formatted HTML string of a list.
  */
 function install_already_done_error() {
   global $base_url;
@@ -1918,7 +1972,7 @@ function install_already_done_error() {
  *
  * @throws Exception
  */
-function install_load_profile(&$install_state) {
+function install_load_profile(array &$install_state) {
   $profile_file = _install_find_profile_file($install_state['parameters']['profile']);
   if ($profile_file) {
     include_once $profile_file;
@@ -1935,7 +1989,7 @@ function install_load_profile(&$install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  */
-function install_bootstrap_full(&$install_state) {
+function install_bootstrap_full(array &$install_state) {
   backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 }
 
@@ -1945,10 +1999,10 @@ function install_bootstrap_full(&$install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   The batch definition.
  */
-function install_profile_modules(&$install_state) {
+function install_profile_modules(array &$install_state) {
   $modules = state_get('install_profile_modules', array());
   $files = system_rebuild_module_data();
   state_del('install_profile_modules');
@@ -1981,7 +2035,10 @@ function install_profile_modules(&$install_state) {
 
   $operations = array();
   foreach ($required + $non_required as $module => $weight) {
-    $operations[] = array('_install_module_batch', array($module, $files[$module]->info['name']));
+    $operations[] = array(
+      '_install_module_batch',
+      array($module, $files[$module]->info['name']),
+    );
   }
   $batch = array(
     'operations' => $operations,
@@ -1998,10 +2055,10 @@ function install_profile_modules(&$install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return array|NULL
+ * @return array|null
  *   The batch definition, if there are language files to import.
  */
-function install_import_translations(&$install_state) {
+function install_import_translations(array &$install_state) {
   include_once BACKDROP_ROOT . '/core/includes/locale.inc';
   include_once backdrop_get_path('module', 'locale') . '/locale.bulk.inc';
   $langcode = $install_state['parameters']['langcode'];
@@ -2042,6 +2099,10 @@ function install_import_translations(&$install_state) {
 /**
  * Form constructor for a form to configure the new site.
  *
+ * @param array $form
+ *   An array which stores information about the form.
+ * @param array $form_state
+ *   The current state of the form.
  * @param array $install_state
  *   An array of information about the current installation state.
  *
@@ -2049,7 +2110,7 @@ function install_import_translations(&$install_state) {
  * @see install_configure_form_submit()
  * @ingroup forms
  */
-function install_configure_form($form, &$form_state, &$install_state) {
+function install_configure_form(array $form, array &$form_state, array &$install_state) {
   backdrop_set_title(st('Configure site'));
 
   backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
@@ -2082,7 +2143,7 @@ function install_configure_form($form, &$form_state, &$install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array|false
  *   The batch definition, if there are language files to import.
  *
  * @todo
@@ -2090,7 +2151,7 @@ function install_configure_form($form, &$form_state, &$install_state) {
  *   once we have l10n_update functionality integrated. See
  *   http://drupal.org/node/1191488.
  */
-function install_import_translations_remaining(&$install_state) {
+function install_import_translations_remaining(array &$install_state) {
   include_once backdrop_get_path('module', 'locale') . '/locale.bulk.inc';
   return locale_translate_batch_import_files($install_state['parameters']['langcode']);
 }
@@ -2101,10 +2162,10 @@ function install_import_translations_remaining(&$install_state) {
  * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return
- *   A message informing the user that the installation is complete.
+ * @return void
+ *   Sets a message informing the user that the installation is complete.
  */
-function install_finished(&$install_state) {
+function install_finished(array &$install_state) {
   // Flush all caches to ensure that any full bootstraps during the installer
   // do not leave stale cached data, and that any content types or other items
   // registered by the installation profile are registered correctly.
@@ -2113,7 +2174,7 @@ function install_finished(&$install_state) {
   // Remember the profile which was used.
   config_set('system.core', 'install_profile', $install_state['parameters']['profile']);
 
-  // Installation profiles are always loaded last
+  // Installation profiles are always loaded last.
   db_update('system')
     ->fields(array('weight' => 1000))
     ->condition('type', 'module')
@@ -2143,7 +2204,10 @@ function install_finished(&$install_state) {
 
   // Confirming that the Dashboard module is enabled.
   if (module_exists('dashboard')) {
-    $message .= '<br>' . st('If you are new to @profile, then the <a href="@dashboard">Dashboard</a> may be a good place to start.', array('@profile' => $profile, '@dashboard' => url('admin/dashboard')));
+    $message .= '<br>' . st('If you are new to @profile, then the <a href="@dashboard">Dashboard</a> may be a good place to start.', array(
+      '@profile' => $profile,
+      '@dashboard' => url('admin/dashboard'),
+    ));
   }
 
   if (!backdrop_is_cli()) {
@@ -2193,13 +2257,13 @@ function install_check_requirements($install_state) {
       // Check if a settings.php file already exists.
       if (backdrop_verify_install_file($settings_file, FILE_EXIST)) {
         // If it does, make sure it is writable.
-        $writable = backdrop_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
+        $writable = backdrop_verify_install_file($settings_file, FILE_READABLE | FILE_WRITABLE);
         $exists = TRUE;
       }
       elseif ($settings_file !== './settings.php') {
         if (copy('./settings.php', $settings_file) === TRUE) {
           $exists = TRUE;
-          $writable = backdrop_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
+          $writable = backdrop_verify_install_file($settings_file, FILE_READABLE | FILE_WRITABLE);
         }
       }
     }
@@ -2210,7 +2274,10 @@ function install_check_requirements($install_state) {
         'title'       => st('Settings file'),
         'value'       => st('The settings file does not exist.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The @profile installer could not find a settings.php file. Please place copy of this file into @file.', array('@profile' => backdrop_install_profile_distribution_name(), '@file' => $settings_file)),
+        'description' => st('The @profile installer could not find a settings.php file. Please place copy of this file into @file.', array(
+          '@profile' => backdrop_install_profile_distribution_name(),
+          '@file' => $settings_file,
+        )),
       );
       return $requirements;
     }
@@ -2226,7 +2293,11 @@ function install_check_requirements($install_state) {
         'title'       => st('Settings file'),
         'value'       => st('The settings file is not writable.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The @profile installer requires write permissions to %file during the installation process. If you are unsure how to grant file permissions, consult the <a href="@handbook_url">Installation Instructions</a> page.', array('@profile' => backdrop_install_profile_distribution_name(), '%file' => $settings_file, '@handbook_url' => 'https://backdropcms.org/installation')),
+        'description' => st('The @profile installer requires write permissions to %file during the installation process. If you are unsure how to grant file permissions, consult the <a href="@handbook_url">Installation Instructions</a> page.', array(
+          '@profile' => backdrop_install_profile_distribution_name(),
+          '%file' => $settings_file,
+          '@handbook_url' => 'https://backdropcms.org/installation',
+        )),
       );
     }
     else {
@@ -2246,6 +2317,10 @@ function install_check_requirements($install_state) {
 /**
  * Form constructor for a site configuration form.
  *
+ * @param array $form
+ *   An array which stores information about the form.
+ * @param array $form_state
+ *   The current state of the form.
  * @param array $install_state
  *   An array of information about the current installation state.
  *
@@ -2254,7 +2329,7 @@ function install_check_requirements($install_state) {
  * @see install_configure_form_submit()
  * @ingroup forms
  */
-function _install_configure_form($form, &$form_state, &$install_state) {
+function _install_configure_form(array $form, array &$form_state, array &$install_state) {
   include_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
   $form['site_information'] = array(
@@ -2319,7 +2394,10 @@ function _install_configure_form($form, &$form_state, &$install_state) {
   $form['server_settings']['clean_url'] = array(
     '#type' => 'hidden',
     '#default_value' => 0,
-    '#attributes' => array('id' => 'edit-clean-url', 'class' => array('install')),
+    '#attributes' => array(
+      'id' => 'edit-clean-url',
+      'class' => array('install'),
+    ),
   );
 
   $form['update_notifications'] = array(
@@ -2432,14 +2510,14 @@ function install_configure_form_submit($form, &$form_state) {
  * Get a country code for the provided timezone.
  */
 function _install_get_timezone_country($timezone) {
-  // Get timezone countries list
+  // Get timezone countries list.
   include_once BACKDROP_ROOT . '/core/includes/locale.inc';
   $timezone_countries = timezone_country_get_list();
 
-  // Replace spaces in provided timezone with underscores
+  // Replace spaces in provided timezone with underscores.
   $timezone = str_replace(' ', '_', $timezone);
 
-  // Return timezone's country code or empty string
+  // Return timezone's country code or empty string.
   if (isset($timezone_countries[$timezone])) {
     return $timezone_countries[$timezone];
   }
