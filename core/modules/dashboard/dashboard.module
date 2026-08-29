@@ -218,6 +218,13 @@ function dashboard_preprocess_layout(&$variables) {
   $layout = $variables['layout'];
   if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
     backdrop_add_library('dashboard', 'dashboard');
+
+    // Add collapsible blocks library if enabled.
+    $config = config('dashboard.settings');
+    if ($config->get('dashboard_collapsible_blocks') !== NULL ? $config->get('dashboard_collapsible_blocks') : TRUE) {
+      backdrop_add_library('dashboard', 'dashboard.blocks');
+    }
+
     $variables['classes'][] = 'dashboard';
   }
 }
@@ -273,6 +280,22 @@ function dashboard_library_info() {
       'caret-circle-left',
     ),
   );
+
+  $libraries['dashboard.blocks'] = array(
+    'title' => 'Dashboard Collapsible Blocks',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'dashboard') . '/js/dashboard.blocks.js' => array(),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'dashboard') . '/css/dashboard.blocks.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery'),
+      array('system', 'jquery.once'),
+    ),
+  );
+
   return $libraries;
 }
 
@@ -289,19 +312,40 @@ function dashboard_cron() {
 }
 
 /**
- * Menu callback; Dashboard settings form.
+ * Form callback for dashboard settings.
  */
-function dashboard_admin_settings() {
+function dashboard_admin_settings($form, &$form_state) {
   $config = config('dashboard.settings');
-  // Redirect on log in.
-  $form['#config'] = 'dashboard.settings';
+
   $form['dashboard_login_redirect'] = array(
     '#type' => 'checkbox',
     '#title' => t('Redirect administrators to Dashboard after log in'),
     '#default_value' => $config->get('dashboard_login_redirect'),
-    '#description' => t('User accounts with the !permission permission will be automatically redirected to the Dashboard when they log in.', array(
-      '!permission' => l(t('Access dashboard'), 'admin/config/people/permissions', array('fragment' => 'module-dashboard')),
-    )),
   );
-  return system_settings_form($form);
+
+  $form['dashboard_collapsible_blocks'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable collapsible dashboard blocks'),
+    '#default_value' => $config->get('dashboard_collapsible_blocks') !== NULL ? $config->get('dashboard_collapsible_blocks') : TRUE,
+    '#description' => t('Allow dashboard blocks to be collapsed and expanded. State is remembered per user.'),
+  );
+
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for dashboard settings form.
+ */
+function dashboard_admin_settings_submit($form, &$form_state) {
+  $config = config('dashboard.settings');
+  $config->set('dashboard_login_redirect', (bool) $form_state['values']['dashboard_login_redirect']);
+  $config->set('dashboard_collapsible_blocks', (bool) $form_state['values']['dashboard_collapsible_blocks']);
+  $config->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
