@@ -19,6 +19,9 @@ $info = array(
     'primarytabstext' => t('Primary Tabs Text'),
     'buttons' => t('Buttons and Breadcrumb'),
 
+    'cardsblockbg' => t('Cards block background'),
+    'cardimagebg' => t('Card image background'),
+
     'footer' => t('Footer background'),
     'footertext' => t('Footer text'),
     'footerborder' => t('Footer Border'),
@@ -45,6 +48,9 @@ $info = array(
         'primarytabstext' => '#010000',
         'buttons' => '#dee2ea',
 
+        'cardsblockbg' => '#f2f2f2',
+        'cardimagebg' => '#789fb5',
+
         'footer' => '#fffeff',
         'footertext' => '#000100',
         'footerborder' => '#bbbbbc',
@@ -69,6 +75,9 @@ $info = array(
         'primarytabs' => '#888889',
         'primarytabstext' => '#d0d0d0',
         'buttons' => '#014958',
+
+        'cardsblockbg' => '#f2f2f2',
+        'cardimagebg' => '#d0d0d0',
 
         'footer' => '#ffffff',
         'footertext' => '#000100',
@@ -95,6 +104,9 @@ $info = array(
         'primarytabstext' => '#301313',
         'buttons' => '#c9d9e3',
 
+        'cardsblockbg' => '#f2f2f2',
+        'cardimagebg' => '#4c1c58',
+
         'footer' => '#e7e7e7',
         'footertext' => '#000100',
         'footerborder' => '#89297a',
@@ -120,6 +132,9 @@ $info = array(
         'primarytabstext' => '#e0e4cc',
         'buttons' => '#4c5038',
 
+        'cardsblockbg' => '#f2f2f2',
+        'cardimagebg' => '#e0e4cc',
+
         'footer' => '#f0f1e3',
         'footertext' => '#000100',
         'footerborder' => '#cfd7b2',
@@ -144,6 +159,9 @@ $info = array(
         'primarytabs' => '#2b2b2b',
         'primarytabstext' => '#3b3738',
         'buttons' => '#dec0b4',
+
+        'cardsblockbg' => '#f2f2f2',
+        'cardimagebg' => '#c63d0f',
 
         'footer' => '#7e8f7c',
         'footertext' => '#000100',
@@ -176,6 +194,7 @@ $info = array(
     'css/component/teasers.css',
     'css/component/comment.css',
     'css/component/caption.css',
+    'css/component/cards.css',
     'css/skin.css',
   ),
 );
