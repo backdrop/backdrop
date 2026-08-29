@@ -10,12 +10,16 @@
 class TableSort extends SelectQueryExtender {
 
   /**
-   * The array of fields that can be sorted by.
+   * An array of column headers in format described in theme_table()
+   * that be sorted by.
    *
    * @var array
    */
   protected $header = array();
 
+  /**
+   * {@inheritdoc}
+   */
   public function __construct(SelectQueryInterface $query, DatabaseConnection $connection) {
     parent::__construct($query, $connection);
 
@@ -28,13 +32,15 @@ class TableSort extends SelectQueryExtender {
   /**
    * Order the query based on a header array.
    *
-   * @see theme_table()
-   * @param $header
+   * @param array $header
    *   Table header array.
+   *
    * @return SelectQueryInterface
    *   The called object.
+   *
+   * @see theme_table()
    */
-  public function orderByHeader(Array $header) {
+  public function orderByHeader(array $header) {
     $this->header = $header;
     $ts = $this->init();
     if (!empty($ts['sql'])) {
@@ -50,6 +56,9 @@ class TableSort extends SelectQueryExtender {
 
   /**
    * Initialize the table sort context.
+   *
+   * @return array
+   *   Table sort context array.
    */
   protected function init() {
     $ts = $this->order();
@@ -61,9 +70,7 @@ class TableSort extends SelectQueryExtender {
   /**
    * Determine the current sort direction.
    *
-   * @param $headers
-   *   An array of column headers in the format described in theme_table().
-   * @return
+   * @return string
    *   The current sort direction ("asc" or "desc").
    */
   protected function getSort() {
@@ -73,8 +80,8 @@ class TableSort extends SelectQueryExtender {
   /**
    * Compose a URL query parameter array to append to table sorting requests.
    *
-   * @return
-   *   A URL query parameter array that consists of all components of the current
+   * @return array
+   *   A URL query parameter array that consists of all components of current
    *   page request except for those pertaining to table sorting.
    *
    * @see tablesort_get_query_parameters()
@@ -86,9 +93,7 @@ class TableSort extends SelectQueryExtender {
   /**
    * Determine the current sort criterion.
    *
-   * @param $headers
-   *   An array of column headers in the format described in theme_table().
-   * @return
+   * @return array
    *   An associative array describing the criterion, containing the keys:
    *   - "name": The localized title of the table column.
    *   - "sql": The name of the database field to sort on.

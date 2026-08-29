@@ -3,6 +3,7 @@
  * @file
  * Spanish language transliteration overrides.
  */
+
 $overrides['es'] = array(
   0xE1 => 'a',
   0xE9 => 'e',

@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => 'yeoss', 'yeong', 'yeoj', 'yeoch', 'yeok', 'yeot', 'yeop', 'yeoh', 'ye', 'yeg', 'yekk', 'yegs', 'yen', 'yenj', 'yenh', 'yed',

@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => 'chwik', 'chwit', 'chwip', 'chwih', 'chyu', 'chyug', 'chyukk', 'chyugs', 'chyun', 'chyunj', 'chyunh', 'chyud', 'chyul', 'chyulg', 'chyulm', 'chyulb',

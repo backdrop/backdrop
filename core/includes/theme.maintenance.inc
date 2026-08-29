@@ -29,7 +29,8 @@ function _backdrop_maintenance_theme() {
   require_once BACKDROP_ROOT . '/core/includes/module.inc';
   unicode_check();
 
-  // Install and update pages are treated differently to prevent theme overrides.
+  // Install and update pages are treated differently to prevent theme
+  // overrides.
   if (defined('MAINTENANCE_MODE') && in_array(MAINTENANCE_MODE, array(
     'install',
     'update',
@@ -57,7 +58,8 @@ function _backdrop_maintenance_theme() {
         $custom_theme = $site_config->get('theme_default');
       }
     }
-    catch (ConfigException $e) {}
+    catch (ConfigException $e) {
+    }
   }
 
   if (empty($custom_theme)) {
@@ -93,16 +95,33 @@ function _backdrop_maintenance_theme() {
   // These are usually added from system_init() -except maintenance.css.
   // When the database is inactive it's not called so we add it here.
   $path = backdrop_get_path('module', 'system');
-  backdrop_add_css('core/misc/normalize.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css('core/misc/normalize.css', array(
+    'group' => CSS_SYSTEM,
+    'every_page' => TRUE,
+  ));
   backdrop_add_css($path . '/css/system.css');
   backdrop_add_css($path . '/css/system.admin.css');
   backdrop_add_css($path . '/css/system.theme.css');
-  backdrop_add_css($path . '/css/messages.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css($path . '/css/messages.theme.css', array(
+    'group' => CSS_SYSTEM,
+    'every_page' => TRUE,
+  ));
   backdrop_add_css($path . '/css/system.maintenance.css');
 }
 
 /**
  * Builds the registry when the site needs to bypass any database calls.
+ *
+ * @param object $theme
+ *   The loaded $theme object as returned by list_themes().
+ * @param array|null $base_theme
+ *   An optional array of objects that represent the 'base theme' if the theme
+ *   is meant to be derivative of another theme.
+ * @param string|null $theme_engine
+ *   The name of the theme engine.
+ *
+ * @return array|ThemeRegistry
+ *   The theme registry array, or an instance of the ThemeRegistry class.
  */
 function _theme_load_offline_registry($theme, $base_theme = NULL, $theme_engine = NULL) {
   return _theme_build_registry($theme, $base_theme, $theme_engine);
@@ -111,14 +130,17 @@ function _theme_load_offline_registry($theme, $base_theme = NULL, $theme_engine 
 /**
  * Returns HTML for a list of maintenance tasks to perform.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - items: An associative array of maintenance tasks.
  *   - active: The key for the currently active maintenance task.
  *
+ * @return string
+ *   The themed HTML output.
+ *
  * @ingroup themeable
  */
-function theme_task_list($variables) {
+function theme_task_list(array $variables) {
   $items = $variables['items'];
   $active = $variables['active'];
 
@@ -149,7 +171,10 @@ function theme_task_list($variables) {
   }
 
   $output = '<h2 class="element-invisible">Installation tasks</h2>';
-  $output .= '<div class="step-indicator">' . t('Step !current of !total', array('!current' => $current, '!total' => $total)) . '</div>';
+  $output .= '<div class="step-indicator">' . t('Step !current of !total', array(
+    '!current' => $current,
+    '!total' => $total,
+  )) . '</div>';
   $output .= '<ol class="task-list">' . $list . '</ol>';
 
   return $output;
@@ -160,11 +185,14 @@ function theme_task_list($variables) {
  *
  * Note: this function is not themeable.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - content: The page content to show.
+ *
+ * @return string
+ *   The themed HTML output.
  */
-function theme_install_page($variables) {
+function theme_install_page(array $variables) {
   backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
   return theme('maintenance_page', $variables);
 }
@@ -174,13 +202,16 @@ function theme_install_page($variables) {
  *
  * Note: this function is not themeable.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - content: The page content to show.
  *   - show_messages: Whether to output status and error messages.
  *     FALSE can be useful to postpone the messages to a subsequent page.
+ *
+ * @return string
+ *   The themed HTML output.
  */
-function theme_update_page($variables) {
+function theme_update_page(array $variables) {
   backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
   return theme('maintenance_page', $variables);
 }
@@ -190,11 +221,14 @@ function theme_update_page($variables) {
  *
  * Note: this function is not themeable.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - content: The page content to show.
+ *
+ * @return string
+ *   The themed HTML output.
  */
-function theme_restore_page($variables) {
+function theme_restore_page(array $variables) {
   backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
   return theme('maintenance_page', $variables);
 }
@@ -202,13 +236,16 @@ function theme_restore_page($variables) {
 /**
  * Returns HTML for a results report of an operation run by authorize.php.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - messages: An array of result messages.
  *
+ * @return string
+ *   The themed HTML output.
+ *
  * @ingroup themeable
  */
-function theme_authorize_report($variables) {
+function theme_authorize_report(array $variables) {
   $messages = $variables['messages'];
   $output = '';
   if (!empty($messages)) {
@@ -219,9 +256,15 @@ function theme_authorize_report($variables) {
         if ($number === '#abort') {
           continue;
         }
-        $items[] = theme('authorize_message', array('message' => $log_message['message'], 'success' => $log_message['success']));
+        $items[] = theme('authorize_message', array(
+          'message' => $log_message['message'],
+          'success' => $log_message['success'],
+        ));
       }
-      $output .= theme('item_list',  array('items' => $items, 'title' => $heading));
+      $output .= theme('item_list', array(
+        'items' => $items,
+        'title' => $heading,
+      ));
     }
     $output .= '</div>';
   }
@@ -231,21 +274,27 @@ function theme_authorize_report($variables) {
 /**
  * Returns HTML for a single log message from the authorize.php batch operation.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - message: The log message.
  *   - success: A boolean indicating failure or success.
  *
+ * @return array
+ *   An array with data and class keys for rendering.
+ *
  * @ingroup themeable
  */
-function theme_authorize_message($variables) {
+function theme_authorize_message(array $variables) {
   $message = $variables['message'];
   $success = $variables['success'];
   if ($success) {
     $item = array('data' => $message, 'class' => array('success'));
   }
   else {
-    $item = array('data' => '<strong>' . $message . '</strong>', 'class' => array('failure'));
+    $item = array(
+      'data' => '<strong>' . $message . '</strong>',
+      'class' => array('failure'),
+    );
   }
   return $item;
 }
