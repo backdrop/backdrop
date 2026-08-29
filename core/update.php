@@ -50,7 +50,7 @@ define('MAINTENANCE_MODE', 'update');
  * Renders form with a list of available site updates.
  */
 function update_selection_page() {
-  backdrop_set_title('Backdrop site update');
+  backdrop_set_title('Update Backdrop CMS: Review updates');
   $elements = backdrop_get_form('update_script_selection_form');
   $output = backdrop_render($elements);
 
@@ -189,7 +189,7 @@ function update_helpful_links() {
  * Displays results of the update script with any accompanying errors.
  */
 function update_results_page() {
-  backdrop_set_title('Backdrop site update');
+  backdrop_set_title('Update Backdrop CMS: Review');
 
   update_task_list();
   // Report end result.
@@ -296,10 +296,10 @@ function update_info_page() {
   backdrop_theme_rebuild();
 
   update_task_list('info');
-  backdrop_set_title('Backdrop site update');
+  backdrop_set_title('Update Backdrop CMS: Overview');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your site whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
-  $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
+  $output = '<p>Use this utility to update your site whenever you install a new version of Backdrop CMS or any of the site\'s modules.</p>';
+  $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page.</p>';
   $module_status_report = update_upgrade_check_dependencies();
   if (!empty($module_status_report)) {
     $output .= $module_status_report;
@@ -324,7 +324,7 @@ function update_info_page() {
  */
 function update_backup_page() {
   update_task_list('backup');
-  backdrop_set_title('Pre-update backup');
+  backdrop_set_title('Update Backdrop CMS: Backup');
 
   $elements = backdrop_get_form('update_backup_form');
   return backdrop_render($elements);
@@ -339,23 +339,30 @@ function update_backup_form($form, &$form_state) {
   $backup_directory = backup_get_backup_directory();
 
   $help = '<p>' . t('Before running updates, it is recommended to create a backup of your database and configuration.') . '</p>';
-  $help .= '<p>' . t('If skipping the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.') . '</p>';
+  $help .= '<p>' . t('If skipping the backup process here, please create a backup elsewhere, such as through your hosting provider.') . '</p>';
 
   if (empty($backup_directory) && $backup_directory !== FALSE) {
+    $help .= '<div class="messages info">';
     $help .= '<p>' . t('Backups are not available because the variable !variable has not been set in !file.', array(
       '!variable' => '<code>$settings[\'backup_directory\']</code>',
       '!file' => '<code>settings.php</code>',
     )) . '</p>';
+    $help .= '</div>';
     $help .= '<p>' . t('Please check the <a href="!url">documentation on configuring backups</a>.', array(
       '!url' => 'https://docs.backdropcms.org/documentation/creating-backups',
     )) . '</p>';
   }
   else {
-    $help .= '<p>' . t('The backup process may take several minutes, depending on the size of your database.') . '</p>';
+    $help .= '<p>' . t('The backup process may take several minutes depending on the size of your database.') . '</p>';
   }
   $form['help'] = array(
     '#type' => 'help',
     '#markup' => $help,
+    '#weight' => -5,
+  );
+  $form['info'] = array(
+    '#type' => 'help',
+    '#markup' => '',
     '#weight' => -5,
   );
 
