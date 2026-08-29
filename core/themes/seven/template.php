@@ -36,6 +36,54 @@ function seven_preprocess_layout(&$variables) {
 }
 
 /**
+ * Overrides theme_status_messages().
+ */
+function seven_status_messages($variables) {
+  $display = $variables['display'];
+  $message_types = (empty($variables['messages'])) ? backdrop_get_messages($display) : $variables['messages'];
+  $output = '';
+
+  $status_heading = array(
+    'status' => t('Status message'),
+    'error' => t('Error message'),
+    'warning' => t('Warning message'),
+    'info' => t('Info message'),
+  );
+
+  foreach ($message_types as $type => $messages) {
+    $output .= "<div class=\"messages $type\">\n";
+    if (!empty($status_heading[$type])) {
+      $output .= '  <h2 class="element-invisible">' . $status_heading[$type] . "</h2>\n";
+    }
+    if (count($messages) > 1 && $type == 'error') {
+      $output .= "  <ol>\n";
+      foreach ($messages as $message) {
+        $output .= '    <li>' . $message . "</li>\n";
+      }
+      $output .= "  </ol>\n";
+    }
+    elseif (count($messages) > 1) {
+      $output .= "  <ul>\n";
+      foreach ($messages as $message) {
+        $output .= '    <li>' . $message . "</li>\n";
+      }
+      $output .= "  </ul>\n";
+    }
+    else {
+      $output .= reset($messages) . "\n";
+    }
+    if (config_get('system.core', 'messages_dismissible')) {
+      // Add the 'Dismiss' library and place a 'Dismiss' link on messages.
+      backdrop_add_library('system', 'backdrop.dismiss');
+      $output .= '<a href="#" class="dismiss" title="' . t('Dismiss') . '"><span class="element-invisible">' . t('Dismiss') . '</span></a>' . "\n";
+    }
+    $output .= "</div>\n";
+  }
+
+  return $output;
+}
+
+/**
  * Overrides theme_node_add_list().
  *
  * Display the list of available node types for node creation.
