@@ -1605,7 +1605,7 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
           $uri = entity_uri('taxonomy_term', $term);
           $element[$delta] = array(
             '#type' => 'link',
-            '#title' => $term->name,
+            '#title' => entity_label('taxonomy_term', $term),
             '#href' => $uri['path'],
             '#options' => $uri['options'],
           );
@@ -1615,7 +1615,7 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
 
     case 'taxonomy_term_reference_plain':
       foreach ($items as $delta => $item) {
-        $name = ($item['tid'] != 'autocreate' ? $item['taxonomy_term']->name : $item['name']);
+        $name = ($item['tid'] != 'autocreate' ? entity_label('taxonomy_term', $item['taxonomy_term']) : $item['name']);
         $element[$delta] = array(
           '#markup' => check_plain($name),
         );
@@ -1626,7 +1626,7 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
       foreach ($items as $delta => $item) {
         $entity->rss_elements[] = array(
           'key' => 'category',
-          'value' => $item['tid'] != 'autocreate' ? $item['taxonomy_term']->name : $item['name'],
+          'value' => $item['tid'] != 'autocreate' ? entity_label('taxonomy_term', $item['taxonomy_term']) : $item['name'],
           'attributes' => array(
             'domain' => $item['tid'] != 'autocreate' ? url('taxonomy/term/' . $item['tid'], array('absolute' => TRUE)) : '',
           ),
