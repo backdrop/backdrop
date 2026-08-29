@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function devel_generate_menu() {
+  $items = array();
+
+  $items['admin/devel/generate'] = array(
+    'title' => 'Generate content',
+    'description' => 'Generate sample content for theming and development purposes.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('devel_generate_content_form'),
+    'access arguments' => array('administer nodes'),
+    'file' => 'devel_generate.pages.inc',
+  );
+
+  $items['admin/devel/generate/content'] = array(
+    'title' => 'Generate nodes',
+    'description' => 'Generate a given number of nodes and comments. Optionally delete current items.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('devel_generate_content_form'),
+    'access arguments' => array('administer nodes'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'devel_generate.pages.inc',
+    'weight' => -1,
+  );
+  $items['admin/devel/generate/user'] = array(
+    'title' => 'Generate users',
+    'description' => 'Generate a given number of users. Optionally delete current users.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('devel_generate_users_form'),
+    'access arguments' => array('administer users'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'devel_generate.pages.inc',
+    'weight' => 1,
+  );
+  if (module_exists('taxonomy')) {
+    $items['admin/devel/generate/taxonomy'] = array(
+      'title' => 'Generate terms',
+      'description' => 'Generate a given number of terms. Optionally delete current terms.',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('devel_generate_term_form'),
+      'access arguments' => array('administer taxonomy'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'devel_generate.pages.inc',
+      'weight' => 2,
+    );
+    $items['admin/devel/generate/vocabs'] = array(
+      'title' => 'Generate vocabularies',
+      'description' => 'Generate a given number of vocabularies. Optionally delete current vocabularies.',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('devel_generate_vocab_form'),
+      'access arguments' => array('administer taxonomy'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'devel_generate.pages.inc',
+      'weight' => 3,
+    );
+  }
+  $items['admin/devel/generate/menu'] = array(
+    'title' => 'Generate menus',
+    'description' => 'Generate a given number of menus and menu links. Optionally delete current menus.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('devel_generate_menu_form'),
+    'access arguments' => array('administer menu'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'devel_generate.pages.inc',
+    'weight' => 4,
+  );
+
+  return $items;
+}
