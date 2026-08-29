@@ -25,6 +25,43 @@ function entity_modules_uninstalled($modules) {
   // It is important that the entity info cache gets flushed last to prevent
   // fatal errors with outdated entity information.
   backdrop_register_shutdown_function('entity_info_cache_clear');
+
+  // Clean up any leftover field configuration files and field data for entities
+  // defined by the disabled modules.
+  foreach ($modules as $module) {
+    $hook = $module . '_entity_info';
+    if (function_exists($hook)) {
+      $entity_infos = $hook();
+      foreach ($entity_infos as $entity_type => $entity_info) {
+        if (!empty($entity_info['fieldable'])) {
+          // Get any leftover instance config files.
+          $instance_config_names = config_get_names_with_prefix('field.instance.' . $entity_type . '.');
+          foreach ($instance_config_names as $instance_config_name) {
+            // Remove the instance config.
+            $config = config($instance_config_name);
+            $config->delete();
+
+            // Remove any leftover data from field tables.
+            list(,,, $bundle, $field_name) = explode('.', $instance_config_name);
+            if (db_table_exists('field_data_' . $field_name)) {
+              db_delete('field_data_' . $field_name)
+              ->condition('entity_type', $entity_type)
+              ->condition('bundle', $bundle)
+              ->condition('deleted', 1)
+              ->execute();
+            }
+            if (db_table_exists('field_revision_' . $field_name)) {
+              db_delete('field_revision_' . $field_name)
+              ->condition('entity_type', $entity_type)
+              ->condition('bundle', $bundle)
+              ->condition('deleted', 1)
+              ->execute();
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
