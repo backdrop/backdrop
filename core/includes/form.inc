@@ -4951,13 +4951,13 @@ function theme_form_element($variables) {
   // Add element's #type and #name as class to aid with JS/CSS selectors.
   $attributes['class'][] = 'form-item';
   if (!empty($element['#type'])) {
-    $attributes['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
+    $attributes['class'][] = backdrop_html_class('form-type-' . $element['#type']);
     if (isset($element['#parents']) && form_get_error($element) !== NULL && !empty($element['#validated'])) {
       $attributes['class'][] = 'form-error';
     }
   }
   if (!empty($element['#name'])) {
-    $attributes['class'][] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+    $attributes['class'][] = backdrop_html_class('form-item-' . $element['#name']);
   }
   // Add a class for disabled elements to facilitate cross-browser styling.
   if (!empty($element['#attributes']['disabled'])) {
