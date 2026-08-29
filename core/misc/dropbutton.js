@@ -128,6 +128,9 @@ function DropButton (dropbutton, settings) {
   else {
     this.$dropbutton.addClass('dropbutton-single');
   }
+
+  // Fix parent element min-width, like <td class="operations">
+  this.$dropbutton.parent().css('min-width', this.$dropbutton.find('.dropbutton-widget').outerWidth());
 }
 
 /**
