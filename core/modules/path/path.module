@@ -457,7 +457,8 @@ function path_entity_load($entities, $type) {
  * Implements hook_entity_insert().
  */
 function path_entity_insert(Entity $entity) {
-  $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+  $entity_langcode = $entity->langcode();
+  $langcode = $entity_langcode != NULL ? $entity->langcode() : LANGUAGE_NONE;
   $uri = $entity->uri();
 
   // Only generate alias if entity has a URI.
@@ -503,7 +504,8 @@ function path_entity_insert(Entity $entity) {
  */
 function path_entity_update(Entity $entity) {
   if (isset($entity->path)) {
-    $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+    $entity_langcode = $entity->langcode();
+    $langcode = $entity_langcode != NULL ? $entity_langcode : LANGUAGE_NONE;
     $uri = $entity->uri();
     $path = $entity->path;
     $path['source'] = $uri['path'];
@@ -689,7 +691,10 @@ function path_get_pattern_by_entity_type($entity_type, $bundle = '', $langcode =
  */
 function path_load_by_entity(Entity $entity) {
   $uri = $entity->uri();
-  $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+  $langcode = $entity->langcode();
+  if ($langcode == NULL) {
+    $langcode = LANGUAGE_NONE;
+  }
   $conditions = array(
     'source' => $uri['path'],
     'langcode' => $langcode,
@@ -724,7 +729,10 @@ function path_load_multiple_by_entities(array $entities) {
   foreach ($entities as $entity) {
     $uri = $entity->uri();
     if (!empty($uri)) {
-      $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+      $langcode = $entity->langcode();
+      if ($langcode == NULL) {
+        $langcode = LANGUAGE_NONE;
+      }
       $sources[$langcode][] = $uri['path'];
       $map[$langcode][$uri['path']] = $entity->id();
 
@@ -807,7 +815,10 @@ function path_delete_all_by_entity(Entity $entity, $default_uri = NULL) {
  * Return a portion of a form for setting an alias on an entity.
  */
 function path_form_element(Entity $entity) {
-  $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+  $langcode = $entity->langcode();
+  if ($langcode == NULL) {
+    $langcode = LANGUAGE_NONE;
+  }
   $entity_type = $entity->entityType();
   $bundle = $entity->bundle();
 
