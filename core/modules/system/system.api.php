@@ -314,29 +314,44 @@ function hook_js_alter(&$javascript) {
  * Registers JavaScript/CSS libraries associated with a module.
  *
  * Modules implementing this return an array of arrays. The key to each
- * sub-array is the machine readable name of the library. Each library may
+ * sub-array is the machine-readable name of the library. Each library may
  * contain the following items:
  *
- * - 'title': The human readable name of the library.
+ * - 'title': The human-readable name of the library.
  * - 'website': The URL of the library's web site.
- * - 'version': A string specifying the version of the library; intentionally
- *   not a float because a version like "1.2.3" is not a valid float. Use PHP's
- *   version_compare() to compare different versions.
+ * - 'version': (optional) A string specifying the version of the library.
+ *     Notes:
+ *     - This is intentionally not a float, because a version like "1.2.3" is
+ *         not a valid float. Use PHP's version_compare() when comparing
+ *         versions.
+ *     - Although not mandated, specifying a version string should be reserved
+ *         for 3rd-party libraries. Specifying a version will cause that
+ *         version string to be appended as a query string when a .js asset is
+ *         loaded individually when JS aggregation is disabled (for example:
+ *         .../my_script.js?v=1.2.3. See backdrop_pre_render_scripts() and
+ *         backdrop_get_library()). That does not apply to .css assets - these
+ *         always get a random string as their query string (see
+ *         backdrop_pre_render_styles()). Because the query strings for assets
+ *         are taken into account when clearing caches (see
+ *         _backdrop_flush_css_js()), and because adding a version will cause
+ *         the query string to be specific instead of randomized on cache clear,
+ *         this may cause undesired/unexpected results when working with JS code
+ *         (changes not being applied even after clearing caches for instance).
  * - 'js': An array of JavaScript elements; each element's key is used as $data
- *   argument, each element's value is used as $options array for
- *   backdrop_add_js(). To add library-specific (not module-specific) JavaScript
- *   settings, the key may be skipped, the value must specify
- *   'type' => 'setting', and the actual settings must be contained in a 'data'
- *   element of the value.
+ *     argument, each element's value is used as $options array for
+ *     JavaScript backdrop_add_js(). To add library-specific settings (as
+ *     opposed to module-specific settings), the key may be skipped, the value
+ *     must specify 'type' => 'setting', and the actual settings must be
+ *     contained in a 'data' element of the value.
  * - 'css': Like 'js', an array of CSS elements passed to backdrop_add_css().
  * - 'icons': A simple array with only icon names. Each icon in the list will be
- *   resolved to a file path and then added to the page as both a JavaScript
- *   variable (Backdrop.icons['icon-name']) and as a CSS variable
- *   (--icon-[icon-name]).
+ *     resolved to a file path and then added to the page as both a JavaScript
+ *     variable (Backdrop.icons['icon-name']) and as a CSS variable
+ *     (--icon-[icon-name]).
  * - 'dependencies': An array of libraries that are required for a library. Each
- *   element is an array listing the module and name of another library. Note
- *   that all dependencies for each dependent library will also be added when
- *   this library is added.
+ *     element is an array listing the module and name of another library. Note
+ *     that all dependencies for each dependent library will also be added when
+ *     this library is added.
  *
  * Registered information for a library should contain re-usable data only.
  * Module- or implementation-specific data and integration logic should be added
@@ -348,6 +363,11 @@ function hook_js_alter(&$javascript) {
  * @see system_library_info()
  * @see backdrop_add_library()
  * @see backdrop_get_library()
+ * @see backdrop_pre_render_scripts()
+ * @see backdrop_pre_render_styles()
+ * @see _backdrop_flush_css_js()
+ * @see hook_icon_info()
+ * @see https://docs.backdropcms.org/documentation/icon-api
  *
  * @since 1.28.0 Added "icons" key to library info.
  */

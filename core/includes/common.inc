@@ -5756,7 +5756,10 @@ function backdrop_get_library($module, $name = NULL) {
           'icons' => array(),
         );
         foreach ($module_libraries[$key]['js'] as $file => $options) {
-          $module_libraries[$key]['js'][$file]['version'] = $module_libraries[$key]['version'];
+          // Make sure that 'version' can be optional - see hook_library_info().
+          if (isset($module_libraries[$key]['version'])) {
+            $module_libraries[$key]['js'][$file]['version'] = $module_libraries[$key]['version'];
+          }
         }
       }
     }
@@ -9141,6 +9144,16 @@ function backdrop_flush_all_caches() {
  *
  * Changing the dummy query string appended to CSS and JavaScript files forces
  * all browsers to reload fresh files.
+ *
+ * Note that .js assets added with a `'version'` specified in the respective
+ * hook_library_info() implementation will not be affected by this, since in
+ * that case the the version sting is used for the query instead of the random
+ * string. This may affect cache flushing of these assets when JS aggregation
+ * is disabled.
+ *
+ * @see hook_library_info()
+ * @see backdrop_pre_render_scripts()
+ * @see backdrop_pre_render_styles()
  */
 function _backdrop_flush_css_js() {
   // The timestamp is converted to base 36 in order to make it more compact.
