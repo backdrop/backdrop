@@ -30,7 +30,7 @@ interface BackdropUpdaterInterface {
    * Returns the system name of the project.
    *
    * @param string $directory
-   *  A directory containing a project.
+   *   A directory containing a project.
    */
   public static function getProjectName($directory);
 
@@ -82,6 +82,9 @@ abstract class Updater implements BackdropUpdaterInterface {
    */
   protected $title;
 
+  /**
+   * {@inheritdoc}
+   */
   public function __construct($source) {
     $this->source = $source;
     $this->name = self::getProjectName($source);
@@ -175,6 +178,7 @@ abstract class Updater implements BackdropUpdaterInterface {
    *        provide their canonical name.
    *
    * @param string $directory
+   *   The project directory.
    *
    * @return string
    *   The name of the project.
@@ -251,7 +255,7 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @return array
    *   An array of configuration parameters for an update or install operation.
    */
-  protected function getInstallArgs($overrides = array()) {
+  protected function getInstallArgs(array $overrides = array()) {
     $args = array(
       'make_backup' => FALSE,
       'install_dir' => $this->getInstallDirectory(),
@@ -275,7 +279,7 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @throws UpdaterException
    * @throws UpdaterFileTransferException
    */
-  public function update(&$filetransfer, $overrides = array()) {
+  public function update(FileTransfer &$filetransfer, array $overrides = array()) {
     try {
       // Establish arguments with possible overrides.
       $args = $this->getInstallArgs($overrides);
@@ -341,7 +345,7 @@ abstract class Updater implements BackdropUpdaterInterface {
    *
    * @throws UpdaterFileTransferException
    */
-  public function install(&$filetransfer, $overrides = array()) {
+  public function install(FileTransfer &$filetransfer, array $overrides = array()) {
     try {
       // Establish arguments with possible overrides.
       $args = $this->getInstallArgs($overrides);
@@ -376,7 +380,7 @@ abstract class Updater implements BackdropUpdaterInterface {
    *
    * @throws UpdaterException
    */
-  public function prepareInstallDirectory(&$filetransfer, $directory) {
+  public function prepareInstallDirectory(FileTransfer &$filetransfer, $directory) {
     // Make the parent dir writable if need be and create the dir.
     if (!is_dir($directory)) {
       $parent_dir = dirname($directory);
@@ -401,7 +405,10 @@ abstract class Updater implements BackdropUpdaterInterface {
           }
           catch (FileTransferException $e) {
             $message = t($e->getMessage(), $e->arguments);
-            $throw_message = t('Unable to create %directory due to the following: %reason', array('%directory' => $directory, '%reason' => $message));
+            $throw_message = t('Unable to create %directory due to the following: %reason', array(
+              '%directory' => $directory,
+              '%reason' => $message,
+            ));
             throw new UpdaterException($throw_message);
           }
         }
@@ -421,7 +428,7 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @param bool $recursive
    *   If the chmod should be applied recursively.
    */
-  public function makeWorldReadable(&$filetransfer, $path, $recursive = TRUE) {
+  public function makeWorldReadable(FileTransfer &$filetransfer, $path, $recursive = TRUE) {
     if (!is_executable($path)) {
       // Set it to read + execute.
       $new_perms = substr(sprintf('%o', fileperms($path)), -4, -1) . "5";
