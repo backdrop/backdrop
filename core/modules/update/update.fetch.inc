@@ -54,12 +54,13 @@ function update_fetch_data_batch(&$context) {
   // Grab another item from the fetch queue.
   for ($i = 0; $i < 5; $i++) {
     if ($item = $queue->claimItem()) {
+      $item_name = $item->data['project_type'] == 'core' ? t('Backdrop CMS core') : $item->data['info']['name'];
       if (_update_process_fetch_task($item->data)) {
         $context['results']['updated']++;
-        $context['message'] = t('Checked available update data for %title.', array('%title' => $item->data['info']['name']));
+        $context['message'] = t('Checked available update data for %item.', array('%item' => $item_name));
       }
       else {
-        $context['message'] = t('Failed to check available update data for %title.', array('%title' => $item->data['info']['name']));
+        $context['message'] = t('Failed to check available update data for %item.', array('%item' => $item_name));
         $context['results']['failures']++;
       }
       $context['sandbox']['progress']++;
