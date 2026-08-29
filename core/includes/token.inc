@@ -602,9 +602,10 @@ function _token_build_tree($token_type, array $options, $parent_restricted = FAL
 
   $tree = array();
   foreach ($info['tokens'][$token_type] as $token => $token_info) {
+    $is_pseudo_token = isset($token_info['pseudo_token']) && $token_info['pseudo_token'];
     // Build the raw token string.
     $token_parents = $options['parents'];
-    if (empty($token_parents)) {
+    if (empty($token_parents) && !$is_pseudo_token) {
       // If the parents array is currently empty, assume the token type is its
       // parent.
       $token_parents[] = $token_type;
@@ -625,7 +626,7 @@ function _token_build_tree($token_type, array $options, $parent_restricted = FAL
     if (!empty($token_info['dynamic'])) {
       $token_parents[] = '?';
     }
-    $raw_token = '[' . implode(':', $token_parents) . ']';
+    $raw_token = $is_pseudo_token ? $token : '[' . implode(':', $token_parents) . ']';
     $tree[$raw_token] = $token_info;
     $tree[$raw_token]['raw token'] = $raw_token;
 
