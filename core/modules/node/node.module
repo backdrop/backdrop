@@ -2730,6 +2730,10 @@ function node_add_node_grants_to_query($node_access_grants, $table_alias = '') {
  * @return string
  */
 function node_node_access($node, $op, $account) {
+  if (!isset($node) && user_access('administer nodes', $account)) {
+    return NODE_ACCESS_ALLOW;
+  } 
+
   $type = is_string($node) ? $node : $node->type;
 
   if (in_array($type, node_permissions_get_configured_types())) {
