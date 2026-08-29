@@ -40,10 +40,30 @@ class DateUITestCase extends DateFieldBasic {
     }
 
     // Test timezone handling validation on the field settings form.
-    $this->createDateField(array('label' => $label, 'field_type' => 'date', 'widget_type' => 'date_select', 'granularity' => array('year', 'month', 'day')));
+    $date_field = array(
+      'label' => $label,
+      'field_type' => 'date',
+      'widget_type' => 'date_select',
+      'granularity' => array('year', 'month', 'day', 'hour'),
+    );
+    $this->createDateField($date_field);
+    $field_name = 'field_' . strtolower($label);
+    $field_edit_path = 'admin/structure/types/manage/story/fields/' . $field_name;
+    $this->backdropGet($field_edit_path);
+    $this->assertOptionSelected('edit-field-settings-tz-handling', 'site', 'Found the default timezone handling method preselected when editing the field settings.');
+    $edit = array('field[settings][tz_handling]' => 'user');
+    $this->backdropPost($field_edit_path, $edit, t('Save settings'));
+    $this->backdropGet($field_edit_path);
+    $this->assertOptionSelected('edit-field-settings-tz-handling', 'user', 'Found the expected timezone handling method preselected when editing the field settings.');
+    // Remove the hour granularity and save.
     $edit = array('field[settings][granularity][hour]' => FALSE);
-    $this->backdropPost('admin/structure/types/manage/story/fields/field_' . strtolower($label), $edit, t('Save settings'));
-    $this->assertText("Dates without hours granularity must not use any timezone handling.", "Dates without hours granularity required to use timezone handling of 'none.'");
+    $this->backdropPost($field_edit_path, $edit, t('Save settings'));
+    // The tz_handling select should now be visually hidden via #states, so we
+    // cannot verify if it was correctly set to "none" via
+    // assertOptionSelected(). We check whether the config value has been set to
+    // 'none' instead.
+    $this->assertEqual('none', config_get('field.field.' . $field_name, 'settings.tz_handling'), 'Timezone handling method correctly set to "none" in config after removing the hour granularity from the field settings.');
+
     $this->deleteDateField($label);
   }
 

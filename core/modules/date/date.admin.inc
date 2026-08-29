@@ -609,8 +609,14 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#default_value' => $tz_handling,
     '#options' => date_timezone_handling_options(),
     '#description' => $description,
-    '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'date') . '/js/date.admin.js'),
+    '#states' => array(
+      'invisible' => array(
+        // Remove the timezone handling options for fields without hours
+        // granularity.
+        ':input[name="field[settings][granularity][hour]"]' => array(
+          'checked' => FALSE,
+        ),
+      ),
     ),
   );
   // Force this value to hidden because we don't want to allow it to be changed
@@ -667,7 +673,8 @@ function date_field_settings_validate(&$form, &$form_state) {
   }
 
   if ($field['settings']['tz_handling'] != 'none' && !in_array('hour', array_filter($field['settings']['granularity']))) {
-    form_set_error('field[settings][tz_handling]', t('Dates without hours granularity must not use any timezone handling.'));
+    // Dates without hours granularity must not use any timezone handling.
+    $field['settings']['tz_handling'] = 'none';
   }
 
   // Extract the correct 'todate' value out of the two end date checkboxes.
