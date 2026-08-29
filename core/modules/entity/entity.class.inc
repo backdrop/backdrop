@@ -132,6 +132,7 @@ interface EntityInterface {
    *   (optional) A language code to use for rendering. Defaults to the global
    *   content language of the current request.
    *
+   * @since 1.21.0 Method added.
    */
   public function buildContent($view_mode = 'full', $langcode = NULL);
 
@@ -150,6 +151,8 @@ interface EntityInterface {
    *
    * @return
    *   A render array of the entity.
+   *
+   * @since 1.21.0 Method added.
    */
   public function view($view_mode = 'full', $langcode = NULL, $page = NULL);
 
@@ -328,6 +331,8 @@ abstract class Entity extends stdClass implements EntityInterface {
 
   /**
    * Implements EntityInterface::buildContent().
+   *
+   * @since 1.21.0 Method added.
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
     return entity_get_controller($this->entityType())->buildContent($this, $view_mode, $langcode);
@@ -335,6 +340,8 @@ abstract class Entity extends stdClass implements EntityInterface {
 
   /**
    * Implements EntityInterface::view().
+   *
+   * @since 1.21.0 Method added.
    */
   public function view($view_mode = 'full', $langcode = NULL, $page = NULL) {
     // It is null for newly created, but we need it as array key.
