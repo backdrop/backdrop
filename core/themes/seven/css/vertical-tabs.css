@@ -159,6 +159,7 @@
   text-transform: none;
   color: #666;
   word-wrap: break-word;
+  line-height: 1.5em;
 }
 .vertical-tab-selected.vertical-tab-item {
   background-color: #fff;
