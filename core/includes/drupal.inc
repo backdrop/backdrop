@@ -98,6 +98,16 @@ function drupal_valid_http_host($host) {
 }
 
 /**
+ * Checks whether an HTTPS request is being served.
+ *
+ * @deprecated since 1.0.0
+ * @see backdrop_is_https()
+ */
+function drupal_is_https() {
+  return backdrop_is_https();
+}
+
+/**
  * Sets the base URL, cookie domain, and session name from configuration.
  *
  * @deprecated since 1.0.0
@@ -165,6 +175,16 @@ function drupal_add_http_header($name, $value, $append = FALSE) {
  */
 function drupal_get_http_header($name = NULL) {
   return backdrop_get_http_header($name);
+}
+
+/**
+ * Sets the preferred name for the HTTP header.
+ *
+ * @deprecated since 1.0.0
+ * @see _backdrop_set_preferred_header_name
+ */
+function _drupal_set_preferred_header_name($name = NULL) {
+  return _backdrop_set_preferred_header_name($name);
 }
 
 /**
@@ -359,6 +379,36 @@ function drupal_get_user_timezone() {
 }
 
 /**
+ * Initializes the database system and registers autoload functions.
+ *
+ * @deprecated since 1.0.0
+ * @see _backdrop_bootstrap_database()
+ */
+function _drupal_bootstrap_database() {
+  return _backdrop_bootstrap_database();
+}
+
+/**
+ * Loads system variables and all enabled bootstrap modules.
+ *
+ * @deprecated since 1.0.0
+ * @see _backdrop_bootstrap_variables()
+ */
+function _drupal_bootstrap_variables() {
+  return _backdrop_bootstrap_variables();
+}
+
+/**
+ * Invokes hook_boot() and sends HTTP headers.
+ *
+ * @deprecated since 1.0.0
+ * @see _backdrop_bootstrap_page_header()
+ */
+function _drupal_bootstrap_page_header() {
+  return _backdrop_bootstrap_page_header();
+}
+
+/**
  * Returns the current bootstrap phase for this Backdrop process.
  *
  * @deprecated since 1.0.0
@@ -426,6 +476,26 @@ function drupal_installation_attempted() {
  */
 function drupal_language_initialize() {
   backdrop_language_initialize();
+}
+
+/**
+ * Returns a list of the built-in language types.
+ *
+ * @deprecated since 1.0.0
+ * @see language_types_get_default()
+ */
+function drupal_language_types() {
+  return language_types_get_default();
+}
+
+/**
+ * Returns TRUE if there is more than one language enabled.
+ *
+ * @deprecated since 1.0.0
+ * @see language_multilingual()
+ */
+function drupal_multilingual() {
+  return language_multilingual();
 }
 
 /**
@@ -516,6 +586,36 @@ function drupal_placeholder($text) {
  */
 function &drupal_register_shutdown_function($callback = NULL) {
   return backdrop_register_shutdown_function($callback);
+}
+
+/**
+ * Executes registered shutdown functions.
+ *
+ * @deprecated since 1.0.0
+ * @see _backdrop_shutdown_function()
+ */
+function _drupal_shutdown_function() {
+  return _backdrop_shutdown_function();
+}
+
+/**
+ * Compares the memory required for an operation to the available memory.
+ *
+ * @deprecated since 1.0.0
+ * @see backdrop_check_memory_limit()
+ */
+function drupal_check_memory_limit($required, $memory_limit = NULL) {
+  return backdrop_check_memory_limit($required, $memory_limit);
+}
+
+/**
+ * Invalidates a PHP file from any active opcode caches.
+ *
+ * @deprecated since 1.0.0
+ * @see backdrop_clear_opcode_cache()
+ */
+function drupal_clear_opcode_cache($filepath) {
+  return backdrop_clear_opcode_cache($filepath);
 }
 
 // Functions from common.inc.
