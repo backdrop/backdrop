@@ -42,7 +42,10 @@ class DashboardCreateBlock extends Block {
       return filter_xss($this->settings['admin_description']);
     }
 
-    return t('Links to create new content.');
+    $preview = '<p>' . t('Links to create new content.') . '</p>';
+    $preview .= $this->getAdminConditionsPreview();
+
+    return $preview;
   }
 
   /**
