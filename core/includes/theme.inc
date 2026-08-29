@@ -2548,6 +2548,59 @@ function theme_item_list($variables) {
 }
 
 /**
+ * Returns HTML for an list of items with a defined separator.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - items: A list of items to render.
+ *   - separator: The string which separates the items. Defaults to ", ".
+ *   - wrapper_element: The HTML element that forms the wrapper. Defaults to
+ *       'span'.
+ *   - wrapper_attributes: Any additional attributes that should be applied to
+ *       the wrapper around the list element (the "inline-list" CSS class is
+ *       added by default).
+ *   - empty: A message to display when there are no items. Allowed value is a
+ *     string or render array.
+ *
+ * @since 1.34.0
+ */
+function theme_inline_list($variables) {
+  $items = $variables['items'];
+  $separator = $variables['separator'];
+  $wrapper_attributes = $variables['wrapper_attributes'];
+  $wrapper_element = $variables['wrapper_element'];
+
+  $output = '';
+  if ($items) {
+    $output .= implode($separator, $items);
+  }
+  elseif (!empty($variables['empty'])) {
+    $output .= render($variables['empty']);
+  }
+
+  // Only output the list container if there are any list items.
+  if ($output !== '') {
+    // Add any attributes specified for the wrapper div tag.
+    if (!isset($wrapper_attributes['class'])) {
+      // Make sure that the 'class' key exists in the array.
+      $wrapper_attributes['class'] = array();
+    }
+    elseif (is_string($wrapper_attributes['class'])) {
+      // Do not choke if 'class' was provided as a string which may include
+      // commas, spaces, or semicolons. Convert sub-strings into array items.
+      $wrapper_class_items = array_map('trim', preg_split("/[;,]/", $wrapper_attributes['class']));
+      $wrapper_attributes['class'] = $wrapper_class_items;
+    }
+    // Finally, include a default CSS class "inline-list".
+    $wrapper_attributes['class'][] = 'inline-list';
+
+    $output = '<' . $wrapper_element . backdrop_attributes($wrapper_attributes) . '>' . $output . '</' . $wrapper_element . '>';
+  }
+
+  return $output;
+}
+
+/**
  * Returns HTML for a help element.
  */
 function theme_help($variables) {
