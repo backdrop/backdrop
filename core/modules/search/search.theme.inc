@@ -22,7 +22,7 @@ function template_preprocess_search_results(&$variables) {
   }
   foreach ($variables['results'] as $result) {
     $info = array();
-    if (empty($result['attributes']))  {
+    if (empty($result['attributes'])) {
       $attributes = '';
     }
     else {
@@ -57,6 +57,14 @@ function template_preprocess_search_results(&$variables) {
     }
   }
 
+  // Calculate the starting number for the ordered list across pages. The
+  // pager stores the actual page size, so do not assume a fixed number of
+  // results per page here.
+  global $pager_page_array, $pager_limits;
+  $current_page = $pager_page_array[0] ?? 0;
+  $limit = $pager_limits[0] ?? 0;
+  $variables['ol_start'] = ($current_page * $limit) + 1;
+
   $pager_type = config_get('search.settings', 'search_pager_type');
   // @todo Move "views_mini_pager" out of Views namespace to just "mini_pager".
   if ($pager_type === 'mini') {
@@ -69,4 +77,3 @@ function template_preprocess_search_results(&$variables) {
   $variables['pager'] = theme($pager_theme, array('tags' => NULL));
   $variables['theme_hook_suggestions'][] = 'search_results__' . $variables['module'];
 }
-
