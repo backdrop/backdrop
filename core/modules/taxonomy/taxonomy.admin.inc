@@ -957,12 +957,33 @@ function taxonomy_form_term($form, &$form_state, ?TaxonomyTerm $term = NULL, ?Ta
   );
 
   if ($term->tid) {
+    $destination = array();
+    if (isset($_GET['destination'])) {
+      $destination = backdrop_get_destination();
+      unset($_GET['destination']);
+    }
+
     $form['actions']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete'),
+      '#type' => 'link',
+      '#title' => t('Delete'),
+      '#href' => 'taxonomy/term/' . $term->tid . '/delete',
+      '#options' => array(
+        'query' => $destination,
+        'attributes' => array(
+          'class' => array('button', 'button-danger', 'use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array(
+            'width' => 880,
+          )),
+        ),
+      ),
+      '#attached' => array(
+        'library' => array(
+          array('system', 'backdrop.ajax'),
+        ),
+      ),
       '#access' => taxonomy_term_access('delete', $term),
       '#weight' => 10,
-      '#submit' => array('taxonomy_form_term_delete_submit'),
     );
   }
   else {
@@ -1047,22 +1068,6 @@ function taxonomy_form_term_submit_build_taxonomy_term($form, &$form_state) {
   $term->description = $description['value'];
   $term->format = $description['format'];
   return $term;
-}
-
-/**
- * Form submission handler for the 'Delete' button for taxonomy_form_term().
- *
- * @see taxonomy_form_term_validate()
- * @see taxonomy_form_term_submit()
- */
-function taxonomy_form_term_delete_submit($form, &$form_state) {
-  $destination = array();
-  if (isset($_GET['destination'])) {
-    $destination = backdrop_get_destination();
-    unset($_GET['destination']);
-  }
-  $term = $form['#term'];
-  $form_state['redirect'] = array('taxonomy/term/' . $term['tid'] . '/delete', array('query' => $destination));
 }
 
 /**

@@ -1864,7 +1864,6 @@ function field_ui_field_delete_form_submit($form, &$form_state) {
  * @see field_ui_menu()
  * @see field_ui_field_edit_form_validate()
  * @see field_ui_field_edit_form_submit()
- * @see field_ui_field_edit_form_delete_submit()
  * @ingroup forms
  */
 function field_ui_field_edit_form($form, &$form_state, $instance) {
@@ -2049,34 +2048,35 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
     '#type' => 'submit',
     '#value' => t('Save settings')
   );
-  $form['actions']['delete'] = array(
-    '#type' => 'submit',
-    '#value' => t('Delete field'),
-    '#submit' => array('field_ui_field_edit_form_delete_submit'),
-  );
-  return $form;
-}
 
-/**
- * Form submission handler for 'Delete' button in field_ui_field_edit_form().
- */
-function field_ui_field_edit_form_delete_submit($form, &$form_state) {
   $destination = array();
   if (isset($_GET['destination'])) {
     $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
-  $instance = $form['#instance'];
-  $entity_type = $instance['entity_type'];
-  $bundle = field_extract_bundle($entity_type, $instance['bundle']);
   $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
-  $admin_field_path = $admin_path . '/fields/' . $instance['field_name'] . '/delete';
-  $form_state['redirect'] = array(
-    $admin_field_path,
-    array(
+
+  $form['actions']['delete'] = array(
+    '#type' => 'link',
+    '#title' => t('Delete field'),
+    '#href' => $admin_path . '/fields/' . $instance['field_name'] . '/delete',
+    '#options' => array(
       'query' => $destination,
+      'attributes' => array(
+        'class' => array('button', 'button-danger', 'use-ajax'),
+        'data-dialog' => TRUE,
+        'data-dialog-options' => json_encode(array(
+          'width' => 880,
+        )),
+      ),
+    ),
+    '#attached' => array(
+      'library' => array(
+        array('system', 'backdrop.ajax'),
+      ),
     ),
   );
+  return $form;
 }
 
 /**

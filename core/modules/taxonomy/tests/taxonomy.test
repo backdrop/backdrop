@@ -716,7 +716,8 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     }
 
     // Delete term 1 from the term edit page.
-    $this->backdropPost('taxonomy/term/' . $term_objects['term1']->tid . '/edit', array(), t('Delete'));
+    $this->backdropGet('taxonomy/term/' . $term_objects['term1']->tid . '/edit');
+    $this->clickLink(t('Delete'));
     $this->backdropPost(NULL, NULL, t('Delete'));
 
     // Delete term 2 from the term delete page.
@@ -824,7 +825,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $this->backdropGet('taxonomy/term/' . $term->tid . '/edit/' . $this->randomName());
 
     // Delete the term.
-    $this->backdropPost('taxonomy/term/' . $term->tid . '/edit', array(), t('Delete'));
+    $this->clickLink(t('Delete'));
     $this->backdropPost(NULL, NULL, t('Delete'));
 
     // Assert that the term no longer exists.

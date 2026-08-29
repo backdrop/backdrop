@@ -120,7 +120,6 @@ function path_admin_edit($path = array()) {
  * @ingroup forms
  * @see path_admin_form_validate()
  * @see path_admin_form_submit()
- * @see path_admin_form_delete_submit()
  */
 function path_admin_form($form, &$form_state, $path = array('source' => '', 'alias' => '', 'langcode' => LANGUAGE_NONE, 'pid' => NULL)) {
   $field_prefix = url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=');
@@ -177,11 +176,32 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
       '#type' => 'hidden',
       '#value' => $path['pid'],
     );
+
+    $destination = array();
+    if (isset($_GET['destination'])) {
+      $destination = backdrop_get_destination();
+      unset($_GET['destination']);
+    }
+
     $form['actions']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete'),
-      '#submit' => array('path_admin_form_delete_submit'),
-      '#limit_validation_errors' => array(array('actions'), array('pid')),
+      '#type' => 'link',
+      '#title' => t('Delete'),
+      '#href' => 'admin/config/urls/path/delete/' . $path['pid'],
+      '#options' => array(
+        'query' => $destination,
+        'attributes' => array(
+          'class' => array('button', 'button-danger', 'use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array(
+            'width' => 880,
+          )),
+        ),
+      ),
+      '#attached' => array(
+        'library' => array(
+          array('system', 'backdrop.ajax'),
+        ),
+      ),
     );
   }
   $form['actions']['cancel'] = array(
@@ -191,21 +211,6 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
   );
 
   return $form;
-}
-
-/**
- * Form submission handler for the 'Delete' button on path_admin_form().
- *
- * @see path_admin_form_validate()
- * @see path_admin_form_submit()
- */
-function path_admin_form_delete_submit($form, &$form_state) {
-  $destination = array();
-  if (isset($_GET['destination'])) {
-    $destination = backdrop_get_destination();
-    unset($_GET['destination']);
-  }
-  $form_state['redirect'] = array('admin/config/urls/path/delete/' . $form_state['values']['pid'], array('query' => $destination));
 }
 
 /**
@@ -239,7 +244,6 @@ function _path_get_language_names(array $language_codes) {
  * Form validation handler for path_admin_form().
  *
  * @see path_admin_form_submit()
- * @see path_admin_form_delete_submit()
  */
 function path_admin_form_validate($form, &$form_state) {
   $source = &$form_state['values']['source'];
@@ -276,7 +280,6 @@ function path_admin_form_validate($form, &$form_state) {
  * Form submission handler for path_admin_form().
  *
  * @see path_admin_form_validate()
- * @see path_admin_form_delete_submit()
  */
 function path_admin_form_submit($form, &$form_state) {
   // Remove unnecessary values.
