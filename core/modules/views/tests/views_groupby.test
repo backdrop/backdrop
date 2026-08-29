@@ -172,7 +172,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['row_plugin'] = 'fields';
 
     // The test view has 2 fields ('nid' and 'type'). Don't add 'nid' when
-    // having no aggregation function. We just want to aggregate on node type.
+    // having no aggregation function. We want to aggregate on node type.
     if (!empty($group_by)) {
       /* Field: Content: Nid */
       $handler->display->display_options['fields']['nid']['id'] = 'nid';
