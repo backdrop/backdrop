@@ -2995,6 +2995,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
    * Test Menu Block functionality.
    */
   function doMenuBlockTests($menu_name, $menu_title) {
+    $add_menu_block_link = 'Menu: ' . $menu_title;
 
     // Add nodes to use as links for menu links.
     $node1 = $this->backdropCreateNode(array('type' => 'post'));
@@ -3018,7 +3019,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $this->clickLink(t('Remove'), 1);
     // Add a block to the sidebar (the fourth region).
     $this->clickLink(t('Add block'), 3);
-    $this->clickLink($menu_title);
+    $this->clickLink($add_menu_block_link);
     $edit = array();
     $this->backdropPost(NULL, $edit, t('Add block'));
 

@@ -2660,6 +2660,12 @@ function system_user_timezone(&$form, &$form_state) {
 
 /**
  * Implements hook_block_info().
+ *
+ * Note that this also returns the system-defined menu blocks (as opposed to any
+ * custom menus created on the site, which are provided by the Menu module).
+ *
+ * @see menu_block_info()
+ * @see menu_list_system_menus()
  */
 function system_block_info() {
   $blocks['main'] = array(
@@ -2698,6 +2704,11 @@ function system_block_info() {
       // Names from menu_list_system_menus() need to be translated through t().
       'info' => check_plain(t($custom_title)),
       'description' => t('A list of links for the menu: %title.', array('%title' => t($custom_title))),
+      // Helper, non-standard key to distinguish the menu blocks from other
+      // types of blocks provided by the System module.
+      // @todo: should this be provided by a system_layout_context_info()
+      // implementation instead or be a 'required contexts' key?
+      'type' => 'menu',
     );
   }
   return $blocks;

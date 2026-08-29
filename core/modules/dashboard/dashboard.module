@@ -78,25 +78,25 @@ function dashboard_block_info() {
 
   // Dashboard blocks.
   $blocks['welcome'] = array(
-    'info' => t('Dashboard - Welcome to Backdrop CMS!'),
+    'info' => t('Welcome to Backdrop CMS!'),
     'description' => t('Provides a welcome message, and links to get people started using Backdrop'),
     'class' => 'DashboardWelcomeBlock',
     'required contexts' => array('dashboard'),
   );
   $blocks['create'] = array(
-    'info' => t('Dashboard - Create content'),
+    'info' => t('Create content'),
     'description' => t('Provides links to create new content'),
     'class' => 'DashboardCreateBlock',
     'required contexts' => array('dashboard'),
   );
   $blocks['menu'] = array(
-    'info' => t('Dashboard - Menus'),
+    'info' => t('Menus'),
     'description' => t('Provides links to manage menus'),
     'class' => 'DashboardMenuBlock',
     'required contexts' => array('dashboard'),
   );
   $blocks['node_types'] = array(
-    'info' => t('Dashboard - Content types'),
+    'info' => t('Content types'),
     'description' => t('Provides links to manage content types'),
     'class' => 'DashboardContentTypesBlock',
     'required contexts' => array('dashboard'),
@@ -108,19 +108,19 @@ function dashboard_block_info() {
     'required contexts' => array('dashboard'),
   );
   $blocks['overview_content'] = array(
-    'info' => t('Dashboard - Content'),
+    'info' => t('Content'),
     'description' => t('Displays a summary of content statistics'),
     'class' => 'DashboardOverviewContentBlock',
     'required contexts' => array('dashboard'),
   );
   $blocks['overview_user'] = array(
-    'info' => t('Dashboard - User accounts'),
+    'info' => t('User accounts'),
     'description' => t('Displays a summary of user account statistics'),
     'class' => 'DashboardOverviewUserBlock',
     'required contexts' => array('dashboard'),
   );
   $blocks['updates'] = array(
-    'info' => t('Dashboard - Available updates'),
+    'info' => t('Available updates'),
     'description' => t('Displays a list of available updates for modules, themes, layouts, and Backdrop core.'),
     'class' => 'DashboardUpdateBlock',
     'required contexts' => array('dashboard'),
@@ -128,7 +128,7 @@ function dashboard_block_info() {
 
   if (module_exists('taxonomy')) {
     $blocks['taxonomy'] = array(
-      'info' => t('Dashboard - Categories'),
+      'info' => t('Categories'),
       'description' => t('Provides links to manage taxonomy'),
       'class' => 'DashboardTaxonomyBlock',
       'required contexts' => array('dashboard'),

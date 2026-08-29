@@ -85,7 +85,10 @@ class views_plugin_display_block extends views_plugin_display {
       $info = $this->get_option('block_description');
     }
     else {
-      $info = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+      $info = t('View: @view (display: @display)', array(
+        '@view' => t($this->view->get_human_name()),
+        '@display' => t($this->display->display_title),
+      ));
     }
 
     $required_contexts = array();
