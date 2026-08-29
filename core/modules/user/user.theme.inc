@@ -191,7 +191,7 @@ function theme_user_permission_description($variables) {
     $description[] = '<div class="permission-description description table-filter-text-source">' . $permission_item['description'] . '</div>';
   }
   if (!empty($permission_item['restrict access'])) {
-    $description[] = '<em class="permission-warning">' . t('Warning: Give to trusted roles only; this permission has security implications.') . '</em>';
+    $description[] = '<em class="permission-warning">' . t('<strong>Warning</strong>: Give to trusted roles only; this permission has security implications.') . '</em>';
   }
   if (!empty($permission_item['warning'])) {
     $description[] = '<a class="warning-toggle" href="#">more</a>';
