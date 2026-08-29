@@ -24,8 +24,23 @@ class TranslationTestCase extends BackdropWebTestCase {
     parent::setUp('node', 'language', 'locale', 'translation', 'translation_test');
 
     // Setup users.
-    $this->admin_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes', 'administer languages', 'administer content types', 'administer blocks', 'access administration pages', 'translate content'));
-    $this->translator = $this->backdropCreateUser(array('create page content', 'edit own page content', 'translate content'));
+    $this->admin_user = $this->backdropCreateUser(
+      array(
+        'bypass node access',
+        'administer nodes',
+        'administer languages',
+        'administer content types',
+        'administer blocks',
+        'access administration pages',
+        'translate content',
+      ));
+    $this->translator = $this->backdropCreateUser(
+      array(
+        'create page content',
+        'edit own page content',
+        'delete own page content',
+        'translate content',
+      ));
 
     $this->backdropLogin($this->admin_user);
 
@@ -125,6 +140,11 @@ class TranslationTestCase extends BackdropWebTestCase {
     $edit['translation[status]'] = FALSE;
     $this->backdropPost('node/' . $node_translation->nid . '/edit', $edit, t('Save'));
     $this->assertRaw(t('Page %title has been updated.', array('%title' => $node_translation_title)), 'Translated node updated.');
+
+    // Delete the source node.
+    $this->backdropPost('node/' . $node->nid . '/delete', array(), t('Delete'));
+    // Assert that hook_translation_change() was called.
+    $this->assertEqual(state_get('translation_change_called', ''), $node->nid, t('hook_node_translation_change() was called.'));
 
     // Confirm that disabled languages are an option for translators when
     // creating nodes.
