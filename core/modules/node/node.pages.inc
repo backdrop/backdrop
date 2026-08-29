@@ -1101,10 +1101,10 @@ function node_autocomplete_validate($string) {
   // This preg_match() looks for the last pattern like [33334] and if found
   // extracts the numeric portion.
   $result = preg_match('/\[([0-9]+)\]$/', $string, $matches);
-  if ($result > 0) {
-    // If $result is nonzero, we found a match and can use it as the index into
-    // $matches.
-    $nid = $matches[$result];
+  // If $result equals 1, we found a match.
+  if ($result == 1) {
+    // Get the first parenthesized match.
+    $nid = $matches[1];
     // Verify that it's a valid nid.
     $node = node_load($nid);
     if (empty($node)) {
