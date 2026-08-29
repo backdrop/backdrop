@@ -1098,6 +1098,7 @@ function layout_autoload_info() {
     'FrontLayoutAccess' => 'plugins/access/front_layout_access.inc',
     'HttpResponseCodeLayoutAccess' => 'plugins/access/http_response_code_layout_access.inc',
     'LanguageLayoutAccess' => 'plugins/access/language_layout_access.inc',
+    'EntityFieldValueLayoutAccess' => 'plugins/access/entity_field_value_layout_access.inc',
     'LayoutAccess' => 'plugins/access/layout_access.inc',
     'LayoutAccessBroken' => 'plugins/access/layout_access.inc',
     'LayoutAccessNegatable' => 'plugins/access/layout_access.inc',
