@@ -145,7 +145,7 @@ class views_handler_field_field extends views_handler_field {
         if (!empty($relationships[$this->options['relationship']])) {
           $options = $relationships[$this->options['relationship']];
           $data = views_fetch_data($options['table']);
-          $this->base_table = $data[$options['field']]['relationship']['base'];
+          $this->base_table = $data[$options['field']]['relationship']['base'] ?? $options['table'];
         }
       }
     }
