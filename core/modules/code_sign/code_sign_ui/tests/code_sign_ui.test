@@ -1,0 +1,77 @@
+<?php
+/**
+ * @file
+ * Tests for code_sign_ui.module.
+ */
+
+/**
+ * Tests the administrative interface for managing Code Sign profiles.
+ */
+class CodeSignUiTestCase extends BackdropWebTestCase {
+  /**
+   * A user with permission to use the admin interface.
+   *
+   * @var object
+   */
+  protected $admin_user;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp(array('code_sign', 'code_sign_hash', 'code_sign_ui'));
+
+    $this->admin_user = $this->backdropCreateUser(array('administer code signing'));
+  }
+
+  /**
+   * Tests the administrative interface for managing Code Sign profiles.
+   */
+  public function testCodeSignAdminInterface() {
+    $this->backdropGet('admin/config/system/code-sign');
+    $this->assertText(t('You are not authorized to access this page.'), 'Access to code sign admin.');
+
+    $this->backdropLogin($this->admin_user);
+
+    $this->backdropGet('admin/config/system/code-sign');
+    $this->assertText('sha256', 'Default signing profile is present.');
+    $this->assertText(t('Hash'), 'Hash engine label is present.');
+    $this->assertLinkByHref('admin/config/system/code-sign/profile/add');
+    $this->assertLinkByHref('admin/config/system/code-sign/profile/hash/sha256/edit');
+    $this->assertLinkByHref('admin/config/system/code-sign/profile/hash/sha256/delete');
+  }
+
+  /**
+   * Tests adding and deleting a hash profile.
+   */
+  public function testCodeSignAddDeleteHash() {
+    $this->backdropGet('admin/config/system/code-sign/profile/add');
+    $this->assertText(t('You are not authorized to access this page.'), 'Access to code_sign_hash add hash.');
+
+    $this->backdropLogin($this->admin_user);
+
+    // Create a hash.
+    $new_hash = array(
+      'label' => $this->randomString(),
+      'name' => strtolower($this->randomName()),
+      'hash_algorithm' => 'md5',
+    );
+    $this->backdropGet('admin/config/system/code-sign');
+    // The label is run through check_plain() when rendered in the listing,
+    // so it must be compared against the same escaped form here - a random
+    // string may contain characters like & or < that would otherwise never
+    // match the encoded output on the page.
+    $this->assertNoText(check_plain($new_hash['label']));
+
+    // The add form is a consolidated, two-step form: choose the engine
+    // first, then fill in the engine-specific fields.
+    $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'hash'), t('Continue'));
+    $this->backdropPost(NULL, $new_hash, t('Add profile'));
+    // The listing shows the human-readable label, not the machine name.
+    $this->assertText(check_plain($new_hash['label']), 'New hash added.');
+
+    // And delete it.
+    $this->backdropPost('admin/config/system/code-sign/profile/hash/' . $new_hash['name'] . '/delete', array(), t('Delete'));
+    $this->assertNoText(check_plain($new_hash['label']));
+  }
+}

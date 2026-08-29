@@ -1,0 +1,7 @@
+{
+    "_config_name": "code_sign.profile.sha256",
+    "engine": "hash",
+    "label": "sha256",
+    "name": "sha256",
+    "hash_algorithm": "sha256"
+}

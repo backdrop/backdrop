@@ -1,0 +1,10 @@
+name = Code Sign Hash
+description = Generates and verifies hash signatures (such as MD5 or SHA1) on downloaded projects.
+package = Security
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = module
+dependencies[] = code_sign
+
+; This module is intended for testing and demonstration purposes.
+;hidden = true

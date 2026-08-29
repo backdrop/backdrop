@@ -1,0 +1,6 @@
+[CodeSignSodiumTestCase]
+name = Code Sign Sodium functionality
+description = Test profile management for the Sodium Code Sign engine.
+group = Code Sign
+file = code_sign_sodium.test
+dependencies[] = code_sign_sodium

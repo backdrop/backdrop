@@ -1,0 +1,156 @@
+<?php
+/**
+ * @file
+ * Tests for the Sodium Code Sign engine.
+ */
+
+// @cspell:ignore secretkey
+
+/**
+ * Tests profile management for the Sodium Code Sign engine, including the
+ * 'label' (human-readable) / 'name' (machine name) profile keys.
+ */
+class CodeSignSodiumTestCase extends BackdropWebTestCase {
+
+  /**
+   * A user with permission to administer Code Sign.
+   *
+   * @var object
+   */
+  protected $admin_user;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp(array('code_sign', 'code_sign_sodium', 'code_sign_ui'));
+
+    // @todo Mark this test as a fail once PHP 7.1 is no longer supported.
+    if (!extension_loaded('sodium')) {
+      $this->pass('The PHP Sodium extension is not available; these tests cannot run.');
+      return;
+    }
+
+    $this->admin_user = $this->backdropCreateUser(array('administer code signing'));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests that adding a Sodium profile generates a keypair, and that the
+   * resulting profile can sign and verify data through the generic Code
+   * Sign API.
+   */
+  public function testAddProfileGeneratesKeypairAndSigns() {
+    $machine_name = strtolower($this->randomName(8));
+
+    $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'sodium'), t('Continue'));
+    $edit = array(
+      'label' => 'Sodium Test Profile',
+      'name' => $machine_name,
+    );
+    $this->backdropPost(NULL, $edit, t('Add profile'));
+    $this->assertText(t('Profile saved.'), 'Profile was saved.');
+
+    $profile = code_sign_load_profile($machine_name);
+    $this->assertEqual($profile['label'], 'Sodium Test Profile', 'The label was recorded on the profile.');
+    $this->assertTrue(!empty($profile['public_key']), 'A public key was generated.');
+    $this->assertTrue(!empty($profile['secret_key']), 'A secret key was generated.');
+
+    $data = $this->randomString(256);
+    $signature = code_sign_sign('sodium', $machine_name, $data);
+    $this->assertTrue(!empty($signature), 'Signed data using the new profile.');
+    $this->assertIdentical(code_sign_verify('sodium', $data, $signature), TRUE, 'Verified the signature produced by the profile.');
+  }
+
+  /**
+   * Tests that editing a Sodium profile updates its label without changing
+   * the underlying keypair.
+   */
+  public function testEditProfilePreservesKeypair() {
+    $machine_name = strtolower($this->randomName(8));
+
+    $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'sodium'), t('Continue'));
+    $this->backdropPost(NULL, array(
+      'label' => 'Original Label',
+      'name' => $machine_name,
+    ), t('Add profile'));
+    $original_profile = code_sign_load_profile($machine_name);
+
+    $this->backdropGet('admin/config/system/code-sign/profile/sodium/' . $machine_name . '/edit');
+    $this->backdropPost(NULL, array('label' => 'Renamed Label'), t('Save profile'));
+    $this->assertText(t('Profile saved.'), 'Profile was re-saved after editing.');
+
+    $updated_profile = code_sign_load_profile($machine_name);
+    $this->assertEqual($updated_profile['label'], 'Renamed Label', 'The label was updated.');
+    $this->assertEqual($updated_profile['public_key'], $original_profile['public_key'], 'The public key is unchanged after editing.');
+    $this->assertEqual($updated_profile['secret_key'], $original_profile['secret_key'], 'The secret key is unchanged after editing.');
+  }
+
+  /**
+   * Tests that deleting a Sodium profile removes its configuration.
+   */
+  public function testDeleteProfile() {
+    $machine_name = strtolower($this->randomName(8));
+
+    $this->backdropPost('admin/config/system/code-sign/profile/add', array('engine' => 'sodium'), t('Continue'));
+    $this->backdropPost(NULL, array(
+      'label' => 'Delete Me',
+      'name' => $machine_name,
+    ), t('Add profile'));
+
+    $this->backdropPost('admin/config/system/code-sign/profile/sodium/' . $machine_name . '/delete', array(), t('Delete'));
+    $this->assertText(t('Profile deleted.'), 'Profile deletion succeeded.');
+
+    $profile = code_sign_load_profile($machine_name);
+    $this->assertTrue(empty($profile), 'The profile configuration was removed.');
+  }
+
+  /**
+   * Tests that a public key bundled in the module's keys/ directory is
+   * merged into getPublicKeychain() and trusted for verification, with no
+   * profile ever having been created for it.
+   */
+  public function testBundledKeyIsTrustedForVerification() {
+    $keypair = sodium_crypto_sign_keypair();
+    $public_key = base64_encode(sodium_crypto_sign_publickey($keypair));
+    $secret_key = base64_decode(base64_encode(sodium_crypto_sign_secretkey($keypair)));
+
+    $key_name = 'test-bundled-' . strtolower($this->randomName(8));
+    $keys_dir = BACKDROP_ROOT . '/' . backdrop_get_path('module', 'code_sign_sodium') . '/keys';
+    $key_file = $keys_dir . '/' . $key_name . '.pub';
+    file_put_contents($key_file, $public_key);
+
+    $engine = code_sign_get_engine('sodium');
+    $public_keychain = $engine->getPublicKeychain();
+    $this->assertTrue(isset($public_keychain['bundled:' . $key_name]), 'The bundled key appears in the public keychain.');
+    $this->assertEqual($public_keychain['bundled:' . $key_name]['public_key'], $public_key, 'The bundled public key value matches the file contents.');
+    $this->assertFalse(isset($engine->getPrivateKeychain()['bundled:' . $key_name]), 'The bundled key does not appear in the private keychain.');
+
+    // Sign data directly with the matching secret key (bypassing a profile,
+    // since none was created) and confirm the generic verify() API trusts
+    // it purely because the public half is bundled.
+    $data = $this->randomString(256);
+    $raw_signature = sodium_crypto_sign_detached($data, $secret_key);
+    $signature = base64_encode(base64_decode($public_key)) . ':' . base64_encode($raw_signature);
+    $this->assertIdentical(code_sign_verify('sodium', $data, $signature), TRUE, 'A signature from the bundled key is trusted.');
+
+    unlink($key_file);
+  }
+
+  /**
+   * Tests that a malformed bundled key file is skipped rather than breaking
+   * the public keychain.
+   */
+  public function testMalformedBundledKeyIsSkipped() {
+    $key_name = 'test-bad-bundled-' . strtolower($this->randomName(8));
+    $keys_dir = BACKDROP_ROOT . '/' . backdrop_get_path('module', 'code_sign_sodium') . '/keys';
+    $key_file = $keys_dir . '/' . $key_name . '.pub';
+    file_put_contents($key_file, 'not a valid key');
+
+    $engine = code_sign_get_engine('sodium');
+    $public_keychain = $engine->getPublicKeychain();
+    $this->assertFalse(isset($public_keychain['bundled:' . $key_name]), 'The malformed bundled key was not added to the public keychain.');
+
+    unlink($key_file);
+  }
+}
