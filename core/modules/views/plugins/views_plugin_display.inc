@@ -72,7 +72,7 @@ class views_plugin_display extends views_plugin {
     // Cache for unpack_options, but not if we are in the ui.
     static $unpack_options = array();
     if (empty($view->editing)) {
-      $cid = 'unpack_options:' . md5(serialize(array($this->options, $options)));
+      $cid = 'unpack_options:' . hash('sha256', serialize(array($this->options, $options)));
       if (empty($unpack_options[$cid])) {
         $cache = views_cache_get($cid, TRUE);
         if (!empty($cache->data)) {
