@@ -106,6 +106,14 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
       return FALSE;
     }
     $this->view->set_display($display_name);
+
+    // Force the pager to 'none' internally to ensure relationships and filters
+    // are calculated across the entire dataset before any limiting occurs.
+    $this->view->display_handler->set_option('pager', array(
+      'type' => 'none',
+      'options' => array(),
+    ));
+
     $this->view->pre_execute();
 
     // Make sure the query is not cached.
@@ -132,6 +140,11 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
     if ($this->initializeView($match, $match_operator, $limit)) {
       // Get the results.
       $result = $this->view->execute_display($display_name, $args);
+
+      // Manually apply the limit to the result set if one was provided.
+      if ($limit > 0 && !empty($result)) {
+        $result = array_slice($result, 0, $limit, TRUE);
+      }
     }
 
     $return = array();
