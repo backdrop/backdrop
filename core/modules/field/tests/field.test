@@ -753,7 +753,21 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
     $entity->content = field_attach_view($entity_type, $entity, 'full');
     $output = backdrop_render($entity->content);
     $this->content = $output;
-    $this->assertNoRaw($this->instance['label'], "Hidden label: label is not displayed.");
+    // Hidden labels are not output in the HTML at all.
+    $this->assertNoRaw($this->instance['label'], "Hidden label: label is not present in the HTML.");
+
+    // Label visually hidden.
+    $entity = clone($entity_init);
+    $this->instance['display']['full']['label'] = 'invisible';
+    field_update_instance($this->instance);
+    field_attach_prepare_view($entity_type, array($entity->ftid => $entity), 'full');
+    $entity->content = field_attach_view($entity_type, $entity, 'full');
+    $output = backdrop_render($entity->content);
+    $this->content = $output;
+    // Visually hidden labels ARE output in the HTML, but they are hidden via
+    // CSS.
+    $this->assertRaw($this->instance['label'], "Visually hidden label: label is present in the HTML.");
+    $this->assertNoText($this->instance['label'], "Visually hidden label: label is not visible.");
 
     // Field hidden.
     $entity = clone($entity_init);

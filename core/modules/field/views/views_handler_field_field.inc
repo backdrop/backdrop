@@ -885,7 +885,7 @@ class views_handler_field_field extends views_handler_field {
     $display = array(
       'type' => $this->options['type'],
       'settings' => $this->options['settings'],
-      'label' => 'hidden',
+      'label' => 'invisible',
       // Pass the View object in the display so that fields can act on it.
       'views_view' => $this->view,
       'views_field' => $this,
