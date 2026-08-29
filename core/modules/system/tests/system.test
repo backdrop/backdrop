@@ -3037,6 +3037,39 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     // links.
     $this->assertLink($item1['link_title']);
     $this->assertLink($item6['link_title']);
+
+    // Switch style to Hierarchical and verify the functionality is NOT applied to the front-end.
+    $this->backdropGet($block_edit_url);
+    $edit = array(
+      'block_settings[style]' => 'hierarchical',
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('user');
+    $this->assertNoRaw('data-expand-active-trail', 'Expand active trail attribute is NOT present when using hierarchical style.');
+
+    // Enable "Expand active trail" for dropdown style and verify data attribute.
+    $this->backdropGet($block_edit_url);
+    $edit = array(
+      'block_settings[style]' => 'dropdown',
+      'block_settings[expand_active_trail]' => TRUE,
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('user');
+    $this->assertRaw('data-expand-active-trail="1"', 'Expand active trail data attribute found when enabled.');
+
+    // Disable and verify it is set to 0.
+    $edit = array(
+      'block_settings[expand_active_trail]' => FALSE,
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('user');
+    $this->assertRaw('data-expand-active-trail="0"', 'Expand active trail data attribute set to 0 when disabled.');
     if ($menu_name == 'main-menu') {
       $this->assertNoLink($item2['link_title']);
     }
