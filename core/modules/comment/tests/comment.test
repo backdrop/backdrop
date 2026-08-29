@@ -2064,6 +2064,47 @@ class CommentActionsTestCase extends CommentHelperCase {
 }
 
 /**
+ * Tests that the comment hostname is set correctly on save.
+ */
+class CommentHostnameTestCase extends CommentHelperCase {
+  /**
+   * Tests that an explicitly set hostname is preserved on save.
+   */
+  function testCommentPresetHostnamePreserved() {
+    $preset_hostname = '192.168.1.100';
+    $comment = entity_create('comment', array(
+      'nid' => $this->node->nid,
+      'uid' => $this->web_user->uid,
+      'subject' => $this->randomName(),
+      'comment_body' => array(LANGUAGE_NONE => array(array('value' => $this->randomName()))),
+      'node_type' => 'comment_node_post',
+      'hostname' => $preset_hostname,
+    ));
+    comment_save($comment);
+
+    $saved_comment = comment_load($comment->cid);
+    $this->assertEqual($saved_comment->hostname, $preset_hostname, 'The hostname explicitly set on the comment before saving was preserved.');
+  }
+
+  /**
+   * Tests that the hostname still defaults to the request IP when unset.
+   */
+  function testCommentDefaultHostnameFromRequest() {
+    $comment = entity_create('comment', array(
+      'nid' => $this->node->nid,
+      'uid' => $this->web_user->uid,
+      'subject' => $this->randomName(),
+      'comment_body' => array(LANGUAGE_NONE => array(array('value' => $this->randomName()))),
+      'node_type' => 'comment_node_post',
+    ));
+    comment_save($comment);
+
+    $saved_comment = comment_load($comment->cid);
+    $this->assertEqual($saved_comment->hostname, ip_address(), 'The hostname defaulted to the current request IP when not explicitly set.');
+  }
+}
+
+/**
  * Tests fields on comments.
  */
 class CommentFieldsTest extends CommentHelperCase {
