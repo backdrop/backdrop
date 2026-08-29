@@ -388,8 +388,14 @@ function config_export_single_form_update_export($form, &$form_state) {
     $storage = config_get_config_storage('active');
     $config = new Config($config_name, $storage);
 
-    // Re-add the config name property so it shows up in the export.
-    $data = array_merge(array('_config_name' => $config_name), $config->get());
+    // Re-add config properties so they show up in the export.
+    $system_properties = array(
+      '_config_name' => $config_name,
+      '_config_project_type' => $config->project_type,
+      '_config_' . $config->project_type => $config->project,
+    );
+
+    $data = array_merge($system_properties, $config->get());
     $value = $storage->encode($data);
     $row_count = substr_count($value, "\n");
     $form['export']['#value'] = $value;
