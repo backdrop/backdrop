@@ -137,6 +137,15 @@ function search_admin_settings($form, &$form_state) {
     '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at <a href="@search">@search</a>.', array('@search' => url('search', array('absolute' => TRUE)))),
   );
 
+  /* Add checkbox for partial word search */
+  $search_partial_words = $config->get('search_partial_words');
+  $form['active']['search_partial_words'] = array(
+    '#title' => t('Enable partial word search'),
+    '#type' => 'checkbox',
+    '#default_value' => $config->get('search_partial_words'),
+    '#description' => t('Uncheck for full word only search.')
+  );
+
   $form['pager'] = array(
     '#type' => 'fieldset',
     '#title' => t('Pager type'),
@@ -271,6 +280,7 @@ function search_admin_settings_submit($form, &$form_state) {
   $config->set('search_default_module', $form_state['values']['search_default_module']);
   $config->set('search_logging', (bool) $form_state['values']['search_logging']);
   $config->set('search_pager_type', $form_state['values']['search_pager_type']);
+  $config->set('search_partial_words', $form_state['values']['search_partial_words']);
 
   // Check whether we are resetting the values.
   if ($form_state['triggering_element']['#value'] == t('Reset to defaults')) {
