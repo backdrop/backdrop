@@ -145,6 +145,7 @@ function _field_token_info($field_name = NULL) {
               continue;
             }
 
+            $info[$key]['field_type'] = $field['type'];
             $info[$key]['token types'][] = $token_type;
             $info[$key] += array('labels' => array(), 'bundles' => array());
 
