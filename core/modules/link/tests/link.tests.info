@@ -28,6 +28,12 @@ description = Tests the link_validate_url() function by itself, without invoking
 group = Link
 file = link.validate.test
 
+[LinkConvertInternalTestCase]
+name = Conversion of internal path aliases
+description = Test that internal path aliases are saved as system paths.
+group = Link
+file = link.convert_alias.test
+
 [LinkCustomFormTest]
 name = Link field custom form tests
 description = Tests link fields being used on custom forms.
