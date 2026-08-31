@@ -52,6 +52,11 @@ define('CACHE_PERMANENT', 0);
 define('CACHE_TEMPORARY', -1);
 
 /**
+ * A max-age value signifying an item that should be cached forever.
+ */
+define('CACHE_MAX_AGE_PERMANENT', -2);
+
+/**
  * @defgroup logging_severity_levels Logging severity levels
  * @{
  * Logging severity levels as defined in RFC 3164.
