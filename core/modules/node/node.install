@@ -2850,7 +2850,6 @@ function node_update_1024(&$sandbox) {
   $revision_records = array_slice($sandbox['revision_records'], $offset, $limit, TRUE);
 
   foreach ($revision_records as $vid => $record) {
-        if ($vid == 126) $record['uid'] = 'wibble';
     try {
       db_update('node_revision')
         ->fields(array(
