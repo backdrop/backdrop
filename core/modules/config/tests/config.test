@@ -162,6 +162,57 @@ class ConfigurationTest extends BackdropWebTestCase {
   }
 
   /**
+   * Tests the in-memory cache used by configuration.
+   */
+  public function testConfigStaticCache() {
+    // Populate a sample configuration file.
+    $original_data = array(
+      'favorite_animal' => 'cats',
+    );
+    $config = config('config.test');
+    $config->setData($original_data);
+    $config->save();
+
+    // Check the default case of not using static caching.
+    $this->assertEqual($config->isStatic(), FALSE, 'Configuration is by default not statically cached.');
+
+    $static_cache = &backdrop_static('config');
+    $this->assertFalse(array_key_exists('config.test', $static_cache['active']), 'Static cache is empty by default after reading configuration.');
+
+    // Enable static caching and check the in-cache memory is used.
+    $config->setStatic();
+    $config->save();
+
+    $config = config('config.test');
+
+    $this->assertEqual($config->isStatic(), TRUE, 'Configuration is statically cached after setting static flag.');
+    $this->assertNotNull($static_cache['active']['config.test'], 'Static cache is not empty after reading configuration that has the static flag set.');
+
+    // Note the _config_name key is specifically removed when reading. But other
+    // _config_* keys should be the first items in the stored data.
+    $expected_static_data = array(
+      '_config_static' => TRUE,
+      'favorite_animal' => 'cats',
+    );
+    $actual_static_data = $static_cache['active']['config.test']->getData();
+    $this->assertIdentical($expected_static_data, $actual_static_data, 'Static cache is set to the expected exact values after reading from disk.');
+
+    /** @noinspection PhpArrayIndexImmediatelyRewrittenInspection */
+    $static_cache['active']['config.test']->set('favorite_animal', 'bunnies');
+    $config = config('config.test');
+    $this->assertEqual($config->get('favorite_animal'), 'bunnies', 'Static cache is used when reading configuration.');
+
+    // Disable static caching and check it is no longer used.
+    $config->setStatic(FALSE);
+    $config->save();
+
+    $config = config('config.test');
+    $this->assertFalse(array_key_exists('config.test', $static_cache['active']), 'Static cache is empty after removing static flag.');
+    $this->assertEqual($config->get('favorite_animal'), 'bunnies', 'Original value is read from disk when static flag removed.');
+    $this->assertNull($config->get('_config_static'), 'Config static flag entire removed when using setStatic(FALSE).');
+  }
+
+  /**
    * Tests that config directories are protected by .htaccess files.
    */
   public function testConfigHtaccess() {
@@ -335,7 +386,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
     // Verify that new config exists.
     $this->assertIdentical($original_dynamic_data, config_get($dynamic_name));
 
-    // Create a second config that is not declared in hook_config_info().
+    // Create a config that is not declared in hook_config_info().
     $this->copyConfig('active', 'staging');
     $dynamic_name2 = $dynamic_name . '2';
     $staging_storage->write($dynamic_name2, $original_dynamic_data);
@@ -345,8 +396,72 @@ class ConfigurationUITest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/development/configuration', array(), t('Import all'));
 
     // Validation should fail, as this config file is not owned by a module.
-    $error_message = t('The configuration "@name" is not owned by any module. Try enabling the module that provides this configuration, then importing again.', array('@name' => $dynamic_name2));
+    $missing_module_message = 'The configuration "@name" is not owned by any module. Try enabling the module that provides this configuration, then importing again.';
+    $error_message = t($missing_module_message, array('@name' => $dynamic_name2));
     $this->assertText($error_message, 'Validation properly prevents import when a config is not declared by a module.');
+
+    // Create a second config that is not declared in hook_config_info().
+    $dynamic_name3 = $dynamic_name . '3';
+    $staging_storage->write($dynamic_name3, $original_dynamic_data);
+    $this->assertIdentical($staging_storage->exists($dynamic_name3), TRUE, $dynamic_name3 . ' found in staging.');
+
+    // Attempt an import which should fail on two missing modules.
+    $this->backdropPost('admin/config/development/configuration', array(), t('Import all'));
+
+    // Confirm the error message is shown once for each module that is missing.
+    $error_message = t($missing_module_message, array('@name' => $dynamic_name2));
+    $this->assertText($error_message, 'Validation prevents import when first module of two missing modules is missing.');
+    $error_message = t($missing_module_message, array('@name' => $dynamic_name3));
+    $this->assertText($error_message, 'Validation prevents import when second module of two missing modules is missing.');
+
+    // Depend on a real module that is not enabled. This configCopy() includes
+    // the config from "config_test" module.
+    $this->copyConfig('active', 'staging');
+
+    // Fully uninstall config_test module, which will delete associated config.
+    module_disable(array('config_test'));
+    backdrop_uninstall_modules(array('config_test'));
+    module_list(TRUE);
+    $this->assertFalse(module_exists('config_test'), 'The config_test module has been disabled.');
+
+    // Do not include the config_test module being enabled in the first import.
+    $system_extensions_data = $staging_storage->read('system.extensions');
+    $system_extensions_data['modules']['config_test'] = FALSE;
+    $staging_storage->write('system.extensions', $system_extensions_data);
+
+    // Attempt an import which should fail on the disabled module.
+    $this->backdropPost('admin/config/development/configuration', array(), t('Import all'));
+    $error_message = t($missing_module_message, array('@name' => 'config_test.simple'));
+    $this->assertText($error_message, 'Validation prevents import when depending on a disabled module.');
+
+    // Intentionally create an error in the configuration file so that it will
+    // be flagged as invalid by config_test module, even though it is disabled
+    // before the start of the sync process.
+    $config_test_data = $staging_storage->read('config_test.simple');
+    $config_test_data['fail_validation'] = TRUE;
+    $staging_storage->write('config_test.simple', $config_test_data);
+
+    // Include the dependent module in system.extensions so it is enabled as
+    // part of the config sync.
+    $system_extensions_data['modules']['config_test'] = TRUE;
+    $staging_storage->write('system.extensions', $system_extensions_data);
+
+    // Validation should now fail from hook_config_data_validate().
+    $this->backdropPost('admin/config/development/configuration', array(), t('Import all'));
+    $this->assertText('Configuration intentionally flagged to fail validation.', 'Config sync correctly failed when a disabled module was enabled via system.extensions, then dependent configuration failed validation.');
+
+    // Allow validation to pass by removing the intentional fail flag.
+    $config_test_data['fail_validation'] = FALSE;
+    $staging_storage->write('config_test.simple', $config_test_data);
+
+    // Now the import should succeed with the dependent module enabled.
+    $this->backdropPost('admin/config/development/configuration', array(), t('Import all'));
+    $error_message = t($missing_module_message, array('@name' => 'config_test'));
+    $this->assertNoText($error_message, 'No validation error when config that has a dependent module is enabled in the same config sync.');
+    $this->assertText('Configuration sync completed.', 'Sync successful when enabling a module and its dependent configuration.');
+
+    module_list(TRUE);
+    $this->assertTrue(module_exists('config_test'), 'The config_test module was enabled as part of the config sync.');
 
     // Empty out the staging config.
     $staging_storage->deleteAll();
@@ -590,9 +705,9 @@ class ConfigurationUITest extends BackdropWebTestCase {
 }
 
 /**
- * Tests that hook_config_create() is run during config sync.
+ * Tests that hook_config_create() is run during installation of default config.
  */
-class ConfigurationSyncTest extends BackdropWebTestCase {
+class ConfigurationInstallDefaultHooksTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   /**
@@ -620,9 +735,9 @@ class ConfigurationSyncTest extends BackdropWebTestCase {
   }
 
   /**
-   * Tests that hook_config_create() is run during config sync.
+   * Tests that hook_config_create() is run during module installation.
    */
-  public function testSync() {
+  public function testModuleInstall() {
     $config_data = config_get('config_test_hooks.data');
     $this->assertEqual('brie', $config_data['favorite_cheese'], 'Config variable is set to brie.');
     $this->assertFalse(field_info_field('field_config_test'), 'The test field does not exist.');

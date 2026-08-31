@@ -207,7 +207,10 @@ class TokenTestHelper extends BackdropWebTestCase {
     foreach ($tokens as $name => $expected) {
       $token = $input[$name];
       if (!isset($expected)) {
-        $this->assertTrue(!isset($replacements[$token]), t("Token value for @token was not generated.", array('@type' => $type, '@token' => $token)));
+        $this->assertTrue(!isset($replacements[$token]), t("Token value for @token was not generated.", array(
+          '@type' => $type,
+          '@token' => $token,
+        )));
       }
       elseif (!isset($replacements[$token])) {
         $this->fail(t("Token value for @token was not generated.", array('@type' => $type, '@token' => $token)));
@@ -406,9 +409,16 @@ class TokenCommentTestCase extends TokenTestHelper {
   }
 
   function testCommentTokens() {
-    $node = $this->backdropCreateNode(array('comment' => COMMENT_NODE_OPEN));
+    $content_type = $this->backdropCreateContentType(array(
+      'comment_enabled' => TRUE,
+    ));
+    $node = $this->backdropCreateNode(array(
+      'comment' => COMMENT_NODE_OPEN,
+      'type' => $content_type->type,
+    ));
 
-    $parent_comment = new Comment();
+    /** @var Comment $parent_comment */
+    $parent_comment = entity_create('comment', array());
     $parent_comment->nid = $node->nid;
     $parent_comment->pid = 0;
     $parent_comment->cid = NULL;
@@ -430,7 +440,8 @@ class TokenCommentTestCase extends TokenTestHelper {
     );
     $this->assertTokens('comment', array('comment' => $parent_comment), $tokens);
 
-    $comment = new Comment();
+    /** @var Comment $comment */
+    $comment = entity_create('comment', array());
     $comment->nid = $node->nid;
     $comment->pid = $parent_comment->cid;
     $comment->cid = NULL;
@@ -460,7 +471,8 @@ class TokenNodeTestCase extends TokenTestHelper {
     $this->backdropLogin($admin_user);
 
     $files = $this->backdropGetTestFiles('image');
-    $file = new File((array) $files[0]);
+    /** @var File $file */
+    $file = entity_create('file', (array) $files[0]);
     $file->uid = $admin_user->uid;
     $file->save();
     $node_title = $this->randomName();
@@ -709,13 +721,14 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
     return $vocabulary;
   }
 
-  function addTerm(TaxonomyVocabulary $vocabulary, array $term = array()) {
-    $term += array(
+  function addTerm(TaxonomyVocabulary $vocabulary, array $term_parameters = array()) {
+    $term_parameters += array(
       'name' => backdrop_strtolower($this->randomName(5)),
       'vocabulary' => $vocabulary->machine_name,
       'parent' => array(0),
     );
-    $term = new TaxonomyTerm($term);
+    /** @var TaxonomyTerm $term */
+    $term = entity_create('taxonomy_term', $term_parameters);
     taxonomy_term_save($term);
     return $term;
   }
@@ -814,13 +827,14 @@ class TokenEntityTestCase extends TokenTestHelper {
     $this->vocab = $vocabulary;
   }
 
-  function addTerm(TaxonomyVocabulary $vocabulary, array $term = array()) {
-    $term += array(
+  function addTerm(TaxonomyVocabulary $vocabulary, array $term_parameters = array()) {
+    $term_parameters += array(
       'name' => backdrop_strtolower($this->randomName(5)),
       'vocabulary' => $vocabulary->machine_name,
       'parents' => array(0),
     );
-    $term = new TaxonomyTerm($term);
+    /** @var TaxonomyTerm $term */
+    $term = entity_create('taxonomy_term', $term_parameters);
     $term->save();
     return $term;
   }
@@ -969,7 +983,8 @@ class TokenFileTestCase extends TokenTestHelper {
 
   function testFileTokens() {
     // Create a test file object.
-    $file = new File();
+    /** @var File $file */
+    $file = entity_create('file', array());
     $file->fid = 1;
     $file->filename = 'test.png';
     $file->filesize = 100;

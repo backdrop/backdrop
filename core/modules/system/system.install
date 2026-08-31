@@ -28,17 +28,20 @@ function system_requirements($phase) {
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
-      // If a version has been specified, append it to the profile.
-      $profile .= !empty($info['version']) ? '-' . $info['version'] : '';
-      $requirements['install_profile'] = array(
-        'title' => $t('Install profile'),
-        'value' => $t('%profile_name (%profile)', array(
-          '%profile_name' => $info['name'],
-          '%profile' => $profile,
-        )),
-        'severity' => REQUIREMENT_INFO,
-        'weight' => -9,
-      );
+      // Profiles might not ship with modules.
+      if (!empty($info)) {
+        // If a version has been specified, append it to the profile.
+        $profile .= !empty($info['version']) ? '-' . $info['version'] : '';
+        $requirements['install_profile'] = array(
+          'title' => $t('Install profile'),
+          'value' => $t('%profile_name (%profile)', array(
+            '%profile_name' => $info['name'],
+            '%profile' => $profile,
+          )),
+          'severity' => REQUIREMENT_INFO,
+          'weight' => -9,
+        );
+      }
     }
 
     // Report the configuration storage being used.
@@ -89,7 +92,10 @@ function system_requirements($phase) {
   $phpversion = phpversion();
   if (function_exists('phpinfo')) {
     if ($phase == 'runtime') {
-      $php_value = $t('Version: !version (<a href="!infourl">PHP information</a>)', array('!version' => $phpversion, '!infourl' => url('admin/reports/status/php')));
+      $php_value = $t('Version: !version (<a href="!url">PHP information</a>)', array(
+        '!version' => $phpversion,
+        '!url' => url('admin/reports/status/php'),
+      ));
     }
     else {
       $php_value = $t('Version: !version', array('!version' => $phpversion));
@@ -112,10 +118,10 @@ function system_requirements($phase) {
   // Minimum recommended PHP version can be incremented when deprecating older
   // versions of PHP but while they are still supported. This does not throw
   // a warning or error on updates to keep upgrade tests compatible.
-  $minimum_recommended_version = '5.6.0';
+  $minimum_recommended_version = '7.1.0';
   $minimum_warning = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => $minimum_recommended_version));
   if (version_compare($phpversion, $minimum_recommended_version) < 0) {
-    $requirements['php']['description'] = $minimum_warning . ' ' . l(t('Read about the minimum version increase'), 'https://backdropcms.org/news/backdrop-cms-drops-support-for-php-versions-prior-to-56') . '.';
+    $requirements['php']['description'] = $minimum_warning . ' ' . l(t('Read about the minimum version increase'), 'https://backdropcms.org/news/backdrop-cms-drops-support-for-php-versions-prior-to-71') . '.';
     $requirements['php']['severity'] = $phase === 'runtime' ? REQUIREMENT_ERROR : REQUIREMENT_INFO;
   }
 
@@ -479,19 +485,29 @@ function system_requirements($phase) {
     );
 
     // Check installed modules.
+    $modules_update_required = array();
     foreach (module_list() as $module) {
       $updates = backdrop_get_schema_versions($module);
       if ($updates !== FALSE) {
         $current_schema = backdrop_get_installed_schema_version($module);
+        // Special case: modules installed in Drupal 6, that did not receive any
+        // update in Drupal 7, but have updates available in Backdrop.
+        if ($current_schema >= 6000 && $current_schema < 7000) {
+          $current_schema = 0;
+        }
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
-          $update_link = base_path() . 'core/update.php';
-          $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
-          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link));
-          break;
+          // Add the module with the latest schema to a list.
+          $modules_update_required[] = $module . ' (' . $current_schema . ' → ' . $latest_schema . ')';
         }
       }
+    }
+    if (!empty($modules_update_required)) {
+      $update_link = base_path() . 'core/update.php';
+      $requirements['update']['severity'] = REQUIREMENT_ERROR;
+      $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
+      $modules_update_required_list = theme('item_list', array('items' => $modules_update_required));
+      $requirements['update']['description'] = $t('The modules listed below have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link)) . $modules_update_required_list;
     }
   }
 
@@ -851,7 +867,8 @@ function _system_check_db_utf8mb4_requirements($phase) {
  * Implements hook_install().
  */
 function system_install() {
-  // Create tables.
+  // As an exception from other modules, the System module needs to explicitly
+  // call backdrop_install_schema('system') or its tables won't be created.
   backdrop_install_schema('system');
   $versions = backdrop_get_schema_versions('system');
   $version = $versions ? max($versions) : SCHEMA_INSTALLED;
@@ -1233,7 +1250,7 @@ function system_schema() {
   $schema['menu_links'] = array(
     'description' => 'Contains the individual links within a menu.',
     'fields' => array(
-     'menu_name' => array(
+      'menu_name' => array(
         'description' => "The menu name. All links with the same menu name (such as 'main-menu') are part of the same menu.",
         'type' => 'varchar',
         'length' => 32,
@@ -1268,7 +1285,7 @@ function system_schema() {
         'default' => '',
       ),
       'link_title' => array(
-      'description' => 'The text displayed for the link, which may be modified by a title callback stored in {menu_router}.',
+        'description' => 'The text displayed for the link, which may be modified by a title callback stored in {menu_router}.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -1506,7 +1523,7 @@ function system_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-     ),
+    ),
     'primary key' => array('value'),
   );
 
@@ -1752,6 +1769,17 @@ function system_schema() {
 function system_update_last_removed() {
   // Drupal 7.28.
   return 7078;
+}
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function system_update_dependencies() {
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['system'][1071] = array(
+    'user' => 1007,
+  );
+  return $dependencies;
 }
 
 /**
@@ -2121,7 +2149,7 @@ function system_update_1018() {
   $config = config('system.authorize');
   $config->set('filetransfer_default', update_variable_get('authorize_filetransfer_default', ''));
   $settings = db_query("SELECT name, value FROM {variable} WHERE name LIKE 'authorize_filetransfer_connection_settings_%'");
-  foreach ($settings as $row)  {
+  foreach ($settings as $row) {
     $row = unserialize($row);
     $config->set('authorize_filetransfer_connection_settings_' . $row[0], $row[1]);
   }
@@ -2432,7 +2460,7 @@ function system_update_1025() {
     ),
     'content' => array(
       '84c43df4-1165-4faf-8700-c362a7153c0b' => array(
-      'plugin' => 'system:header',
+        'plugin' => 'system:header',
         'data' => array(
           'module' => 'system',
           'delta' => 'header',
@@ -3315,6 +3343,7 @@ function system_update_1070() {
  * See: https://github.com/backdrop/backdrop-issues/issues/1759
  */
 function system_update_1071() {
+  backdrop_static_reset('user_roles');
   $roles = user_roles(FALSE, 'administer layouts');
   foreach ($roles as $role_name => $role) {
     user_role_grant_permissions($role_name, array('administer flexible templates'));
@@ -3431,9 +3460,14 @@ function system_update_1078() {
 
 /**
  * Clear the cache to reset allowlist settings.
+ *
+ * This update has been removed because it causes a regression when later update
+ * hooks create cache tables.
+ *
+ * @see https://github.com/backdrop/backdrop-issues/issues/6974
  */
 function system_update_1079() {
-  backdrop_flush_all_caches();
+  // This update has been removed.
 }
 
 /**
@@ -3706,7 +3740,10 @@ function system_update_1098() {
   $module = db_query("SELECT name FROM {system} WHERE name = 'fast_token_browser' AND type = 'module'")->fetchField();
   if ($module) {
     $path = backdrop_get_path('module', 'fast_token_browser');
-    backdrop_set_message(t('The contributed module <em>Fast Token Browser</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('The contributed module %module has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array(
+      '%module' => 'Fast Token Browser',
+      '%path' => BACKDROP_ROOT . '/' . $path,
+    )), 'warning');
     // Remove the entry for the Fast Token Browser module from the system table.
     // As this module does not provide any config or settings, there doesn't
     // seem to be anything else left to clean up or migrate.
@@ -3825,9 +3862,91 @@ function system_update_1102() {
 }
 
 /**
- * Creates database tables and config items for cache tags if they do not exist.
+ * Create system.extensions config and populate with enabled modules and themes.
  */
 function system_update_1103() {
+  $result = db_query("SELECT name, status, type, schema_version, info FROM {system} ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+  $modules = [];
+  $themes = [];
+  foreach ($result as $row) {
+    $extension = (array) $row;
+    $extension['info'] = unserialize($extension['info']);
+
+    if ($extension['type'] === 'module') {
+      // Do not include hidden modules in the list.
+      if (!empty($extension['info']['hidden'])) {
+        continue;
+      }
+      // Do not include uninstalled modules in the list.
+      if ($extension['schema_version'] == -1) {
+        continue;
+      }
+
+      $modules[$extension['name']] = (bool) $extension['status'];
+    }
+
+    // Only add enabled themes to the list.
+    if ($extension['type'] === 'theme' && $extension['status']) {
+      $themes[$extension['name']] = (bool) $extension['status'];
+    }
+  }
+
+  $config = config('system.extensions');
+  $config->set('modules', $modules);
+  $config->set('themes', $themes);
+  $config->save();
+}
+
+/**
+ * Ensure system.core uses _config_static for better performance.
+ */
+function system_update_1104() {
+  $config = config('system.core');
+  if ($config->get('_config_static') === NULL) {
+    $config->set('_config_static', TRUE);
+    $config->save();
+  }
+}
+
+/**
+ * Uninstall the html5_upload contrib module, now part of core.
+ */
+function system_update_1105() {
+  $module = db_query("SELECT name FROM {system} WHERE name = 'html5_upload' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'html5_upload');
+    backdrop_set_message(t('The contributed module %module has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array(
+      '%module' => 'HTML5 Upload',
+      '%path' => BACKDROP_ROOT . '/' . $path,
+    )), 'warning');
+
+    // Remove the entry for the HTML5 Upload module from the system table.
+    // As this module does not provide any config or settings, there doesn't
+    // seem to be anything else left to clean up or migrate.
+    // While the contrib module remains in the filesystem, this entry will be
+    // recreated, but it will have status 0 (disabled), and schema -1
+    // (uninstalled), so it is safe to remove.
+    db_query("DELETE FROM {system} WHERE name = 'html5_upload' AND type = 'module'");
+  } else {
+    return t('<em>HTML5 Upload</em> not found. Nothing to be done.');
+  }
+}
+
+/**
+ * Set icon browser default number of icons per page.
+ */
+function system_update_1106() {
+  $config = config('system.core');
+  if ($config->get('icon_browser_icons_per_page') === NULL) {
+    $config->set('icon_browser_icons_per_page', 110);
+    $config->save();
+  }
+}
+  
+/**
+ * Creates database tables and config items for cache tags if they do not exist.
+ */
+function system_update_1107() {
   $schema = system_schema();
 
   if (!db_table_exists('invalidated_cache_tags')) {

@@ -1662,15 +1662,28 @@ function _theme_render_template_debug($template_function, $template_file, $varia
 function theme_enable($theme_list) {
   backdrop_clear_css_cache();
 
-  foreach ($theme_list as $key) {
+  foreach ($theme_list as $theme) {
     db_update('system')
       ->fields(array('status' => 1))
       ->condition('type', 'theme')
-      ->condition('name', $key)
+      ->condition('name', $theme)
       ->execute();
 
     // Copy any default configuration data to the system config directory.
-    config_install_default_config($key);
+    config_install_default_config($theme);
+
+    // Update the theme status in the system.extensions config.
+    $config = config('system.extensions');
+    $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
+    $themes_in_config[$theme] = TRUE;
+
+    watchdog('system', '%theme theme enabled.', array('%theme' => $theme), WATCHDOG_INFO);
+  }
+
+  // Save the updated config.
+  if (isset($config) && isset($themes_in_config)) {
+    $config->set('themes', $themes_in_config);
+    $config->save();
   }
 
   list_themes(TRUE);
@@ -1698,14 +1711,19 @@ function theme_disable($theme_list) {
 
   backdrop_clear_css_cache();
 
-  foreach ($theme_list as $key) {
+  foreach ($theme_list as $theme) {
     db_update('system')
       ->fields(array('status' => 0))
       ->condition('type', 'theme')
-      ->condition('name', $key)
+      ->condition('name', $theme)
       ->execute();
 
-    config_uninstall_config($key);
+    config_uninstall_config($theme);
+
+    // Remove the theme from the system.extensions config.
+    config_clear('system.extensions', 'themes.' . $theme);
+
+    watchdog('system', '%theme theme disabled.', array('%theme' => $theme), WATCHDOG_INFO);
   }
 
   list_themes(TRUE);
@@ -2372,12 +2390,24 @@ function theme_table(array $variables) {
  *     show.
  */
 function theme_tablesort_indicator($variables) {
-  if ($variables['style'] == "asc") {
-    return theme('image', array('path' => 'core/misc/arrow-asc.png', 'width' => 13, 'height' => 13, 'alt' => t('sort ascending'), 'title' => t('sort ascending')));
+  if ($variables['style'] == 'asc') {
+    $icon = 'caret-down-fill';
+    $alt = t('sort ascending');
   }
   else {
-    return theme('image', array('path' => 'core/misc/arrow-desc.png', 'width' => 13, 'height' => 13, 'alt' => t('sort descending'), 'title' => t('sort descending')));
+    $icon = 'caret-up-fill';
+    $alt = t('sort descending');
   }
+
+  $options = array(
+    'alt' => $alt,
+    'attributes' => array(
+      'width' => 15,
+      'height' => 15,
+    ),
+  );
+
+  return icon($icon, $options);
 }
 
 /**

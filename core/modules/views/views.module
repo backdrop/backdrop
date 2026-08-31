@@ -176,6 +176,11 @@ function views_theme($existing, $type, $theme, $path) {
     'file' => 'templates/views.theme.inc',
   );
 
+  $hooks['views_select_all_pages'] = $base + array(
+    'variables' => array('view' => NULL, 'enable_select_all_pages' => TRUE),
+    'file' => 'views.theme.inc',
+  );
+
   // Add theme suggestions which are part of modules.
   foreach (views_get_module_apis() as $info) {
     if (isset($info['template path'])) {

@@ -96,6 +96,7 @@ function taxonomy_entity_info() {
       'entity keys' => array(
         'id' => 'tid',
         'bundle' => 'vocabulary',
+        'label' => 'name',
       ),
       'bundle keys' => array(
         'bundle' => 'machine_name',
@@ -879,10 +880,10 @@ function taxonomy_vocabulary_get_names() {
 /**
  * Finds all parents of a given term ID.
  *
- * @param $tid
- *   A taxonomy term ID.
+ * @param int|string|null $tid
+ *   Numeric taxonomy term ID or null, when creating a new one.
  *
- * @return
+ * @return array
  *   An array of term objects which are the parents of the term $tid, or an
  *   empty array if parents are not found.
  */
@@ -901,7 +902,7 @@ function taxonomy_term_load_parents($tid) {
     $parents[$tid] = taxonomy_term_load_multiple($tids);
   }
 
-  return isset($parents[$tid]) ? $parents[$tid] : array();
+  return $tid && isset($parents[$tid]) ? $parents[$tid] : array();
 }
 
 /**
@@ -1027,7 +1028,9 @@ function taxonomy_get_tree($vocabulary_name, $parent = 0, $max_depth = NULL, $lo
   // Keeps track of the parents we have to process, the last entry is used
   // for the next processing step.
   $process_parents = array();
-  $process_parents[] = $parent;
+  if ($parent !== NULL) {
+    $process_parents[] = $parent;
+  }
 
   // Loops over the parent terms and adds its children to the tree array.
   // Uses a loop instead of a recursion, because it's more efficient.
@@ -2016,6 +2019,7 @@ function taxonomy_language_delete($language) {
 function taxonomy_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
   foreach ($items as $delta => $item) {
     if ($item['tid'] == 'autocreate') {
+      /** @var TaxonomyTerm $term */
       $term = entity_create('taxonomy_term', $item);
       unset($term->tid);
       taxonomy_term_save($term);

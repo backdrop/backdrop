@@ -33,17 +33,24 @@
   display: none;
   float: left; /* LTR */
   margin-right: 10px;
-  max-width: 37px;
-  height: auto;
 }
 [dir="rtl"] .layout-list img {
   float: right; /* LTR */
   margin-right: 0;
   margin-left: 10px;
 }
+.layout-icon {
+  object-fit: contain;
+  max-width: 50px;
+  max-height: 75px;
+  width: 50px;
+  height: 75px;
+}
 @media (min-width: 768px) {
-  .layout-list img {
-    display: inline;
+  .layout-list img,
+  .layout-list .layout-icon {
+    display: inline-block;
+    color: rgb(102, 102, 102);
   }
 }
 
@@ -58,6 +65,11 @@
    [dir="rtl"] .layout-list thead .layout-title {
      padding-right: 71px;
    }
+}
+
+.layout-info {
+  display: flex;
+  gap: 10px;
 }
 
 /* Individual layout settings form. */
@@ -110,8 +122,17 @@
 .layout-placeholder-examples {
   margin-top: 0.5em;
 }
+input.layout-additional-path-remove.form-submit {
+  margin: 0;
+}
+#layout-path-description .description {
+  margin: 0 0 1em;
+}
+.layout-path-description {
+  margin-bottom: 1em;
+}
 
-/* Toggle for the placeholder examples */
+/* Toggle for the path examples */
 .layout-placeholder-examples-toggle {
   white-space: nowrap;
 }
@@ -252,6 +273,9 @@
 .ui-sortable .layout-editor-block {
   cursor: move;
 }
+.ui-sortable .layout-editor-block:hover .handle {
+  opacity: 1;
+}
 .layout-editor-block {
   margin: -1px 1px 15px -1px;
   background: #ffffff;
@@ -269,15 +293,16 @@
   padding: 0.4em 0.5em;
 }
 .layout-editor-block-title .handle {
-  background: url(../../../misc/draggable.png) no-repeat 6px 9px;
-  height: 13px;
-  width: 13px;
-  margin: 0 0.5em 0 0; /* LTR */
-  padding: 0.25em 0.75em;
+  mask-image: var(--icon-arrows-out-cardinal-fill);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  display: inline-block;
+  background-color: currentColor;
+  opacity: 0.65;
+  height: 1em;
+  width: 1em;
+  margin: 0 .5em;
   box-sizing: content-box;
-}
-[dir="rtl"] .layout-editor-block-title .handle {
-  margin: 0 0 0 0.5em;
 }
 .layout-editor-block-title .text {
   font-size: 1.1em;

@@ -117,13 +117,6 @@ class Comment extends Entity {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->subject;
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {
@@ -449,6 +442,8 @@ class CommentStorageController extends EntityDatabaseStorageController {
   public function buildContent(EntityInterface $comment, $view_mode = 'full', $langcode = NULL) {
     global $language_content;
     $langcode = $langcode ? $langcode : $language_content->langcode;
+    // It is null for newly created, but we need it as array key.
+    $cid = (string) $comment->id();
 
     $node = node_load($comment->nid);
 
@@ -456,11 +451,11 @@ class CommentStorageController extends EntityDatabaseStorageController {
     $comment->content = array();
 
     // Allow modules to change the display mode.
-    $view_mode = key(entity_view_mode_prepare('comment', array($comment->cid => $comment), $view_mode, $langcode));
+    $view_mode = key(entity_view_mode_prepare('comment', array($cid => $comment), $view_mode, $langcode));
 
     // Build fields content.
-    field_attach_prepare_view('comment', array($comment->cid => $comment), $view_mode, $langcode);
-    entity_prepare_view('comment', array($comment->cid => $comment), $langcode);
+    field_attach_prepare_view('comment', array($cid => $comment), $view_mode, $langcode);
+    entity_prepare_view('comment', array($cid => $comment), $langcode);
     $comment->content += field_attach_view('comment', $comment, $view_mode, $langcode);
 
     $comment->content['links'] = array(
@@ -541,7 +536,9 @@ class CommentStorageController extends EntityDatabaseStorageController {
       // Allow modules to modify the structured comment.
       $type = 'comment';
       backdrop_alter(array('comment_view', 'entity_view'), $build, $type);
-      $view[$type][$comment->id()] = $build;
+      // It is null for newly created, but we need it as array key.
+      $cid = (string) $comment->id();
+      $view[$type][$cid] = $build;
     }
 
     return $view;

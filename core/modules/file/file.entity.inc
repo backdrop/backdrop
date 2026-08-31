@@ -87,6 +87,15 @@ class File extends Entity {
   public $timestamp;
 
   /**
+   * Whether to keep the original timestamp when saving the file.
+   *
+   * @var bool
+   *
+   * @since 1.35.0 Property added.
+   */
+  public $keepTimestamp = FALSE;
+
+  /**
    * Constructor for file entities.
    */
   public function __construct(array $values = array()) {
@@ -125,13 +134,6 @@ class File extends Entity {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->filename;
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {
@@ -150,6 +152,12 @@ class File extends Entity {
     // If no user object is supplied, the access check is for the current user.
     if (empty($account)) {
       $account = $GLOBALS['user'];
+    }
+    // Bundle might be NULL, which we can not use as array key. But we keep the
+    // initial value to be used with module_invoke_all() below.
+    $bundle_initial = $bundle;
+    if ($bundle === NULL) {
+      $bundle = '';
     }
 
     // If we've already checked access for this file, user and op, return from
@@ -170,11 +178,12 @@ class File extends Entity {
     // We grant access to the file if both of the following conditions are met:
     // - No modules say to deny access.
     // - At least one module says to grant access.
-    $access = module_invoke_all('file_access', $bundle, 'create', $account);
+    $access = module_invoke_all('file_access', $bundle_initial, 'create', $account);
     if (in_array(FILE_ACCESS_DENY, $access, TRUE)) {
       $rights[$account->uid][$bundle] = FALSE;
       return $rights[$account->uid][$bundle];
-    } elseif (in_array(FILE_ACCESS_ALLOW, $access, TRUE)) {
+    }
+    elseif (in_array(FILE_ACCESS_ALLOW, $access, TRUE)) {
       $rights[$account->uid][$bundle] = TRUE;
       return $rights[$account->uid][$bundle];
     }
@@ -285,7 +294,10 @@ class FileStorageController extends EntityDatabaseStorageController {
    *   The file entity about to be saved.
    */
   protected function preSave(EntityInterface $entity) {
-    $entity->timestamp = REQUEST_TIME;
+    if ($entity->isNew() || !$entity->keepTimestamp) {
+      $entity->timestamp = REQUEST_TIME;
+    }
+
     $entity->filesize = filesize($entity->uri);
     if (!isset($entity->langcode)) {
       // Default the file's language code to none, because files are language

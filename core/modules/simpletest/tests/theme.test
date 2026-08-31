@@ -665,10 +665,10 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
           '#details' => t('Detailed content'),
           '#attributes' => array(
             'id' => 'foobar-id',
-            'class' => array('fooclass'),
+            'class' => array('foo-class'),
           ),
         ),
-        'expected' => '<details id="foobar-id" class="fooclass"><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
+        'expected' => '<details id="foobar-id" class="foo-class"><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
       ),
       // Expanded 'details' with child element.
       array(
@@ -1050,6 +1050,7 @@ EOL;
 
     // Create another term and make sure the template suggestions shown in the
     // debug markup are correct.
+    /** @var TaxonomyTerm $term2 */
     $term2 = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),
@@ -1071,6 +1072,7 @@ EOL;
 
     // Create another term and make sure the template suggestions shown in the
     // debug markup are correct.
+    /** @var TaxonomyTerm $term3 */
     $term3 = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),

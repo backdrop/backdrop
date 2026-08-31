@@ -25,7 +25,7 @@
 function layout_entity_admin_form(array $form, array &$form_state, $entity_type, $bundle_arg) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
-  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['#attached']['library'][] = array('layout', 'layout.admin');
 
   $form['messages'] = array(
     '#theme' => 'status_messages',
@@ -191,8 +191,7 @@ function layout_entity_admin_add_form(array $form, array &$form_state, $entity_t
 
   $form['#tree'] = TRUE;
 
-  $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
-  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['#attached']['library'][] = array('layout', 'layout.admin');
 
   $entity_layouts = layout_get_entity_layouts($entity_type);
   $bundle = field_extract_bundle($entity_type, $bundle_arg);

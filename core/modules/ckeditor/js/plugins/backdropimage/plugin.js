@@ -254,7 +254,7 @@ CKEDITOR.plugins.add('backdropimage', {
         var dialogSettings = {
           title: data.dialogTitle,
           uploads: uploadsEnabled,
-          dialogClass: 'editor-image-dialog'
+          classes: {'ui-dialog': 'editor-image-dialog'}
         };
         Backdrop.ckeditor.openDialog(editor, editor.config.backdrop.imageDialogUrl, data.existingValues, data.saveCallback, dialogSettings);
       }

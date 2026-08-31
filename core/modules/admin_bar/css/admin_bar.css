@@ -14,6 +14,14 @@
   --admin-bar-height: calc(var(--admin-bar-font-size) * 3.05);
 }
 
+/* Prevent hash link targets from being covered. */
+html.admin-bar-fixed :target {
+  scroll-margin-top: var(--admin-bar-height);
+}
+html.admin-bar-fixed table.sticky-enabled :target {
+  scroll-margin-top: 5rem;
+}
+
 #admin-bar {
   /* Adjusting font size will scale the entire admin menu, including icons. */
   font: normal var(--admin-bar-font-size) "Lucida Grande", Verdana, sans-serif;
@@ -326,6 +334,10 @@
   padding: 0.5em 2em 0.5em 1em; /* LTR */
   width: 100%;
   box-sizing: border-box;
+  /* Reinforce the admin bar font so the search input is unaffected by the
+  theme. */
+  font: inherit;
+  line-height: 1.15;
 }
 [dir="rtl"] #admin-bar .admin-bar-search input {
   background-position: left 0.5em center;
@@ -392,4 +404,14 @@ tr.admin-bar-tweak-permissions-processed td.module {
 }
 #admin-bar .admin-bar-alert .error-label {
   display: none;
+}
+
+/* On small screens, expand children straight down instead of side-to-side. */
+@media only screen and (max-width: 500px) {
+  @media (hover: none) {
+    #admin-bar-menu .dropdown.expanded .dropdown.expanded {
+      position: inherit;
+      margin: 0;
+    }
+  }
 }
