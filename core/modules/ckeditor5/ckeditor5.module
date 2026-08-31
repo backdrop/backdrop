@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR5_VERSION', '48.0.0');
+define('CKEDITOR5_VERSION', '48.4.0');
 
 /**
  * Implements hook_menu().
@@ -620,6 +620,18 @@ function ckeditor5_ckeditor5_plugins() {
         // CKEditor CDN, which may be blocked by CORS configuration.
         // See lib/UPGRADING.md for more information.
         'definitionsUrl' => url($emoji_definitions, array('absolute' => TRUE)),
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/bookmarks.html
+  $plugins['bookmark.Bookmark'] = array(
+    'buttons' => array(
+      'bookmark' => array(
+        'label' => t('Bookmark'),
+        'image' => $image_prefix . '/bookmark.svg',
+        'required_html' => array('<a id>'),
+        'plugin_dependencies' => array('bookmark.Bookmark'),
       ),
     ),
   );

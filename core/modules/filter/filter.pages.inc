@@ -202,6 +202,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#type' => 'number',
     '#default_value' => $values['width'],
     '#max' => 99999,
+    '#min' => 0,
     '#attributes' => array('placeholder' => t('width')),
     '#parents' => array('attributes', 'width'),
     '#field_suffix' => ' &times; ',
@@ -212,10 +213,15 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#type' => 'number',
     '#default_value' => $values['height'],
     '#max' => 99999,
+    '#min' => 0,
     '#attributes' => array('placeholder' => t('height')),
     '#parents' => array('attributes', 'height'),
     '#field_suffix' => ' ' . t('pixels'),
   );
+
+  // Add reset icon after the "height" field.
+  $form['size']['height']['#field_suffix'] .= '<button class="image-ratio-icon image-ratio-reset-original image-ratio-reset-original-inactive" title="' . t('Reset to original size') . '" aria-label="' . t('Reset to original size') . '">' . icon('arrows-clockwise-fill') . '</button>';
+
   // Original values used for reference in submit handler.
   $form['size']['previous_width'] = array(
     '#type' => 'value',
