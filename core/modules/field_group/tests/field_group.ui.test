@@ -1,0 +1,105 @@
+<?php
+/**
+ * @file
+ * Test file for Field Group UI.
+ */
+
+include_once('field_group.test');
+
+/**
+ * Test the Field Group UI.
+ */
+class GroupUITestCase extends GroupTestCase {
+
+  /**
+   * Set up.
+   */
+  public function setUp() {
+    parent::setUp();
+  }
+
+  /**
+   * Test the creation a group on the post content type.
+   */
+  public function createGroup() {
+
+    // Create random group name.
+    $this->group_label = $this->randomName(8);
+    $this->group_name_input = backdrop_strtolower($this->randomName(8));
+    $this->group_name = 'group_' . $this->group_name_input;
+
+    // Setup new group.
+    $group = array(
+      'fields[_add_new_group][label]' => $this->group_label,
+      'fields[_add_new_group][group_name]' => $this->group_name_input,
+    );
+    // Add new group on the 'Manage fields' page.
+    $this->backdropPost('admin/structure/types/manage/post/fields', $group, t('Save'));
+
+    $this->assertRaw(t('New group %label successfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
+
+    // Test if group is in the $groups array.
+    $groups = field_group_info_groups('node', 'post', 'form', TRUE);
+    $this->assertTrue(array_key_exists($this->group_name, $groups), t('Group found in groups array'));
+
+    // Add new group on the 'Manage display' page.
+    $this->backdropPost('admin/structure/types/manage/post/display/default', $group, t('Save'));
+    $this->assertRaw(t('New group %label successfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
+
+    // Test if group is in the $groups array.
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->assertTrue(array_key_exists($this->group_name, $groups), t('Group found in groups array'));
+  }
+
+  /**
+   * Delete a group.
+   */
+  public function deleteGroup() {
+
+    $this->backdropPost('admin/structure/types/manage/post/groups/' . $this->group_name . '/delete/form', array(), t('Delete'));
+    $this->assertRaw(t('The group %label has been deleted from the %post content type.', array(
+      '%label' => $this->group_label,
+      '%post' => 'Post'),
+    ), t('Group removal message displayed on screen.'));
+
+    // Test that group is not in the $groups array.
+    $groups = field_group_info_groups('node', 'post', 'form', TRUE);
+    $this->assertFalse(array_key_exists($this->group_name, $groups), t('Group not found in groups array while deleting'));
+
+    $this->backdropPost('admin/structure/types/manage/post/groups/' . $this->group_name . '/delete/default', array(), t('Delete'));
+    $this->assertRaw(t('The group %label has been deleted from the %post content type.', array(
+      '%label' => $this->group_label,
+      '%post' => 'Post',
+    )), t('Group removal message displayed on screen.'));
+
+    // Test that group is not in the $groups array.
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->assertFalse(array_key_exists($this->group_name, $groups), t('Group not found in groups array while deleting'));
+  }
+
+  /**
+   * General CRUD.
+   */
+  public function testCRUDGroup() {
+    $this->createGroup();
+    $this->deleteGroup();
+  }
+
+  /**
+   * Nest a field underneath a group.
+   */
+  public function testNestField() {
+
+    $this->createGroup();
+
+    $edit = array(
+      'fields[field_image][parent]' => $this->group_name,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields', $edit, t('Save'));
+    $this->assertRaw(t('Your settings have been saved.'), t('Settings saved'));
+
+    $groups = field_group_info_groups('node', 'post', 'form', TRUE);
+    $this->assertTrue(in_array('field_image', $groups[$this->group_name]->children), t('Image is a child of %group', array('%group' => $this->group_name)));
+  }
+
+}
