@@ -2850,6 +2850,7 @@ function node_update_1024(&$sandbox) {
   $revision_records = array_slice($sandbox['revision_records'], $offset, $limit, TRUE);
 
   foreach ($revision_records as $vid => $record) {
+        if ($vid == 126) $record['uid'] = 'wibble';
     try {
       db_update('node_revision')
         ->fields(array(
@@ -2867,7 +2868,18 @@ function node_update_1024(&$sandbox) {
       // revision record to the $vid but do not advance progress so we can
       // continue, but know that not every record successfully updated.
       $sandbox['current_revision_record'] = $vid;
-      watchdog_exception('Node Update (nid:' . $record['nid'] . ', vid:' . $vid . ')', $e);
+
+      // Compile meaningful information for the watchdog log record to help the
+      // site administrator identify and resolve the issue.
+      $exception_data = array(
+        'nid=' . $record['nid'],
+        'vid=' . $vid,
+        'uid=' . $record['uid'],
+        'timestamp=' . $record['timestamp'],
+      );
+      $exception_data_string = ' <em>' . get_class($e) . '</em>: ' . $e->getMessage();
+      $exception_data_string .= ' <em>Data:</em> ' . implode(', ', $exception_data);
+      watchdog_exception('Node Update', $e, $exception_data_string);
     }
   }
 
