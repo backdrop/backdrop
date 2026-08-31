@@ -18,12 +18,12 @@ function field_group_requirements($phase) {
     if ($extras_enabled && !$extras_module) {
       if ($extras_module === FALSE) {
         // Module not found.
-        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module !module should be downloaded and enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array(
+        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module %module should be enabled to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
           '!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra'),
         ));
       } elseif (!$extras_module) {
         // Module exists but isn't enabled.
-        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module %module should be enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array(
+        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. Enable the contrib module %module to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
           '%module' => 'Field Group Extra',
         ));
       }
@@ -156,7 +156,7 @@ function field_group_update_1002() {
   if ($extras_enabled) {
     if ($extras_module === FALSE) {
       // Module not found.
-      backdrop_set_message(t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, and <em>Multipage</em> field group types have been moved out of the Field Group module. The contrib module !module should be downloaded and enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array(
+      backdrop_set_message(t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, and <em>Multipage</em> field group types have been moved out of the Field Group module. Your website uses one or more of these group types. Download and enable the contrib module !module to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
         '!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra'),
       )));
     } elseif (!$extras_module) {
@@ -165,7 +165,7 @@ function field_group_update_1002() {
         ->fields(array('status' => 1))
         ->condition('name', 'field_group_extra')
         ->execute();
-      backdrop_set_message(t('The contrib module %module has been enabled to ensure the existing field groups continue to work properly. Or update those field groups to use other group types.', array(
+      backdrop_set_message(t('The contrib module %module has been enabled to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
         '%module' => 'Field Group Extra',
       )));
     }

@@ -3934,8 +3934,7 @@ function system_update_1107() {
     backdrop_set_message(t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array(
       '@name' => t('Field Group'),
       '%path' => $path,
-      // @todo new URL for change notice.
-      '!url' => 'https://docs.backdropcms.org/node/47321',
+      '!url' => 'https://docs.backdropcms.org/node/49214',
     )), 'warning');
   }
 }
