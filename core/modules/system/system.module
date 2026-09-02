@@ -3592,7 +3592,7 @@ function system_header_block($settings) {
  */
 function system_breadcrumb_block($settings = array()) {
   $crumbs = backdrop_get_breadcrumb();
-  if (isset($settings['current']) && $settings['current'] == TRUE) {
+  if (isset($settings['current']) && $settings['current'] == TRUE && !empty($crumbs)) {
     $crumbs[] = '<span aria-current="page">' . backdrop_get_title() . '</span>';
   }
 
