@@ -3056,7 +3056,9 @@ function user_role_revoke_permissions($role_name, array $permissions = array()) 
 }
 
 /**
- * List user administration filters that can be applied.
+ * Lists user administration filters that can be applied.
+ *
+ * @deprecated since 1.34.0
  */
 function user_filters() {
   $filters = array();
@@ -3110,6 +3112,8 @@ function user_filters() {
  *
  * @param $query
  *   Query object that should be filtered.
+ *
+ * @deprecated since 1.34.0
  */
 function user_build_filter_query(SelectQuery $query) {
   $filters = user_filters();
