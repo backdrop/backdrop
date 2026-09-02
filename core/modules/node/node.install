@@ -2753,6 +2753,160 @@ function node_update_1023() {
 }
 
 /**
+ * Fix node initial revision timestamp and user.
+ */
+function node_update_1024(&$sandbox) {
+
+  // Setup a batch process so large numbers of node revision records can be
+  // handled.
+  if (!isset($sandbox['progress'])) {
+    // The count of node revision records processed so far.
+    $sandbox['progress'] = 0;
+
+    // A place to store messages during the run.
+    $sandbox['messages'] = array();
+
+    // Last node revision record read via the query.
+    $sandbox['current_revision_record'] = -1;
+
+    // Get the node revision and node records.
+    $query = db_select('node_revision', 'nr')
+      ->fields('nr', array('vid', 'nid'))
+      ->condition('nr.uid', 0)
+      ->condition('nr.timestamp', 0)
+      ->orderBy('nr.vid');
+    $query->innerJoin('node', 'n', 'nr.nid = n.nid');
+    $query->fields('n', array('uid', 'created', 'type'));
+    $revision_results = $query->execute()->fetchAllAssoc('nid');
+
+    // Total node revision records that must be updated.
+    $sandbox['max'] = count(array_keys($revision_results));
+    // Exit if no node revision records to update.
+    if ($sandbox['max'] == 0) {
+      return;
+    }
+
+    // Check for these nodes if revisions exist with user ids. If so, retrieve
+    // the uid from the earliest revision.
+    $node_revision_query = db_select('node_revision', 'nr')
+      ->fields('nr', array('nid', 'uid'))
+      ->condition('nid', array_keys($revision_results), 'IN')
+      ->condition('uid', 0, '>')
+      ->groupBy('nid');
+    $node_revision_query->addExpression('MIN(timestamp)', 'timestamp');
+    $node_revision_results = $node_revision_query->execute()->fetchAllAssoc('nid');
+
+    // Check which node types, if any, allow anonymous users to create content.
+    $node_types = array_keys(node_type_get_names());
+    $anon_create_types = array();
+    foreach ($node_types as $node_type) {
+      $create_permission = "create $node_type content";
+      if (user_role_has_permission(BACKDROP_ANONYMOUS_ROLE, $create_permission)) {
+        $anon_create_types[$node_type] = TRUE;
+      }
+    }
+
+    // Combine the revision results and node records into a single array.
+    $revision_records = array();
+    foreach ($revision_results as $nid => $row) {
+      // If the current node owner is "Anonymous" AND the node type allows
+      // anonymous node creation, then we assume that the node author was
+      // anonymous.
+      $anon_author = isset($anon_create_types[$row->type]) && $row->uid == "0";
+
+      if (!$anon_author && isset($node_revision_results[$nid])) {
+        // If not an anonymous author AND other revisions exist for this node,
+        // use the uid from the earliest valid revision.
+        $uid = $node_revision_results[$nid]->uid;
+      }
+      else {
+        // If no other revisions exist OR the node owner is anonymous, use the
+        // uid from the node.
+        $uid = $row->uid;
+      }
+      $revision_records[$row->vid] = array(
+        'vid' => $row->vid,
+        'nid' => $nid,
+        'uid' => $uid,
+        'timestamp' => $row->created,
+      );
+    }
+    // Store the compiled revision records in the $sandbox.
+    $sandbox['revision_records'] = $revision_records;
+    $sandbox['max_revision_record'] = max(array_keys($revision_records));
+  }
+
+  // Set a limit of records to update in each batch.
+  $limit = 2500;
+
+  // Find the starting point within the array based on the progress so far.
+  $offset = 0;
+  $latest_vid = $sandbox['current_revision_record'];
+  if (isset($sandbox['revision_records'][$latest_vid])) {
+    $offset = array_search($latest_vid, array_keys($sandbox['revision_records'])) + 1;
+  }
+
+  // Retrieve the records to process in this batch.
+  $revision_records = array_slice($sandbox['revision_records'], $offset, $limit, TRUE);
+
+  foreach ($revision_records as $vid => $record) {
+    try {
+      db_update('node_revision')
+        ->fields(array(
+          'uid' => $record['uid'],
+          'timestamp' => $record['timestamp'],
+        ))
+        ->condition('vid', $vid)
+        ->execute();
+      // Update the $sandbox data.
+      $sandbox['current_revision_record'] = $vid;
+      $sandbox['progress']++;
+    }
+    catch (Exception $e) {
+      // If there has been a failure in updating that record, set the current
+      // revision record to the $vid but do not advance progress so we can
+      // continue, but know that not every record successfully updated.
+      $sandbox['current_revision_record'] = $vid;
+
+      // Compile meaningful information for the watchdog log record to help the
+      // site administrator identify and resolve the issue.
+      $exception_data = array(
+        'nid=' . $record['nid'],
+        'vid=' . $vid,
+        'uid=' . $record['uid'],
+        'timestamp=' . $record['timestamp'],
+      );
+      $exception_data_string = ' <em>' . get_class($e) . '</em>: ' . $e->getMessage();
+      $exception_data_string .= ' <em>Data:</em> ' . implode(', ', $exception_data);
+      watchdog_exception('Node Update', $e, $exception_data_string);
+    }
+  }
+
+  // Define when the batch process is finished.
+  $test_progress_max = $sandbox['progress'] >= $sandbox['max'];
+  $test_revision_record_max = $sandbox['current_revision_record'] >= $sandbox['max_revision_record'];
+  $sandbox['#finished'] = ($test_progress_max || $test_revision_record_max) ? TRUE : ($sandbox['progress'] / $sandbox['max']);
+
+  // Once the batch is finished, return a final progress update.
+  if ($sandbox['#finished'] === TRUE) {
+    if ($test_progress_max) {
+      $final_message = t('!progress of !max node revision records updated.', array(
+        '!progress' => $sandbox['progress'],
+        '!max' => $sandbox['max'],
+      ));
+      return $final_message;
+    }
+    else {
+      $final_message = t('Only !progress of !max node revision records were updated. Check the logs and re-run the update hook.', array(
+        '!progress' => $sandbox['progress'],
+        '!max' => $sandbox['max'],
+      ));
+      throw new BackdropUpdateException($final_message);
+    }
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
