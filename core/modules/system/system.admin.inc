@@ -1671,7 +1671,7 @@ function system_cron_settings($form, &$form_state) {
   );
 
   $status = '<p>' . t('Last run: %cron-last ago.', array(
-    '%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)) . '</p>';
+    '%cron-last' => format_time_diff_since(state_get('cron_last')),)) . '</p>';
   $form['status'] = array(
     '#markup' => $status,
   );

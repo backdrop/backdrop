@@ -2694,7 +2694,7 @@ function hook_requirements($phase) {
     $cron_last = state_get('cron_last');
 
     if (is_numeric($cron_last)) {
-      $requirements['cron']['value'] = $t('Last run !time ago', array('!time' => format_interval(REQUEST_TIME - $cron_last)));
+      $requirements['cron']['value'] = $t('Last run !time ago', array('!time' => format_time_diff_since($cron_last)));
     }
     else {
       $requirements['cron'] = array(

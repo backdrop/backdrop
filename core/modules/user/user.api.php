@@ -320,7 +320,7 @@ function hook_user_view($account, $view_mode, $langcode) {
   $account->content['member_for'] = array(
     '#type' => 'item',
     '#title' => t('Member for'),
-    '#markup' => format_interval(REQUEST_TIME - $account->created),
+    '#markup' => format_time_diff_since($account->created),
   );
 }
 

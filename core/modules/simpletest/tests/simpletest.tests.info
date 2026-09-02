@@ -384,7 +384,7 @@ file = common.test
 
 [CommonFormatDateTestCase]
 name = Format date
-description = Test the format_date() function.
+description = Test the format_date(), format_interval() and format_time_diff() functions.
 group = Common
 file = common.test
 

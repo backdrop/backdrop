@@ -2579,6 +2579,13 @@ function format_size($size, $langcode = NULL) {
 /**
  * Formats a time interval with the requested granularity.
  *
+ * Works best if the interval is short, that is, less than 30 days. For larger
+ * intervals use format_time_diff() for more precise time spans.
+ *
+ * For intervals over 30 days, the output is approximate: a "month" is always
+ * exactly 30 days, and a "year" is always 365 days. It is not possible to make
+ * a more exact representation, given that there is only one input in seconds.
+ *
  * @param int $interval
  *   The length of the interval in seconds.
  * @param int $granularity
@@ -2589,6 +2596,10 @@ function format_size($size, $langcode = NULL) {
  *
  * @return string
  *   A translated string representation of the interval.
+ *
+ * @see format_time_diff()
+ * @see format_time_diff_since()
+ * @see format_time_diff_until()
  */
 function format_interval($interval, $granularity = 2, $langcode = NULL) {
   $units = array(
@@ -2614,6 +2625,194 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
     }
   }
   return $output ? $output : t('0 sec', array(), array('langcode' => $langcode));
+}
+
+/**
+ * Formats the time difference from the current request time to a timestamp.
+ *
+ * @param int $timestamp
+ *   A UNIX timestamp to compare against the current request time.
+ * @param array $options
+ *   (optional) An associative array with additional options. The following
+ *   keys can be used:
+ *   - granularity: An integer value that signals how many different units to
+ *     display in the string. Defaults to 2.
+ *   - langcode: The language code for the language used to format the date.
+ *     Defaults to NULL, which results in the user interface language for the
+ *     page being used.
+ *   - strict: A Boolean value indicating whether or not the timestamp can be
+ *     before the current request time. If TRUE (default) and $timestamp is
+ *     before the current request time, the result string will be "0 seconds".
+ *     If FALSE and $timestamp is before the current request time, the result
+ *     string will be the formatted time difference.
+ *   - return_as_object: A Boolean value whether to return a FormattedDateDiff
+ *     object.
+ *
+ * @return string
+ *   A translated string representation of the difference between the given
+ *   timestamp and the current request time. This interval is always positive.
+ *
+ * @see format_time_diff()
+ * @see format_time_diff_since()
+ * 
+ * @since 1.35.0 Function added.
+ */
+function format_time_diff_until($timestamp, $options = array()) {
+  return format_time_diff(REQUEST_TIME, $timestamp, $options);
+}
+
+/**
+ * Formats the time difference from a timestamp to the current request time.
+ *
+ * @param int $timestamp
+ *   A UNIX timestamp to compare against the current request time.
+ * @param array $options
+ *   (optional) An associative array with additional options. The following
+ *   keys can be used:
+ *   - granularity: An integer value that signals how many different units to
+ *     display in the string. Defaults to 2.
+ *   - langcode: The language code for the language used to format the date.
+ *     Defaults to NULL, which results in the user interface language for the
+ *     page being used.
+ *   - strict: A Boolean value indicating whether or not the timestamp can be
+ *     after the current request time. If TRUE (default) and $timestamp is
+ *     after the current request time, the result string will be "0 seconds".
+ *     If FALSE and $timestamp is after the current request time, the result
+ *     string will be the formatted time difference.
+ *
+ * @return string
+ *   A translated string representation of the difference between the given
+ *   timestamp and the current request time. This interval is always positive.
+ *
+ * @see format_time_diff()
+ * @see format_time_diff_until()
+ * 
+ * @since 1.35.0 Function added.
+ */
+function format_time_diff_since($timestamp, $options = array()) {
+  return format_time_diff($timestamp, REQUEST_TIME, $options);
+}
+
+/**
+ * Formats a time interval between two timestamps.
+ *
+ * @param int $from
+ *   A UNIX timestamp, defining the from date and time.
+ * @param int $to
+ *   A UNIX timestamp, defining the to date and time.
+ * @param array $options
+ *   (optional) An associative array with additional options. The following
+ *   keys can be used:
+ *   - granularity: An integer value that signals how many different units to
+ *     display in the string. Defaults to 2.
+ *   - langcode: The language code for the language used to format the date.
+ *     Defaults to NULL, which results in the user interface language for the
+ *     page being used.
+ *   - strict: A Boolean value indicating whether or not the $from timestamp
+ *     can be after the $to timestamp. If TRUE (default) and $from is after
+ *     $to, the result string will be "0 seconds". If FALSE and $from is
+ *     after $to, the result string will be the formatted time difference.
+ *
+ * @return string
+ *   A translated string representation of the interval. This interval is
+ *   always positive.
+ *
+ * @see format_interval()
+ * @see format_time_diff_since()
+ * @see format_time_diff_until()
+ * 
+ * @since 1.35.0 Function added.
+ */
+function format_time_diff($from, $to, $options = array()) {
+  $options += array(
+    'granularity' => 2,
+    'langcode' => NULL,
+    'strict' => TRUE,
+  );
+
+  if ($options['strict'] && $from > $to) {
+    $string = t('0 sec');
+    return $string;
+  }
+
+  $date_time_from = new \DateTime();
+  $date_time_from->setTimestamp($from);
+
+  $date_time_to = new \DateTime();
+  $date_time_to->setTimestamp($to);
+
+  $interval = $date_time_to->diff($date_time_from);
+
+  $granularity = $options['granularity'];
+  $output = '';
+
+  // We loop over the keys provided by \DateInterval explicitly. Since we
+  // don't take the "invert" property into account, the resulting output value
+  // will always be positive.
+  foreach (array('y', 'm', 'd', 'h', 'i', 's') as $value) {
+    if ($interval->$value > 0) {
+      // Switch over the keys to call format_plural() explicitly with literal
+      // strings for all different possibilities.
+      switch ($value) {
+        case 'y':
+          $interval_output = format_plural($interval->y, '1 year', '@count years', array(), array('langcode' => $options['langcode']));
+          break;
+
+        case 'm':
+          $interval_output = format_plural($interval->m, '1 month', '@count months', array(), array('langcode' => $options['langcode']));
+          break;
+
+        case 'd':
+          // \DateInterval doesn't support weeks, so we need to calculate them
+          // ourselves.
+          $interval_output = '';
+          $days = $interval->d;
+          $weeks = floor($days / 7);
+          if ($weeks) {
+            $interval_output .= format_plural($weeks, '1 week', '@count weeks', array(), array('langcode' => $options['langcode']));
+            $days -= $weeks * 7;
+            $granularity--;
+          }
+
+          if ((!$output || $weeks > 0) && $granularity > 0 && $days > 0) {
+            $interval_output .= ($interval_output ? ' ' : '') . format_plural($days, '1 day', '@count days', array(), array('langcode' => $options['langcode']));
+          } else {
+            // If we did not output days, set the granularity to 0 so that we
+            // will not output hours and get things like "1 week 1 hour".
+            $granularity = 0;
+          }
+          break;
+
+        case 'h':
+          $interval_output = format_plural($interval->h, '1 hour', '@count hours', array(), array('langcode' => $options['langcode']));
+          break;
+
+        case 'i':
+          $interval_output = format_plural($interval->i, '1 min', '@count min', array(), array('langcode' => $options['langcode']));
+          break;
+
+        case 's':
+          $interval_output = format_plural($interval->s, '1 sec', '@count sec', array(), array('langcode' => $options['langcode']));
+          break;
+      }
+      $output .= ($output && $interval_output ? ' ' : '') . $interval_output;
+      $granularity--;
+    } elseif ($output) {
+      // Break if there was previous output but not any output at this level,
+      // to avoid skipping levels and getting output like "1 year 1 sec".
+      break;
+    }
+
+    if ($granularity <= 0) {
+      break;
+    }
+  }
+
+  if (empty($output)) {
+    $output = t('0 sec');
+  }
+
+  return $output;
 }
 
 /**

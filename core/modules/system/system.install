@@ -394,7 +394,7 @@ function system_requirements($phase) {
 
     // Set summary and description based on values determined above.
     $summary = $t('Last run !time ago (<a href="@url">Run cron manually</a>)', array(
-      '!time' => format_interval(REQUEST_TIME - $cron_last),
+      '!time' => format_time_diff_since($cron_last),
       '@url' => url('admin/reports/status/run-cron'),
     ));
     $description = '';
