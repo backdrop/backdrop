@@ -549,12 +549,11 @@ function install_tasks($install_state) {
   $needs_translations = count($install_state['translations']) > 1 && !empty($install_state['parameters']['langcode']) && $install_state['parameters']['langcode'] != 'en';
 
   // Display profile task only when there is more than one non-hidden profile.
-  $hidden_profile_count = 0;
+  $visible_profile_count = 0;
   foreach ($install_state['profiles'] as $profile) {
     $profile_info = install_profile_info($profile->name);
-    $hidden_profile_count += empty($profile_info['hidden']);
+    $visible_profile_count += !isset($profile_info['hidden']) || empty($profile_info['hidden']);
   }
-  $display_select_profile = $hidden_profile_count > 1 && count($install_state['profiles']) != 1;
 
   // Determine whether a translation file must be downloaded during the
   // 'install_download_translation' task. Download when a non-English language
