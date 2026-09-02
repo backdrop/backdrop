@@ -632,8 +632,62 @@ function form_state_keys_no_cache() {
  * Example:
  * @code
  *   // Load node.admin.inc from Node module.
+ *   form_load_include($form_state, 'node', 'node.admin.inc');
+ * @endcode
+ *
+ * Use this function instead of backdrop_include_file() from inside a form
+ * constructor or any form processing logic as it ensures that the include file
+ * is loaded whenever the form is processed. In contrast to using
+ * backdrop_include_file() directly, form_include_file() makes sure the include
+ * file is correctly loaded also if the form is cached.
+ *
+ * @param $form_state
+ *   The current state of the form.
+ * @param $module
+ *   The module to which the include file belongs.
+ * @param $filename
+ *   The file name including the type extension. If omitted,
+ *   $module is used with an extenstion of '.inc', i.e., resulting in
+ *   "$module.inc" by default.
+ *
+ * @return
+ *   The filepath of the loaded include file, or FALSE if the include file was
+ *   not found or has been loaded already.
+ *
+ * @see backdrop_include_file()
+ */
+function form_include_file(&$form_state, $module, $filename = NULL) {
+  if (is_null($filename)) {
+    $filename = "$module.inc";
+  }
+  if (!isset($form_state['build_info']['files']["$module:$filename"])) {
+    // Only add successfully included files to the form state.
+    if ($result = backdrop_include_file($module, $filename)) {
+      $parts = explode('.', $filename);
+      $type = array_pop($parts);
+      $name = implode('.', $parts);
+      $form_state['build_info']['files']["$module:$filename"] = array(
+        'type' => $type,
+        'module' => $module,
+        'name' => $name,
+      );
+      return $result;
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Ensures an include file is loaded whenever the form is processed.
+ *
+ * Example:
+ * @code
+ *   // Load node.admin.inc from Node module.
  *   form_load_include($form_state, 'inc', 'node', 'node.admin');
  * @endcode
+ *
+ * This function may be deprecated in a future version of Backdrop. Use
+ * form_include_file() instead.
  *
  * Use this function instead of module_load_include() from inside a form
  * constructor or any form processing logic as it ensures that the include file
@@ -661,18 +715,7 @@ function form_load_include(&$form_state, $type, $module, $name = NULL) {
   if (!isset($name)) {
     $name = $module;
   }
-  if (!isset($form_state['build_info']['files']["$module:$name.$type"])) {
-    // Only add successfully included files to the form state.
-    if ($result = module_load_include($type, $module, $name)) {
-      $form_state['build_info']['files']["$module:$name.$type"] = array(
-        'type' => $type,
-        'module' => $module,
-        'name' => $name,
-      );
-      return $result;
-    }
-  }
-  return FALSE;
+  return form_include_file($form_state, $module, "$name.$type");
 }
 
 /**
