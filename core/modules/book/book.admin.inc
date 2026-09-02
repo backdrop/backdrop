@@ -103,7 +103,6 @@ function book_admin_settings($form, &$form_state) {
       'book_reorder' => t('Reorder book'),
     ),
   );
-  $form['array_filter'] = array('#type' => 'value', '#value' => TRUE);
   $form['#validate'][] = 'book_admin_settings_validate';
 
   $form['actions']['#type'] = 'actions';
