@@ -902,7 +902,6 @@ function user_settings_email($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#description' => t('Edit the welcome email messages sent to new member accounts created by an administrator.') . ' ' . $email_token_link,
-    '#group' => 'email',
   );
   $form['email_admin_created']['user_mail_register_admin_created_subject'] = array(
     '#type' => 'textfield',
@@ -927,7 +926,6 @@ function user_settings_email($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#description' => t('Edit the welcome email messages sent to new members upon registering, when administrative approval is required.') . ' ' . $email_token_link,
-    '#group' => 'email',
   );
   $form['email_pending_approval']['user_mail_register_pending_approval_subject'] = array(
     '#type' => 'textfield',
@@ -952,7 +950,6 @@ function user_settings_email($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#description' => t('Edit the email message sent to admin upon registering, when administrative approval is required.') . ' ' . $email_token_link,
-    '#group' => 'email',
   );
   $form['email_pending_approval_admin']['user_mail_register_pending_approval_admin_subject'] = array(
     '#type' => 'textfield',
@@ -977,7 +974,6 @@ function user_settings_email($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#description' => t('Edit the welcome email messages sent to new members upon registering, when no administrator approval is required.') . ' ' . $email_token_link,
-    '#group' => 'email',
   );
   $form['email_no_approval_required']['user_mail_register_no_approval_required_subject'] = array(
     '#type' => 'textfield',
@@ -1002,7 +998,6 @@ function user_settings_email($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#description' => t('Edit the email messages sent to users who request a new password.') . ' ' . $email_token_link,
-    '#group' => 'email',
     '#weight' => 10,
   );
   $form['email_password_reset']['user_mail_password_reset_subject'] = array(
@@ -1028,7 +1023,6 @@ function user_settings_email($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#description' => t('Enable and edit email messages sent to users upon account activation (when an administrator activates an account of a user who has already registered, on a site where administrative approval is required).') . ' ' . $email_token_link,
-    '#group' => 'email',
   );
   $form['email_activated']['user_mail_status_activated_notify'] = array(
     '#type' => 'checkbox',
@@ -1067,7 +1061,6 @@ function user_settings_email($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#description' => t('Enable and edit email messages sent to users when their accounts are blocked.') . ' ' . $email_token_link,
-    '#group' => 'email',
   );
   $form['email_blocked']['user_mail_status_blocked_notify'] = array(
     '#type' => 'checkbox',
@@ -1106,7 +1099,6 @@ function user_settings_email($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#description' => t('Edit the email messages sent to users when they attempt to cancel their accounts.') . ' ' . $email_token_link,
-    '#group' => 'email',
   );
   $form['email_cancel_confirm']['user_mail_cancel_confirm_subject'] = array(
     '#type' => 'textfield',
@@ -1131,7 +1123,6 @@ function user_settings_email($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#description' => t('Enable and edit email messages sent to users when their accounts are canceled.') . ' ' . $email_token_link,
-    '#group' => 'email',
   );
   $form['email_canceled']['user_mail_status_canceled_notify'] = array(
     '#type' => 'checkbox',
