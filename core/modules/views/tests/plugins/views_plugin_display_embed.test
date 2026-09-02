@@ -1,0 +1,76 @@
+<?php
+/**
+ * @file
+ * Definition of ViewsPluginDisplayEmbedTestCase.
+ */
+
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
+
+/**
+ * Tests the embed display plugin.
+ */
+class ViewsPluginDisplayEmbedTestCase extends ViewsSqlTest {
+  protected $profile = 'minimal';
+  protected $admin_user;
+  protected $test_content = array();
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
+
+    // Create a content type and content.
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+    for ($n = 0; $n < 5; $n++) {
+      $this->test_content[] = $this->backdropCreateNode(array('type' => 'post'));
+    }
+
+    // Create and log in as the admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer views',
+      'access administration pages',
+      'access content',
+      'view any unpublished content',
+      'bypass node access',
+      'administer nodes',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests the embed display with an exposed form.
+   */
+  public function testEmbedExposedForm() {
+    $this->backdropGet('test_embed_exposed_form');
+
+    // Check if the exposed form is NOT present (exposed_block is TRUE).
+    $this->assertNoFieldByName('title', '', 'The exposed title filter is not present when exposed_block is TRUE.');
+
+    // Filter by title via URL parameters.
+    $node = $this->test_content[0];
+    $edit = array(
+      'title' => $node->title,
+    );
+    $this->backdropGet('test_embed_exposed_form', array('query' => $edit));
+
+    // Verify the filtered result.
+    $this->assertText($node->title, 'The filtered node title is present.');
+
+    // Verify that other nodes are not present.
+    for ($i = 1; $i < 5; $i++) {
+      $this->assertNoText($this->test_content[$i]->title, 'Other node titles are not present.');
+    }
+
+    // Now disable exposed_block and check if the form appears.
+    $view = views_get_view('test_embed_exposed_form');
+    $view->set_display('embed_1');
+    $view->display_handler->set_option('exposed_block', FALSE);
+    $view->save();
+    views_invalidate_cache();
+
+    $this->backdropGet('test_embed_exposed_form');
+    $this->assertFieldByName('title', '', 'The exposed title filter is present when exposed_block is FALSE.');
+    $this->assertFieldById('edit-submit-test-embed-exposed-form', t('Apply'), 'The exposed form submit button is present.');
+  }
+}

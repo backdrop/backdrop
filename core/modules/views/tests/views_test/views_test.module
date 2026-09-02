@@ -129,3 +129,32 @@ function template_preprocess_views_view_mapping_test(&$variables) {
 function theme_views_view_mapping_test($variables) {
   return backdrop_render($variables['element']);
 }
+
+/**
+ * Implements hook_menu().
+ */
+function views_test_menu() {
+  $items['test_embed_exposed_form'] = array(
+    'title' => 'Test Embed Exposed Form',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('views_test_embed_form'),
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+/**
+ * Form builder for embed exposed form test page.
+ */
+function views_test_embed_form($form, &$form_state) {
+  $form[] = array(
+    '#type' => 'help',
+    '#markup' => t('Test the exposed form in an embed block.'),
+  );
+
+  $form['test_embed_exposed_form'] = array(
+    '#markup' => views_embed_view('test_embed_exposed_form', 'embed_1'),
+  );
+
+  return system_settings_form($form);
+}
