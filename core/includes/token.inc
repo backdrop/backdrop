@@ -405,19 +405,24 @@ function token_get_token_problems() {
   $token_info = token_info();
   $token_problems = array(
     'not-array' => array(
-      'label' => t('The following tokens or token types are not defined as arrays:'),
+      'label' => t('Tokens or token types not defined as arrays'),
+      'severity' => REQUIREMENT_ERROR,
     ),
     'missing-info' => array(
-      'label' => t('The following tokens or token types are missing required name and/or description information:'),
+      'label' => t('Tokens or token types missing name property'),
+      'severity' => REQUIREMENT_WARNING,
     ),
     'type-no-tokens' => array(
-      'label' => t('The following token types do not have any tokens defined:'),
+      'label' => t('Token types do not have any tokens defined'),
+      'severity' => REQUIREMENT_INFO,
     ),
     'tokens-no-type' => array(
-      'label' => t('The following token types are not defined but have tokens:'),
+      'label' => t('Token types are not defined but have tokens'),
+      'severity' => REQUIREMENT_INFO,
     ),
     'duplicate' => array(
-      'label' => t('The following token or token types are defined by multiple modules:')
+      'label' => t('Token or token types are defined by multiple modules'),
+      'severity' => REQUIREMENT_ERROR,
     ),
   );
 
@@ -428,8 +433,11 @@ function token_get_token_problems() {
       $token_problems['not-array']['problems'][] = "\$info['types']['$type']";
       continue;
     }
-    elseif (!isset($type_info['name']) || !isset($type_info['description'])) {
+    elseif (!isset($type_info['name'])) {
       $token_problems['missing-info']['problems'][] = "\$info['types']['$type']";
+    }
+    elseif (is_array($type_info['name'])) {
+      $token_problems['duplicate']['problems'][] = "\$info['types']['$type']";
     }
     elseif (empty($token_info['tokens'][$real_type])) {
       $token_problems['type-no-tokens']['problems'][] = "\$info['tokens']['$real_type']";
@@ -448,10 +456,10 @@ function token_get_token_problems() {
           $token_problems['not-array']['problems'][] = "\$info['tokens']['$type']['$token']";
           continue;
         }
-        elseif (!isset($tokens[$token]['name']) || !isset($tokens[$token]['description'])) {
+        elseif (!isset($tokens[$token]['name'])) {
           $token_problems['missing-info']['problems'][] = "\$info['tokens']['$type']['$token']";
         }
-        elseif (is_array($tokens[$token]['name']) || is_array($tokens[$token]['description'])) {
+        elseif (is_array($tokens[$token]['name'])) {
           $token_problems['duplicate']['problems'][] = "\$info['tokens']['$type']['$token']";
         }
       }
