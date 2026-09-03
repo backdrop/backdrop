@@ -695,11 +695,25 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
         break;
 
       default:
-        // cspell:disable-next-line
-        if (strpos('BdcgGhHiIjLmnNosStTuUwWYyz', $c) !== FALSE) {
+        // Any specific character that we want to treat specially should have
+        // been handled by the previous "case" statements. For each special case
+        // above, we should then have broken out of the switch(). So at this
+        // point, we should have one of the other remaining letters in the
+        // English alphabet.
+        //
+        // Instead of explicitly hard-coding those remaining letters, we are
+        // using a list of all letters from a to z and A to Z, so that we don't
+        // have to keep updating this list in the future if more special cases
+        // are added above.
+        $formatters = array_merge(range('a', 'z'), range('A', 'Z'));
+        if (in_array($c, $formatters)) {
+          // Unrecognized characters in the format string will be printed as-is.
+          // @see https://www.php.net/manual/en/datetime.format.php
           $date_string .= $date->format($c);
         }
         else {
+          // Any character not within the a to z and A to Z range in the English
+          // alphabet.
           $date_string .= $c;
         }
     }
