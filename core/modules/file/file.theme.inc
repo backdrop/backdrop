@@ -85,9 +85,6 @@ function theme_file_link($variables) {
   }
 
   $options = array(
-    'attributes' => array(
-      'type' => $file->filemime . '; length=' . $file->filesize,
-    ),
     'attributes' => $attributes,
   );
 
