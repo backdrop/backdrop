@@ -205,10 +205,12 @@ function hook_ckeditor_settings_alter(array &$settings, $format) {
  * @ingroup callbacks
  */
 function hook_ckeditor_PLUGIN_plugin_check($format, $plugin_name) {
-  // Automatically enable this plugin if the Underline button is enabled.
-  foreach ($format->editor_settings['toolbar']['buttons'] as $row) {
-    if (in_array('Underline', $row)) {
-      return TRUE;
+  $toolbars = $format->editor_settings['toolbar'];
+  foreach ($toolbars as $toolbar) {
+    foreach ($toolbar as $group) {
+      if (in_array('Underline', $group['items'])) {
+        return TRUE;
+      }
     }
   }
 }
