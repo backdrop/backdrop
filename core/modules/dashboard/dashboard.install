@@ -16,7 +16,7 @@ function dashboard_install() {
  */
 function dashboard_enable() {
   // Enable the Dashboard menu item (if it exists and is disabled).
-  $mlid = db_query("SELECT mlid FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system' AND hidden = 1")->fetchField();
+  $mlid = db_query("SELECT mlid FROM {menu_links} WHERE router_path = 'admin/dashboard' AND module = 'system' AND hidden = 1")->fetchField();
   if ($mlid) {
     $link = menu_link_load($mlid);
     $link['hidden'] = 0;
@@ -35,7 +35,7 @@ function dashboard_enable() {
  */
 function dashboard_disable() {
   // Disable the Dashboard menu item (if it exists and is enabled).
-  $mlid = db_query("SELECT mlid FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system' AND hidden = 0")->fetchField();
+  $mlid = db_query("SELECT mlid FROM {menu_links} WHERE router_path = 'admin/dashboard' AND module = 'system' AND hidden = 0")->fetchField();
   if ($mlid) {
     $link = menu_link_load($mlid);
     $link['hidden'] = 1;
