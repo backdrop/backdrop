@@ -263,7 +263,7 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     elseif (empty($value)) {
       return $this->options['wildcard_substitution'];
     }
-    $format = !empty($this->options['title_format_custom']) && !empty($this->options['title_format_custom']) ? $this->options['title_format_custom'] : $this->date_handler->views_formats($this->options['granularity'], 'display');
+    $format = !empty($this->options['title_format_custom']) ? $this->options['title_format_custom'] : $this->date_handler->views_formats($this->options['granularity'], 'display');
     $range = $this->date_handler->arg_range($value);
     return date_format_date($range[0], 'custom', $format);
   }
@@ -272,7 +272,7 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
    * Provide a title for the view based on the argument value.
    */
   function title() {
-    $format = !empty($this->options['title_format_custom']) && !empty($this->options['title_format_custom']) ? $this->options['title_format_custom'] : $this->date_handler->views_formats($this->options['granularity'], 'display');
+    $format = !empty($this->options['title_format_custom']) ? $this->options['title_format_custom'] : $this->date_handler->views_formats($this->options['granularity'], 'display');
     $range = $this->date_handler->arg_range($this->argument);
     return date_format_date($range[0], 'custom', $format);
   }
