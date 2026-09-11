@@ -3847,7 +3847,7 @@ function backdrop_css_defaults($data = NULL) {
  *   - 'external': The absolute path to an external CSS file that is not hosted
  *     on the local server. These files will not be aggregated if CSS
  *     aggregation is enabled.
- * @param array|null $options
+ * @param string|array $options
  *   (optional) A string defining the 'type' of CSS that is being added in the
  *   $data parameter ('file', 'inline', or 'external'), or an array which can
  *   have any or all of the following keys:
@@ -3918,7 +3918,7 @@ function backdrop_css_defaults($data = NULL) {
  *
  * @see backdrop_get_css()
  */
-function backdrop_add_css($data = NULL, $options = NULL) {
+function backdrop_add_css($data = NULL, $options = array()) {
   $css = &backdrop_static(__FUNCTION__, array());
   $count = &backdrop_static(__FUNCTION__ . '_count', 0);
 
@@ -3928,13 +3928,8 @@ function backdrop_add_css($data = NULL, $options = NULL) {
   }
 
   // Construct the options, taking the defaults into consideration.
-  if (isset($options)) {
-    if (!is_array($options)) {
-      $options = array('type' => $options);
-    }
-  }
-  else {
-    $options = array();
+  if (isset($options) && is_string($options)) {
+    $options = array('type' => $options);
   }
 
   $defaults = backdrop_css_defaults($data);
@@ -5020,7 +5015,7 @@ function backdrop_region_class($region) {
  *     the Backdrop.settings namespace. Settings within the same namespace will
  *     be recursively merged together unless a "key" option is specified in the
  *     $options array.
- * @param string|array|null $options
+ * @param string|array $options
  *   (optional) A string defining the type of JavaScript that is being added in
  *   the $data parameter ('file'/'setting'/'inline'/'external'), or an
  *   associative array.
@@ -5110,18 +5105,14 @@ function backdrop_region_class($region) {
  *
  * @see backdrop_get_js()
  */
-function backdrop_add_js($data = NULL, $options = NULL) {
+function backdrop_add_js($data = NULL, $options = array()) {
   $javascript = &backdrop_static(__FUNCTION__, array());
 
   // Construct the options, taking the defaults into consideration.
-  if (isset($options)) {
-    if (!is_array($options)) {
-      $options = array('type' => $options);
-    }
+  if (isset($options) && is_string($options)) {
+    $options = array('type' => $options);
   }
-  else {
-    $options = array();
-  }
+
   $options += backdrop_js_defaults($data);
 
   // Preprocess can only be set if caching is enabled and no attributes
