@@ -16,9 +16,9 @@ function dashboard_install() {
  */
 function dashboard_enable() {
   // Enable the Dashboard menu item (if it exists and is disabled).
-  $link = db_query("SELECT * FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system' AND hidden = 1")->fetchAssoc();
-  if ($link) {
-    $link = menu_link_load($link['mlid']);
+  $mlid = db_query("SELECT mlid FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system' AND hidden = 1")->fetchField();
+  if ($mlid) {
+    $link = menu_link_load($mlid);
     $link['hidden'] = 0;
     unset($link['customized']);
     menu_link_save($link);
@@ -35,9 +35,9 @@ function dashboard_enable() {
  */
 function dashboard_disable() {
   // Disable the Dashboard menu item (if it exists and is enabled).
-  $link = db_query("SELECT * FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system' AND hidden = 0")->fetchAssoc();
-  if ($link) {
-    $link = menu_link_load($link['mlid']);
+  $mlid = db_query("SELECT mlid FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system' AND hidden = 0")->fetchField();
+  if ($mlid) {
+    $link = menu_link_load($mlid);
     $link['hidden'] = 1;
     // This is required, otherwise hiding the menu item won't work.
     $link['customized'] = 1;
