@@ -1,12 +1,11 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_machine_name.
  */
 
 /**
- * Field handler whichs allows to show machine name content as human name.
+ * Field handler that allows showing machine name content as human names.
  * @ingroup views_field_handlers
  *
  * Definition items:

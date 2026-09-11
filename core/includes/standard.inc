@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides a list of countries and languages based on web standards.
@@ -54,7 +53,7 @@ function standard_country_list() {
     'BM' => $t('Bermuda'),
     'BN' => $t('Brunei'),
     'BO' => $t('Bolivia'),
-    'BQ' => $t('Caribbean Netherlands'),    
+    'BQ' => $t('Caribbean Netherlands'),
     'BR' => $t('Brazil'),
     'BS' => $t('Bahamas'),
     'BT' => $t('Bhutan'),
@@ -232,10 +231,10 @@ function standard_country_list() {
     'SN' => $t('Senegal'),
     'SO' => $t('Somalia'),
     'SR' => $t('Suriname'),
-    'SS' => $t('South Sudan'),    
+    'SS' => $t('South Sudan'),
     'ST' => $t('Sao Tome and Principe'),
     'SV' => $t('El Salvador'),
-    'SX' => $t('Sint Maarten'),    
+    'SX' => $t('Sint Maarten'),
     'SY' => $t('Syria'),
     'SZ' => $t('Swaziland'),
     'TC' => $t('Turks and Caicos Islands'),

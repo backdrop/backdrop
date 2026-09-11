@@ -695,6 +695,7 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
         break;
 
       default:
+        // cspell:disable-next-line
         if (strpos('BdcgGhHiIjLmnNosStTuUwWYyz', $c) !== FALSE) {
           $date_string .= $date->format($c);
         }
@@ -726,12 +727,19 @@ function date_format_interval($date, $granularity = 2, $display_ago = TRUE) {
   }
 
   $interval = REQUEST_TIME - $date->format('U');
+  $format_interval = format_time_diff(REQUEST_TIME, $date->format('U'), array(
+    'granularity' => $granularity,
+    'strict' => FALSE,
+  ));
   if ($interval > 0) {
-    return $display_ago ? t('!time ago', array('!time' => format_interval($interval, $granularity))) :
-      t('!time', array('!time' => format_interval($interval, $granularity)));
+    return $display_ago ? t('!time ago', array(
+      '!time' => $format_interval,
+    )) : t('!time', array(
+      '!time' => $format_interval,
+    ));
   }
   else {
-    return format_interval(abs($interval), $granularity);
+    return $format_interval;
   }
 }
 
@@ -1334,7 +1342,7 @@ function date_format_order($format) {
  *   An array like ('year', 'month', 'day', 'hour', 'minute', 'second');
  *
  * @return array
- *   A reduced set of granularitiy elements.
+ *   A reduced set of granularity elements.
  */
 function date_nongranularity($granularity) {
   $options = array(

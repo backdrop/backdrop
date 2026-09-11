@@ -22,8 +22,10 @@ class NodeBlock extends Block {
     if (!empty($this->settings['admin_description'])) {
       return filter_xss($this->settings['admin_description']);
     }
+    $preview = '<p>' . t('Displays content of node ID: @nid', array('@nid' => $this->settings['nid'])) . '</p>';
+    $preview .= $this->getAdminConditionsPreview();
 
-    return t('Displays content of node ID: @nid', array('@nid' => $this->settings['nid']));
+    return $preview;
   }
 
   /**
@@ -90,8 +92,8 @@ class NodeBlock extends Block {
     // Add author and date information settings.
     $content['#display_submitted'] = !empty($this->settings['display_submitted']);
 
-    // Add theme hook suggestion.
-    $content['#theme'] = 'node__block_' . $this->settings['nid'];
+    // Add theme hook suggestions.
+    $content['#theme'] .= '__node_block';
 
     return $content;
   }

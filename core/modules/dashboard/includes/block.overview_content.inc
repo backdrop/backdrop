@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Dashboard block displaying informtion about content, including:
+ * Dashboard block displaying information about content, including:
  * - number pieces of each type of content
  * - number of comments
  * - number of unapproved comments

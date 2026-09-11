@@ -116,6 +116,16 @@ function theme_field_multiple_value_form($variables) {
     );
     $rows = array();
 
+    if ($element['#description']) {
+      $description = '<div class="description">' . $element['#description'] . '</div>';
+      $rows[] = array(
+        'data' => array(
+          array('data' => ''),
+          array('data' => $description, 'colspan' => 3),
+        ),
+      );
+    }
+
     // Sort items according to '_weight' (needed when the form comes back after
     // preview or failed validation)
     $items = array();
@@ -144,10 +154,16 @@ function theme_field_multiple_value_form($variables) {
       );
     }
 
+    $add_more = backdrop_render($add_more_button);
+    $rows[] = array(
+      'data' => array(
+        array('data' => ''),
+        array('data' => $add_more, 'colspan' => 2),
+      ),
+    );
+
     $output = '<div class="form-item">';
     $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
-    $output .= $element['#description'] ? '<div class="description">' . $element['#description'] . '</div>' : '';
-    $output .= '<div class="clearfix">' . backdrop_render($add_more_button) . '</div>';
     $output .= '</div>';
 
     backdrop_add_tabledrag($table_id, 'order', 'sibling', $order_class);

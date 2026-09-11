@@ -727,7 +727,7 @@ class views_handler_argument extends views_handler {
   }
 
   /**
-   * How to act if validation failes
+   * How to act if validation fails.
    */
   function validate_fail() {
     $info = $this->default_actions($this->options['validate']['fail']);
@@ -925,7 +925,7 @@ class views_handler_argument extends views_handler {
 
   /**
    * Sorts the summary based upon the user's selection. The base variant of
-   * this is usually adequte.
+   * this is usually adequate.
    *
    * @param $order
    *   The order selected in the UI.

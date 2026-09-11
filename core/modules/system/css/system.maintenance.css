@@ -1,5 +1,5 @@
 /**
- * Update styles
+ * Update styles.
  */
 .update-results {
   margin-top: 3em;
@@ -23,7 +23,16 @@
 }
 
 /**
- * Authorize.php styles
+ * Restore styles.
+ */
+.restore-progress {
+  background: transparent url(../../../misc/throbber-active.gif) no-repeat center center;
+  display: inline-block;
+  padding: 0 .6em;
+}
+
+/**
+ * Authorize.php styles.
  */
 #edit-submit-connection {
   clear: both;

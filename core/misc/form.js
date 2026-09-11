@@ -5,7 +5,8 @@
  */
 $.fn.backdropGetSummary = function () {
   var callback = this.data('summaryCallback');
-  return (this[0] && callback) ? $.trim(callback(this[0])) : '';
+  var returnValue = (this[0] && callback) ? callback(this[0]) : '';
+  return typeof returnValue === 'string' ? returnValue.trim() : '';
 };
 
 /**
@@ -29,8 +30,8 @@ $.fn.backdropSetSummary = function (callback) {
     .data('summaryCallback', callback)
     // To prevent duplicate events, the handlers are first removed and then
     // (re-)added.
-    .unbind('formUpdated.summary')
-    .bind('formUpdated.summary', function () {
+    .off('formUpdated.summary')
+    .on('formUpdated.summary', function () {
       self.trigger('summaryUpdated');
     })
     // The actual summaryUpdated handler doesn't fire when the callback is
@@ -51,7 +52,7 @@ Backdrop.behaviors.formUpdated = {
       .find(':input').addBack().filter(':input')
       // To prevent duplicate events, the handlers are first removed and then
       // (re-)added.
-      .unbind(events).bind(events, function () {
+      .off(events).on(events, function () {
         $(this).trigger('formUpdated');
       });
   }
@@ -116,7 +117,7 @@ Backdrop.behaviors.formSingleSubmit = {
     }
 
     $('body').once('form-single-submit')
-      .delegate('form:not([method~="GET"])', 'submit.singleSubmit', onFormSubmit);
+      .on('submit.singleSubmit', 'form:not([method~="GET"])', onFormSubmit);
 
   }
 };

@@ -45,7 +45,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
             '<span class="expand-dropdown-tabs-label"></span>' +
           '</div>'
         );
-        $('.expand-dropdown-tabs-control', $tabsWrapper).click(function(){
+        $('.expand-dropdown-tabs-control', $tabsWrapper).on('click', function(){
           $tabsWrapper.toggleClass('expand-dropdown-tabs');
           $(this).toggleClass('js-active');
           // If there's not enough room for mobile tabs.
@@ -273,7 +273,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
     }
 
     // If they click outside of the responsive tabs, shut them
-    $('html').click(function(e){
+    $('html').on('click', function(e){
       var $target = $(e.target);
       if (responsiveTabs && !$target.is('.responsive-tabs-processed') && $target.parents('.responsive-tabs-processed').length < 1) {
         closeTabsDropdown();
@@ -289,36 +289,6 @@ Backdrop.behaviors.responsivePrimaryTabs = {
     $(document).ready(handleResize);
   }
 
-};
-
-Backdrop.behaviors.sevenDropButtonWidths = {
-  attach: function(context, settings) {
-    function adjustDropButtonWidths() {
-      var $dropbutton = $(this);
-
-      // Get widest item width.
-      var widestItem = 0, $item;
-      $dropbutton.find('li:hidden').each(function() {
-        // Use a clone element to avoid altering element CSS properties.
-        $item = $(this).clone().insertAfter($(this)).show().css('visibility','hidden');
-        widestItem = Math.max($item.outerWidth(), widestItem);
-        $item.remove();
-      });
-
-      // Set dropbutton list (<ul>) as wide as it's widest child.
-      $dropbutton.find('.dropbutton').css('min-width', widestItem + 'px');
-
-      // Set parent element min-width, like <td class="operations"> to prevent
-      // overflow issue (See #2806).
-      $dropbutton.parent().css('min-width', $dropbutton.find('.dropbutton-widget').outerWidth() + 'px');
-    }
-
-    // Calculate dropbutton elements width once the font is loaded.
-    Backdrop.isFontLoaded('Open Sans', function() {
-      $(context).find('.dropbutton-wrapper').once('dropbutton-width', adjustDropButtonWidths);
-    });
-
-  }
 };
 
 })(jQuery);

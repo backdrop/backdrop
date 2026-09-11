@@ -256,7 +256,7 @@ class views_plugin_style extends views_plugin {
       );
 
       if ($this->uses_fields()) {
-        $form['row_class']['#description'] .= ' ' . t('You may use field tokens from as per the "Replacement patterns" used in "Rewrite the output of this field" for all fields.');
+        $form['row_class']['#description'] .= ' ' . t('You may use field tokens from the "Replacement patterns" used in "Rewrite the output of this field" for all fields.');
       }
 
       $form['default_row_class'] = array(

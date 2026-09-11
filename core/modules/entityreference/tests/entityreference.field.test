@@ -1,0 +1,130 @@
+<?php
+
+/**
+ * Tests for the Entity Reference field.
+ */
+class EntityReferenceFieldTestCase extends BackdropWebTestCase {
+
+  /**
+   * The admin user that the test runs under.
+   *
+   * @var Backdrop\user\Entity
+   */
+  public $admin_user;
+  /**
+   * The content type that is created.
+   *
+   * @var string
+   */
+  protected $contentType;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp(array('field_ui', 'entity', 'entityreference'));
+
+    // Create test user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'administer content types',
+      'administer nodes',
+      'bypass node access',
+      'administer filters',
+      'administer fields',
+    ));
+    $this->backdropLogin($this->admin_user);
+
+    // Create content type.
+    $this->contentType = strtolower($this->randomName(8));
+    $this->backdropCreateContentType(array('name' => $this->contentType, 'type' => $this->contentType));
+  }
+
+  /**
+   * Creates an entity reference field.
+   *
+   * @param string $field_name
+   *   The name of the field.
+   * @param string $label
+   *   The label of the field.
+   */
+  protected function createEntityReferenceField($field_name, $label = 'Test label') {
+    $bundle_path = 'admin/structure/types/manage/' . $this->contentType;
+
+    // First step: 'Add new field' on the 'Manage fields' page.
+    $this->backdropPost($bundle_path . '/fields', array(
+      'fields[_add_new_field][label]' => $label,
+      'fields[_add_new_field][field_name]' => $field_name,
+      'fields[_add_new_field][type]' => 'entityreference',
+      'fields[_add_new_field][widget_type]' => 'entityreference_autocomplete',
+    ), t('Save'));
+
+    // Second step: 'Instance settings' form.
+    $this->backdropPost(NULL, array(), t('Save field settings'));
+
+    // Third step: confirm.
+    $this->backdropPost(NULL, array(), t('Save settings'));
+  }
+
+  /**
+   * Tests the "Show links" setting for the field formatter "Rendered entity".
+   */
+  public function testShowLinksSetting() {
+    // Create an entity reference field.
+    $this->createEntityReferenceField('test');
+
+    // Set formatter to "Rendered entity".
+    $this->backdropPost('admin/structure/types/manage/' . $this->contentType . '/display/default', array(
+      'fields[field_test][type]' => 'entityreference_entity_view',
+    ), t('Save'));
+
+    // Set view mode option to "teaser" and enable the "Show links" option.
+    $this->backdropPostAJAX(NULL, array(), 'field_test_formatter_settings_edit');
+    $edit = array(
+      'fields[field_test][settings_edit_form][settings][view_mode]' => 'teaser',
+      'fields[field_test][settings_edit_form][settings][links]' => 1,
+    );
+    $this->backdropPostAJAX(NULL, $edit, 'field_test_formatter_settings_update');
+    $this->backdropPost(NULL, array(), t('Save'));
+
+    // Assert that the formatter says that links will be shown.
+    $this->assertText('Display links');
+    $this->assertNoText('Do not display links');
+
+    // Create two nodes. The second node will reference the first one.
+    $node1 = $this->backdropCreateNode(array(
+      'type' => $this->contentType,
+    ));
+    $node2 = $this->backdropCreateNode(array(
+      'type' => $this->contentType,
+      'field_test' => array(
+        LANGUAGE_NONE => array(
+          0 => array(
+            'target_id' => $node1->nid,
+          ),
+        ),
+      ),
+    ));
+
+    // Assert that a read more link is shown on node 2.
+    $this->backdropGet('node/' . $node2->nid);
+    $this->assertText('Read more');
+
+    // Now turn off the "Show links" setting.
+    $this->backdropGet('admin/structure/types/manage/' . $this->contentType . '/display/default');
+    $this->backdropPostAJAX(NULL, array(), 'field_test_formatter_settings_edit');
+    $edit = array(
+      'fields[field_test][settings_edit_form][settings][links]' => FALSE,
+    );
+    $this->backdropPostAJAX(NULL, $edit, 'field_test_formatter_settings_update');
+    $this->backdropPost(NULL, array(), t('Save'));
+
+    // Assert that the formatter says that no links will be shown.
+    $this->assertText('Do not display links');
+
+    // And assert that the read more link is no longer displayed on node 2.
+    $this->backdropGet('node/' . $node2->nid);
+    $this->assertNoText('Read more');
+  }
+
+}

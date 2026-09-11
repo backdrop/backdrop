@@ -1,5 +1,6 @@
 type = layout
 name = Sutro
+description = Includes a header, top, content, two halves, bottom, and footer. This is the default template for the Dashboard layout.
 version = BACKDROP_VERSION
 backdrop = 1.x
 

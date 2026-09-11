@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update, and uninstall functions for the Filter module.
@@ -13,6 +12,17 @@ function filter_schema() {
   $schema['cache_filter']['description'] = 'Cache table for the Filter module to store already filtered pieces of text, identified by text format and hash of the text.';
 
   return $schema;
+}
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function filter_update_dependencies() {
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['filter'][1001] = array(
+    'user' => 1007,
+  );
+  return $dependencies;
 }
 
 /**
@@ -60,6 +70,7 @@ function filter_update_1000() {
  * Add a separate permission for image upload access.
  */
 function filter_update_1001() {
+  backdrop_static_reset('user_roles');
   user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('upload editor images'));
 
   // Enable uploading on existing text formats. Access previously was not
@@ -100,7 +111,7 @@ function filter_update_1002() {
     'core' => '1.7',
     'display' => array(
       'default' => array(
-        'display_title' => 'Master',
+        'display_title' => 'Default',
         'display_plugin' => 'default',
         'display_options' => array(
           'query' => array(
@@ -545,6 +556,27 @@ function filter_update_1004() {
     $view_config['display']['default']['display_options']['hide_admin_links'] = TRUE;
     $config->setData($view_config);
     $config->save();
+  }
+}
+
+/**
+ * Uninstall the editorimgdimensionsync contrib module, now part of core.
+ */
+function filter_update_1005() {
+  $module = db_query("SELECT name FROM {system} WHERE name = 'editorimgdimensionsync' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'editorimgdimensionsync');
+    backdrop_set_message(t('The contributed module <em>Editor Image Dimension Sync</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the Editor Image Dimension Sync module from the system table.
+    // As this module does not provide any config or settings, there doesn't
+    // seem to be anything else left to clean up or migrate.
+    // While the contrib module remains in the filesystem, this entry will be
+    // recreated, but it will have status 0 (disabled), and schema -1
+    // (uninstalled), so it is safe to remove.
+    db_query("DELETE FROM {system} WHERE name = 'editorimgdimensionsync' AND type = 'module'");
+  }
+  else {
+    return t('<em>Editor Image Dimension Sync</em> not found. Nothing to be done.');
   }
 }
 

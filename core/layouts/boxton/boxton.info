@@ -1,5 +1,6 @@
 type = layout
 name = Boxton
+description = Includes a header, top, content, bottom, and footer. This is the default template for the Home page and Default Administrative layouts.
 version = BACKDROP_VERSION
 backdrop = 1.x
 

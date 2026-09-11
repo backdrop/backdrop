@@ -28,7 +28,9 @@ function theme_views_ui_view_description($variables) {
 
   $output = '';
   $output = '<div class="views-ui-view-description">' . check_plain($view->description) . '</div>';
-  $output .= '<div class="views-ui-view-tag">' . t('Tags') . ': ' . check_plain($view->tag) . '</div>';
+  if (!empty($view->tag)) {
+    $output .= '<div class="views-ui-view-tag">' . t('Tags') . ': ' . check_plain($view->tag) . '</div>';
+  }
   $output .= '<div class="views-ui-view-storage">' . t('Type') . ': ' . check_plain($view->base_table). '</div>';
   return $output;
 }
@@ -132,14 +134,16 @@ function theme_views_ui_rearrange_form($variables) {
       $rows[] = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
     }
   }
-  if (empty($rows)) {
-    $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
-  }
 
   $header = array('', t('Weight'), t('Remove'));
   $output = backdrop_render($form['override']);
   $output .= '<div class="scroll" data-backdrop-views-scroll>';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange')));
+  $output .= theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No fields available.'),
+    'attributes' => array('id' => 'arrange'),
+  ));
   $output .= '</div>';
   $output .= backdrop_render_children($form);
   backdrop_add_tabledrag('arrange', 'order', 'sibling', 'weight');
@@ -319,9 +323,6 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
       }
     }
   }
-  if (empty($rows)) {
-    $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
-  }
 
   $output = backdrop_render($form['override']);
   $output .= '<div class="scroll">';
@@ -336,7 +337,15 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
   if (!empty($ungroupable_rows)) {
     backdrop_add_tabledrag('views-rearrange-filters-ungroupable', 'order', 'sibling', 'weight');
     $header = array(t('Ungroupable filters'), t('Weight'), array('class' => array('views-hide-label'), 'data' => t('Group')), array('class' => array('views-hide-label'), 'data' => t('Remove')));
-    $output .= theme('table', array('header' => $header, 'rows' => $ungroupable_rows, 'attributes' => array('id' => 'views-rearrange-filters-ungroupable', 'class' => array('arrange'))));
+    $output .= theme('table', array(
+      'header' => $header,
+      'rows' => $ungroupable_rows,
+      'empty' => t('No fields available.'),
+      'attributes' => array(
+        'id' => 'views-rearrange-filters-ungroupable',
+        'class' => array('arrange'),
+      ),
+    ));
   }
 
   // Set up tabledrag so that the weights are changed when rows are dragged.
@@ -382,6 +391,10 @@ function theme_views_ui_style_plugin_table($variables) {
       'data' => t('Hide empty column'),
       'align' => 'center',
     ),
+    array(
+      'data' => t('Responsive priority'),
+      'align' => 'center',
+    ),
   );
   $rows = array();
   foreach (element_children($form['columns']) as $id) {
@@ -413,6 +426,10 @@ function theme_views_ui_style_plugin_table($variables) {
       'data' => backdrop_render($form['info'][$id]['empty_column']),
       'align' => 'center',
     );
+    $row[] = array(
+      'data' => backdrop_render($form['info'][$id]['responsive']),
+      'align' => 'center',
+    );
     $rows[] = $row;
   }
 
@@ -433,6 +450,9 @@ function theme_views_ui_view_preview_section($variables) {
   . '<div class="preview-section">'. $variables['content'] . '</div>';
 }
 
+/**
+ * Returns the HTML for the tab settings in the Views UI.
+ */
 function template_preprocess_views_ui_display_tab_setting(&$variables) {
   static $zebra = 0;
   $variables['zebra'] = ($zebra % 2 === 0 ? 'odd' : 'even');

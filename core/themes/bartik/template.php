@@ -32,7 +32,7 @@ function bartik_css_alter(&$css) {
  * @see layout.tpl.php
  */
 function bartik_preprocess_layout(&$variables) {
-  if ($variables['content']['header']) {
+  if (isset($variables['content']['header'])) {
     $extra_header_classes = array();
     $extra_header_classes[] = theme_get_setting('main_menu_tabs');
     $legacy = array('one_column', 'two_column', 'two_column_flipped', 'three_three_four_column');

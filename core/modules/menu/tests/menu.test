@@ -231,6 +231,16 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->assertMenuLink($item2['mlid'], array('depth' => 2, 'has_children' => 1, 'p1' => $item1['mlid'], 'p2' => $item2['mlid'], 'p3' => 0));
     $this->assertMenuLink($item3['mlid'], array('depth' => 3, 'has_children' => 0, 'p1' => $item1['mlid'], 'p2' => $item2['mlid'], 'p3' => $item3['mlid'], 'p4' => 0));
 
+    // Add 102 menu links with increasing weights.
+    $items = array();
+    for ($i = -51; $i <= 51; $i++) {
+      $items[$i] = $this->addMenuLink(0, 'node/' . $node1->nid, $menu_name, TRUE, strval($i));
+    }
+    // Make sure that the first-added and last-added items' weights don't get
+    // changed because of the old hardcoded delta = 50.
+    $this->assertMenuLink($items[-51]['mlid'], array('weight' => '-51'));
+    $this->assertMenuLink($items[51]['mlid'], array('weight' => '51'));
+
     // Verify menu links.
     $this->verifyMenuLink($item1, $node1);
     $this->verifyMenuLink($item2, $node2, $item1, $node1);
@@ -315,12 +325,19 @@ class MenuTestCase extends BackdropWebTestCase {
   /**
    * Add a menu link using the menu module UI.
    *
-   * @param integer $plid Parent menu link id.
-   * @param string $link Link path.
-   * @param string $menu_name Menu name.
-   * @return array Menu link created.
+   * @param integer $plid
+   *   Parent menu link ID.
+   * @param string $link
+   *   Link path.
+   * @param string $menu_name
+   *   Menu name.
+   * @param int $weight
+   *   Menu link weight.
+   *
+   * @return array
+   *   Menu link created.
    */
-  function addMenuLink($plid = 0, $link = '<front>', $menu_name = 'main-menu', $expanded = TRUE) {
+  function addMenuLink($plid = 0, $link = '<front>', $menu_name = 'main-menu', $expanded = TRUE, $weight = 0) {
     // View add menu link page.
     $this->backdropGet("admin/structure/menu/manage/$menu_name/add");
     $this->assertResponse(200);
@@ -333,7 +350,7 @@ class MenuTestCase extends BackdropWebTestCase {
       'enabled' => TRUE, // Use this to disable the menu and test.
       'expanded' => $expanded, // Setting this to true should test whether it works when we do the std_user tests.
       'parent' =>  $menu_name . ':' . $plid,
-      'weight' => '0',
+      'weight' => $weight,
     );
 
     // Add menu link.
@@ -640,6 +657,12 @@ class MenuTestCase extends BackdropWebTestCase {
  * Test menu settings for nodes.
  */
 class MenuNodeTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('menu');
 
@@ -752,13 +775,14 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     menu_link_save($item);
 
-    // Assert that disabled Administration menu is not shown on the node/$nid/edit page.
+    // Assert that disabled Administration menu is not shown on the
+    // node/$nid/edit page.
     $this->backdropGet('node/' . $node->nid . '/edit');
-    $this->assertText('Provide a menu link', 'Link in not allowed menu not shown in node edit form');
+    $this->assertText('Provide a menu link', 'Link in not-allowed menu not shown in node edit form.');
     // Assert that the link is still in the Administration menu after save.
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $link = menu_link_load($item['mlid']);
-    $this->assertTrue($link, 'Link in not allowed menu still exists after saving node');
+    $this->assertTrue($link, 'Link in not-allowed menu still exists after saving node.');
 
     // Move the menu link back to the Main menu.
     $item['menu_name'] = 'main-menu';
@@ -774,10 +798,12 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     menu_link_save($child_item);
     // Edit the first node.
     $this->backdropGet('node/'. $node->nid .'/edit');
-    // Assert that it is not possible to set the parent of the first node to itself or the second node.
+    // Assert that it is not possible to set the parent of the first node to
+    // itself...
     $this->assertNoOption('edit-menu-parent', 'main-menu:'. $item['mlid']);
+    // ...nor to the second node
     $this->assertNoOption('edit-menu-parent', 'main-menu:'. $child_item['mlid']);
-    // Assert that unallowed Management menu is not available in options.
+    // ...nor to the not-allowed "Management" menu.
     $this->assertNoOption('edit-menu-parent', 'management:0');
   }
 }

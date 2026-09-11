@@ -4,14 +4,14 @@
     "description": "Displays recently uploaded images for selection when creating content.",
     "module": "filter",
     "storage": 4,
-    "tag": "default",
+    "tag": "",
     "disabled": false,
     "base_table": "file_managed",
     "human_name": "Image Library",
     "core": "1.7",
     "display": {
         "default": {
-            "display_title": "Master",
+            "display_title": "Default",
             "display_plugin": "default",
             "display_options": {
                 "query": {

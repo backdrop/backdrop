@@ -23,16 +23,12 @@
   width: 100%;
   margin-left: auto;
   margin-right: auto;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   clear: both;
 }
 .layout--two-column .l-content,
 .layout--two-column .l-sidebar {
   padding: 0 15px;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 

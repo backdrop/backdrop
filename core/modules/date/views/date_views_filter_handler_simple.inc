@@ -92,9 +92,8 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
       // The format for our filter is in ISO format, but the widget will need it in datetime format.
       $default_date = str_replace('T', ' ', $default_date);
     }
-    // This a fixed date.
     else {
-      $default_date = $options['value'][$prefix];
+      $default_date = isset($options['value'][$prefix]) ? $options['value'][$prefix] : '';
     }
     return $default_date;
   }
@@ -286,6 +285,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
     // construct our own form element.
     $form['value'] = array();
     $form['value']['#tree'] = TRUE;
+    $form['value']['#id'] = 'date_views_exposed_filter-' . bin2hex(backdrop_random_bytes(16));
 
     // Below section copied from views_handler_filter_numeric.inc.
     $which = 'all';
@@ -386,6 +386,10 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         }
       }
       if (!isset($form_state['input'][$identifier][$prefix])) {
+        // Handle bogus input from the query string to prevent fatal errors.
+        if (isset($form_state['input'][$identifier]) && !is_array($form_state['input'][$identifier])) {
+          $form_state['input'][$identifier] = array();
+        }
         // Ensure these exist.
         foreach ($granularity as $key) {
           $form_state['input'][$identifier][$prefix][$key] = NULL;
@@ -425,7 +429,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         '#type' => 'textfield',
         '#title' => check_plain($relative_label),
         '#default_value' => $relative_value,
-        '#description' => t('Relative dates are computed when the view is displayed. Examples: now, now +1 day, 12AM today, Monday next week. <a href="http://php.net/manual/en/datetime.formats.relative.php">More examples of relative date formats in the PHP documentation</a>.'),
+        '#description' => t('Relative dates are computed when the view is displayed. Examples: now, now +1 day, 12AM today, Monday next week. <a href="https://www.php.net/manual/en/datetime.formats.php#datetime.formats.relative">More examples of relative date formats in the PHP documentation</a>.'),
         '#states' => array(
           'visible' => array(
             ":input.{$prefix}-choose-input-type" => array('value' => 'relative'),

@@ -83,7 +83,7 @@ Backdrop.behaviors.passwordToggle = {
 
       // When submitting the form, convert back to a password field for the
       // sake of password managers.
-      $($passwordInput[0].form).submit(function() {
+      $($passwordInput[0].form).on('submit', function() {
         if ($passwordWrapper.is('.password-shown')) {
           $passwordToggle.triggerHandler('click');
         }
@@ -239,7 +239,7 @@ Backdrop.behaviors.fieldUserRegistration = {
 
     if ($checkbox.length) {
       $('input#edit-instance-required', context).once('user-register-form-checkbox', function () {
-        $(this).bind('change', function (e) {
+        $(this).on('change', function (e) {
           if ($(this).prop('checked')) {
             $checkbox.prop('checked', true);
           }

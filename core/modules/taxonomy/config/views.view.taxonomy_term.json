@@ -3,14 +3,14 @@
     "name": "taxonomy_term",
     "description": "A view to emulate Backdrop core's handling of taxonomy/term.",
     "module": "taxonomy",
-    "tag": "default",
+    "tag": "",
     "disabled": true,
     "base_table": "node",
     "human_name": "Taxonomy term",
     "core": 7,
     "display": {
         "default": {
-            "display_title": "Master",
+            "display_title": "Default",
             "display_plugin": "default",
             "display_options": {
                 "query": {

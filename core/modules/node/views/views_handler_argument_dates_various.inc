@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Handlers for various date arguments.

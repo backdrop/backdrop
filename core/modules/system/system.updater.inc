@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Subclasses of the Updater class to update Backdrop core, modules, themes, and layouts.
@@ -221,7 +220,7 @@ class LayoutUpdater extends Updater {
   }
 
   public function postInstall() {
-    layout_reset_caches();
+    cache()->delete('layout_info');
     clearstatcache();
   }
 

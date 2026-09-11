@@ -1,5 +1,5 @@
 [PathTestCase]
-name = Path alias functionality
+name = URL alias functionality
 description = Add, edit, delete, and change alias and verify its consistency in the database.
 group = Path
 file = path.test
@@ -11,13 +11,13 @@ group = Path
 file = path.test
 
 [PathLanguageTestCase]
-name = Path aliases with translated nodes
+name = URL aliases with translated nodes
 description = Confirm that paths work with translated nodes
 group = Path
 file = path.test
 
 [PathLanguageUITestCase]
-name = Path aliases with languages
+name = URL aliases with languages
 description = Confirm that the Path module user interface works with languages.
 group = Path
 file = path.test
@@ -48,7 +48,7 @@ file = path_pattern.test
 
 [PathPatternLocaleTestCase]
 name = Path pattern localization tests
-description = Test automatic path aliasing functionality with localization and translation.
+description = Test automatic URL aliasing functionality with localization and translation.
 group = Path
 file = path_pattern.test
 

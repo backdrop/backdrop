@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * A file to test module_implements() loading includes.

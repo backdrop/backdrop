@@ -19,10 +19,6 @@ Backdrop.behaviors.fileUploadChange = {
     $(context).find('input[data-file-auto-upload]').once('auto-upload').on('change', Backdrop.file.autoUpload).each(function() {
       $(this).closest('.form-item').find('.file-upload-button').hide();
     });
-  },
-  detach: function (context, settings) {
-    $(context).find('input[data-file-extensions]').off('change', Backdrop.file.validateExtension);
-    $(context).find('input[data-file-auto-upload]').off('change', Backdrop.file.autoUpload);
   }
 };
 
@@ -31,12 +27,8 @@ Backdrop.behaviors.fileUploadChange = {
  */
 Backdrop.behaviors.fileButtons = {
   attach: function (context) {
-    $('input.form-submit', context).once('file-disable-fields').bind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).once('file-progress-bar').bind('mousedown', Backdrop.file.progressBar);
-  },
-  detach: function (context) {
-    $('input.form-submit', context).unbind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).unbind('mousedown', Backdrop.file.progressBar);
+    $('input.form-submit', context).once('file-disable-fields').on('mousedown', Backdrop.file.disableFields);
+    $('div.form-managed-file input.form-submit', context).once('file-progress-bar').on('mousedown', Backdrop.file.progressBar);
   }
 };
 
@@ -45,10 +37,10 @@ Backdrop.behaviors.fileButtons = {
  */
 Backdrop.behaviors.filePreviewLinks = {
   attach: function (context) {
-    $('div.form-managed-file .file a, .file-widget .file a', context).once('file-preview-link').bind('click', Backdrop.file.openInNewWindow);
+    $('.file-preview-link', context).once('file-preview-link').on('click', Backdrop.file.openInNewWindow);
   },
   detach: function (context){
-    $('div.form-managed-file .file a, .file-widget .file a', context).unbind('click', Backdrop.file.openInNewWindow);
+    $('.file-preview-link', context).off('click', Backdrop.file.openInNewWindow);
   }
 };
 
@@ -137,7 +129,7 @@ Backdrop.file = Backdrop.file || {
     // do not get enabled when we re-enable these fields at the end of behavior
     // processing. Re-enable in a setTimeout set to a relatively short amount
     // of time (1 second). All the other mousedown handlers (like Backdrop's
-    // Ajax behaviors) are excuted before any timeout functions are called, so
+    // AJAX behaviors) are executed before any timeout functions are called, so
     // we don't have to worry about the fields being re-enabled too soon.
     // @todo If the previous sentence is true, why not set the timeout to 0?
     var $fieldsToTemporarilyDisable = $('div.form-managed-file input.form-file').not($enabledFields).not(':disabled');
@@ -180,32 +172,76 @@ Backdrop.file = Backdrop.file || {
   /**
    * Provide events for files in the file browser dialog.
    */
-  dialogOpenEvent: function(e, dialoog, $element, settings) {
+  dialogOpenEvent: function(e, dialog, $element, settings) {
     var $browserContainer = $element.find(".file-browser");
-    $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
-      var $selectedElement = $(this);
-      if ($selectedElement.is('img')) {
-        $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
-        $selectedElement.parent('.image-library-choose-file').addClass('image-library-image-selected');
-      }
-      else {
-        $browserContainer.find('.file-browser-selected').removeClass('file-browser-selected');
-        $selectedElement.parent('.file-browser-file').addClass('file-browser-selected');
-      }
-      var selectedFid = $(this).data('fid');
-      // Set the FID in the modal submit form.
-      $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
-    }).on('dblclick', '.image-library-choose-file', function() {
-      var $selectedElement = $(this);
-      $selectedElement.click();
-      var $form = $selectedElement.closest('.ui-dialog-content').find('form');
-      var $submit = $form.find('.form-actions input[type=submit]:first');
-      $submit.trigger('mousedown').trigger('click').trigger('mouseup');
-    });
+    let fieldCardinality = 1;
+    let existingFilesCount = 0;
+    if (typeof Backdrop.settings.file !== 'undefined') {
+      fieldCardinality = parseInt(Backdrop.settings.file.browser.fieldCardinality);
+      existingFilesCount = parseInt(Backdrop.settings.file.browser.existingFilesCount);
+    }
+    if (fieldCardinality !== 1) {
+      $browserContainer.selectable({
+        filter: '.image-library-choose-file',
+        classes: {
+          "ui-selected": "image-library-image-selected"
+        },
+        selecting: function(event, ui) {
+          if (fieldCardinality === -1) {
+            return;
+          }
+          let available = fieldCardinality - existingFilesCount;
+          if ($(".image-library-choose-file.ui-selecting").length > available) {
+            $(ui.selecting).removeClass("ui-selecting");
+          }
+          else if ($(".image-library-choose-file.image-library-image-selected").length >= available) {
+            $(".image-library-choose-file.image-library-image-selected").removeClass("image-library-image-selected");
+          }
+        },
+        selected: function(event, ui) {
+          let fids = [];
+          $(".image-library-choose-file.image-library-image-selected").each(function() {
+            fids.push($(this).children("img").data("fid"));
+          });
+          // Set the FID in the modal submit form.
+          $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
+        },
+        unselected: function(event, ui) {
+          let fids = [];
+          $(".image-library-choose-file.image-library-image-selected").each(function() {
+            fids.push($(this).children("img").data("fid"));
+          });
+          // Update values also when unselected.
+          $('form.file-managed-file-browser-form [name="fid"]').val(fids.join(','));
+        }
+      });
+    }
+    else {
+      $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
+        var $selectedElement = $(this);
+        if ($selectedElement.is('img') && fieldCardinality === 1) {
+          $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
+          $selectedElement.parent('.image-library-choose-file').addClass('image-library-image-selected');
+        }
+        else {
+          $browserContainer.find('.file-browser-selected').removeClass('file-browser-selected');
+          $selectedElement.parent('.file-browser-file').addClass('file-browser-selected');
+        }
+        var selectedFid = $(this).data('fid');
+        // Set the FID in the modal submit form.
+        $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
+      }).on('dblclick', '.image-library-choose-file', function() {
+        var $selectedElement = $(this);
+        $selectedElement.trigger('click');
+        var $form = $selectedElement.closest('.ui-dialog-content').find('form');
+        var $submit = $form.find('.form-actions input[type=submit]:first');
+        $submit.trigger('mousedown').trigger('click').trigger('mouseup');
+      });
+    }
   },
 
   /**
-   * After closing a dialog, check if the file ID needs to be updated..
+   * After closing a dialog, check if the file ID needs to be updated.
    */
   dialogCloseEvent: function(e, dialog, $element) {
     var $browserContainer = $element.find(".file-browser");

@@ -238,7 +238,7 @@ function field_test_create_entity($id = 1, $vid = 1, $bundle = 'test_bundle', $l
  *   The loaded entity.
  */
 function field_test_entity_test_load($ftid, $ftvid = NULL) {
-  // Load basic strucure.
+  // Load basic structure.
   $query = db_select('test_entity', 'fte', array())
     ->condition('fte.ftid', $ftid);
 
@@ -257,7 +257,7 @@ function field_test_entity_test_load($ftid, $ftvid = NULL) {
   foreach ($entities as $key => $entity) {
     $entities[$key] = entity_create('test_entity', (array) $entity);
   }
-    
+
 
   // Attach fields.
   if ($ftvid) {
@@ -331,7 +331,7 @@ function field_test_entity_add($fttype) {
 }
 
 /**
- * Menu callback: displays the 'Edit exiisting test_entity' form.
+ * Menu callback: displays the 'Edit existing test_entity' form.
  */
 function field_test_entity_edit($entity) {
   backdrop_set_title(t('test_entity @ftid revision @ftvid', array('@ftid' => $entity->ftid, '@ftvid' => $entity->ftvid)), PASS_THROUGH);

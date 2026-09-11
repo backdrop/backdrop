@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for the Database Schema API.

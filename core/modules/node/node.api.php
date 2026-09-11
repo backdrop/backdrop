@@ -18,10 +18,10 @@
  * During node operations (create, update, view, delete, etc.), there are
  * several sets of hooks that get invoked to allow modules to modify the base
  * node operation:
- * - Node-type-specific hooks: When defining a node type, hook_node_info()
+ * - Node-type-specific hooks: When defining a node type, node_type_save()
  *   returns a 'base' component. Node-type-specific hooks are named
- *   base_hookname() instead of mymodule_hookname() (in a module called
- *   'mymodule' for example). Only the node type's corresponding implementation
+ *   base_hookname() instead of my_module_hookname() (in a module called
+ *   'my_module' for example). Only the node type's corresponding implementation
  *   is invoked. For example, book_node_info() in book.module defines the base
  *   for the 'book' node type as 'book'. So when a book node is created,
  *   hook_insert() is invoked on book_insert() only. Hooks that are
@@ -780,7 +780,7 @@ function hook_node_view(Node $node, $view_mode, $langcode) {
   $node->content['my_additional_field'] = array(
     '#markup' => $additional_field,
     '#weight' => 10,
-    '#theme' => 'mymodule_my_additional_field',
+    '#theme' => 'my_module_my_additional_field',
   );
 }
 
@@ -890,7 +890,7 @@ function hook_ranking() {
  * after loading, if the node type is later saved, these defaults are saved into
  * configuration.
  *
- * @param $types
+ * @param array $types
  *   An array of type information, passed by reference. Each item is keyed by
  *   the node type name, and is an array of values as loaded from the node
  *   type config file. The most common use is to populate the "settings" array
@@ -914,10 +914,9 @@ function hook_node_type_load(&$types) {
 /**
  * Respond to node type creation.
  *
- * This hook is invoked from node_type_save() after the node type is added to
- * the database.
+ * This hook is invoked from node_type_save() after the node type is created.
  *
- * @param $info
+ * @param object $info
  *   The node type object that is being created.
  */
 function hook_node_type_insert($info) {
@@ -927,17 +926,16 @@ function hook_node_type_insert($info) {
 /**
  * Respond to node type updates.
  *
- * This hook is invoked from node_type_save() after the node type is updated in
- * the database.
+ * This hook is invoked from node_type_save() after the node type is updated.
  *
- * @param $info
+ * @param object $info
  *   The node type object that is being updated.
  */
 function hook_node_type_update($info) {
   // Update a setting that pointed at the old type name to the new type name.
   if (!empty($info->old_type) && $info->old_type != $info->type) {
     $config = config('my_module.settings');
-    $default_type = $config->get('defaut_node_type');
+    $default_type = $config->get('default_node_type');
     if ($default_type === $info->old_type) {
       $config->set('default_node_type', $info->type);
     }
@@ -947,10 +945,9 @@ function hook_node_type_update($info) {
 /**
  * Respond to node type deletion.
  *
- * This hook is invoked from node_type_delete() after the node type is removed
- * from the database.
+ * This hook is invoked from node_type_delete() after the node type is deleted.
  *
- * @param $info
+ * @param object $info
  *   The node type object that is being deleted.
  */
 function hook_node_type_delete($info) {
@@ -962,6 +959,37 @@ function hook_node_type_delete($info) {
     unset($enabled_types[$key]);
     $config->set('enabled_types', $enabled_types);
   }
+}
+
+/**
+ * Add to the matrix of node permissions on a node type to be
+ * displayed on the node type form. This would be used in addition to
+ * hook_permission() which supplies the actual permissions.
+ *
+ * This hook is invoked from node_type_form_permissions.
+ *
+ * @param string $type
+ *   The node type.
+ * 
+ * @since 1.34.0 Hook added.
+ */
+function hook_node_type_list_permissions($type) {
+  $perms = array();
+  foreach (node_type_get_names() as $node_type => $name) {
+    if ($type != $node_type) {
+      continue;
+    }
+    $perms += array(
+      "view own $type content" => array(
+        'title' => t('%type_name: View own content', array('%type_name' => $name)),
+      ),
+      "view any $type content" => array(
+        'title' => t('%type_name: View any content', array('%type_name' => $name)),
+      ),
+    );
+  }
+
+  return $perms;
 }
 
 /**
@@ -1014,8 +1042,8 @@ function hook_delete(Node $node) {
  * @ingroup node_api_hooks
  */
 function hook_prepare(Node $node) {
-  if (!isset($node->mymodule_value)) {
-    $node->mymodule_value = 'foo';
+  if (!isset($node->my_module_value)) {
+    $node->my_module_value = 'foo';
   }
 }
 
@@ -1247,7 +1275,7 @@ function hook_view(Node $node, $view_mode) {
   }
 
   $node->content['myfield'] = array(
-    '#markup' => theme('mymodule_myfield', $node->myfield),
+    '#markup' => theme('my_module_myfield', $node->myfield),
     '#weight' => 1,
   );
 

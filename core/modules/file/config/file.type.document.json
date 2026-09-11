@@ -15,7 +15,10 @@
         "application/vnd.oasis.opendocument.presentation",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.apple.keynote",
+        "application/vnd.apple.numbers",
+        "application/vnd.apple.pages"
     ],
     "disabled": false,
     "storage": 4,

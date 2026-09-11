@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Helper module for the file tests.
@@ -63,7 +62,7 @@ function _file_test_form($form, &$form_state) {
     ),
     '#default_value' => FILE_EXISTS_RENAME,
   );
-  $form['file_subdir'] = array(
+  $form['file_subdirectory'] = array(
     '#type' => 'textfield',
     '#title' => t('Subdirectory for test file'),
     '#default_value' => '',
@@ -104,8 +103,8 @@ function _file_test_form($form, &$form_state) {
 function _file_test_form_submit(&$form, &$form_state) {
   // Process the upload and perform validation. Note: we're using the
   // form value for the $replace parameter.
-  if (!empty($form_state['values']['file_subdir'])) {
-    $destination = 'temporary://' . $form_state['values']['file_subdir'];
+  if (!empty($form_state['values']['file_subdirectory'])) {
+    $destination = 'temporary://' . $form_state['values']['file_subdirectory'];
     file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
   }
   else {
@@ -416,9 +415,9 @@ function file_test_file_url_alter(&$uri) {
  */
 function file_test_file_mimetype_mapping_alter(&$mapping) {
   // Add new mappings.
-  $mapping['mimetypes']['file_test_mimetype_1'] = 'madeup/file_test_1';
-  $mapping['mimetypes']['file_test_mimetype_2'] = 'madeup/file_test_2';
-  $mapping['mimetypes']['file_test_mimetype_3'] = 'madeup/doc';
+  $mapping['mimetypes']['file_test_mimetype_1'] = 'made_up/file_test_1';
+  $mapping['mimetypes']['file_test_mimetype_2'] = 'made_up/file_test_2';
+  $mapping['mimetypes']['file_test_mimetype_3'] = 'made_up/doc';
   $mapping['extensions']['file_test_1'] = 'file_test_mimetype_1';
   $mapping['extensions']['file_test_2'] = 'file_test_mimetype_2';
   $mapping['extensions']['file_test_3'] = 'file_test_mimetype_2';

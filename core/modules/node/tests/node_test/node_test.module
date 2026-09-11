@@ -37,7 +37,8 @@ function node_test_node_view(Node $node, $view_mode) {
 
     // Add content that should be displayed only in the RSS feed.
     $node->content['extra_feed_content'] = array(
-      '#markup' => '<p>' . t('Extra data that should appear only in the RSS feed for node !nid.', array('!nid' => $node->nid)) . '</p>',
+      '#type' => 'help',
+      '#markup' => t('Extra data that should appear only in the RSS feed for node !nid.', array('!nid' => $node->nid)),
       '#weight' => 10,
     );
   }
@@ -45,7 +46,8 @@ function node_test_node_view(Node $node, $view_mode) {
   if ($view_mode != 'rss') {
     // Add content that should NOT be displayed in the RSS feed.
     $node->content['extra_non_feed_content'] = array(
-      '#markup' => '<p>' . t('Extra data that should appear everywhere except the RSS feed for node !nid.', array('!nid' => $node->nid)) . '</p>',
+      '#type' => 'help',
+      '#markup' => t('Extra data that should appear everywhere except the RSS feed for node !nid.', array('!nid' => $node->nid)),
     );
   }
 }
@@ -177,4 +179,45 @@ function node_test_node_insert($node) {
     unset($node->is_new);
     node_save($node);
   }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function node_test_permission() {
+  $perms = array();
+  foreach (node_type_get_names() as $type => $name) {
+    $perms += array(
+      "view own $type content" => array(
+        'title' => t('%type_name: View own content', array('%type_name' => $name)),
+      ),
+      "view any $type content" => array(
+        'title' => t('%type_name: View any content', array('%type_name' => $name)),
+      ),
+    );
+  }
+  return $perms;
+}
+
+/**
+ *
+ * Implements hook_node_type_list_permissions()
+ */
+function node_test_node_type_list_permissions($type) {
+  $perms = array();
+  foreach (node_type_get_names() as $node_type => $name) {
+    if ($type != $node_type) {
+      continue;
+    }
+    $perms += array(
+      "view own $type content" => array(
+        'title' => t('%type_name: View own content', array('%type_name' => $name)),
+      ),
+      "view any $type content" => array(
+        'title' => t('%type_name: View any content', array('%type_name' => $name)),
+      ),
+    );
+  }
+
+  return $perms;
 }

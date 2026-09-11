@@ -1,0 +1,93 @@
+<?php
+/**
+ * @file
+ * Helper module for testing link fields with custom forms.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function link_field_custom_form_test_menu() {
+  $items['link-field-custom-form'] = array(
+    'title' => "Custom Form to test link field",
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('link_field_custom_form_test_form'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Custom form for testing link field.
+ *
+ * @param array $form
+ *   The form array.
+ * @param array $form_state
+ *   The form state array.
+ *
+ * @see link_field_custom_form_test_menu()
+ *
+ */
+function link_field_custom_form_test_form(array $form, array &$form_state) {
+  $form = array();
+  $form['link_test_defaults'] = array(
+    '#type' => 'link_field',
+    '#title' => t('Link defaults'),
+    '#required' => TRUE,
+  );
+  $form['link_test_title_changes'] = array(
+    '#type' => 'link_field',
+    '#title' => t('Link with title changed'),
+    '#link_field_options' => array(
+      'title_maxlength' => 16,
+      'title_label_use_field_label' => TRUE,
+    ),
+  );
+  $form['link_test_internal_no_title'] = array(
+    '#type' => 'link_field',
+    '#title' => t('Link without title'),
+    '#link_field_options' => array(
+      'title_mode' => 'none',
+      'link_type' => 'internal',
+    ),
+  );
+  $form['link_test_validate_url'] = array(
+    '#type' => 'link_field',
+    '#title' => t('Required link with URL validation'),
+    '#required' => TRUE,
+    '#link_field_options' => array(
+      'url_mode' => 'required',
+      'title_mode' => 'required',
+      'validate_url' => TRUE,
+    ),
+    '#default_value' => array(
+      'title' => 'Example title on custom link field',
+      'url' => 'http://example.com',
+    ),
+  );
+  $form['configurable_title_and_class'] = array(
+    '#type' => 'link_field',
+    '#title' => t('Link with configurable title and class'),
+    '#link_field_options' => array(
+      'configurable_title' => TRUE,
+      'configurable_class' => TRUE,
+    ),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for link_field_custom_form_test_form().
+ */
+function link_field_custom_form_test_form_submit(array $form, array &$form_state) {
+  $output = print_r($form_state['values'], TRUE);
+  $output = str_replace(array("\r", "\n"), '', $output);
+  $output = str_replace(array("    ", "   ", "  "), ' ', $output);
+  backdrop_set_message($output);
+}

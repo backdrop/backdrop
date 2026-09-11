@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the numeric argument validator plugin.

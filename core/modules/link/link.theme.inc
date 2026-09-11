@@ -157,3 +157,16 @@ function theme_link_formatter_link_separate($variables) {
   $output .= '</div>';
   return $output;
 }
+
+/**
+ * Wraps the link field form element.
+ */
+function theme_link_field_wrapper($variables) {
+  $element = $variables['element'];
+
+  // Wrap in a div with an ID for #states.
+  if (isset($element['#children'])) {
+    $element['#children'] = '<div id="' . $element['#id'] . '" class="container-inline-link-field">' . $element['#children'] . '</div>';
+  }
+  return theme('form_element', $element);
+}

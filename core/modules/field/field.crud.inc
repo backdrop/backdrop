@@ -20,6 +20,33 @@
  */
 
 /**
+ * Retrieves the schema for a field.
+ *
+ * @param array $field
+ *   The field array to get the schema definition against.
+ *
+ * @return array
+ *   The field schema definition array.
+ *
+ * @since 1.26.4 Function added.
+ */
+function field_retrieve_schema($field) {
+  // Make sure the installation API is available.
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
+  module_load_all_includes('install');
+  $schema = (array) module_invoke($field['module'], 'field_schema', $field);
+  $schema += array(
+    'columns' => array(),
+    'indexes' => array(),
+    'foreign keys' => array()
+  );
+  // Give other modules a chance to alter this definition.
+  // @see hook_field_schema_alter()
+  backdrop_alter('field_schema', $schema, $field);
+  return $schema;
+}
+
+/**
  * Creates a field.
  *
  * This function does not bind the field to any bundle; use
@@ -97,13 +124,7 @@ function field_create_field($field) {
   $config->save();
 
   // Collect storage information.
-  module_load_install($field['module']);
-  $schema = (array) module_invoke($field['module'], 'field_schema', $field);
-  $schema += array(
-    'columns' => array(),
-    'indexes' => array(),
-    'foreign keys' => array(),
-  );
+  $schema = field_retrieve_schema($field);
   $field['columns'] = $schema['columns'];
   $field['foreign keys'] = $schema['foreign keys'];
   $field['indexes'] = $schema['indexes'];
@@ -190,13 +211,7 @@ function field_update_field($field) {
 
   // Collect the new storage information, since what is in
   // $prior_field may no longer be right.
-  module_load_install($field['module']);
-  $schema = (array) module_invoke($field['module'], 'field_schema', $field);
-  $schema += array(
-    'columns' => array(),
-    'indexes' => array(),
-    'foreign keys' => array(),
-  );
+  $schema = field_retrieve_schema($field);
   $field['columns'] = $schema['columns'];
   $field['foreign keys'] = $schema['foreign keys'];
   $field['indexes'] = $schema['indexes'];
@@ -226,10 +241,10 @@ function field_update_field($field) {
 /**
  * Validates a field configuration.
  *
- * @param $field_name
- *   The field name to read.
+ * @param $field
+ *   A field structure. $field['field_name'] and $field['type'] must be provided.
  * @param $update
- *   Whether this is a new or existing field.
+ *   Whether this is an existing field or a new one.
  */
 function field_validate_field($field, $update = FALSE) {
   // Field name is required.
@@ -373,13 +388,7 @@ function field_read_fields($params = array(), $include_additional = array()) {
     module_invoke_all('field_read_field', $field);
 
     // Populate storage information.
-    module_load_install($field['module']);
-    $schema = (array) module_invoke($field['module'], 'field_schema', $field);
-    $schema += array(
-      'columns' => array(),
-      'indexes' => array(),
-      'foreign keys' => array(),
-    );
+    $schema = field_retrieve_schema($field);
     $field['columns'] = $schema['columns'];
     $field['indexes'] = $schema['indexes'];
     $field['foreign keys'] = $schema['foreign keys'];
@@ -457,7 +466,7 @@ function field_delete_field($field_name) {
 /**
  * Creates an instance of a field, binding it to a bundle.
  *
- * @param $instance
+ * @param array $instance
  *   A field instance definition array. The field_name, entity_type and
  *   bundle properties are required. Other properties, if omitted,
  *   will be given the following default values:
@@ -483,12 +492,13 @@ function field_delete_field($field_name) {
  *     Display modes not present in the definition are left empty, and the field
  *     will not be displayed in this mode.
  *
- * @return
+ * @return array
  *   The $instance array with the id property filled in.
  *
  * @throws FieldException
  *
  * See: @link field Field API data structures @endlink.
+ * @see hook_field_schema_alter()
  */
 function field_create_instance($instance) {
   // Populate defaults.
@@ -619,6 +629,26 @@ function field_validate_instance($instance, $update = FALSE, $load_field = TRUE)
       throw new FieldException(t('The field instance "@label" on the type "@entity_type" is not allowed.', array('@label' => $label, '@entity_type' => $instance['entity_type'])));
     }
 
+    // Check to ensure that the field instance does not have a reserved word for
+    // this entity type.
+    $entity_info = entity_get_info($instance['entity_type']);
+    if (in_array($instance['field_name'], $entity_info['entity keys'])) {
+      // If it does, check whether this is new or an update and tailor the
+      // message accordingly.
+      $error_message_placeholders = array(
+        '@name' => $instance['field_name'],
+        '@type' => $entity_info['label'],
+      );
+      if ($update) {
+        $error_message = t("The machine name '@name' is invalid for entity type @type as this machine name is reserved by this entity type. You will not be able to save any @type with this field on. You should delete this field and create a new field with a different machine name", $error_message_placeholders);
+      }
+      else {
+        $error_message = t("You cannot add the existing field with the machine name '@name' to entity type @type as this machine name is reserved by this entity type", $error_message_placeholders);
+      }
+      throw new FieldException($error_message);
+    }
+
+    // @todo: Expand the check for reserved words to all properties of the entity type.
     // @todo: Check that the widget type is known and can handle the field type.
     // @todo: Check that the formatters are known and can handle the field type.
     // @todo: Check that the display display modes are known for the entity type.

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide node tnid argument handler.

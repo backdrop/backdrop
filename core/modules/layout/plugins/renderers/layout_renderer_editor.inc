@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Class file to control the main Layout editor.
@@ -13,8 +12,8 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     parent::__construct($layout, $renderer_plugin);
 
     // Set the page title region if not already.
-    if (!isset($this->layout_info['regions']['title'])) {
-      $this->layout_info['regions']['title'] = t('Page title');
+    if (!isset($this->layout_template_info['regions']['title'])) {
+      $this->layout_template_info['regions']['title'] = t('Page title');
     }
     $this->admin = TRUE;
 
@@ -26,8 +25,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
   function addMeta() {
     parent::addMeta();
     backdrop_add_library('system', 'ui.sortable');
-    backdrop_add_js(backdrop_get_path('module', 'layout') . '/js/layout.admin.js');
-    backdrop_add_css(backdrop_get_path('module', 'layout') . '/css/layout.admin.css');
+    backdrop_add_library('layout', 'layout.admin');
   }
 
   /**
@@ -71,7 +69,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
 
       $output = '<div class="layout-editor-region" id="layout-editor-region-' . $region_id . '" data-region-name="' . $region_id . '">';
       $output .= '<div class="layout-editor-region-title clearfix">';
-      $output .= '<h2 class="label">' . check_plain($this->layout_info['regions'][$region_id]) . '</h2>';
+      $output .= '<h2 class="label">' . check_plain($this->layout_template_info['regions'][$region_id]) . '</h2>';
       $output .= $region_buttons;
       $output .= '</div>';
       $output .= '<div class="layout-editor-region-content">' . $content . '</div>';
@@ -90,7 +88,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
 
     $output  = '<div class="layout-editor-block" id="layout-editor-title" data-region-name="' . $region_id . '">';
     $output .= '  <div class="layout-editor-block-title clearfix">';
-    $output .= '    <span class="text">' . check_plain($this->layout_info['regions'][$region_id]) . '</span>';
+    $output .= '    <span class="text">' . check_plain($this->layout_template_info['regions'][$region_id]) . '</span>';
     $output .= '    <span class="description">' . $description . '</span>';
     $output .= '    <span class="buttons">' . $region_buttons . '</span>';
     $output .= '  </div>';
@@ -115,9 +113,15 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       'data-block-id' => $block->uuid,
     );
 
+    $block_admin_title = $block->getAdminTitle();
+    if (!$block->status) {
+      $attributes['class'][] = 'layout-editor-block-disabled';
+      $block_admin_title = t('!title (Disabled)', array('!title' => $block_admin_title));
+    }
+
     $output = '<div ' . backdrop_attributes($attributes) . '>';
     $output .= '<div class="layout-editor-block-title clearfix">';
-    $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
+    $output .= '<span class="handle"></span><span class="text">' . $block_admin_title . '</span>';
     if ($buttons) {
       $output .= '<span class="buttons">' . $buttons . '</span>';
     }
@@ -181,7 +185,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+          'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
         ),
       );
     }
@@ -192,7 +196,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+          'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
         ),
       );
       $links['configure'] = array(
@@ -201,7 +205,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+          'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
         ),
       );
     }
@@ -220,6 +224,17 @@ class LayoutRendererEditor extends LayoutRendererStandard {
   protected function getBlockLinks($block) {
     $links = array();
 
+    if (!$block->status) {
+      $links['enable'] = array(
+        'title' => t('Enable'),
+        'href' => $this->getUrl('toggle-block-status', $block->uuid),
+        'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+        'attributes' => array(
+          'class' => array('enable-block', 'use-ajax'),
+        ),
+      );
+    }
+
     // Only render the "Configure" link if the block is not broken.
     if (!is_a($block, 'BlockBroken')) {
       $links['configure'] = array(
@@ -228,7 +243,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+          'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
         ),
       );
     }
@@ -240,7 +255,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'attributes' => array(
           'class' => array('use-ajax'),
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+          'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
         ),
       );
     }
@@ -253,6 +268,17 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'class' => array('remove-block', 'use-ajax'),
       ),
     );
+
+    if ($block->status) {
+      $links['disable'] = array(
+        'title' => t('Disable'),
+        'href' => $this->getUrl('toggle-block-status', $block->uuid),
+        'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+        'attributes' => array(
+          'class' => array('disable-block', 'use-ajax'),
+        ),
+      );
+    }
 
     $dropbutton = array(
       '#type' => 'dropbutton',

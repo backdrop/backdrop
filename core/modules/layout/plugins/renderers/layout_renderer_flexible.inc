@@ -11,12 +11,25 @@ class LayoutRendererFlexible {
    */
   var $layout;
 
+
   /**
-   * The information from hook_layout_info() for the layout template.
+   * Deprecated. Now replaced by $layout_template_info.
+   *
+   * @var NULL
+   * @deprecated since 1.30.0
+   */
+  var $layout_info;
+
+  /**
+   * The information from hook_layout_template_info() for the layout being
+   * rendered.
+   *
+   * This array is stored here for easy access, as it contains most importantly
+   * the list of regions that can be configured.
    *
    * @var array
    */
-  var $layout_info;
+  var $layout_template_info;
 
   /**
    * The complete rendered editor.
@@ -65,7 +78,7 @@ class LayoutRendererFlexible {
     $template_id = $layout->layout_template;
 
     $template_info = layout_get_layout_template_info($template_id);
-    $template_data = layout_flexible_tempstore_load($template_id);
+    $template_data = layout_flexible_tempstore_load($template_id, 'flexible');
 
     foreach ($template_data->rows as $position => $info) {
       $layout->positions[$position] = array();
@@ -74,15 +87,19 @@ class LayoutRendererFlexible {
 
     $this->admin = TRUE;
     $this->layout = &$layout;
-    $this->layout_info = $template_info;
-    $this->flexible = TRUE;
+    $this->layout_template_info = $template_info;
+
+    // Adjust for the renaming of "layout_info" to "layout_template_info".
+    // See https://github.com/backdrop/backdrop-issues/issues/6628.
+    // @todo: Remove in 2.x.
+    $this->layout_info = $this->layout_template_info;
   }
 
   /**
    * Render the entire editor HTML and attach meta data.
    *
    * @return string
-   *  Themed & rendered HTML output.
+   *   Themed & rendered HTML output.
    */
   function render() {
     $this->addMeta();
@@ -107,14 +124,21 @@ class LayoutRendererFlexible {
     $this->renderRowButtons();
 
     module_load_include('inc', 'layout', 'layout.theme');
-    if (empty($this->layout_info['template'])) {
+    if (empty($this->layout_template_info['template'])) {
       $theme = 'layout__' . $this->layout->layout_template;
     }
     else {
-      $theme = str_replace('-', '_', $this->layout_info['template']);
+      $theme = str_replace('-', '_', $this->layout_template_info['template']);
     }
 
-    $this->rendered_editor = theme($theme, array('content' => array(), 'settings' => array(), 'layout' => $this->layout, 'layout_info' => $this->layout_info, 'renderer' => $this, 'admin' => $this->admin));
+    $this->rendered_editor = theme($theme, array(
+      'content' => array(),
+      'settings' => array(),
+      'layout' => $this->layout,
+      'layout_template_info' => $this->layout_template_info,
+      'renderer' => $this,
+      'admin' => $this->admin,
+    ));
     return $this->prefix . $this->rendered_editor . $this->suffix;
   }
 
@@ -124,15 +148,15 @@ class LayoutRendererFlexible {
   function addMeta() {
     backdrop_add_library('system', 'backdrop.ajax');
     backdrop_add_library('system', 'ui.sortable');
-    backdrop_add_js(backdrop_get_path('module', 'layout') . '/js/layout.admin.js');
-    backdrop_add_css(backdrop_get_path('module', 'layout') . '/css/layout.admin.css');
+    backdrop_add_library('layout', 'layout.admin');
+    backdrop_add_css(backdrop_get_path('module', 'layout') . '/css/layout.flexible.admin.css');
   }
 
   /**
    * Render row dropbuttons.
    */
   function renderRowButtons() {
-    foreach ($this->layout_info['regions'] as $region_id => $title) {
+    foreach ($this->layout_template_info['regions'] as $region_id => $title) {
       $this->region_buttons[$region_id] = $this->getRowButtons($region_id);
     }
 
@@ -145,19 +169,19 @@ class LayoutRendererFlexible {
   protected function getRowButtons($region_id) {
     $links = array();
     $links['configure'] = array(
-      'title' => t('Configure row'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_info['name'] . '/row/' . $region_id . '/configure',
+      'title' => t('Configure'),
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_template_info['name'] . '/row/' . $region_id . '/configure',
       'attributes' => array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,
-        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        'data-dialog-options' => json_encode(array('classes' => array('ui-dialog' => 'layout-dialog'))),
       ),
     );
     $links['delete'] = array(
       'title' => t('Delete row'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_info['name'] . '/row/' . $region_id . '/delete',
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_template_info['name'] . '/row/' . $region_id . '/delete',
       'query' => array(
-        'token' => backdrop_get_token('layout-region-' . $region_id)
+        'token' => backdrop_get_token('layout-region-' . $region_id),
       ),
       'attributes' => array(
         'class' => array('use-ajax'),

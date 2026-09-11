@@ -1,0 +1,6 @@
+{
+    "_config_name": "test_theme_config.settings",
+    "test_theme_checkbox_one": true,
+    "test_theme_checkbox_two": false,
+    "test_theme_textfield": "Default field value"
+}

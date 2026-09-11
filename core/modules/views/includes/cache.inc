@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Load Views' data so that it knows what is available to build queries from.

@@ -75,6 +75,7 @@ class ViewsBlock extends Block {
     parent::prepare();
 
     list($view_name, $display_id) = explode('-', $this->delta);
+
     if ($view = views_get_view($view_name)) {
       if (!$view->access($display_id)) {
         $view->destroy();
@@ -89,25 +90,12 @@ class ViewsBlock extends Block {
       $arguments = $view->display_handler->get_option('arguments');
 
       foreach ($view->display_handler->get_argument_input() as $id => $argument) {
+
         switch ($argument['type']) {
-          case 'context':
-            // @todo: Context handling non-existent at the moment.
-            /*
-            $context_keys = isset($this->settings['context']) ? $this->settings['context'] : array();
-            $key = array_shift($context_keys);
-            if (isset($contexts[$key])) {
-              if (strpos($argument['context'], '.')) {
-                list($context, $converter) = explode('.', $argument['context'], 2);
-                $args[] = layout_context_convert_context($contexts[$key], $converter, array('sanitize' => FALSE));
-              }
-              else {
-                $args[] = $contexts[$key]->argument;
-              }
+          case 'layout':
+            foreach ($this->contexts as $context) {
+              $args[] = $context->argument;
             }
-            else {
-              $args[] = isset($arguments[$id]['exception']['value']) ? $arguments[$id]['exception']['value'] : 'all';
-            }
-            */
             break;
 
           case 'fixed':
@@ -144,7 +132,6 @@ class ViewsBlock extends Block {
       }
 
       $view->set_arguments($args);
-
       $allow = $view->display_handler->get_option('allow');
 
       if ($allow['path_override'] && !empty($this->settings['path'])) {

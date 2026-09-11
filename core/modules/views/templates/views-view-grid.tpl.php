@@ -24,7 +24,13 @@
 <div class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <?php foreach ($rows as $row_count => $row): ?>
     <div <?php if (!empty($row_classes[$row_count])) { print 'class="' . implode(' ', $row_classes[$row_count]) . '"';  } ?>>
-      <?php print $row; ?>
+      <?php if (empty($responsive)) : ?>
+        <?php print $row; ?>
+      <?php else : ?>
+        <div class="views-grid-box-inner">
+          <?php print $row; ?>
+        </div>
+      <?php endif; ?>
     </div>
   <?php endforeach; ?>
 </div>

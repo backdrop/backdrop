@@ -26,7 +26,7 @@ Backdrop.behaviors.textSummary = {
         var $link = $('<span class="field-edit-link">(<a class="link-edit-summary" href="#">' + Backdrop.t('Hide summary') + '</a>)</span>');
         var $a = $link.find('a');
         var toggleClick = true;
-        $link.bind('click', function (e) {
+        $link.on('click', function (e) {
           if (toggleClick) {
             $summary.hide();
             $a.html(Backdrop.t('Edit summary'));
@@ -43,7 +43,7 @@ Backdrop.behaviors.textSummary = {
 
         // If no summary is set, hide the summary field.
         if ($(this).find('.text-summary').val() == '') {
-          $link.click();
+          $link.trigger('click');
         }
       });
     });

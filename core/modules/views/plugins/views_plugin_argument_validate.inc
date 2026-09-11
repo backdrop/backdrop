@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the base argument validator plugin.

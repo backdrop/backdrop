@@ -23,3 +23,28 @@ function _filter_formtest_href_element_validate(&$element, &$form_state) {
     backdrop_set_message($message, 'info');
   }
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function filter_formtest_form_filter_format_editor_image_form_alter(&$form, &$form_state, $form_id) {
+  // Pick up form values after original submit handler ran.
+  $form['#submit'][] = '_filter_formtest_editor_image_form_submit';
+}
+
+/**
+ * Construct and display a string for assertion in test.
+ *
+ * @see FilterEditorImageDialogTestCase
+ */
+function _filter_formtest_editor_image_form_submit($form, &$form_state) {
+  $result = '';
+  if (isset($form_state['values'])) {
+    $attributes = $form_state['values']['attributes'];
+    $result .= 'width:' . $attributes['width'];
+    $result .= '|height:' . $attributes['height'];
+    $result .= '|src:' . $attributes['src'];
+    $result .= '|fid:' . $attributes['data-file-id'];
+    backdrop_set_message ($result, 'info');
+  }
+}

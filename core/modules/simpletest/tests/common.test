@@ -76,6 +76,26 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
     $link = l($text, $path);
     $sanitized_path = check_url(url($path));
     $this->assertTrue(strpos($link, $sanitized_path) !== FALSE, format_string('XSS attack @path was filtered', array('@path' => $path)));
+
+    // Verify that a dangerous protocol is sanitized.
+    $text = $this->randomName();
+    $path = "javascript:alert('XSS')";
+    $link = l($text, $path, array('external' => TRUE));
+    $this->assertTrue(strpos($link, 'javascript:') === FALSE, 'Dangerous protocol javascript: was sanitized.');
+
+    // Verify that these harmless javascript paths are left intact for BC.
+    $special_case_js_paths = array(
+      'javascript:void()',
+      'javascript:void();',
+      'javascript:void(0)',
+      'javascript:void(0);',
+      'JavaScript:Void(0)',
+    );
+    foreach ($special_case_js_paths as $path) {
+      $text = $this->randomName();
+      $link = l($text, $path, array('external' => TRUE));
+      $this->assertTrue(strpos($link, $path) !== FALSE, format_string('Harmless @path was not sanitized.', array('@path' => $path)));
+    }
   }
 
   /*
@@ -189,11 +209,11 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
     $result = url($url);
     $this->assertEqual($url, $result, 'External URL with fragment works without a fragment in $options.');
 
-    // Verify fragment can be overidden in an external URL.
+    // Verify fragment can be overridden in an external URL.
     $url = $test_url . '#backdrop';
     $fragment = $this->randomName(10);
     $result = url($url, array('fragment' => $fragment));
-    $this->assertEqual($test_url . '#' . $fragment, $result, 'External URL fragment is overidden with a custom fragment in $options.');
+    $this->assertEqual($test_url . '#' . $fragment, $result, 'External URL fragment is overridden with a custom fragment in $options.');
 
     // Verify external URL can contain a query string.
     $url = $test_url . '?backdrop=awesome';
@@ -469,18 +489,25 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
    * Check that invalid multi-byte sequences are rejected.
    */
   function testInvalidMultiByte() {
-     // Ignore PHP 5.3+ invalid multibyte sequence warning.
-     $text = @check_plain("Foo\xC0barbaz");
-     $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "Foo\xC0barbaz"');
-     // Ignore PHP 5.3+ invalid multibyte sequence warning.
-     $text = @check_plain("\xc2\"");
-     $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "\xc2\""');
-     $text = check_plain("Fooÿñ");
-     $this->assertEqual($text, "Fooÿñ", 'check_plain() accepts valid sequence "Fooÿñ"');
-     $text = filter_xss("Foo\xC0barbaz");
-     $this->assertEqual($text, '', 'filter_xss() rejects invalid sequence "Foo\xC0barbaz"');
+     // Ignore PHP 8.0+ null deprecations.
+     $text = check_plain(NULL);
+     $this->assertEqual($text, '', 'check_plain() casts null to string');
+     $text = check_plain(FALSE);
+     $this->assertEqual($text, '', 'check_plain() casts boolean to string');
+     // cspell:disable
      $text = filter_xss("Fooÿñ");
      $this->assertEqual($text, "Fooÿñ", 'filter_xss() accepts valid sequence Fooÿñ');
+     $text = check_plain("Fooÿñ");
+     $this->assertEqual($text, "Fooÿñ", 'check_plain() accepts valid sequence "Fooÿñ"');
+     // cspell:enable
+     $text = filter_xss("Foo\xC0barbaz");
+     $this->assertEqual($text, '', 'filter_xss() rejects invalid sequence "Foo\xC0barbaz"');
+     // Ignore invalid multibyte sequence warning.
+     $text = @check_plain("Foo\xC0barbaz");
+     $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "Foo\xC0barbaz"');
+     // Ignore invalid multibyte sequence warning.
+     $text = @check_plain("\xc2\"");
+     $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "\xc2\""');
   }
 
   /**
@@ -588,13 +615,13 @@ class CommonSizeUnitTestCase extends BackdropUnitTestCase {
       $size = 23476892,
       $string . ' == ' . $parsed_size . ' bytes'
     );
-    $string = '76MRandomStringThatShouldBeIgnoredByParseSize.'; // 76 MB
+    $string = '76MRandomStringThatShouldBeIgnoredByParseSize.'; // 76 MB.
     $this->assertEqual(
       $parsed_size = parse_size($string),
       $size = 79691776,
       $string . ' == ' . $parsed_size . ' bytes'
     );
-    $string = '76.24 Giggabyte'; // Misspeld text -> 76.24 GB
+    $string = '76.24 Giggabyte'; // Misspelled text -> 76.24 GB.
     $this->assertEqual(
       $parsed_size = parse_size($string),
       $size = 81862076662,
@@ -724,7 +751,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Makes sure that reseting the CSS empties the cache.
+   * Makes sure that resetting the CSS empties the cache.
    */
   function testReset() {
     backdrop_static_reset('backdrop_add_css');
@@ -766,7 +793,6 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     backdrop_add_css($css, array('type' => 'inline'));
     $styles = backdrop_get_css();
     $this->assertEqual(trim($styles), $css_preprocessed, 'Rendering preprocessed inline CSS adds it to the page.');
-
   }
 
   /**
@@ -835,7 +861,6 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
       $system_path . '/css/system.theme.css',
       backdrop_get_path('module', 'simpletest') . '/css/simpletest.css',
     );
-
 
     $styles = backdrop_get_css();
     // Stylesheet URL may be the href of a LINK tag or in an @import statement
@@ -928,7 +953,7 @@ class CommonHTMLIdentifierTestCase extends BackdropUnitTestCase {
     $this->assertIdentical(backdrop_clean_css_identifier($identifier, array()), $identifier, 'Verify valid UTF-8 characters pass through.');
 
     // Verify that invalid characters (including non-breaking space) are stripped from the identifier.
-    $this->assertIdentical(backdrop_clean_css_identifier('invalid !"#$%&\'()*+,./:;<=>?@[\\]^`{|}~ identifier', array()), 'invalididentifier', 'Strip invalid characters.');
+    $this->assertIdentical(backdrop_clean_css_identifier('invalid- !"#$%&\'()*+,./:;<=>?@[\\]^`{|}~ identifier', array()), 'invalid-identifier', 'Strip invalid characters.');
   }
 
   /**
@@ -948,7 +973,7 @@ class CommonHTMLIdentifierTestCase extends BackdropUnitTestCase {
     $this->assertIdentical(backdrop_html_id($id), $id, 'Verify valid characters pass through.');
 
     // Verify that invalid characters are stripped from the ID.
-    $this->assertIdentical(backdrop_html_id('invalid,./:@\\^`{Üidentifier'), 'invalididentifier', 'Strip invalid characters.');
+    $this->assertIdentical(backdrop_html_id('invalid-,./:@\\^`{Üidentifier'), 'invalid-identifier', 'Strip invalid characters.');
 
     // Verify Backdrop coding standards are enforced.
     $this->assertIdentical(backdrop_html_id('ID NAME_[1]'), 'id-name-1', 'Enforce Backdrop coding standards.');
@@ -975,6 +1000,8 @@ class CommonCascadingStylesheetsUnitTestCase extends BackdropUnitTestCase {
    * - Proper URLs in imported files. (https://drupal.org/node/265719)
    * - Retain pseudo-selectors. (https://drupal.org/node/460448)
    * - Don't adjust data URIs. (https://drupal.org/node/2142441)
+   * - Support semicolons in import statements.
+   *   (https://github.com/backdrop/backdrop-issues/issues/6337)
    */
   function testLoadCssBasic() {
     // Array of files to test living in 'simpletest/files/css_test_files/'.
@@ -1046,7 +1073,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $this->assertTitle(t('Home | @site-name', array('@site-name' => config_get_translated('system.core', 'site_name'))), 'Site title matches.');
 
     // Test that code and status message is returned.
-    $result = backdrop_http_request(url('pagedoesnotexist', array('absolute' => TRUE)));
+    $result = backdrop_http_request(url('page-does-not-exist', array('absolute' => TRUE)));
     $this->assertTrue(!empty($result->protocol),  'Result protocol is returned.');
     $this->assertEqual($result->code, '404', 'Result code is 404');
     $this->assertEqual($result->status_message, 'Not Found', 'Result status message is "Not Found"');
@@ -1090,16 +1117,20 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $redirect_301 = backdrop_http_request(url('system-test/redirect/301', array('absolute' => TRUE)), array('max_redirects' => 0));
     $this->assertFalse(isset($redirect_301->redirect_code), 'backdrop_http_request does not follow 301 redirect if max_redirects = 0.');
 
+    $redirect_invalid = backdrop_http_request(url('system-test/redirect-protocol-relative', array('absolute' => TRUE)), array('max_redirects' => 1));
+    $this->assertEqual($redirect_invalid->code, -1002, format_string('301 redirect to protocol-relative URL returned with error code !code.', array('!code' => $redirect_invalid->code)));
+    $this->assertEqual($redirect_invalid->error, 'missing schema', format_string('301 redirect to protocol-relative URL returned with error message "!error".', array('!error' => $redirect_invalid->error)));
+
     $redirect_invalid = backdrop_http_request(url('system-test/redirect-noscheme', array('absolute' => TRUE)), array('max_redirects' => 1));
-    $this->assertEqual($redirect_invalid->code, -1002, format_string('301 redirect to invalid URL returned with error code !error.', array('!error' => $redirect_invalid->error)));
+    $this->assertEqual($redirect_invalid->code, -1002, format_string('301 redirect to invalid URL returned with error code !code.', array('!code' => $redirect_invalid->code)));
     $this->assertEqual($redirect_invalid->error, 'missing schema', format_string('301 redirect to invalid URL returned with error message "!error".', array('!error' => $redirect_invalid->error)));
 
     $redirect_invalid = backdrop_http_request(url('system-test/redirect-noparse', array('absolute' => TRUE)), array('max_redirects' => 1));
-    $this->assertEqual($redirect_invalid->code, -1001, format_string('301 redirect to invalid URL returned with error message code "!error".', array('!error' => $redirect_invalid->error)));
+    $this->assertEqual($redirect_invalid->code, -1001, format_string('301 redirect to invalid URL returned with error message code "!code".', array('!code' => $redirect_invalid->code)));
     $this->assertEqual($redirect_invalid->error, 'unable to parse URL', format_string('301 redirect to invalid URL returned with error message "!error".', array('!error' => $redirect_invalid->error)));
 
     $redirect_invalid = backdrop_http_request(url('system-test/redirect-invalid-scheme', array('absolute' => TRUE)), array('max_redirects' => 1));
-    $this->assertEqual($redirect_invalid->code, -1003, format_string('301 redirect to invalid URL returned with error code !error.', array('!error' => $redirect_invalid->error)));
+    $this->assertEqual($redirect_invalid->code, -1003, format_string('301 redirect to invalid URL returned with error code !code.', array('!code' => $redirect_invalid->code)));
     $this->assertEqual($redirect_invalid->error, 'invalid schema ftp', format_string('301 redirect to invalid URL returned with error message "!error".', array('!error' => $redirect_invalid->error)));
 
     $redirect_302 = backdrop_http_request(url('system-test/redirect/302', array('absolute' => TRUE)), array('max_redirects' => 1));
@@ -1140,6 +1171,47 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     // Request home page in French and check for matching Content-language.
     $request = backdrop_http_request(url('<front>', array('absolute' => TRUE, 'language' => $language)));
     $this->assertEqual($request->headers['content-language'], 'fr', t('Content-Language HTTP header is French.'));
+  }
+}
+
+/**
+ * Unit tests for processing of http redirects.
+ */
+class CommonBackdropHTTPRedirectTest extends BackdropUnitTestCase {
+  /**
+   * Tests HTTP redirect with HTTPS downgrade.
+   */
+  public function testHttpsDowngrade() {
+    $url = 'https://example.com/foo';
+    $location = 'http://example.com/bar';
+    $this->assertTrue(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are stripped on HTTPS downgrade.');
+  }
+
+  /**
+   * Tests HTTP redirect without downgrade.
+   */
+  public function testNoHttpsDowngrade() {
+    $url = 'https://example.com/foo';
+    $location = 'https://example.com/bar';
+    $this->assertFalse(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are not stripped without HTTPS downgrade.');
+  }
+
+  /**
+   * Tests HTTP redirect with host change.
+   */
+  public function testHostChange() {
+    $url = 'https://example.com/foo';
+    $location = 'https://www.example.com/bar';
+    $this->assertTrue(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are stripped on change of host.');
+  }
+
+  /**
+   * Tests HTTP redirect without downgrade and host change.
+   */
+  public function testNoHostChange() {
+    $url = 'http://example.com/foo';
+    $location = 'http://example.com/bar';
+    $this->assertFalse(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are not stripped without change of host.');
   }
 }
 
@@ -1320,7 +1392,6 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     $javascript = backdrop_add_js('core/misc/collapse.js');
     $this->assertTrue(array_key_exists('core/misc/jquery.js', $javascript), 'jQuery is added when a file is added.');
     $this->assertTrue(array_key_exists('core/misc/backdrop.js', $javascript), 'Backdrop.js is added when file is added.');
-    $this->assertTrue(array_key_exists('core/misc/html5.js', $javascript), 'html5.js is added when file is added.');
     $this->assertTrue(array_key_exists('core/misc/collapse.js', $javascript), 'JavaScript files are correctly added.');
     $this->assertEqual(base_path(), $javascript['settings']['data'][0]['basePath'], 'Base path JavaScript setting is correctly set.');
     url('', array('prefix' => &$prefix));
@@ -1422,7 +1493,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test backdrop_add_js() sets preproccess to false when cache is set to false.
+   * Test backdrop_add_js() sets preprocess to false when cache is set to false.
    */
   function testNoCache() {
     $javascript = backdrop_add_js('core/misc/collapse.js', array('cache' => FALSE));
@@ -1446,32 +1517,52 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test adding JavaScript within conditional comments.
+   * Test deprecated conditional comments are no longer output.
+   *
+   * Since Backdrop 1.27.0, the "browsers" option for backdrop_add_js() and
+   * backdrop_add_css() no longer outputs conditional comments, because
+   * conditional comments only work on IE 4-10 (which is completely
+   * unsupported). The "browsers" attribute still exists to prevent IE-only
+   * files from suddenly appearing on existing sites.
    *
    * @see backdrop_pre_render_conditional_comments()
    */
-  function testBrowserConditionalComments() {
+  function testDeprecatedBrowserConditionalComments() {
     $default_query_string = state_get('css_js_query_string', '0');
 
     backdrop_add_js('core/misc/collapse.js', array('browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE)));
     backdrop_add_js('jQuery(function () { });', array('type' => 'inline', 'browsers' => array('IE' => FALSE)));
     $javascript = backdrop_get_js();
 
-    $expected_1 = "<!--[if lte IE 8]>\n" . '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
-    $expected_2 = "<!--[if !IE]><!-->\n" . '<script>jQuery(function () { });</script>' . "\n<!--<![endif]-->";
+    $expected_1 = '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>';
+    $expected_2 = '<script>jQuery(function () { });</script>';
 
-    $this->assertTrue(strpos($javascript, $expected_1) > 0, t('Rendered JavaScript within downlevel-hidden conditional comments.'));
-    $this->assertTrue(strpos($javascript, $expected_2) > 0, t('Rendered JavaScript within downlevel-revealed conditional comments.'));
+    $this->assertTrue(strpos($javascript, $expected_1) === FALSE, 'IE-only browser file not output at all.');
+    $this->assertTrue(strpos($javascript, '<!--[if lte IE 8]>') === FALSE, 'IE conditional comment output is suppressed.');
+    $this->assertTrue(strpos($javascript, $expected_2) > 0, 'Browsers except IE file output directly with no conditional comments.');
+    $this->assertTrue(strpos($javascript, '<!--[if !IE]>') === FALSE, 'Not-IE conditional comment output is suppressed.');
   }
 
   /**
    * Test JavaScript versioning.
    */
   function testVersionQueryString() {
-    backdrop_add_js('core/misc/collapse.js', array('version' => 'foo'));
-    backdrop_add_js('core/misc/ajax.js', array('version' => 'bar'));
+    $expected = array();
+    $version = array(
+      'ajax' => 'bar',
+      'collapse' => 'foo',
+    );
+
+    // The following code is the same code used by
+    // backdrop_pre_render_scripts(). If the code in that function is changed,
+    // the following code needs to be changed too.
+    $expected['ajax'] = hash('crc32', $version['ajax'] . backdrop_get_hash_salt());
+    $expected['collapse'] = hash('crc32', $version['collapse'] . backdrop_get_hash_salt());
+
+    backdrop_add_js('core/misc/collapse.js', array('version' => $version['collapse']));
+    backdrop_add_js('core/misc/ajax.js', array('version' => $version['ajax']));
     $javascript = backdrop_get_js();
-    $this->assertTrue(strpos($javascript, 'core/misc/collapse.js?v=foo') > 0 && strpos($javascript, 'core/misc/ajax.js?v=bar') > 0 , t('JavaScript version identifiers correctly appended to URLs'));
+    $this->assertTrue(strpos($javascript, "core/misc/collapse.js?{$expected['collapse']}") > 0 && strpos($javascript, "core/misc/ajax.js?{$expected['ajax']}") > 0, t('JavaScript version identifiers correctly appended to URLs'));
   }
 
   /**
@@ -1838,6 +1929,24 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests the addition of assets via hook_theme(). These are all random assets
+   * that would not normally be added to the page.
+   *
+   * @see common_test_theme()
+   */
+  public function testAssetsAttachedViaHookTheme() {
+    $config = config('system.core');
+    $config->set('preprocess_css', FALSE);
+    $config->set('preprocess_js', FALSE);
+    $config->save();
+    $this->backdropGet('common-test/assets-attached-via-hook-theme');
+    $this->assertRaw('core/themes/basis/css/component/maintenance.css', 'CSS attached via hook_theme() is added to the page.');
+    $this->assertRaw('core/themes/seven/js/script.js', 'JS attached via hook_theme() is added to the page.');
+    $this->assertRaw('"globe-stand-fill":"\/core\/misc\/icons\/globe-stand-fill.svg"', 'Icon attached via hook_theme() is added to the page.');
+    $this->assertRaw('core/misc/ajax.js', 'Library attached via hook_theme() is added to the page.');
+  }
+
+  /**
    * Tests retrieval of libraries via backdrop_get_library().
    */
   function testGetLibrary() {
@@ -1847,7 +1956,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     // Retrieve all libraries for a module not implementing hook_library_info().
     // Note: This test installs Locale module.
     $libraries = backdrop_get_library('locale');
-    $this->assertEqual($libraries, array(), 'Retrieving libraries from a module not implementing hook_library_info() returns an emtpy array.');
+    $this->assertEqual($libraries, array(), 'Retrieving libraries from a module not implementing hook_library_info() returns an empty array.');
 
     // Retrieve a specific library by module and name.
     $farbtastic = backdrop_get_library('common_test', 'farbtastic');
@@ -2290,6 +2399,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
   function testValidAbsolute() {
     $url_schemes = array('http', 'https', 'ftp');
     $valid_absolute_urls = array(
+      // cspell:disable
       'example.com',
       'www.example.com',
       'ex-ample.com',
@@ -2308,6 +2418,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
       'example.org/~,$\'*;',
       'caf%C3%A9.example.org',
       '[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html',
+      // cspell:enable
     );
 
     foreach ($url_schemes as $scheme) {
@@ -2324,14 +2435,16 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
    */
   function testInvalidAbsolute() {
     $url_schemes = array('http', 'https', 'ftp');
-    $invalid_ablosule_urls = array(
+    $invalid_absolute_urls = array(
+      // cspell:disable
       '',
       'ex!ample.com',
       'ex%ample.com',
+      // cspell:enable
     );
 
     foreach ($url_schemes as $scheme) {
-      foreach ($invalid_ablosule_urls as $url) {
+      foreach ($invalid_absolute_urls as $url) {
         $test_url = $scheme . '://' . $url;
         $valid_url = valid_url($test_url, TRUE);
         $this->assertFalse($valid_url, format_string('@url is NOT a valid url.', array('@url' => $test_url)));
@@ -2344,11 +2457,13 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
    */
   function testValidRelative() {
     $valid_relative_urls = array(
+      // cspell:disable
       'paren(the)sis',
       'index.html#pagetop',
       'index.php?q=node',
       'index.php?q=node&param=false',
       'login.php?do=login&style=%23#pagetop',
+      // cspell:enable
     );
 
     foreach (array('', '/') as $front) {
@@ -2365,9 +2480,11 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
    */
   function testInvalidRelative() {
     $invalid_relative_urls = array(
+      // cspell:disable
       'ex^mple',
       'example<>',
       'ex%ample',
+      // cspell:enable
     );
 
     foreach (array('', '/') as $front) {
@@ -2423,7 +2540,7 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
     $this->assertFalse(valid_number_step(1, 1/3));
     $this->assertFalse(valid_number_step(-100, 100/7));
 
-    // Step mismatches very close to beeing valid.
+    // Step mismatches very close to being valid.
     $this->assertFalse(valid_number_step(70 + 9e-7, 10 + 9e-7));
     $this->assertFalse(valid_number_step(1109.87, 0.07));
     $this->assertFalse(valid_number_step(41239412.11, 2));
@@ -2586,7 +2703,7 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
   /**
    * Errors triggered during the test.
    *
-   * Errors are intercepted by the overriden implementation
+   * Errors are intercepted by the overridden implementation
    * of BackdropWebTestCase::error below.
    *
    * @var Array
@@ -2628,7 +2745,7 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
    * the class hierarchy. It just stuffs them into a protected collectedErrors
    * array for various assertions to inspect.
    */
-  protected function error($message = '', $group = 'Other', array $caller = NULL) {
+  protected function error($message = '', $group = 'Other', array $caller = array()) {
     // Due to a WTF elsewhere, simpletest treats debug() and verbose()
     // messages as if they were an 'error'. But, we don't want to collect
     // those here. This function just wants to collect the real errors (PHP
@@ -2732,6 +2849,11 @@ class CommonBackdropSystemListingTestCase extends BackdropWebTestCase {
  * Tests the format_date() function.
  */
 class CommonFormatDateTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
 
   /**
    * Arbitrary langcode for a custom language.
@@ -2860,6 +2982,458 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     // Restore default time zone.
     date_default_timezone_set(backdrop_get_user_timezone());
     backdrop_save_session(TRUE);
+  }
+
+  /**
+   * Tests the formatInterval method.
+   *
+   * @covers ::formatInterval
+   */
+  public function testFormatInterval() {
+    $test_data = $this->providerTestFormatInterval();
+    foreach ($test_data as $data) {
+      list($interval, $granularity, $expected, $langcode) = $data;
+      // Check if the granularity is specified.
+      if ($granularity) {
+        $result = format_interval($interval, $granularity, $langcode);
+      } else {
+        $result = format_interval($interval);
+      }
+
+      $this->assertEqual($expected, $result);
+    }
+  }
+
+  /**
+   * Provides some test data for the format interval test.
+   */
+  public function providerTestFormatInterval() {
+    $data = array(
+      // Checks for basic seconds.
+      array(1, 1, '1 sec', NULL),
+      array(1, 2, '1 sec', NULL),
+      array(2, 1, '2 sec', NULL),
+      array(2, 2, '2 sec', NULL),
+      // Checks for minutes with seconds.
+      array(61, 1, '1 min', NULL),
+      array(61, 2, '1 min 1 sec', NULL),
+      array(62, 2, '1 min 2 sec', NULL),
+      array(121, 1, '2 min', NULL),
+      array(121, 2, '2 min 1 sec', NULL),
+      // Check for hours with minutes and seconds.
+      array(3601, 1, '1 hour', NULL),
+      array(3601, 2, '1 hour 1 sec', NULL),
+      // Check for higher units.
+      array(86401, 1, '1 day', NULL),
+      array(604800, 1, '1 week', NULL),
+      array(2592000 * 2, 1, '2 months', NULL),
+      array(31536000 * 2, 1, '2 years', NULL),
+      // Check for a complicated one with months weeks and days.
+      array(
+        2592000 * 2 + 604800 * 3 + 86400 * 4, 3,
+        '2 months 3 weeks 4 days', NULL,
+      ),
+      // Check for the langcode.
+      array(61, 1, '1 min', self::LANGCODE),
+      // Check with an unspecified granularity.
+      array(61, NULL, '1 min 1 sec', NULL),
+    );
+
+    return $data;
+  }
+
+  /**
+   * Tests the formatInterval method for 0 second.
+   */
+  public function testFormatIntervalZeroSecond() {
+    $result = format_interval(0, 1, self::LANGCODE);
+
+    $this->assertEqual('0 sec', $result);
+  }
+
+  /**
+   * Tests the formatDiff method.
+   *
+   * @covers ::formatDiff
+   */
+  public function testFormatDiff() {
+    $test_data = $this->providerTestFormatDiff();
+    foreach ($test_data as $data) {
+      list($expected, $timestamp1, $timestamp2, $options) = $data;
+
+      $this->assertEqual($expected, format_time_diff($timestamp1, $timestamp2, $options));
+    }
+  }
+
+  /**
+   * Data provider for testFormatDiff().
+   */
+  public function providerTestFormatDiff() {
+    // This is the fixed request time in the test.
+    $request_time = $this->createTimestamp('2013-12-11 10:09:08');
+
+    $granularity_3 = array('granularity' => 3);
+    $granularity_4 = array('granularity' => 4);
+
+    $langcode_en = array('langcode' => 'en');
+    $langcode_xx = array('langcode' => self::LANGCODE);
+
+    $non_strict = array('strict' => FALSE);
+
+    $data = array(
+      // Checks for equal timestamps.
+      array('0 sec', $request_time, $request_time, array(),),
+
+      // Checks for seconds only.
+      array(
+        '1 sec', $this->createTimestamp('2013-12-11 10:09:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 sec', $this->createTimestamp('2013-12-11 10:09:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 sec', $this->createTimestamp('2013-12-11 10:09:07'),
+        $request_time, $granularity_3 + $langcode_en,
+      ),
+      array(
+        '1 sec', $this->createTimestamp('2013-12-11 10:09:07'),
+        $request_time, $granularity_4 + $langcode_xx,
+      ),
+      array(
+        '2 sec', $this->createTimestamp('2013-12-11 10:09:06'),
+        $request_time, array(),
+      ),
+      array(
+        '59 sec', $this->createTimestamp('2013-12-11 10:08:09'),
+        $request_time, array(),
+      ),
+      array(
+        '59 sec', $this->createTimestamp('2013-12-11 10:08:09'),
+        $request_time, array(),
+      ),
+
+      // Checks for minutes and possibly seconds.
+      array(
+        '1 min', $this->createTimestamp('2013-12-11 10:08:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 min', $this->createTimestamp('2013-12-11 10:08:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 min 1 sec', $this->createTimestamp('2013-12-11 10:08:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 min 59 sec', $this->createTimestamp('2013-12-11 10:07:09'),
+        $request_time, array(),
+      ),
+      array(
+        '2 min', $this->createTimestamp('2013-12-11 10:07:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 min 1 sec', $this->createTimestamp('2013-12-11 10:07:07'),
+        $request_time, array(),
+      ),
+      array(
+        '2 min 2 sec', $this->createTimestamp('2013-12-11 10:07:06'),
+        $request_time, array(),
+      ),
+      array(
+        '2 min 2 sec', $this->createTimestamp('2013-12-11 10:07:06'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '2 min 2 sec', $this->createTimestamp('2013-12-11 10:07:06'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '30 min', $this->createTimestamp('2013-12-11 09:39:08'),
+        $request_time, array(),
+      ),
+      array(
+        '59 min 59 sec', $this->createTimestamp('2013-12-11 09:09:09'),
+        $request_time, array(),
+      ),
+      array(
+        '59 min 59 sec', $this->createTimestamp('2013-12-11 09:09:09'),
+        $request_time, array(),
+      ),
+
+      // Checks for hours and possibly minutes or seconds.
+      array(
+        '1 hour', $this->createTimestamp('2013-12-11 09:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 hour', $this->createTimestamp('2013-12-11 09:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 hour', $this->createTimestamp('2013-12-11 09:09:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 hour', $this->createTimestamp('2013-12-11 09:09:06'),
+        $request_time, array(),
+      ),
+      array(
+        '1 hour 1 min', $this->createTimestamp('2013-12-11 09:08:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 hour 1 min 1 sec', $this->createTimestamp('2013-12-11 09:08:07'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '1 hour 1 min 2 sec', $this->createTimestamp('2013-12-11 09:08:06'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '1 hour 30 min', $this->createTimestamp('2013-12-11 08:39:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 hours', $this->createTimestamp('2013-12-11 08:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '23 hours 59 min', $this->createTimestamp('2013-12-10 10:10:08'),
+        $request_time, array(),
+      ),
+
+      // Checks for days and possibly hours, minutes or seconds.
+      array(
+        '1 day', $this->createTimestamp('2013-12-10 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 day', $this->createTimestamp('2013-12-10 10:09:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 day 1 hour', $this->createTimestamp('2013-12-10 09:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 day 1 hour 1 min', $this->createTimestamp('2013-12-10 09:08:07'),
+        $request_time, $granularity_3 + $langcode_en,
+      ),
+      array(
+        '1 day 1 hour 1 min 1 sec',
+        $this->createTimestamp('2013-12-10 09:08:07'),
+        $request_time, $granularity_4 + $langcode_xx,
+      ),
+      array(
+        '1 day 2 hours 2 min 2 sec',
+        $this->createTimestamp('2013-12-10 08:07:06'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '2 days', $this->createTimestamp('2013-12-09 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 days', $this->createTimestamp('2013-12-09 10:07:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 days 2 hours', $this->createTimestamp('2013-12-09 08:09:08'),
+        $request_time, array(),),
+      array(
+        '2 days 2 hours 2 min', $this->createTimestamp('2013-12-09 08:07:06'),
+        $request_time, $granularity_3 + $langcode_en,
+      ),
+      array(
+        '2 days 2 hours 2 min 2 sec',
+        $this->createTimestamp('2013-12-09 08:07:06'),
+        $request_time, $granularity_4 + $langcode_xx,
+      ),
+
+      // Checks for weeks and possibly days, hours, minutes or seconds.
+      array(
+        '1 week', $this->createTimestamp('2013-12-04 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 week 1 day', $this->createTimestamp('2013-12-03 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 weeks', $this->createTimestamp('2013-11-27 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 weeks 2 days', $this->createTimestamp('2013-11-25 08:07:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 weeks 2 days 2 hours 2 min',
+        $this->createTimestamp('2013-11-25 08:07:08'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '4 weeks', $this->createTimestamp('2013-11-13 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '4 weeks 1 day', $this->createTimestamp('2013-11-12 10:09:08'),
+        $request_time, array(),
+      ),
+
+      // Checks for months and possibly days, hours, minutes or seconds.
+      array(
+        '1 month', $this->createTimestamp('2013-11-11 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 month', $this->createTimestamp('2013-11-11 10:09:07'),
+        $request_time, array(),
+      ),
+      array(
+        '1 month', $this->createTimestamp('2013-11-11 09:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 month', $this->createTimestamp('2013-11-11 09:08:07'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '1 month', $this->createTimestamp('2013-11-11 09:08:07'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '1 month 4 weeks', $this->createTimestamp('2013-10-13 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 month 4 weeks 1 day', $this->createTimestamp('2013-10-13 10:09:08'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '1 month 4 weeks', $this->createTimestamp('2013-10-12 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 month 4 weeks 2 days', $this->createTimestamp('2013-10-12 10:09:08'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '2 months', $this->createTimestamp('2013-10-11 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 months', $this->createTimestamp('2013-10-10 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 months', $this->createTimestamp('2013-10-09 08:07:06'),
+        $request_time, array(),
+      ),
+      array(
+        '2 months', $this->createTimestamp('2013-10-09 08:07:06'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '2 months', $this->createTimestamp('2013-10-09 08:07:06'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '6 months', $this->createTimestamp('2013-06-09 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '11 months', $this->createTimestamp('2013-01-11 07:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '11 months 4 weeks', $this->createTimestamp('2012-12-12 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '11 months 4 weeks 2 days',
+        $this->createTimestamp('2012-12-12 10:09:08'),
+        $request_time, $granularity_3,
+      ),
+
+      // Checks for years and possibly months, days, hours, minutes or seconds.
+      array(
+        '1 year', $this->createTimestamp('2012-12-11 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 year', $this->createTimestamp('2012-12-11 10:08:08'),
+        $request_time, array(),
+      ),
+      array(
+        '1 year', $this->createTimestamp('2012-12-10 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 years', $this->createTimestamp('2011-12-11 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 years', $this->createTimestamp('2011-12-11 10:07:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 years', $this->createTimestamp('2011-12-09 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '2 years 2 months', $this->createTimestamp('2011-10-09 08:07:06'),
+        $request_time, $granularity_3,
+      ),
+      array(
+        '2 years 2 months', $this->createTimestamp('2011-10-09 08:07:06'),
+        $request_time, $granularity_4,
+      ),
+      array(
+        '10 years', $this->createTimestamp('2003-12-11 10:09:08'),
+        $request_time, array(),
+      ),
+      array(
+        '100 years', $this->createTimestamp('1913-12-11 10:09:08'),
+        $request_time, array(),
+      ),
+
+      // Checks the non-strict option vs. strict (default).
+      array(
+        '1 sec', $this->createTimestamp('2013-12-11 10:09:08'),
+        $this->createTimestamp('2013-12-11 10:09:07'), $non_strict,
+      ),
+      array(
+        '0 sec', $this->createTimestamp('2013-12-11 10:09:08'),
+        $this->createTimestamp('2013-12-11 10:09:07'), array(),
+      ),
+
+      // Checks granularity limit.
+      array(
+        '2 years 3 months 1 week', $this->createTimestamp('2011-08-30 11:15:57'),
+        $request_time, $granularity_3,
+      ),
+    );
+
+    return $data;
+  }
+
+  /**
+   * Creates a UNIX timestamp given a date and time string in the format
+   * year-month-day hour:minute:seconds (e.g. 2013-12-11 10:09:08).
+   *
+   * @param string $dateTimeString
+   *   The formatted date and time string.
+   *
+   * @return int
+   *   The UNIX timestamp.
+   */
+  private function createTimestamp($dateTimeString) {
+    return \DateTime::createFromFormat('Y-m-d G:i:s', $dateTimeString)->getTimestamp();
   }
 }
 
@@ -3114,7 +3688,7 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
     foreach ($html_unsafe as $char) {
       $this->assertTrue(strpos($json, $char) === FALSE, format_string('A JSON encoded string does not contain @s.', array('@s' => $char)));
     }
-    // Verify that JSON encoding escapes the HTML unsafe characters
+    // Verify that JSON encoding escapes the HTML unsafe characters.
     foreach ($html_unsafe_escaped as $char) {
       $this->assertTrue(strpos($json, $char) > 0, format_string('A JSON encoded string contains @s.', array('@s' => $char)));
     }
@@ -3128,6 +3702,7 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
     $this->assertIdentical($source, $json_decoded, 'Encoding structured data to pretty-printed JSON and decoding back results in the original data.');
 
     // Unicode test strings.
+    // cspell:disable-next-line.
     $unicode_decoded = 'üéåâ';
     $unicode_encoded = '\u00fc\u00e9\u00e5\u00e2';
     $unicode_encoded_escaped = '\\\\u00fc\\\\u00e9\\\\u00e5\\\\u00e2';
@@ -3409,56 +3984,12 @@ class BackdropGetQueryArrayTestCase extends BackdropWebTestCase {
    * Tests that backdrop_get_query_array() correctly explodes query parameters.
    */
   public function testBackdropGetQueryArray() {
-    $url = "http://my.site.com/somepath?foo=/content/folder[@name='foo']/folder[@name='bar']";
+    $url = "http://my.site.com/some-path?foo=/content/folder[@name='foo']/folder[@name='bar']";
     $parsed = parse_url($url);
     $result = backdrop_get_query_array($parsed['query']);
     $this->assertEqual($result['foo'], "/content/folder[@name='foo']/folder[@name='bar']", 'backdrop_get_query_array() should only explode parameters on the first equals sign.');
   }
 
-}
-
-/**
- * Test for block_interest_cohort.
- */
-class BlockInterestCohortTest extends BackdropWebTestCase {
-  protected $profile = 'testing';
-
-  function setUp() {
-    parent::setUp('common_test');
-  }
-
-  /**
-   * Tests that FLoC is blocked by default.
-   */
-  function testDefaultBlocking() {
-    $this->backdropGet('node');
-    $this->assertEqual($this->backdropGetHeader('Permissions-Policy'), 'interest-cohort=()', 'FLoC is blocked by default.');
-  }
-
-  /**
-   * Tests that an existing interest-cohort policy is not overwritten.
-   */
-  function testExistingInterestCohortPolicy() {
-    $this->backdropGet('common-test/existing_interest_cohort_policy');
-    $this->assertEqual($this->backdropGetHeader('Permissions-Policy'), 'interest-cohort=*', 'Existing interest-cohort policy is not overwritten.');
-  }
-
-  /**
-   * Tests that an existing header is appended to correctly.
-   */
-  function testExistingPolicyHeader() {
-    $this->backdropGet('common-test/existing_permissions_policy_header');
-    $this->assertTrue((strpos($this->backdropGetHeader('Permissions-Policy'), 'geolocation=(),interest-cohort=()') !== FALSE), 'The interest-cohort policy is appended to existing header.');
-  }
-
-  /**
-   * Tests that FLoC blocking can be disabled.
-   */
-  function testDisableBlocking() {
-    config_set('system.core', 'block_interest_cohort', FALSE);
-    $this->backdropGet('node');
-    $this->assertFalse($this->backdropGetHeader('Permissions-Policy'), 'FLoC blocking can be disabled.');
-  }
 }
 
 /**

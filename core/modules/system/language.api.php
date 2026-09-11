@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the base system for language support.
@@ -26,6 +25,7 @@
 function hook_language_init() {
   global $language, $settings;
 
+  // cspell:disable
   switch ($language->language) {
     case 'it':
       $settings['locale_custom_strings_en']['site_name'] = 'Il mio sito Backdrop';
@@ -35,6 +35,7 @@ function hook_language_init() {
       $settings['locale_custom_strings_en']['site_name'] = 'Mon site Backdrop';
       break;
   }
+  // cspell:enable
 }
 
 /**
@@ -42,7 +43,7 @@ function hook_language_init() {
  *
  * A language switcher link may need to point to a different path or use a
  * translated link text before going through l(), which will just handle the
- * path aliases.
+ * URL aliases.
  *
  * @param $links
  *   Nested array of links keyed by language code.
@@ -156,7 +157,7 @@ function hook_language_negotiation_info() {
 }
 
 /**
- * Perform alterations on language negoiation providers.
+ * Perform alterations on language negotiation providers.
  *
  * @param $language_providers
  *   Array of language negotiation provider definitions.

@@ -33,23 +33,47 @@ Backdrop.behaviors.layoutList = {
  */
 Backdrop.behaviors.layoutConfigure = {
   attach: function(context) {
-    var $form = $('.layout-settings-form').once('layout-settings');
+
+    /**
+     * Toggle handler for the examples.
+     */
+    function examples_toggle_handler(e) {
+      var $examples = $(this).next().toggle();
+      if ($examples.is(':visible')) {
+        $(this).text(Backdrop.t('Hide examples')).append('<span class="arrow close"></span>');
+      }
+      else {
+        $(this).text(Backdrop.t('Show examples')).append('<span class="arrow"></span>');
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    var $form = $('.layout-settings-form');
     if ($form.length && Backdrop.ajax) {
       var ajax = Backdrop.ajax['edit-path-update'];
       var updateContexts = function() {
         // Cancel existing AJAX requests and start a new one.
-        for (var n = 0; n < ajax.currentRequests.lenth; n++) {
+        for (var n = 0; n < ajax.currentRequests.length; n++) {
           ajax.currentRequests[n].abort();
           ajax.cleanUp(ajax.currentRequests[n]);
         }
         $('input[data-layout-path-update]').triggerHandler('mousedown');
       };
+
       // Update contexts after a slight typing delay.
       var timer = 0;
-      $('input[name="path"]').on('keyup', function(e) {
+      $('input.data-layout-additional-path, input[name="path"]').once('update-contexts').on('keyup', function(e) {
         clearTimeout(timer);
         timer = setTimeout(updateContexts, 200);
       });
+    }
+
+    // Handle toggling the examples.
+    var $examplesToggle = $('a.layout-placeholder-examples-toggle').once('examples-toggle');
+    if ($examplesToggle.length) {
+      $examplesToggle.on('click', examples_toggle_handler);
+      $form.find('.layout-placeholder-examples').hide();
     }
 
     // Convert AJAX buttons to links.
@@ -135,7 +159,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
         }
       }
 
-      $('#layout-edit-main').on('keydown', '.layout-editor-block', function(event) { 
+      $('#layout-edit-main').on('keydown', '.layout-editor-block', function(event) {
         var currentDroppable = $(this).closest('.layout-editor-region');
         var currentDroppableId = currentDroppable.attr('id');
         var that = $(this);
@@ -286,7 +310,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
     } else {
       $('span.field-suffix').hide();
     }
-    $('input[name="reusable"]').change(function() {
+    $('input[name="reusable"]').on('change', function() {
       $('span.field-suffix').toggle();
     });
   },
@@ -367,7 +391,7 @@ Backdrop.behaviors.blockListFilterByText = {
       });
 
       // @todo Use autofocus attribute when possible.
-      $input.focus().on('keyup', filterBlockList);
+      $input.trigger('focus').on('keyup', filterBlockList);
     }
   }
 }

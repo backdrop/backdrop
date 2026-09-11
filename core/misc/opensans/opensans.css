@@ -2,47 +2,39 @@
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 400;
-  src: url('OpenSans-Regular-webfont.eot'); /* Old IE */
+  font-display: swap;
   src:
-    url('OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
-    url('OpenSans-Regular-webfont.woff') format('woff'),
-    url('OpenSans-Regular-webfont.ttf') format('truetype'),
-    url('OpenSans-Regular-webfont.svg#open_sansregular') format('svg');
+    url('OpenSans-Regular-webfont.woff2') format('woff2'),
+    url('OpenSans-Regular-webfont.woff') format('woff');
 }
 
 @font-face {
   font-family: 'Open Sans';
   font-style: italic;
   font-weight: 400;
-  src: url('OpenSans-Italic-webfont.eot'); /* Old IE */
+  font-display: swap;
   src:
-    url('OpenSans-Italic-webfont.eot?#iefix') format('embedded-opentype'),
-    url('OpenSans-Italic-webfont.woff') format('woff'),
-    url('OpenSans-Italic-webfont.ttf') format('truetype'),
-    url('OpenSans-Italic-webfont.svg#open_sanslight') format('svg');
+    url('OpenSans-Italic-webfont.woff2') format('woff2'),
+    url('OpenSans-Italic-webfont.woff') format('woff');
 }
 
 @font-face {
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 700;
-  src: url('OpenSans-Bold-webfont.eot'); /* Old IE */
+  font-display: swap;
   src:
-    url('OpenSans-Bold-webfont.eot?#iefix') format('embedded-opentype'),
-    url('OpenSans-Bold-webfont.woff') format('woff'),
-    url('OpenSans-Bold-webfont.ttf') format('truetype'),
-    url('OpenSans-Bold-webfont.svg#open_sansbold') format('svg');
+    url('OpenSans-Bold-webfont.woff2') format('woff2'),
+    url('OpenSans-Bold-webfont.woff') format('woff');
 }
 
 @font-face {
   font-family: 'Open Sans';
   font-style: italic;
   font-weight: 700;
-  src: url('OpenSans-BoldItalic-webfont.eot'); /* Old IE */
+  font-display: swap;
   src:
-    url('OpenSans-BoldItalic-webfont.eot?#iefix') format('embedded-opentype'),
-    url('OpenSans-BoldItalic-webfont.woff') format('woff'),
-    url('OpenSans-BoldItalic-webfont.ttf') format('truetype'),
-    url('OpenSans-BoldItalic-webfont.svg#open_sansbold_italic') format('svg');
+    url('OpenSans-BoldItalic-webfont.woff2') format('woff2'),
+    url('OpenSans-BoldItalic-webfont.woff') format('woff');
 }
 

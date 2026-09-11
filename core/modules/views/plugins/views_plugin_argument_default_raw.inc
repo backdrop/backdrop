@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the raw value argument default plugin.
@@ -32,9 +31,9 @@ class views_plugin_argument_default_raw extends views_plugin_argument_default {
     );
     $form['use_alias'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use path alias'),
+      '#title' => t('Use URL alias'),
       '#default_value' => $this->options['use_alias'],
-      '#description' => t('Use path alias instead of internal path.'),
+      '#description' => t('Use URL alias instead of internal path.'),
     );
   }
 

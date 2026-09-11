@@ -54,6 +54,13 @@ class DashboardUpdateBlock extends Block {
   /**
    * {@inheritdoc}
    */
+  function checkAccess() {
+    return user_access('access site reports');
+  }
+  
+  /**
+   * {@inheritdoc}
+   */
   function getContent() {
     $panel = array(
       '#theme' => 'dashboard_panel__update',
@@ -190,7 +197,7 @@ class DashboardUpdateBlock extends Block {
       $link_path = 'admin/config/system/updates';
       $link_text = t('Install system updates');
     }
-    elseif (user_access('access_site_reports')) {
+    elseif (user_access('access site reports')) {
       $link_path = 'admin/reports/updates';
       $link_text = t('More info');
     }
@@ -223,7 +230,7 @@ class DashboardUpdateBlock extends Block {
         'core' => t('Backdrop core'),
         'module' => t('Modules'),
         'theme' => t('Themes'),
-        'layout' => t('Layouts'),
+        'layout' => t('Layout templates'),
       ),
       '#default_value' => $this->settings['project_types'],
     );

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Page callbacks for the Contact module.
@@ -16,7 +15,7 @@
 function contact_site_form($form, &$form_state) {
   global $user;
 
-  // Check if flood control has been activated for sending e-mails.
+  // Check if flood control has been activated for sending emails.
   $config = config('contact.settings');
   $limit = $config->get('contact_threshold_limit');
   $window = $config->get('contact_threshold_window');
@@ -72,7 +71,7 @@ function contact_site_form($form, &$form_state) {
   );
   $form['mail'] = array(
     '#type' => 'email',
-    '#title' => t('Your e-mail address'),
+    '#title' => t('Your email address'),
     '#default_value' => $user->uid ? $user->mail : '',
     '#required' => TRUE,
   );
@@ -150,11 +149,11 @@ function contact_site_form_submit($form, &$form_state) {
     user_cookie_save(array_intersect_key($values, array_flip(array('name', 'mail'))));
   }
 
-  // Get the to and from e-mail addresses.
+  // Get the to and from email addresses.
   $to = $values['category']['recipients'];
   $from = $values['sender']->mail;
 
-  // Send the e-mail to the recipients using the site default language.
+  // Send the email to the recipients using the site default language.
   backdrop_mail('contact', 'page_mail', $to, language_default(), $values, $from);
 
   // If the user requests it, send a copy using the current language.
@@ -169,7 +168,7 @@ function contact_site_form_submit($form, &$form_state) {
 
   $config = config('contact.settings');
   flood_register_event('contact', $config->get('contact_threshold_window'));
-  watchdog('mail', '%sender-name (@sender-from) sent an e-mail regarding %category.',
+  watchdog('mail', '%sender-name (@sender-from) sent an email regarding %category.',
     array(
       '%sender-name' => $values['name'],
       '@sender-from' => $from,
@@ -193,7 +192,7 @@ function contact_site_form_submit($form, &$form_state) {
 function contact_personal_form($form, &$form_state, $recipient) {
   global $user;
 
-  // Check if flood control has been activated for sending e-mails.
+  // Check if flood control has been activated for sending emails.
   $config = config('contact.settings');
   $limit = $config->get('contact_threshold_limit');
   $window = $config->get('contact_threshold_window');
@@ -223,7 +222,7 @@ function contact_personal_form($form, &$form_state, $recipient) {
   );
   $form['mail'] = array(
     '#type' => 'email',
-    '#title' => t('Your e-mail address'),
+    '#title' => t('Your email address'),
     '#default_value' => $user->uid ? $user->mail : '',
     '#required' => TRUE,
   );
@@ -285,11 +284,11 @@ function contact_personal_form_submit($form, &$form_state) {
     user_cookie_save(array_intersect_key($values, array_flip(array('name', 'mail'))));
   }
 
-  // Get the to and from e-mail addresses.
+  // Get the to and from email addresses.
   $to = $values['recipient']->mail;
   $from = $values['sender']->mail;
 
-  // Send the e-mail in the requested user language.
+  // Send the email in the requested user language.
   backdrop_mail('contact', 'user_mail', $to, user_preferred_language($values['recipient']), $values, $from);
 
   // Send a copy if requested, using current page language.
@@ -299,7 +298,7 @@ function contact_personal_form_submit($form, &$form_state) {
 
   $config = config('contact.settings');
   flood_register_event('contact', $config->get('contact_threshold_window'));
-  watchdog('mail', '%sender-name (@sender-from) sent %recipient-name an e-mail.',
+  watchdog('mail', '%sender-name (@sender-from) sent %recipient-name an email.',
     array(
       '%sender-name' => $values['name'],
       '@sender-from' => $from,

@@ -26,11 +26,11 @@
  * name of the function performing the operation. A very simple example use of
  * this API:
  * @code
- * function mymodule_long_operation() {
- *   if (lock_acquire('mymodule_long_operation')) {
+ * function my_module_long_operation() {
+ *   if (lock_acquire('my_module_long_operation')) {
  *     // Do the long operation here.
  *     // ...
- *     lock_release('mymodule_long_operation');
+ *     lock_release('my_module_long_operation');
  *   }
  * }
  * @endcode

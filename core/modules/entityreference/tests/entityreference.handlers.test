@@ -1,0 +1,619 @@
+<?php
+
+/**
+ * @file
+ * Contains EntityReferenceHandlersTestCase
+ */
+
+/**
+ * Test for Entity Reference handlers.
+ */
+class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
+
+  public function setUp() {
+    parent::setUp('entityreference');
+
+    // Remove default content.
+    $i = 1;
+    while ($i <= 5) {
+      node_delete($i);
+      $i++;
+    }
+  }
+
+  protected function assertReferenceable($field, $tests, $handler_name) {
+    $handler = entityreference_get_selection_handler($field);
+
+    foreach ($tests as $test) {
+      foreach ($test['arguments'] as $arguments) {
+        $result = call_user_func_array(array($handler, 'getReferencableEntities'), $arguments);
+        $this->assertEqual($result, $test['result'], format_string('Valid result set returned by @handler.', array('@handler' => $handler_name)));
+
+        $result = call_user_func_array(array($handler, 'countReferencableEntities'), $arguments);
+        if (!empty($test['result'])) {
+          $bundle = key($test['result']);
+          $count = count($test['result'][$bundle]);
+        }
+        else {
+          $count = 0;
+        }
+
+        $this->assertEqual($result, $count, format_string('Valid count returned by @handler.', array('@handler' => $handler_name)));
+      }
+    }
+  }
+
+  /**
+   * Test the node-specific overrides of the entity handler.
+   */
+  public function testNodeHandler() {
+    // Build a fake field instance.
+    $field = array(
+      'translatable' => FALSE,
+      'entity_types' => array(),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'node',
+        'handler_settings' => array(
+          'target_bundles' => array(),
+        ),
+      ),
+      'field_name' => 'test_field',
+      'type' => 'entityreference',
+      'cardinality' => '1',
+    );
+
+    // Build a set of test data.
+    // Titles contain HTML-special characters to test escaping.
+    $build_nodes = array(
+      'published1' => array(
+        'type' => 'post',
+        'status' => 1,
+        'title' => 'Node published1 (<&>)',
+        'uid' => 1,
+      ),
+      'published2' => array(
+        'type' => 'post',
+        'status' => 1,
+        'title' => 'Node published2 (<&>)',
+        'uid' => 1,
+      ),
+      'unpublished' => array(
+        'type' => 'post',
+        'status' => 0,
+        'title' => 'Node unpublished (<&>)',
+        'uid' => 1,
+      ),
+      // Title purposefully starts with same characters as published1 and
+      // published2 above but contains a slash.
+      'published_withslash' => array(
+        'type' => 'post',
+        'status' => 1,
+        'title' => 'Node pub/lished1',
+        'uid' => 1,
+      ),
+    );
+
+    $node_labels = array();
+    foreach ($build_nodes as $key => $settings) {
+      $node = $this->backdropCreateNode($settings);
+      $nodes[$key] = $node;
+      $node_labels[$key] = check_plain($node->title);
+    }
+
+    // Test as a non-admin.
+    $normal_user = $this->backdropCreateUser(array('access content'));
+    $GLOBALS['user'] = $normal_user;
+    $referenceable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          'post' => array(
+            $nodes['published1']->nid => $node_labels['published1'],
+            $nodes['published2']->nid => $node_labels['published2'],
+            $nodes['published_withslash']->nid => $node_labels['published_withslash'],
+          ),
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('published1', 'CONTAINS'),
+          array('Published1', 'CONTAINS'),
+        ),
+        'result' => array(
+          'post' => array(
+            $nodes['published1']->nid => $node_labels['published1'],
+          ),
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('published2', 'CONTAINS'),
+          array('Published2', 'CONTAINS'),
+        ),
+        'result' => array(
+          'post' => array(
+            $nodes['published2']->nid => $node_labels['published2'],
+          ),
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('invalid node', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+      array(
+        'arguments' => array(
+          array('Node unpublished', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+      // Searching for "Node pub/" should return only the published_withslash node
+      // and not published1 and published2 from above.
+      array(
+        'arguments' => array(
+          array('Node pub/', 'CONTAINS'),
+        ),
+        'result' => array(
+          'post' => array(
+            $nodes['published_withslash']->nid => $node_labels['published_withslash'],
+          ),
+        ),
+      ),
+    );
+    $this->assertReferenceable($field, $referenceable_tests, 'Node handler');
+
+    // Test as an admin.
+    $admin_user = $this->backdropCreateUser(array('access content', 'bypass node access'));
+    $GLOBALS['user'] = $admin_user;
+    $referenceable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          'post' => array(
+            $nodes['published1']->nid => $node_labels['published1'],
+            $nodes['published2']->nid => $node_labels['published2'],
+            $nodes['published_withslash']->nid => $node_labels['published_withslash'],
+            $nodes['unpublished']->nid => $node_labels['unpublished'],
+          ),
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('Node unpublished', 'CONTAINS'),
+        ),
+        'result' => array(
+          'post' => array(
+            $nodes['unpublished']->nid => $node_labels['unpublished'],
+          ),
+        ),
+      ),
+    );
+    $this->assertReferenceable($field, $referenceable_tests, 'Node handler (admin)');
+
+    // Verify autocomplete input validation.
+    $handler = entityreference_get_selection_handler($field);
+    $element = array(
+      '#parents' => array('element_name'),
+    );
+    $form_state = array();
+    $form = array();
+    $value = $handler->validateAutocompleteInput($nodes['published1']->title, $element, $form_state, $form);
+    $this->assertEqual($value, $nodes['published1']->nid);
+
+    $invalid_input = $this->randomName();
+    $value = $handler->validateAutocompleteInput($invalid_input, $element, $form_state, $form);
+    $this->assertNull($value);
+    $this->assertEqual(form_get_error($element), t('There are no entities matching "%value"', array('%value' => $invalid_input)));
+  }
+
+  /**
+   * Test the user-specific overrides of the entity handler.
+   */
+  public function testUserHandler() {
+    // Build a fake field instance.
+    $field = array(
+      'translatable' => FALSE,
+      'entity_types' => array(),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'user',
+        'handler_settings' => array(
+          'target_bundles' => array(),
+        ),
+      ),
+      'field_name' => 'test_field',
+      'type' => 'entityreference',
+      'cardinality' => '1',
+    );
+
+    // Build a set of test data.
+    $users = array(
+      'anonymous' => NULL,
+      'admin' => user_load(1),
+      'non_admin' => entity_create('user', array(
+        'name' => 'non_admin <&>',
+        'mail' => 'non_admin@example.com',
+        'roles' => array(),
+        'pass' => user_password(),
+        'status' => 1,
+      )),
+      'blocked' => entity_create('user', array(
+        'name' => 'blocked <&>',
+        'mail' => 'blocked@example.com',
+        'roles' => array(),
+        'pass' => user_password(),
+        'status' => 0,
+      )),
+    );
+
+    $user_labels = array();
+    foreach ($users as $key => $user) {
+      if ($key == 'anonymous') {
+        $users[$key] = backdrop_anonymous_user();
+        $name = ENTITYREFERENCE_DENIED;
+      } else {
+        user_save($user);
+        $users[$key] = $user;
+        $name = check_plain($user->name);
+      }
+      $user_labels[$key] = $name;
+    }
+
+    // Test as a non-admin.
+    $GLOBALS['user'] = $users['non_admin'];
+    $referenceable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          'user' => array(
+            $users['admin']->uid => ENTITYREFERENCE_DENIED,
+            $users['non_admin']->uid => $user_labels['non_admin'],
+          ),
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('non_admin', 'CONTAINS'),
+          array('NON_ADMIN', 'CONTAINS'),
+        ),
+        'result' => array(
+          'user' => array(
+            $users['non_admin']->uid => $user_labels['non_admin'],
+          ),
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('invalid user', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+      array(
+        'arguments' => array(
+          array('blocked', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+    );
+    $this->assertReferenceable($field, $referenceable_tests, 'User handler');
+
+    $GLOBALS['user'] = $users['admin'];
+    $referenceable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          'user' => array(
+            $users['anonymous']->uid => $user_labels['anonymous'],
+            $users['admin']->uid => $user_labels['admin'],
+            $users['non_admin']->uid => $user_labels['non_admin'],
+            $users['blocked']->uid => $user_labels['blocked'],
+          ),
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('blocked', 'CONTAINS'),
+        ),
+        'result' => array(
+          'user' => array(
+            $users['blocked']->uid => $user_labels['blocked'],
+          ),
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('Anonymous', 'CONTAINS'),
+          array('anonymous', 'CONTAINS'),
+        ),
+        'result' => array(
+          'user' => array(
+            $users['anonymous']->uid => $user_labels['anonymous'],
+          ),
+        ),
+      ),
+    );
+    $this->assertReferenceable($field, $referenceable_tests, 'User handler (admin)');
+  }
+
+  /**
+   * Test the comment-specific overrides of the entity handler.
+   */
+  public function testCommentHandler() {
+    // Build a fake field instance.
+    $field = array(
+      'translatable' => FALSE,
+      'entity_types' => array(),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'comment',
+        'handler_settings' => array(
+          'target_bundles' => array(),
+        ),
+      ),
+      'field_name' => 'test_field',
+      'type' => 'entityreference',
+      'cardinality' => '1',
+    );
+
+    // Build a set of test data.
+    $build_nodes = array(
+      'published' => array(
+        'type' => 'post',
+        'status' => 1,
+        'title' => 'Node published',
+        'uid' => 1,
+      ),
+      'unpublished' => array(
+        'type' => 'post',
+        'status' => 0,
+        'title' => 'Node unpublished',
+        'uid' => 1,
+      ),
+    );
+    foreach ($build_nodes as $key => $settings) {
+      $nodes[$key] = $this->backdropCreateNode($settings);
+    }
+
+    $build_comments = array(
+      'published_published' => array(
+        'nid' => $nodes['published']->nid,
+        'uid' => 1,
+        'cid' => NULL,
+        'pid' => 0,
+        'status' => COMMENT_PUBLISHED,
+        'subject' => 'Comment Published <&>',
+        'hostname' => ip_address(),
+        'language' => LANGUAGE_NONE,
+      ),
+      'published_unpublished' => array(
+        'nid' => $nodes['published']->nid,
+        'uid' => 1,
+        'cid' => NULL,
+        'pid' => 0,
+        'status' => COMMENT_NOT_PUBLISHED,
+        'subject' => 'Comment Unpublished <&>',
+        'hostname' => ip_address(),
+        'language' => LANGUAGE_NONE,
+      ),
+      'unpublished_published' => array(
+        'nid' => $nodes['unpublished']->nid,
+        'uid' => 1,
+        'cid' => NULL,
+        'pid' => 0,
+        'status' => COMMENT_NOT_PUBLISHED,
+        'subject' => 'Comment Published on Unpublished node <&>',
+        'hostname' => ip_address(),
+        'language' => LANGUAGE_NONE,
+      ),
+    );
+
+    $comment_labels = array();
+    foreach ($build_comments as $key => $settings) {
+      /** @var Comment $comment */
+      $comment = entity_create('comment', $settings);
+      comment_save($comment);
+      $comments[$key] = $comment;
+      $comment_labels[$key] = check_plain($comment->subject);
+    }
+
+    // Test as a non-admin.
+    $normal_user = $this->backdropCreateUser(array('access content', 'access comments'));
+    $GLOBALS['user'] = $normal_user;
+    $referenceable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          'comment_node_post' => array(
+            $comments['published_published']->cid => $comment_labels['published_published'],
+          ),
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('Published', 'CONTAINS'),
+        ),
+        'result' => array(
+          'comment_node_post' => array(
+            $comments['published_published']->cid => $comment_labels['published_published'],
+          ),
+        ),
+      ),
+      array(
+        'arguments' => array(
+          array('invalid comment', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+      array(
+        'arguments' => array(
+          array('Comment Unpublished', 'CONTAINS'),
+        ),
+        'result' => array(),
+      ),
+    );
+    $this->assertReferenceable($field, $referenceable_tests, 'Comment handler');
+
+    // Test as a comment admin.
+    $admin_user = $this->backdropCreateUser(array('access content', 'access comments', 'administer comments'));
+    $GLOBALS['user'] = $admin_user;
+    $referenceable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          'comment_node_post' => array(
+            $comments['published_published']->cid => $comment_labels['published_published'],
+            $comments['published_unpublished']->cid => $comment_labels['published_unpublished'],
+          ),
+        ),
+      ),
+    );
+    $this->assertReferenceable($field, $referenceable_tests, 'Comment handler (comment admin)');
+
+    // Test as a node and comment admin.
+    $admin_user = $this->backdropCreateUser(array('access content', 'access comments', 'administer comments', 'bypass node access'));
+    $GLOBALS['user'] = $admin_user;
+    $referenceable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL, 'CONTAINS'),
+        ),
+        'result' => array(
+          'comment_node_post' => array(
+            $comments['published_published']->cid => $comment_labels['published_published'],
+            $comments['published_unpublished']->cid => $comment_labels['published_unpublished'],
+            $comments['unpublished_published']->cid => $comment_labels['unpublished_published'],
+          ),
+        ),
+      ),
+    );
+    $this->assertReferenceable($field, $referenceable_tests, 'Comment handler (comment + node admin)');
+  }
+
+  /**
+   * Assert sorting by field works for non-admins.
+   *
+   * Since we are sorting on a field, we need to make sure the base-table
+   * is added, and access-control is behaving as expected.
+   */
+  public function testSortByField() {
+    // Add text field to entity, to sort by.
+    $field_info = array(
+      'field_name' => 'field_text',
+      'type' => 'text',
+      'entity_types' => array('node'),
+    );
+    field_create_field($field_info);
+
+    $instance = array(
+      'label' => 'Text Field',
+      'field_name' => 'field_text',
+      'entity_type' => 'node',
+      'bundle' => 'post',
+      'settings' => array(),
+      'required' => FALSE,
+    );
+    field_create_instance($instance);
+
+
+    // Build a fake field instance.
+    $field = array(
+      'translatable' => FALSE,
+      'entity_types' => array(),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'node',
+        'handler_settings' => array(
+          'target_bundles' => array(),
+          // Add sorting.
+          'sort' => array(
+            'type' => 'field',
+            'field' => 'field_text:value',
+            'direction' => 'DESC',
+          ),
+        ),
+      ),
+      'field_name' => 'test_field',
+      'type' => 'entityreference',
+      'cardinality' => '1',
+    );
+
+    // Build a set of test data.
+    $build_nodes = array(
+      'published1' => array(
+        'type' => 'post',
+        'status' => 1,
+        'title' => 'Node published1 (<&>)',
+        'uid' => 1,
+        'field_text' => array(
+          LANGUAGE_NONE => array(
+            array(
+              'value' => 1,
+            ),
+          ),
+        ),
+      ),
+      'published2' => array(
+        'type' => 'post',
+        'status' => 1,
+        'title' => 'Node published2 (<&>)',
+        'uid' => 1,
+        'field_text' => array(
+          LANGUAGE_NONE => array(
+            array(
+              'value' => 2,
+            ),
+          ),
+        ),
+      ),
+      'unpublished' => array(
+        'type' => 'post',
+        'status' => 0,
+        'title' => 'Node unpublished (<&>)',
+        'uid' => 1,
+        'field_text' => array(
+          LANGUAGE_NONE => array(
+            array(
+              'value' => 3,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    $node_labels = array();
+    foreach ($build_nodes as $key => $settings) {
+      $node = $this->backdropCreateNode($settings);
+      $nodes[$key] = $node;
+      $node_labels[$key] = check_plain($node->title);
+    }
+
+    // Test as a non-admin.
+    $normal_user = $this->backdropCreateUser(array('access content'));
+    $GLOBALS['user'] = $normal_user;
+
+    $handler = entityreference_get_selection_handler($field);
+
+    // Not only assert the result, but make sure the keys are sorted as
+    // expected.
+    $result = $handler->getReferencableEntities();
+    $expected_result = array(
+      $nodes['published2']->nid => $node_labels['published2'],
+      $nodes['published1']->nid => $node_labels['published1'],
+    );
+    $this->assertIdentical($result['post'], $expected_result, 'Query sorted by field returned expected values for non-admin.');
+  }
+}

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Unit tests for the redirect module.
@@ -220,7 +219,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
    * Tests renaming automatic aliases in a circular loop.
    */
   function testPathChangeRedirects() {
-    // Create an initial post node with a path alias.
+    // Create an initial post node with a URL alias.
     $node = $this->backdropCreateNode(array('type' => 'post', 'path' => array('alias' => 'first-alias')));
     $node_path = 'node/' . $node->nid;
 

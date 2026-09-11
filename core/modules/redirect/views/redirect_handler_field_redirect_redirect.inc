@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Redirect field handler for {redirect}.redirect.

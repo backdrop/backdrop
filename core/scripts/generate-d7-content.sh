@@ -152,7 +152,7 @@ for ($i = 0; $i < 24; $i++) {
     ));
     taxonomy_term_save($term);
     $terms[] = $term->tid;
-    $term_vocabs[$term->tid] = 'taxonomy_' . $vocabulary->machine_name;
+    $term_vocabularies[$term->tid] = 'taxonomy_' . $vocabulary->machine_name;
     $parents[] = $term->tid;
   }
 }
@@ -191,7 +191,7 @@ for ($i = 0; $i < 24; $i++) {
     unset($node_terms[$i], $node_terms[47 - $i]);
   }
   foreach ($node_terms as $tid) {
-    $field_name = $term_vocabs[$tid];
+    $field_name = $term_vocabularies[$tid];
     $node->{$field_name}[LANGUAGE_NONE][] = array('tid' => $tid);
   }
   $node->path = array('alias' => "content/$node->created");
@@ -208,7 +208,7 @@ for ($i = 0; $i < 24; $i++) {
     $node_terms = $terms;
     unset($node_terms[$i], $node_terms[47 - $i]);
     foreach ($node_terms as $tid) {
-      $field_name = $term_vocabs[$tid];
+      $field_name = $term_vocabularies[$tid];
       $node->{$field_name}[LANGUAGE_NONE][] = array('tid' => $tid);
     }
     node_save($node);

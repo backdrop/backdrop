@@ -73,11 +73,17 @@ function field_ui_menu() {
 
           // Add the "administer fields" permission on top of the access
           // restriction because the field UI should only be accessible to
-          // trusted users.
+          // trusted users. The bundle argument is passed to
+          // field_ui_admin_access() to allow for substitution.
           if ($access['access callback'] != 'user_access' || $access['access arguments'] != array('administer fields')) {
             $access = array(
               'access callback' => 'field_ui_admin_access',
-              'access arguments' => array($access['access callback'], $access['access arguments']),
+              'access arguments' => array(
+                $access['access callback'],
+                $access['access arguments'],
+                $bundle_position,
+                $bundle_arg
+              ),
             );
           }
 
@@ -140,7 +146,12 @@ function field_ui_menu() {
             'weight' => 2,
             'file' => 'field_ui.admin.inc',
           ) + $access;
-
+          // Secondary tab for 'Manage display' overview.
+          $items["$path/display/overview"] = array(
+            'title' => 'Overview',
+            'type' => MENU_DEFAULT_LOCAL_TASK,
+            'weight' => -99,
+          ) + $access;
           // Display modes.
           // The same base $path for the menu item (with a placeholder) can be
           // used for all bundles of a given entity type; but depending on
@@ -148,17 +159,37 @@ function field_ui_menu() {
           // modes available for customization. So we define menu items for all
           // Display modes, and use an access callback to determine which ones
           // are actually visible for a given bundle.
-          $items["$path/display/%"] = array(
-            'page callback' => 'backdrop_get_form',
-            'page arguments' => array('field_ui_display_form', $entity_type, $bundle_arg, $view_mode_position),
-            // The access callback needs to check both the current 'custom
-            // display' setting for the Display mode, and the overall access
-            // rules for the bundle admin pages.
-            'access callback' => '_field_ui_view_mode_menu_access',
-            'access arguments' => array_merge(array($entity_type, $bundle_arg, $view_mode_position, $access['access callback']), $access['access arguments']),
-            'type' => MENU_LOCAL_TASK,
-            'file' => 'field_ui.admin.inc',
-          );
+          $view_modes = array(
+            'default' => array(
+              'label' => t('Default'),
+            ),
+          ) + $entity_info['view modes'];
+
+          foreach ($view_modes as $view_mode => $view_mode_info) {
+            $items["$path/display/$view_mode"] = array(
+              'title' => $view_mode_info['label'],
+              'page callback' => 'backdrop_get_form',
+              'page arguments' => array(
+                'field_ui_display_form',
+                $entity_type,
+                $bundle_arg,
+                $view_mode,
+              ),
+              // The access callback needs to check both the current 'custom
+              // display' setting for the view mode, and the overall access
+              // rules for the bundle admin pages.
+              'access callback' => '_field_ui_view_mode_menu_access',
+              'access arguments' => array_merge(
+                array(
+                  $entity_type,
+                  $bundle_arg,
+                  $view_mode,
+                  $access['access callback'],
+                ), $access['access arguments']),
+              'type' => MENU_LOCAL_TASK,
+              'file' => 'field_ui.admin.inc',
+            );
+          }
 
           // Display mode administration.
           $items["$path/display/add"] = array(
@@ -404,7 +435,28 @@ function field_ui_form_node_type_form_submit($form, &$form_state) {
  *
  * Only grant access if the user has both the "administer fields" permission and
  * is granted access by the entity specific restrictions.
+ *
+ * @param string $access_callback
+ *   The name of the access callback function to be called.
+ * @param array $access_arguments
+ *   An array of arguments to pass to the access callback.
+ * @param string|null $bundle_position
+ *   The position within the menu path that contains the bundle name. Note this
+ *   is a string value because the menu substitutes integer values.
+ * @param mixed|null $bundle_value
+ *   The substituted value of the bundle after performing any menu auto-loaders.
+ *
+ * @return bool
+ *   TRUE if access to field UI pages is allowed, FALSE otherwise.
  */
-function field_ui_admin_access($access_callback, $access_arguments) {
+function field_ui_admin_access($access_callback, $access_arguments, $bundle_position = NULL, $bundle_value = NULL) {
+  // Perform variable substitution for the bundle. This would normally happen
+  // by the menu system replacing integers with the bundle value, but since the
+  // access callback is wrapped, the substitution needs to be done again before
+  // calling the child access callback.
+  $bundle_access_key = array_search((int) $bundle_position, $access_arguments, TRUE);
+  if ($bundle_access_key !== FALSE) {
+    $access_arguments[$bundle_access_key] = $bundle_value;
+  }
   return user_access('administer fields') && call_user_func_array($access_callback, $access_arguments);
 }

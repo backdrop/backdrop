@@ -1,0 +1,49 @@
+/**
+ * @file
+ * Caption: default styling for displaying image captions.
+ */
+
+/**
+ * Figure and Figure Captions.
+ *
+ * Responsive figure elements, based on http://stackoverflow.com/a/13363408.
+ */
+.caption {
+  display: table;
+  max-width: 100%;
+  margin: 0 12px 10px;
+}
+.caption .cke_image_resizer_wrapper {
+  display: block !important;
+}
+.cke_widget_wrapper.align-center {
+  text-align: center;
+}
+.cke_widget_wrapper.align-center .caption {
+  margin-left: auto;
+  margin-right: auto;
+}
+.caption > * {
+  display: block;
+  max-width: 100%;
+  border: 1px solid #ccc;
+}
+.caption > figcaption {
+  display: table-caption;
+  caption-side: bottom;
+  max-width: none;
+  padding: 3px 6px;
+  border: 1px solid #CCC;
+  border-top: none;
+  background-color: #eee;
+}
+
+/**
+ * While editing and whenever the caption is empty, show a placeholder.
+ *
+ * Based on http://codepen.io/flesler/pen/AEIFc.
+ */
+.caption > figcaption[contenteditable=true]:empty:before {
+  content: attr(data-placeholder);
+  font-style: italic;
+}

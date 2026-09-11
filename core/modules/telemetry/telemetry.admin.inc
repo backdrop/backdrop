@@ -14,8 +14,7 @@ function telemetry_report() {
     '#attributes' => array('class' => array('telemetry-report')),
   );
 
-  $help = '';
-  $help .= '<p>' . t('Help us improve Backdrop CMS by sending anonymous, untracked information about what features your site uses.') . '</p>';
+  $help = '<p>' . t('Help us improve Backdrop CMS by sending anonymous, untracked information about what features your site uses.') . '</p>';
   $help .= '<p>' . t('Below is a list of all data collected by the enabled modules on your site. Only projects that are publicly available on BackdropCMS.org will store usage information.') . '</p>';
   $help .= '<p>' . t('If you prefer to not send usage information, you can disable the Telemetry module from the <a href="!modules">modules page</a>.', array('!modules' => url('admin/modules'))) . '</p>';
 
@@ -47,7 +46,7 @@ function telemetry_report() {
       // Data directly recorded by Telemetry module is reported as "System".
       // This keeps Telemetry data collection all in one module for now.
       // Perhaps remove this conversion once more modules start collecting data.
-      $module_info['name'] = $info['module'] === 'telemetry' ? t('System') : $info['label'];
+      $module_info['name'] = $info['module'] === 'telemetry' ? t('System') : $module_info['name'];
 
       $row[] = '<div class="telemetry-item-label">' . check_plain($info['label']) . '</div><div class="telemetry-item-project">' . check_plain($module_info['name']) . '</div>';
       $row[] = array(

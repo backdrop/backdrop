@@ -13,6 +13,7 @@ function installer_permission() {
       'title' => t('Install and update modules, themes & layouts'),
       'description' => t('Allows the user to browse for and install new modules, themes and layouts.'),
       'restrict access' => TRUE,
+      'warning' => t('Allows <em>any</em> functionality to be added to the site.'),
     )
   );
 }
@@ -49,7 +50,7 @@ function installer_menu() {
   // Add menu titles with += for the translation extractor.
   $items['admin/modules/install'] += array('title' => 'Install new modules');
   $items['admin/appearance/install'] += array('title' => 'Install new themes');
-  $items['admin/structure/layouts/install'] += array('title' => 'Install new layouts');
+  $items['admin/structure/layouts/install'] += array('title' => 'Install new layout templates');
 
   $items['admin/config/system/updates'] = array(
     'title' => 'System updates',
@@ -101,7 +102,7 @@ function installer_menu() {
     'description' => 'Reset installer project list.',
     'page callback' => 'installer_browser_installation_reset',
     'page arguments' => array(3, 4),
-    'access callback' => 'installer_install_access',
+    'access callback' => 'installer_install_action_access',
     'file' => 'installer.pages.inc',
     'type' => MENU_CALLBACK,
   );
@@ -116,7 +117,7 @@ function installer_menu() {
   $items['admin/installer/queue/%/%/%'] = array(
     'page callback' => 'installer_browser_install_queue_callback',
     'page arguments' => array(3, 4, 5),
-    'access callback' => 'installer_install_access',
+    'access callback' => 'installer_install_action_access',
     'type' => MENU_CALLBACK,
     'file' => 'installer.pages.inc',
   );
@@ -130,7 +131,7 @@ function installer_menu() {
  * It both enforces the 'administer software updates' permission and the global
  * kill switch for the authorize.php script.
  *
- * @return
+ * @return bool
  *   TRUE if the current user can access the updater menu items; FALSE
  *   otherwise.
  *
@@ -146,7 +147,7 @@ function installer_update_access() {
  * It both enforces the 'use installer browser' permission and the global
  * kill switch for the authorize.php script.
  *
- * @return
+ * @return bool
  *   TRUE if the current user can access the installer menu items; FALSE
  *   otherwise.
  *
@@ -156,6 +157,23 @@ function installer_install_access() {
   return settings_get('allow_authorize_operations', TRUE) && user_access('use installer browser');
 }
 
+/**
+ * Access callback used for pages that directly execute an installer action.
+ *
+ * This extends installer_install_access() to also check for a valid query
+ * string token. This is used for pages that directly execute an installer
+ * action, such as the reset and install pages.
+ *
+ * @return bool
+ *   TRUE if the current user can access the installer menu items; FALSE
+ *   otherwise.
+ *
+ * @see installer_menu()
+ */
+function installer_install_action_access() {
+  $valid_token = isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'installer_install_action_access');
+  return installer_install_access() && $valid_token;
+}
 
 /**
  * Implements hook_theme().
@@ -178,6 +196,11 @@ function installer_theme($existing, $type, $theme, $path) {
     'installer_browser_list' => array(
       'variables' => array('projects_list' => NULL, 'type' => NULL),
       'template' => 'templates/installer-list',
+      'attached' => array(
+        'css' => array(
+          backdrop_get_path('module', 'installer') . '/css/installer.css' => array(),
+        ),
+      ),
     ) + $base,
     // Template for block.
     'installer_browser_block' => array(

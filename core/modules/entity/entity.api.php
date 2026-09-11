@@ -17,8 +17,9 @@
  * attached).
  *
  * @return
- *   An array whose keys are entity type names and whose values identify
- *   properties of those types that the system needs to know about:
+ *   An array of information about one or more entity types
+ *   Keys are entity type names; values identify properties of those types that
+ *   the system needs to know about:
  *   - label: The human-readable name of the type.
  *   - entity class: A class that the controller will use for instantiating
  *     entities. Must extend the Entity class or implement EntityInterface.
@@ -61,6 +62,15 @@
  *       omitted if this entity type exposes a single bundle (all entities have
  *       the same collection of fields). The name of this single bundle will be
  *       the same as the entity type.
+ *      - label: The name of the property that contains the label for the entity.
+ *       This property is used in the core entity class's label method. The label
+ *       can be overridden by setting a 'label callback' on the entity which the
+ *       core entity class will call instead if it's set.
+ *   - label callback: The name of a function that will be called to override the
+ *     label property set in 'entity keys'. By default the core entity class will
+ *     use the default label method and the label property set in 'entity keys'
+ *     to set the entity's label. The argument passed to 'label callback' is the
+ *     entity object.
  *   - bundle keys: An array describing how the Field API can extract the
  *     information it needs from the bundle objects for this type (e.g
  *     $vocabulary objects for terms; not applicable for nodes). This entry can
@@ -69,7 +79,7 @@
  *     - bundle: The name of the property that contains the name of the bundle
  *       object.
  *   - bundles: An array describing all bundles for this object type. Keys are
- *     bundles machine names, as found in the objects' 'bundle' property
+ *     bundles' machine names, as found in the objects' 'bundle' property
  *     (defined in the 'entity keys' entry above). This entry can be omitted if
  *     this entity type exposes a single bundle (all entities have the same
  *     collection of fields). The name of this single bundle will be the same as
@@ -88,6 +98,9 @@
  *       - access callback: As in hook_menu(). 'user_access' will be assumed if
  *         no value is provided.
  *       - access arguments: As in hook_menu().
+ *     - bundle cache: (used by DefaultEntityController) Set to FALSE to disable
+ *       persistent caching of fully loaded entities for this bundle. Defaults
+ *       to TRUE. Has no effect if 'entity cache' for the entity is FALSE.
  *   - view modes: An array describing the display modes for the entity type.
  *     Display modes let entities be displayed differently depending on the
  *     context. For instance, a node can be displayed differently on its own
@@ -113,6 +126,8 @@
  *
  * @see entity_load()
  * @see hook_entity_info_alter()
+ *
+ * @since 1.32.0 The "label callback" key was restored.
  */
 function hook_entity_info() {
   $return = array(
@@ -130,6 +145,7 @@ function hook_entity_info() {
         'id' => 'nid',
         'revision' => 'vid',
         'bundle' => 'type',
+        'label' => 'title',
       ),
       'bundle keys' => array(
         'bundle' => 'type',
@@ -215,7 +231,7 @@ function hook_entity_info_alter(&$entity_info) {
  */
 function hook_entity_load($entities, $type) {
   foreach ($entities as $entity) {
-    $entity->foo = mymodule_add_something($entity, $type);
+    $entity->foo = my_module_add_something($entity, $type);
   }
 }
 
@@ -375,7 +391,7 @@ function hook_entity_view($entity, $type, $view_mode, $langcode) {
   $entity->content['my_additional_field'] = array(
     '#markup' => $additional_field,
     '#weight' => 10,
-    '#theme' => 'mymodule_my_additional_field',
+    '#theme' => 'my_module_my_additional_field',
   );
 }
 
@@ -427,7 +443,7 @@ function hook_entity_view_alter(&$build, $type) {
 function hook_entity_prepare_view($entities, $type) {
   // Load a specific node into the user object to theme later.
   if ($type == 'user') {
-    $nodes = mymodule_get_user_nodes(array_keys($entities));
+    $nodes = my_module_get_user_nodes(array_keys($entities));
     foreach ($entities as $uid => $entity) {
       $entity->user_node = $nodes[$uid];
     }

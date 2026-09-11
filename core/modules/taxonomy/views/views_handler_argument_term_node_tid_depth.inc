@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_argument_term_node_tid_depth.

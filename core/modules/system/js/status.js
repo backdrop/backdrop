@@ -19,7 +19,7 @@ Backdrop.behaviors.statusReport = {
     $table.find('tr.report-warning').find('a.description-toggle').text(Backdrop.t('less'));
 
     // Toggle the requirements info.
-    $('a.description-toggle').click(function(e) {
+    $('a.description-toggle').on('click', function(e) {
       var $description = $(this).closest('td').find('.status-description').toggle();
       if ($description.is(':visible')) {
         $(this).text(Backdrop.t('less'));

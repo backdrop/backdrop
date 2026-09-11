@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Adds contextual links to perform actions related to elements on a page.

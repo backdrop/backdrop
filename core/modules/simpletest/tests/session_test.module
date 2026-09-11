@@ -41,9 +41,9 @@ function session_test_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
-  $items['session-test/set-message-but-dont-save'] = array(
+  $items['session-test/set-message-but-do-not-save'] = array(
     'title' => 'Set message but do not save session',
-    'page callback' => '_session_test_set_message_but_dont_save',
+    'page callback' => '_session_test_set_message_but_do_not_save',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
@@ -138,7 +138,7 @@ function _session_test_set_message() {
 /**
  * Menu callback, sets a message but call backdrop_save_session(FALSE).
  */
-function _session_test_set_message_but_dont_save() {
+function _session_test_set_message_but_do_not_save() {
   backdrop_save_session(FALSE);
   _session_test_set_message();
 }

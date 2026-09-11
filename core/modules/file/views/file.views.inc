@@ -177,6 +177,17 @@ function file_views_data() {
      ),
   );
 
+  // Icon based on file extension.
+  $data['file_managed']['icon'] = array(
+    'title' => t('Icon'),
+    'help' => t('An SVG icon according to file extension.'),
+    'real field' => 'uri',
+    'field' => array(
+      'handler' => 'views_handler_field_file_icon',
+      'click sortable' => FALSE,
+     ),
+  );
+
   // filesize
   $data['file_managed']['filesize'] = array(
     'title' => t('Size'),
@@ -228,12 +239,21 @@ function file_views_data() {
   // uid
   $data['file_managed']['uid'] = array(
     'title' => t('User who uploaded'),
-    'help' => t('The user account that uploaded the file.'),
+    'help' => t('The user account that uploaded the file. If more fields than UID are needed, add the "File: User who uploaded" relationship.'),
     'relationship' => array(
       'title' => t('User who uploaded'),
       'label' => t('User who uploaded'),
       'base' => 'users',
       'base field' => 'uid',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_user_name',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+    'field' => array(
+      'handler' => 'views_handler_field_user',
     ),
   );
 

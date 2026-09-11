@@ -11,7 +11,7 @@
 
       $('.jump-menu-change')
           .once('jump-menu')
-          .change(function() {
+          .on('change', function() {
             var loc = $(this).val();
             var urlArray = loc.split('::');
             if (urlArray[1]) {
@@ -25,7 +25,7 @@
 
       $('.jump-menu-button')
           .once('jump-menu')
-          .click(function() {
+          .on('click', function() {
             // Instead of submitting the form, just perform the redirect.
 
             // Find our sibling value.

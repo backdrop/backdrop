@@ -5,7 +5,8 @@
  */
 
 /**
- * Menu callback which shows an overview page of all the custom menus and their descriptions.
+ * Menu callback which shows an overview page of all the custom menus and their
+ * descriptions.
  */
 function menu_overview_page() {
   $menus = menu_load_all();
@@ -39,7 +40,7 @@ function menu_overview_page() {
         'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/delete',
       );
     }
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -102,6 +103,9 @@ function menu_overview_form($form, &$form_state, $menu) {
   foreach ($result as $item) {
     $links[] = $item;
   }
+  $link_count = db_query("SELECT COUNT(*) AS counter FROM {menu_links} WHERE menu_name = :menu AND link_path NOT LIKE :link_path", array(':menu' => $menu['menu_name'], ':link_path' => '%\%%'))->fetchObject();
+  $counter = intval($link_count->counter / 2 ) + 1;
+
   $tree = menu_tree_data($links);
   $node_links = array();
   menu_tree_collect_node_links($tree, $node_links);
@@ -111,9 +115,11 @@ function menu_overview_form($form, &$form_state, $menu) {
   $menu_admin = FALSE;
 
   $tree_langcode = $filter_langcode === LANGUAGE_NONE ? NULL : $filter_langcode;
-  $form = array_merge($form, _menu_overview_tree_form($tree, $tree_langcode));
-  $form['#menu'] =  $menu;
+  $delta = _menu_get_menu_weight_delta($menu['menu_name'], $counter);
+  $form = array_merge($form, _menu_overview_tree_form($tree, $delta, $tree_langcode));
+  $form['#menu'] = $menu;
 
+  // Only show the form submit button if there are menu items.
   if (count($links)) {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
@@ -121,9 +127,7 @@ function menu_overview_form($form, &$form_state, $menu) {
       '#value' => t('Save configuration'),
     );
   }
-  else {
-    $form['#empty_text'] = t('There are no menu links yet. <a href="@link">Add link</a>.', array('@link' => url('admin/structure/menu/manage/' . $form['#menu']['menu_name'] . '/add')));
-  }
+
   return $form;
 }
 
@@ -132,10 +136,12 @@ function menu_overview_form($form, &$form_state, $menu) {
  *
  * @param $tree
  *   The menu_tree retrieved by menu_tree_data.
+ * @param $delta
+ *   The number of items to use in the menu weight selector. Defaults to 50.
  * @param $langcode
  *   A language code by which to filter the list of menu items.
  */
-function _menu_overview_tree_form($tree, $langcode = NULL) {
+function _menu_overview_tree_form($tree, $delta = 50, $langcode = NULL) {
   $form = &backdrop_static(__FUNCTION__, array('#tree' => TRUE));
   $language_options = language_list(TRUE, TRUE);
   $language_options[LANGUAGE_NONE] = t('All');
@@ -175,7 +181,7 @@ function _menu_overview_tree_form($tree, $langcode = NULL) {
       );
       $form[$mlid]['weight'] = array(
         '#type' => 'weight',
-        '#delta' => 50,
+        '#delta' => $delta,
         '#default_value' => $item['weight'],
         '#title_display' => 'invisible',
         '#title' => t('Weight for @title', array('@title' => $item['title'])),
@@ -215,7 +221,7 @@ function _menu_overview_tree_form($tree, $langcode = NULL) {
     }
 
     if ($data['below']) {
-      _menu_overview_tree_form($data['below'], $langcode);
+      _menu_overview_tree_form($data['below'], $delta, $langcode);
     }
   }
   return $form;
@@ -277,6 +283,7 @@ function menu_overview_form_language_filter_submit($form, &$form_state) {
   $query['langcode'] = $form_state['values']['langcode'];
   if (isset($_GET['destination'])) {
     $query['destination'] = $_GET['destination'];
+    unset($_GET['destination']);
   }
   backdrop_goto($_GET['q'], array('query' => $query));
 }
@@ -285,6 +292,7 @@ function menu_overview_form_language_filter_submit($form, &$form_state) {
  * Menu callback; Build the menu link editing form.
  */
 function menu_edit_item($form, &$form_state, $type, $item, $menu) {
+  $menus = menu_get_menus();
   if ($type == 'add' || empty($item)) {
     // This is an add form, initialize the menu link.
     $item = array(
@@ -304,8 +312,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   }
   else {
     // Get the human-readable menu title from the given menu name
-    $titles = menu_get_menus();
-    $current_title = $titles[$item['menu_name']];
+    $current_title = $menus[$item['menu_name']];
 
     // Get the current breadcrumb and add a link to that menu's overview page.
     $breadcrumb = menu_get_active_breadcrumb();
@@ -403,7 +410,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#type' => 'checkbox',
     '#title' => t('Show as expanded'),
     '#default_value' => $item['expanded'],
-    '#description' => t('If selected and this menu link has children, the menu will always appear expanded.'),
+    '#description' => t('When displayed in a "hierarchical tree" menu style, children of expanded menu links will always be visible.'),
   );
 
   // Generate a list of possible parents (not including this link or descendants).
@@ -412,20 +419,67 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   if (!isset($options[$default])) {
     $default = 'main-menu:0';
   }
+  // This select element lists all available menus. When an option is chosen,
+  // the link options in the "Parent link" element below will be filtered to
+  // list only links from that chosen menu. This is accomplished via an AJAX
+  // request. Part of the AJAX request queries admin/structure/menu/parents,
+  // hence we ensure only users with access to that path (those users with
+  // "administer menu" permissions) will have access to this element.
+  // Since this requires JavaScript, the "js-show" class is added to hide this
+  // element if JavaScript is disabled.
+  $form['parent_menu'] = array(
+    '#type' => 'select',
+    '#title' => t('Menu'),
+    '#default_value' => $item['menu_name'],
+    '#options' => $menus,
+    '#description' => t('The parent menu'),
+    '#access' => user_access('administer menu'),
+    '#wrapper_attributes' => array(
+      'class' => array('js-show'),
+    ),
+  );
   $form['parent'] = array(
     '#type' => 'select',
     '#title' => t('Parent link'),
     '#default_value' => $default,
     '#options' => $options,
     '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
-    '#attributes' => array('class' => array('menu-title-select')),
+    '#attributes' => array(
+      'class' => array('menu-title-select'),
+      'data-menu-parent' => TRUE,
+    ),
     '#prefix' => '<div id="menu-parent-select-wrapper">',
     '#suffix' => '</div>',
+    '#attached' => array(
+      'js' => array(
+        backdrop_get_path('module', 'menu') . '/js/menu.admin.js',
+        array(
+          'data' => array('menu_edit_item_menu' => $item['menu_name']),
+          'type' => 'setting',
+        ),
+        array(
+          'data' => array('menu_edit_item_parents' => $menus),
+          'type' => 'setting',
+        ),
+      ),
+    ),
   );
+  // Get number of items in all possible parent menus, so the weight selector is
+  // sized appropriately.
+  $menu_names = array_keys(menu_get_menus());
+  $menu_options = array();
+  foreach ($menu_names as $menu_name) {
+    if (isset($options[$menu_name . ':0'])) {
+      $menu_options[] = $menu_name;
+    }
+  }
+  // Make sure that we always have values in menu_options.
+  $menu_options = !empty($menu_options) ? $menu_options : $menu_names;
+
   $form['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
-    '#delta' => 50,
+    '#delta' => _menu_get_menu_weight_delta($menu_options),
     '#default_value' => $item['weight'],
     '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
   );
@@ -538,6 +592,7 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
     '#default_value' => $menu['menu_name'],
     '#maxlength' => MENU_MAX_MENU_NAME_LENGTH_UI,
     '#description' => t('A unique name to construct the URL for the menu. It must only contain lowercase letters, numbers and hyphens.'),
+    '#field_prefix' => empty($menu['old_name']) ? 'menu-' : '',
     '#machine_name' => array(
       'exists' => 'menu_edit_menu_name_exists',
       'source' => array('title'),

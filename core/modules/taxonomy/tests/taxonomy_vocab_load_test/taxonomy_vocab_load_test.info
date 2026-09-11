@@ -1,0 +1,7 @@
+name = Taxonomy vocabulary load test
+type = module
+description = Test for hook_taxonomy_vocabulary_load.
+package = Testing
+version = VERSION
+backdrop = 1.x
+hidden = TRUE

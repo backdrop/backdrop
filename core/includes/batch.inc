@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Batch processing API for processes to run in multiple HTTP requests.
@@ -17,11 +16,11 @@
 /**
  * Loads a batch from the database.
  *
- * @param $id
+ * @param string $id
  *   The ID of the batch to load. When a progressive batch is being processed,
  *   the relevant ID is found in $_REQUEST['id'].
  *
- * @return
+ * @return array|false
  *   An array representing the batch, or FALSE if no batch was found.
  */
 function batch_load($id) {
@@ -37,6 +36,8 @@ function batch_load($id) {
 
 /**
  * Renders the batch processing page based on the current state of the batch.
+ *
+ * @return string|null|false
  */
 function _batch_page() {
   $batch = &batch_get();
@@ -111,11 +112,17 @@ function _batch_do() {
   // Perform actual processing.
   list($percentage, $message) = _batch_process();
 
-  backdrop_json_output(array('status' => TRUE, 'percentage' => $percentage, 'message' => $message));
+  backdrop_json_output(array(
+    'status' => TRUE,
+    'percentage' => $percentage,
+    'message' => $message,
+  ));
 }
 
 /**
  * Outputs a batch processing page.
+ *
+ * @return string
  *
  * @see _batch_process()
  */
@@ -135,13 +142,15 @@ function _batch_progress_page() {
   }
   else {
     // This is one of the later requests; do some processing first.
-
     // Error handling: if PHP dies due to a fatal error (e.g. a nonexistent
     // function), it will output whatever is in the output buffer, followed by
     // the error message.
     ob_start();
     $fallback = $current_set['error_message'] . '<br />' . $batch['error_message'];
-    $fallback = theme('maintenance_page', array('content' => $fallback, 'show_messages' => FALSE));
+    $fallback = theme('maintenance_page', array(
+      'content' => $fallback,
+      'show_messages' => FALSE,
+    ));
 
     // We strip the end of the page using a marker in the template, so any
     // additional HTML output by PHP shows up inside the page rather than below
@@ -189,7 +198,10 @@ function _batch_progress_page() {
   backdrop_add_js($js_setting, 'setting');
   backdrop_add_library('system', 'backdrop.batch');
 
-  return theme('progress_bar', array('percent' => $percentage, 'message' => $message));
+  return theme('progress_bar', array(
+    'percent' => $percentage,
+    'message' => $message,
+  ));
 }
 
 /**
@@ -289,7 +301,6 @@ function _batch_process() {
 
   if ($batch['progressive']) {
     // Gather progress information.
-
     // Reporting 100% progress will cause the whole batch to be considered
     // processed. If processing was paused right after moving to a new set,
     // we have to use the info from the new (unprocessed) set.
@@ -341,9 +352,9 @@ function _batch_process() {
 /**
  * Formats the percent completion for a batch set.
  *
- * @param $total
+ * @param int $total
  *   The total number of operations.
- * @param $current
+ * @param int|float $current
  *   The number of the current operation. This may be a floating point number
  *   rather than an integer in the case of a multi-step operation that is not
  *   yet complete; in that case, the fractional part of $current represents the
@@ -383,6 +394,8 @@ function _batch_api_percentage($total, $current) {
 
 /**
  * Returns the batch set being currently processed.
+ *
+ * @return array
  */
 function &_batch_current_set() {
   $batch = &batch_get();
@@ -448,17 +461,16 @@ function _batch_finished() {
         $queue->deleteQueue();
       }
     }
+    // Clean-up the session. Not needed for CLI updates.
+    if (isset($_SESSION)) {
+      unset($_SESSION['batches'][$batch['id']]);
+      if (empty($_SESSION['batches'])) {
+        unset($_SESSION['batches']);
+      }
+    }
   }
   $_batch = $batch;
   $batch = NULL;
-
-  // Clean-up the session. Not needed for CLI updates.
-  if (isset($_SESSION)) {
-    unset($_SESSION['batches'][$_batch['id']]);
-    if (empty($_SESSION['batches'])) {
-      unset($_SESSION['batches']);
-    }
-  }
 
   // Redirect if needed.
   if ($_batch['progressive']) {
@@ -488,7 +500,10 @@ function _batch_finished() {
     }
     $function = $_batch['redirect_callback'];
     if (function_exists($function)) {
-      $function($_batch['source_url'], array('query' => array('op' => 'finish', 'id' => $_batch['id'])));
+      $function($_batch['source_url'], array('query' => array(
+        'op' => 'finish',
+        'id' => $_batch['id'],
+      )));
     }
   }
 }

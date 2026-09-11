@@ -1,0 +1,104 @@
+<?php
+/**
+ * @file
+ * Functional tests for the Filter module.
+ */
+
+/**
+ * Test functionality specific to Filter module's attach behavior.
+ */
+class FilterSettingsAttachedTestCase extends BackdropWebTestCase {
+
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp(array(
+      'filter',
+      'ckeditor5',
+    ));
+
+    // Create additional format with an editor.
+    $basic_format = array(
+      'format' => 'basic',
+      'name' => 'Basic',
+      'weight' => 0,
+      'editor' => 'ckeditor5',
+      'editor_settings' => array(
+        'toolbar' => array('bold'),
+        'image_upload' => array('status' => 0),
+      ),
+      'filters' => array(
+        'filter_html' => array('weight' => 1, 'status' => 1),
+      ),
+      'roles' => array(
+        'authenticated' => 'authenticated',
+      ),
+    );
+    $basic_format = (object) $basic_format;
+    filter_format_save($basic_format);
+
+    // Create custom content type.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+
+    // Attach additional text field, which uses filter formats, but only
+    // text_plain (which has no settings).
+    $field_name = 'field_content';
+    $field = array(
+      'type' => 'text_long',
+      'field_name' => $field_name,
+      'cardinality' => 1,
+    );
+    field_create_field($field);
+    $instance = array(
+      'field_name' => $field_name,
+      'entity_type' => 'node',
+      'label' => 'Content',
+      'bundle' => 'page',
+      'settings' => array(
+        'text_processing' => 1,
+        'allowed_formats' => array('text_plain'),
+      ),
+    );
+    field_create_instance($instance);
+
+    // Create account and log in.
+    $basic_permission_name = filter_permission_name($basic_format);
+    $web_user = $this->backdropCreateUser(array(
+      'access content',
+      'create page content',
+      $basic_permission_name,
+    ));
+    $this->backdropLogin($web_user);
+
+    return TRUE;
+  }
+
+  /**
+   * Test that the JavaScript settings attached to page node form are correct.
+   */
+  public function testJavascriptSettingsAttached() {
+    // Snippets from the script tag containing the settings.
+    $empty_settings = '"filter":{"formats":[]}';
+    $basic_settings = '"filter":{"formats":{"basic":{"filterSettings":[],"editor":"ckeditor5","editorSettings":';
+
+    $this->backdropGet('node/add/page');
+    $script_tag = $this->xpath('//script[contains(text(), :string)]', array(':string' => 'window.Backdrop'));
+    $js_settings = (string) $script_tag[0];
+    $this->assertFalse(strpos($js_settings, $empty_settings) > 0, 'JavaScript setting for filter formats is not empty');
+    $this->assertTrue(strpos($js_settings, $basic_settings) > 0, 'JavaScript setting for filter formats contain basic format');
+
+    // Move body field below content field and check again.
+    config_set('field.instance.node.page.body', 'widget.weight', 7);
+    field_info_cache_clear();
+
+    $this->backdropGet('node/add/page');
+    $script_tag = $this->xpath('//script[contains(text(), :string)]', array(':string' => 'window.Backdrop'));
+    $js_settings = (string) $script_tag[0];
+    $this->assertFalse(strpos($js_settings, $empty_settings) > 0, 'After switching field order, JavaScript setting for filter formats is not empty');
+    $this->assertTrue(strpos($js_settings, $basic_settings) > 0, 'After switching field order, JavaScript setting for filter formats contain basic format');
+  }
+
+}

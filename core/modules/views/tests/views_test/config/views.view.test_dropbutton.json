@@ -10,7 +10,7 @@
     "core": "8.0-dev",
     "display": {
         "default": {
-            "display_title": "Master",
+            "display_title": "Default",
             "display_plugin": "default",
             "display_options": {
                 "query": {
@@ -186,6 +186,8 @@
                         "hide_empty": 0,
                         "empty_zero": 0,
                         "hide_alter_empty": 1,
+                        "url": 0,
+                        "absolute": 0,
                         "text": ""
                     },
                     "nothing": {

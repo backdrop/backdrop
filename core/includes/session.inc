@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * User session handling functions.
@@ -14,7 +13,66 @@
  * are assigned by session_set_save_handler() in bootstrap.inc and are called
  * automatically by PHP. These functions should not be called directly. Session
  * data should instead be accessed via the $_SESSION superglobal.
+ *
+ * @see https://www.php.net/manual/en/reserved.variables.session.php
  */
+
+/**
+ * Provides the default session handler for Backdrop.
+ *
+ * PHP 8.4 and higher require session_set_save_handler() use a class instance
+ * rather than separate function callbacks. The separate callbacks are retained
+ * in this file for backwards-compatibility.
+ */
+class BackdropSessionHandler implements SessionHandlerInterface {
+  /**
+   * {@inheritdoc}
+   */
+  #[\ReturnTypeWillChange]
+  public function open($path = '', $name = '') {
+    return _backdrop_session_open();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  #[\ReturnTypeWillChange]
+  public function close() {
+    return _backdrop_session_close();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  #[\ReturnTypeWillChange]
+  public function read($id) {
+    return _backdrop_session_read($id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  #[\ReturnTypeWillChange]
+  public function write($id, $data) {
+    return _backdrop_session_write($id, $data);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  #[\ReturnTypeWillChange]
+  public function destroy($id) {
+    return _backdrop_session_destroy($id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  #[\ReturnTypeWillChange]
+  public function gc($max_lifetime) {
+    return _backdrop_session_garbage_collection($max_lifetime);
+  }
+}
 
 /**
  * Session handler assigned by session_set_save_handler().
@@ -61,6 +119,8 @@ function _backdrop_session_close() {
  * or other unexpected behavior. Session data must always be accessed via the
  * $_SESSION superglobal.
  *
+ * @see https://www.php.net/manual/en/reserved.variables.session.php
+ *
  * @param $sid
  *   The session ID of the session to retrieve.
  *
@@ -106,7 +166,7 @@ function _backdrop_session_read($sid) {
   // active user.
   if ($user && $user->uid > 0 && $user->status == 1) {
     // This is done to unserialize the data member of $user.
-    $user->data = unserialize($user->data);
+    $user->data = unserialize((string) $user->data);
 
     // Add roles element to $user.
     $user->roles = db_query("SELECT role FROM {users_roles} WHERE uid = :uid", array(':uid' => $user->uid))->fetchCol();
@@ -145,6 +205,8 @@ function _backdrop_session_read($sid) {
  * This function is an internal function and must not be called directly.
  * Doing so may result in corrupted session data or other unexpected behavior.
  * Session data must always be accessed via the $_SESSION superglobal.
+ *
+ * @see https://www.php.net/manual/en/reserved.variables.session.php
  *
  * @param $sid
  *   The session ID of the session to write to.
@@ -238,11 +300,10 @@ function backdrop_session_initialize() {
   global $user, $is_https;
 
   // Calling session_set_save_handler() multiple times will cause errors on
-  // PHP 7.2+. But checking a session status is only available 5.4+, so if the
-  // status cannot be checked, or the status indicates that there is no session,
-  // set session handlers.
-  if (!function_exists('session_status') || session_status() === PHP_SESSION_NONE) {
-    session_set_save_handler('_backdrop_session_open', '_backdrop_session_close', '_backdrop_session_read', '_backdrop_session_write', '_backdrop_session_destroy', '_backdrop_session_garbage_collection');
+  // PHP 7.2+.
+  if (session_status() === PHP_SESSION_NONE) {
+    $session_handler = new BackdropSessionHandler();
+    session_set_save_handler($session_handler);
   }
 
   // We use !empty() in the following check to ensure that blank session IDs
@@ -251,7 +312,7 @@ function backdrop_session_initialize() {
     // If a session cookie exists, initialize the session. Otherwise the
     // session is only started on demand in backdrop_session_commit(), making
     // anonymous users not use a session cookie unless something is stored in
-    // $_SESSION. This allows HTTP proxies to cache anonymous pageviews.
+    // $_SESSION. This allows HTTP proxies to cache anonymous page views.
     backdrop_session_start();
     if (!empty($user->uid) || !empty($_SESSION)) {
       backdrop_page_is_cacheable(FALSE);
@@ -356,7 +417,7 @@ function backdrop_session_regenerate() {
   global $user, $is_https;
   // Nothing to do if we are not allowed to change the session.
   if (!backdrop_save_session()) {
-    return TRUE;
+    return;
   }
 
   if ($is_https && settings_get('https', FALSE)) {
@@ -418,7 +479,6 @@ function backdrop_session_regenerate() {
     $user = $account;
   }
   date_default_timezone_set(backdrop_get_user_timezone());
-  return TRUE;
 }
 
 /**

@@ -3,3 +3,9 @@ name = Number field
 description = Test the creation of number fields.
 group = Field types
 file = number.test
+
+[NumberFieldSettingsTestCase]
+name = Number field settings
+description = Test settings for number fields.
+group = Field types
+file = number_settings.test

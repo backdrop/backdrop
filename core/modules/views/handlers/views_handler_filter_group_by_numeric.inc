@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_filter_group_by_numeric.

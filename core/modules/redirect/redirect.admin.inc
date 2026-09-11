@@ -92,7 +92,7 @@ function redirect_list_form($form, &$form_state) {
     $row['count'] = $redirect->count;
     if ($redirect->access) {
       $row['access'] = array(
-        'data' => t('!interval ago', array('!interval' => format_interval(REQUEST_TIME - $redirect->access))),
+        'data' => t('!interval ago', array('!interval' => format_time_diff_since($redirect->access))),
         'title' => t('Last accessed on @date', array('@date' => format_date($redirect->access))),
       );
     }
@@ -375,7 +375,10 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
   $form['source'] = array(
     '#type' => 'textfield',
     '#title' => t('From'),
-    '#description' => t('Enter an internal Backdrop path or path alias to redirect (e.g. %example1 or %example2). Fragment anchors (e.g. %anchor) are <strong>not</strong> allowed.', array('%example1' => 'node/123', '%example2' => 'taxonomy/term/123', '%anchor' => '#anchor')),
+    '#description' => t('Enter an internal Backdrop path or URL alias to redirect (e.g. %example1 or %example2). Fragment anchors (e.g. %anchor) are <strong>not</strong> allowed.', array(
+      '%example1' => 'node/123',
+      '%example2' => 'taxonomy/term/123',
+      '%anchor' => '#anchor')),
     '#maxlength' => 560,
     '#default_value' => $redirect->rid || $redirect->source ? redirect_url($redirect->source, $redirect->source_options + array('alter' => FALSE)) : '',
     '#required' => TRUE,
@@ -394,7 +397,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#maxlength' => 560,
     '#default_value' => $redirect->rid || $redirect->redirect ? redirect_url($redirect->redirect, $redirect->redirect_options, TRUE) : '',
     '#required' => TRUE,
-    '#description' => t('Enter an internal Backdrop path, path alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the home page.', array('%front' => '<front>')),
+    '#description' => t('Enter an internal Backdrop path, URL alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the home page.', array('%front' => '<front>')),
     '#element_validate' => array('redirect_element_validate_redirect'),
     '#autocomplete_path' => 'path-autocomplete',
   );
@@ -436,7 +439,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#parents' => array('override'),
   );
 
-  if (!empty($form_state['storage']['override_messages']) && !count(form_get_errors())) {
+  if (!empty($form_state['storage']['override_messages']) && !form_get_errors()) {
     $form['override']['#access'] = TRUE;
     if (count($form_state['storage']['override_messages']) > 1) {
       $message_output = theme('item_list', array('items' => $form_state['storage']['override_messages']));
@@ -575,7 +578,11 @@ function _redirect_extract_url_options(&$element, &$form_state) {
  */
 function redirect_edit_form_validate($form, &$form_state) {
   form_state_values_clean($form_state);
-  $redirect = new Redirect($form_state['values']);
+  $values = $form_state['values'];
+  // Get rid of form values not appropriate for Redirect creation.
+  unset($values['override']);
+  unset($values['delete']);
+  $redirect = new Redirect($values);
 
   if (empty($form_state['values']['override'])) {
     if ($existing = redirect_load_by_source($redirect->source, $redirect->langcode)) {
@@ -664,7 +671,7 @@ function redirect_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Automatically create redirects when URL aliases are changed.'),
     '#default_value' => $config->get('auto_redirect'),
-    '#description' => t('This setting is most commonly used when replacing existing URL aliases under the "URL alias upadte action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/urls/path/patterns/settings'))),
+    '#description' => t('This setting is most commonly used when replacing existing URL aliases under "Update action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/urls/path/patterns/settings'))),
     '#disabled' => !module_exists('path'),
   );
   $form['passthrough_querystring'] = array(
@@ -842,8 +849,6 @@ function redirect_list_404_filter_form_reset($form, &$form_state) {
  */
 function redirect_list_table($redirects, $header) {
   $destination = backdrop_get_destination();
-  $config = config('redirect.settings');
-  $default_status_code = $config->get('default_status_code');
 
   // Set up the header.
   $header = array_combine($header, $header);
@@ -870,12 +875,12 @@ function redirect_list_table($redirects, $header) {
     $redirect_url = redirect_url($redirect->redirect, array_merge($redirect->redirect_options, array('alias' => TRUE)));
     $row['data']['source'] = l($source_url, $redirect->source, $redirect->source_options);
     $row['data']['redirect'] = l($redirect_url, $redirect->redirect, $redirect->redirect_options);
-    $row['data']['status_code'] = $redirect->status_code ? $redirect->status_code : t('Default (@default)', array('@default' => $default_status_code));
+    $row['data']['status_code'] = $redirect->status_code;
     $row['data']['language'] = language_name($redirect->langcode);
     $row['data']['count'] = $redirect->count;
     if ($redirect->access) {
       $row['data']['access'] = array(
-        'data' => t('!interval ago', array('!interval' => format_interval(REQUEST_TIME - $redirect->access))),
+        'data' => t('!interval ago', array('!interval' => format_time_diff_since($redirect->access))),
         'title' => t('Last accessed on @date', array('@date' => format_date($redirect->access))),
       );
     }

@@ -1,0 +1,56 @@
+.icon-browser-filters-wrapper {
+  align-items: last baseline;
+  margin: 1em 0;
+  padding: 7px 13px;
+  border: 2px solid #EAEAEA;
+  background-color: #fff;
+  gap: 0;
+}
+
+@media (min-width: 48em) {
+  .icon-browser-filters-wrapper {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1.5rem;
+  }
+}
+
+.icon-browser-list {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 1.5rem;
+}
+
+.icon-browser-list .icon-wrapper {
+  width: 72px;
+  display: inline-block;
+  margin: .25rem;
+  text-align: center;
+  text-decoration: none;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+.icon-browser-list .icon-wrapper .icon-name {
+  color: unset;
+  font-size: .7rem;
+}
+
+.icon-browser-list .icon-wrapper .icon-name ::after {
+  min-width: 1.25rem;
+}
+
+.icon-browser-list .icon-wrapper .icon {
+  width: 36px;
+  margin: 0 auto;
+}
+
+.icon-browser-list .icon-wrapper .icon  svg {
+  width: 36px;
+  height: 36px;
+}
+
+.icon-browser-list .icon-wrapper.error .icon {
+  color: #aaaaaa;
+}

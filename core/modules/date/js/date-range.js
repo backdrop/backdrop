@@ -51,7 +51,7 @@ Backdrop.date.EndDateHandler = function ($widget) {
  */
 Backdrop.date.EndDateHandler.prototype.bindToggle = function () {
   var handler = this;
-  this.$toggle.bind('change.endDateHandler', function() {
+  this.$toggle.on('change.endDateHandler', function() {
     if (this.checked) {
       handler.$end.show();
     }
@@ -117,10 +117,10 @@ Backdrop.date.EndDateHandler.prototype.bindClickHandlers = function () {
   var handler = this;
   for (var id in this.selects) {
     if (this.selects.hasOwnProperty(id)) {
-      this.selects[id].start.bind('click.endDateHandler', function(e) {
+      this.selects[id].start.on('click.endDateHandler', function(e) {
         handler.startClickHandler.apply(handler, [e])
       });
-      this.selects[id].end.bind('focus.endDateHandler', function(e) {
+      this.selects[id].end.on('focus.endDateHandler', function(e) {
         handler.endFocusHandler.apply(handler, [e]);
       });
     }
@@ -140,10 +140,10 @@ Backdrop.date.EndDateHandler.prototype.startClickHandler = function () {
 Backdrop.date.EndDateHandler.prototype.endFocusHandler = function (event) {
   for (var id in this.selects) {
     if (this.selects.hasOwnProperty(id)) {
-      this.selects[id].start.unbind('click.endDateHandler');
+      this.selects[id].start.off('click.endDateHandler');
     }
   }
-  $(event.target).unbind('focus', this.endFocusHandler);
+  $(event.target).off('focus', this.endFocusHandler);
 };
 
 Backdrop.date.EndDateHandler.prototype.syncEndDate = function () {

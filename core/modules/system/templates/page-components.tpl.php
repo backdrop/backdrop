@@ -8,7 +8,7 @@
  *
  * To override the display of page components, copy this file and place it
  * inside your theme. 
- * To override individual individual components, create one of the following
+ * To override the individual components, create one of the following
  * templates in your theme:
  * - page-components.tpl.php
  * - page-components--action-links.tpl.php
@@ -18,7 +18,6 @@
  * - page-components--title-combo.tpl.php
  *
  * Variables available:
- * Variables:
  * - $title: The page title, for use in the actual HTML content.
  * - $messages: Status and error messages. Should be displayed prominently.
  * - $tabs: Tabs linking to any sub-pages beneath the current page

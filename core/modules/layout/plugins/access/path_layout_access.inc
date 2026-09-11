@@ -37,7 +37,7 @@ class PathLayoutAccess extends LayoutAccess {
     $path = backdrop_get_path_alias($base_path);
     $page_match = backdrop_match_path($path, $this->settings['paths']);
 
-    // If there's a path alias, we may still be at the un-aliased path
+    // If there's a URL alias, we may still be at the un-aliased path
     // so check that as well.
     if ($path !== $base_path) {
       $page_match = $page_match || backdrop_match_path($base_path, $this->settings['paths']);

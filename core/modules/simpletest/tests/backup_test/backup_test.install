@@ -1,0 +1,43 @@
+<?php
+/**
+ * @file
+ * Install and update functions for the Backup test module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function backup_test_schema() {
+  $schema = array();
+  $schema['backup_test'] = array(
+    'description' => 'Table for testing no-data and table exclusion during backups.',
+    'fields' => array(
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('name'),
+  );
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function backup_test_install() {
+  db_insert('backup_test')
+    ->fields(array(
+      'name' => 'test_value1',
+      'value' => 'foo',
+    ))
+    ->execute();
+}

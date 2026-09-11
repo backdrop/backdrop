@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field hooks to implement a date field.
@@ -301,6 +300,20 @@ function date_field_widget_info() {
   // Add the fieldset option for select fields only.
   $info['date_select']['settings']['no_fieldset'] = FALSE;
 
+  // HTML5 widget with slightly different settings.
+  $info['date_html5'] = array(
+    'label' => t('HTML5 widget'),
+    'field types' => array('date', 'datetime', 'datestamp'),
+    'settings' => array(
+      'limits' => array(
+        'mode' => 'none',
+        'years_back' => -3,
+        'years_forward' => 3,
+      ),
+      'no_fieldset' => TRUE,
+    ),
+  );
+
   return $info;
 }
 
@@ -341,70 +354,20 @@ function date_field_widget_info() {
 function date_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
   module_load_include('inc', 'date', 'date.elements');
 
-  $element = $base;
+  switch ($instance['widget']['type']) {
+    case 'date_html5':
+      if (!isset($form['#entity'])) {
+        // Prevent additional default value and useless token browser on the
+        // settings form.
+        $form['#access'] = FALSE;
+        return;
+      }
+      $element = _date_html5_field_widget_form($field, $instance, $langcode, $items, $delta, $base);
+      break;
 
-  // If this is a new entity, populate the field with the right default values.
-  // This happens early so even fields later hidden with #access get those values.
-  // We should only add default values to new entities, to avoid over-writing
-  // a value that has already been set. This means we can't just check to see
-  // if $items is empty, because it might have been set that way on purpose.
-  // @see date_field_widget_properties_alter() where we flagged if this is a new entity.
-
-  // We check !isset($items[$delta]['value']) because entity translation may create
-  // a new translation entity for an existing entity and we don't want to clobber
-  // values that were already set in that case.
-  // @see http://drupal.org/node/1478848.
-
-  $is_default = FALSE;
-  if (!empty($instance['widget']['is_new']) && !isset($items[$delta]['value'])) {
-    $items = date_default_value($field, $instance, $langcode);
-    $is_default = TRUE;
-  }
-
-  $timezone = date_get_timezone($field['settings']['tz_handling'], isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : date_default_timezone());
-
-  // TODO see if there's a way to keep the timezone element from ever being
-  // nested as array('timezone' => 'timezone' => value)). After struggling
-  // with this a while, I can find no way to get it displayed in the form
-  // correctly and get it to use the timezone element without ending up
-  // with nesting.
-  if (is_array($timezone)) {
-    $timezone = $timezone['timezone'];
-  }
-
-  $element += array(
-    '#type' => 'date_combo',
-    '#theme_wrappers' => array('date_combo'),
-    '#weight' => $delta,
-    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
-    '#date_timezone' => $timezone,
-    '#element_validate' => array('date_combo_validate'),
-    '#date_is_default' => $is_default,
-
-    // Store the original values, for use with disabled and hidden fields.
-    '#date_items' => isset($items[$delta]) ? $items[$delta] : '',
-  );
-
-  if ($field['settings']['tz_handling'] == 'date') {
-    $element['timezone'] = array(
-      '#type' => 'date_timezone',
-      '#theme_wrappers' => array('date_timezone'),
-      '#delta' => $delta,
-      '#default_value' => $timezone,
-      '#weight' => $instance['widget']['weight'] + 1,
-      '#date_label_position' => $instance['widget']['settings']['label_position'],
-    );
-  }
-
-  // Make changes if instance is set to be rendered as a regular field.
-  if ($instance['widget']['settings']['no_fieldset']) {
-    $element['#title'] = NULL;
-    $element['#theme_wrappers'] = array();
-    $element['#date_title_printed'] = FALSE;
-  }
-  else {
-    $element['#title'] = $instance['label'];
-    $element['#date_title_printed'] = TRUE;
+    default:
+      $element = _date_default_field_widget_form($field, $instance, $langcode, $items, $delta, $base);
+      break;
   }
 
   return $element;
@@ -548,6 +511,9 @@ function date_field_instance_settings_form($field, $instance) {
  */
 function date_field_widget_settings_form($field, $instance) {
   module_load_include('inc', 'date', 'date.admin');
+  if ($instance['widget']['type'] == 'date_html5') {
+    return _date_html5_field_widget_settings_form($instance);
+  }
   return _date_field_widget_settings_form($field, $instance);
 }
 

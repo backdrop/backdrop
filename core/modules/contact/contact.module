@@ -27,13 +27,14 @@ function contact_permission() {
   return array(
     'administer contact forms' => array(
       'title' => t('Administer contact forms and contact form settings'),
-      'restrict access' => TRUE
+      'restrict access' => TRUE,
+      'warning' => t('Adding additional email recipients lets them see all incoming emails.'),
     ),
     'access site-wide contact form' => array(
       'title' => t('Use the site-wide contact form'),
     ),
     'access user contact forms' => array(
-      'title' => t("Use users' personal contact forms"),
+      'title' => t('Use personal contact forms'),
     ),
   );
 }
@@ -119,16 +120,20 @@ function contact_menu() {
     'type' => MENU_SUGGESTED_ITEM,
     'file' => 'contact.pages.inc',
   );
-  $items['user/%user/contact'] = array(
-    'title' => 'Contact',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('contact_personal_form', 1),
-    'type' => MENU_LOCAL_TASK,
-    'access callback' => '_contact_personal_tab_access',
-    'access arguments' => array(1),
-    'weight' => 2,
-    'file' => 'contact.pages.inc',
-  );
+  $config = config('contact.settings');
+  if ($config->get('personal')) {
+    $items['user/%user/contact'] = array(
+      'title' => 'Contact',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('contact_personal_form', 1),
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => '_contact_personal_tab_access',
+      'access arguments' => array(1),
+      'weight' => 2,
+      'file' => 'contact.pages.inc',
+    );
+  }
+
   return $items;
 }
 
@@ -209,7 +214,7 @@ function contact_load($cid) {
  * Loads an array of all contact categories.
  *
  * @return array
- *   An array of contact categoryies data.
+ *   An array of contact category data.
  */
 function contact_config_data() {
   $config_data = array();
@@ -280,7 +285,7 @@ function contact_mail($key, &$message, $params) {
       $message['subject'] .= t('[!site-name] !subject', $variables, array('langcode' => $language->langcode));
       $message['body'][] = t('Hello !recipient-name,', $variables, array('langcode' => $language->langcode));
       $message['body'][] = t("!sender-name (!sender-url) has sent you a message via your contact form (!form-url) at !site-name.", $variables, array('langcode' => $language->langcode));
-      $message['body'][] = t("If you don't want to receive such e-mails, you can change your settings at !recipient-edit-url.", $variables, array('langcode' => $language->langcode));
+      $message['body'][] = t("If you don't want to receive such emails, you can change your settings at !recipient-edit-url.", $variables, array('langcode' => $language->langcode));
       if (!empty($params['phone'])) {
         $message['body'][] = t("!sender-name provided a phone number: !sender-phone", $variables, array('langcode' => $language->langcode));
       }
@@ -299,18 +304,22 @@ function contact_mail($key, &$message, $params) {
  */
 function contact_form_user_profile_form_alter(&$form, &$form_state) {
   $config = config('contact.settings');
+  if (!$config->get('personal')) {
+    return;
+  }
+
   $form['contact'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Contact settings'),
+    '#title' => t('Contact form'),
     '#weight' => 5,
-    '#collapsible' => TRUE,
+    '#group' => 'additional_settings',
   );
   $account = $form['#user'];
   $form['contact']['contact'] = array(
     '#type' => 'checkbox',
     '#title' => t('Personal contact form'),
     '#default_value' => isset($account->data['contact']) ? $account->data['contact'] : $config->get('contact_default_status'),
-    '#description' => t('Allow other users to contact you via a <a href="@url">personal contact form</a> which keeps your e-mail address hidden. Note that some privileged users such as site administrators are still able to contact you even if you choose to disable this feature.', array('@url' => url("user/$account->uid/contact"))),
+    '#description' => t('Allow other users to contact you via a <a href="@url">personal contact form</a> which keeps your email address hidden. Note that some privileged users such as site administrators are still able to contact you even if you choose to disable this feature.', array('@url' => url("user/$account->uid/contact"))),
   );
 }
 
@@ -328,33 +337,10 @@ function contact_user_presave($account) {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
- *
- * Add the default personal contact setting on the user settings page.
- *
- * @see user_admin_settings()
- */
-function contact_form_user_admin_settings_alter(&$form, &$form_state) {
-  $config = config('contact.settings');
-
-  $form['contact'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Contact settings'),
-    '#weight' => 0,
-    '#config' => 'contact.settings',
-  );
-  $form['contact']['contact_default_status'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable the personal contact form by default for new users.'),
-    '#description' => t('Changing this setting will not affect existing users.'),
-    '#default_value' => $config->get('contact_default_status'),
-  );
-}
-
-/**
  * Implements hook_block_info().
  */
 function contact_block_info() {
+  // cspell:ignore sitewide
   $blocks['sitewide'] = array(
     'info' => t('Contact form'),
     'description' => t('Site-wide contact form.'),

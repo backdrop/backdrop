@@ -1,0 +1,170 @@
+<?php
+
+/**
+ * Test for Entity Reference taxonomy integration.
+ */
+class EntityReferenceTaxonomyTestCase extends BackdropWebTestCase {
+
+  public function setUp() {
+    parent::setUp('node', 'entityreference', 'taxonomy');
+
+    // Clear field info to ensure entityreference is recognized.
+    field_info_cache_clear();
+  }
+
+  /**
+   * Add an ER field from node/post to taxonomy and a term reference field.
+   */
+  protected function setupForIndex() {
+    // Create an entity reference field.
+    $field = array(
+      'entity_types' => array('node'),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'taxonomy_term',
+        'handler_settings' => array(
+          'target_bundles' => array(),
+        ),
+      ),
+      'field_name' => 'field_entityreference_term',
+      'type' => 'entityreference',
+    );
+    $field = field_create_field($field);
+    $instance = array(
+      'field_name' => 'field_entityreference_term',
+      'bundle' => 'post',
+      'entity_type' => 'node',
+    );
+
+    // Enable the taxonomy-index behavior.
+    $instance['settings']['behaviors']['taxonomy']['status'] = TRUE;
+    field_create_instance($instance);
+
+    // Create a term reference field.
+    $field = array(
+      'translatable' => FALSE,
+      'entity_types' => array('node'),
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => 'terms',
+            'parent' => 0,
+          ),
+        ),
+      ),
+      'field_name' => 'field_taxonomy_term',
+      'type' => 'taxonomy_term_reference',
+    );
+    $field = field_create_field($field);
+    $instance = array(
+      'field_name' => 'field_taxonomy_term',
+      'bundle' => 'post',
+      'entity_type' => 'node',
+    );
+    field_create_instance($instance);
+
+    // Create a terms vocabulary.
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => 'Terms',
+      'machine_name' => 'terms',
+    ));
+    taxonomy_vocabulary_save($vocabulary);
+
+    // Create term.
+    for ($i = 1; $i <= 2; $i++) {
+      /** @var TaxonomyTerm $term */
+      $term = entity_create('taxonomy_term', array(
+        'name' => "term $i",
+        'vocabulary' => $vocabulary->machine_name,
+        'langcode' => LANGUAGE_NONE,
+      ));
+      taxonomy_term_save($term);
+    }
+  }
+
+  /**
+   * Test referencing a term using entity reference field.
+   */
+  public function testNodeIndex() {
+    $this->setupForIndex();
+    $langcode = LANGUAGE_NONE;
+
+    // Assert node insert with reference to term.
+    $settings = array();
+    $settings['type'] = 'post';
+    $settings['field_entityreference_term'][LANGUAGE_NONE][0]['target_id'] = 1;
+    $node = $this->backdropCreateNode($settings);
+
+    $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
+
+    // Assert node update with reference to term.
+    node_save($node);
+    $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
+
+    // Assert node update with reference to term and taxonomy reference to
+    // another term.
+    $node->field_taxonomy_term[$langcode] = array(array('tid' => 2));
+    $node->save();
+
+    $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
+    $this->assertEqual(taxonomy_select_nodes(2), array($node->nid));
+
+    // Assert node update with reference to term and taxonomy reference to
+    // same term.
+    $node->field_taxonomy_term[$langcode] = array(array('tid' => 1));
+    $node->save();
+    $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
+
+    $node->delete();
+    $this->assertFalse(taxonomy_select_nodes(1));
+  }
+
+  /**
+   * Add a second ER field from node/post to taxonomy.
+   *
+   * This should not cause {taxonomy_index} to receive duplicate entries.
+   */
+  protected function setupForIndexDuplicates() {
+    // Create an entity reference field.
+    $field = array(
+      'entity_types' => array('node'),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'taxonomy_term',
+        'handler_settings' => array(
+          'target_bundles' => array(),
+        ),
+      ),
+      'field_name' => 'field_entityreference_term2',
+      'type' => 'entityreference',
+    );
+    $field = field_create_field($field);
+    $instance = array(
+      'field_name' => 'field_entityreference_term2',
+      'bundle' => 'post',
+      'entity_type' => 'node',
+    );
+
+    // Enable the taxonomy-index behavior.
+    $instance['settings']['behaviors']['taxonomy']['status'] = TRUE;
+    field_create_instance($instance);
+  }
+
+  /**
+   * Make sure the index only contains one entry for a given node->term
+   * reference, even when multiple ER fields link from the node bundle to terms.
+   */
+  public function testIndexDuplicates() {
+    // Extra setup for this test: add another ER field on this content type.
+    $this->setupForIndexDuplicates();
+
+    // Assert node insert with reference to term in first field.
+    $tid = 1;
+    $settings = array();
+    $settings['type'] = 'post';
+    $settings['field_entityreference_term2'][LANGUAGE_NONE][0]['target_id'] = $tid;
+    $node = $this->backdropCreateNode($settings);
+
+    $this->assertEqual(taxonomy_select_nodes($tid), array($node->nid));
+  }
+}

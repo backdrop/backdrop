@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides SimpleTests for core session handling functionality.
@@ -53,7 +52,6 @@ class SessionTestCase extends BackdropWebTestCase {
     $this->backdropPost('user/login', $edit, t('Log in'));
     $this->backdropGet('user');
     $pass = $this->assertText($user->name, format_string('Found name: %name', array('%name' => $user->name)), 'User login');
-    $this->_logged_in = $pass;
 
     $this->backdropGet('session-test/id');
     $matches = array();
@@ -162,7 +160,7 @@ class SessionTestCase extends BackdropWebTestCase {
     $this->assertFalse($this->backdropGetHeader('Set-Cookie'), 'New session was not started.');
 
     // Verify that no session is created if backdrop_save_session(FALSE) is called.
-    $this->backdropGet('session-test/set-message-but-dont-save');
+    $this->backdropGet('session-test/set-message-but-do-not-save');
     $this->assertSessionCookie(FALSE);
     $this->assertSessionEmpty(TRUE);
 
@@ -565,4 +563,3 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
     return $base_url . '/core/modules/simpletest/tests/http.php?q=' . $url;
   }
 }
-

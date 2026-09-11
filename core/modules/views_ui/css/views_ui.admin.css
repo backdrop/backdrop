@@ -204,11 +204,13 @@
 [dir="rtl"] #edit-display-settings-top .dropbutton-wrapper {
   float: left;
 }
-#edit-display-settings-top .views-ui-display-tab-setting {
+#edit-display-settings-top .views-ui-display-tab-setting,
+#edit-display-settings-top .views-ui-display-tab-type {
   position: relative;
   float: left; /* LTR */
 }
-[dir="rtl"] #edit-display-settings-top .views-ui-display-tab-setting {
+[dir="rtl"] #edit-display-settings-top .views-ui-display-tab-setting,
+[dir="rtl"] #edit-display-settings-top .views-ui-display-tab-type {
   float: right;
 }
 
@@ -323,7 +325,6 @@
   max-height: 400px;
   overflow: auto;
   padding: 20px;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 @media only screen and (min-height: 750px) {

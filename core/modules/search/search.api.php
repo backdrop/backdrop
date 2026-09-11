@@ -172,7 +172,7 @@ function hook_search_admin() {
  */
 function hook_search_execute($keys = NULL, $conditions = NULL) {
   // Build matching conditions
-  $query = db_select('search_index', 'i', array('target' => 'slave'))->extend('SearchQuery')->extend('PagerDefault');
+  $query = db_select('search_index', 'i', array('target' => 'replica'))->extend('SearchQuery')->extend('PagerDefault');
   $query->join('node', 'n', 'n.nid = i.sid');
   $query
     ->condition('n.status', 1)
@@ -261,7 +261,7 @@ function hook_search_page($results) {
  * - Adding spaces between words of Chinese or Japanese text.
  * - Stemming words down to their root words to allow matches between, for
  *   instance, walk, walked, walking, and walks in searching.
- * - Expanding abbreviations and acronymns that occur in text.
+ * - Expanding abbreviations and acronyms that occur in text.
  *
  * @param $text
  *   The text to preprocess. This is a single piece of plain text extracted

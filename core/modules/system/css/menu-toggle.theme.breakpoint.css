@@ -38,7 +38,6 @@
   height: 2px;
   width: 24px;
   background: #bbb;
-  -webkit-transition: all 0.25s;
   transition: all 0.25s;
 }
 [dir="rtl"] .menu-toggle-button-icon {
@@ -68,12 +67,10 @@
 }
 .menu-toggle-state:checked ~ .menu-toggle-button .menu-toggle-button-icon:before {
   top: 0;
-  -webkit-transform: rotate(-45deg);
   transform: rotate(-45deg);
 }
 .menu-toggle-state:checked ~ .menu-toggle-button .menu-toggle-button-icon:after {
   top: 0;
-  -webkit-transform: rotate(45deg);
   transform: rotate(45deg);
 }
 

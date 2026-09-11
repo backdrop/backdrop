@@ -35,9 +35,6 @@ if ($image) {
       <?php print $title; ?>
     </div>
 
-    <div class="project-updated">
-      <?php print $last_updated; ?>
-    </div>
     <div class="project-page">
       <?php print $project_page; ?>
     </div>

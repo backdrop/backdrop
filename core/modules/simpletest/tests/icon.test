@@ -1,0 +1,206 @@
+<?php
+/**
+ * @file
+ * Tests for displaying and overriding icons in Backdrop.
+ */
+
+/**
+ * Tests providing and overriding icons from both modules and themes.
+ */
+class IconTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp($modules = array()) {
+    $modules[] = 'icon_test';
+    // Enabling the Theme Test module makes the SimpleTest themes available via
+    // hook_system_theme_info().
+    $modules[] = 'theme_test';
+    return parent::setUp($modules);
+  }
+
+  /**
+   * Tests providing and overriding icons with a module.
+   *
+   * The "icon_test_location" state variable is checked in the icon_test.module
+   * implementation of hook_icon(). This determines which icon file is currently
+   * overriding the default core icon.
+   */
+  protected function testIconHooks() {
+    // Default icon location with no overrides.
+    $core_path = 'core/misc/icons/gear.svg';
+    $this->assertIconsEqual($core_path, 'gear', FALSE, 'Default core icon is correct');
+
+    $module_path = backdrop_get_path('module', 'icon_test');
+
+    // Test an icon with the same name in the default icons directory.
+    // Replace the "gear" icon with a duotone variant.
+    state_set('icon_test_location', 'default');
+    $this->assertIconsEqual($module_path . '/icons/gear.svg', 'gear', FALSE, 'Overridden icon is correct.');
+
+    // Test an icon in a nested directory with the same name.
+    // Replace the "gear" icon with a bold variant.
+    state_set('icon_test_location', 'directory');
+    $this->assertIconsEqual($module_path . '/icons/bold/gear.svg', 'gear', FALSE, 'Overridden icon in a sub-directory is correct.');
+
+    // Test an icon in the default icons directory with a different name.
+    // Replace the "gear" icon with a thin variant.
+    state_set('icon_test_location', 'renamed');
+    $this->assertIconsEqual($module_path . '/icons/gear-thin.svg', 'gear', FALSE, 'Overridden icon with a different name is correct.');
+
+    // Test an icon in a nested directory with a different name.
+    // Replace the "gear" icon with a bold variant.
+    state_set('icon_test_location', 'renamed_directory');
+    $this->assertIconsEqual($module_path . '/icons/bold/gear-bold.svg', 'gear', FALSE, 'Overridden icon with a different name and directory is correct.');
+
+    // Test an icon outside of the module.
+    // Replace the "gear" icon with the six-spoke version.
+    state_set('icon_test_location', 'outside_module');
+    $this->assertIconsEqual('core/misc/icons/gear-six.svg', 'gear', FALSE, 'Overridden icon outside of a module directory is correct.');
+
+    // Test that the immutable version is still provided by core.
+    $this->assertIconsEqual($core_path, 'gear', TRUE, 'Immutable icon is still provided from the default location even when overridden.');
+  }
+
+  /**
+   * Tests a theme providing and overriding icons, including sub-themes.
+   */
+  protected function testThemeIcons() {
+    // Test overriding an icon with no special situations.
+    theme_enable(array('test_theme'));
+    config_set('system.core', 'theme_default', 'test_theme');
+    $core_path = 'core/modules/simpletest/tests/themes/test_theme/icons/gear.svg';
+    $this->assertIconsEqual($core_path, 'gear', FALSE, 'Icon provided by a theme is overridden.');
+
+    // Test an icon nested in a sub-directory and using a theme setting.
+    config_set('test_theme.settings', 'icon_directory', 'icons/nested');
+    $core_path = 'core/modules/simpletest/tests/themes/test_theme/icons/nested/gear-bold.svg';
+    $this->assertIconsEqual($core_path, 'gear-bold', FALSE, 'Icon provided by a theme in a sub-directory uses the correct icon.');
+
+    // Test an icon provided by a sub-theme.
+    theme_enable(array('test_subtheme'));
+    config_set('system.core', 'theme_default', 'test_subtheme');
+    $core_path = 'core/modules/simpletest/tests/themes/test_subtheme/icons/gear.svg';
+    $this->assertIconsEqual($core_path, 'gear', FALSE, 'Icon provided by a sub-theme uses the correct icon.');
+
+    // Test an icon provided by a base-theme is used when a sub-theme is active.
+    $core_path = 'core/modules/simpletest/tests/themes/test_basetheme/icons/gear-bold.svg';
+    $this->assertIconsEqual($core_path, 'gear-bold', FALSE, 'Icon provided by a base-theme uses the correct icon.');
+  }
+
+  /**
+   * Test that rendered icons have the expected content and attributes.
+   */
+  protected function testIconAttributes() {
+    $options_alt = array(
+      'alt' => 'Hello world',
+    );
+    $expected_alt = '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" fill="currentColor" class="icon icon--circle-fill"><title>Hello world</title><path d="M232,128A104,104,0,1,1,128,24,104.13,104.13,0,0,1,232,128Z"/></svg>';
+    $icon = icon('circle-fill', $options_alt);
+    $this->assertEqual($icon, $expected_alt, 'Alt option properly converted to title dom element.');
+
+    $options_dimensions = array(
+      'attributes' => array(
+        'width' => 99,
+        'height' => 99,
+      ),
+    );
+    $expected_dimensions = '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" fill="currentColor" width="99" height="99" aria-hidden="true" class="icon icon--line-vertical"><path d="M136,24V232a8,8,0,0,1-16,0V24a8,8,0,0,1,16,0Z"/></svg>';
+    $icon = icon('line-vertical', $options_dimensions);
+    $this->assertEqual($icon, $expected_dimensions, 'Width and height attributes properly added.');
+
+    $options_fill = array(
+      'attributes' => array(
+        'fill' => 'red',
+      ),
+    );
+    $expected_fill = '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" fill="red" aria-hidden="true" class="icon icon--dot"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Z"/></svg>';
+    $icon = icon('dot', $options_fill);
+    $this->assertEqual($icon, $expected_fill, 'Value of fill attribute properly overridden.');
+
+    // Remove title tag if alt option is an empty string, low level check.
+    $initial_svg = '<svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><title>Hello world</title><circle cx="8" cy="8" r="4"></circle></svg>';
+    $options = array(
+      'alt' => '',
+      'aria-hidden' => 'true',
+    );
+    $expected_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4"/></svg>';
+    $updated_svg = image_add_svg_attributes($initial_svg, $options);
+    $this->assertEqual($updated_svg, $expected_svg, 'Title tag stripped and aria attribute added properly.');
+
+    // Make sure, a comment does not break attribute handling.
+    $initial_svg = '<!-- Some vendor comment --><svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="4"></circle></svg>';
+    $options = array(
+      'alt' => 'Some alternative text',
+      'fill' => 'blue',
+    );
+    $expected_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1" viewBox="0 0 16 16" fill="blue"><title>Some alternative text</title><circle cx="8" cy="8" r="4"/></svg>';
+    $updated_svg = image_add_svg_attributes($initial_svg, $options);
+    $this->assertEqual($updated_svg, $expected_svg, 'Addition of title and attribute works with comment in svg file.');
+
+    // Unlikely but possible: a comment as first item in svg tag.
+    $initial_svg = '<svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><!-- Comment --><circle cx="8" cy="8" r="4"></circle></svg>';
+    $options = array(
+      'alt' => 'Some alternative text',
+      'fill' => 'green',
+    );
+    $expected_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1" viewBox="0 0 16 16" fill="green"><title>Some alternative text</title><!-- Comment --><circle cx="8" cy="8" r="4"/></svg>';
+    $updated_svg = image_add_svg_attributes($initial_svg, $options);
+    $this->assertEqual($updated_svg, $expected_svg, 'Addition of title and attribute works with comment as first child of svg tag.');
+  }
+
+  /**
+   * Compare an expected icon path against the active icon path by icon name.
+   *
+   * @param string $expected_path
+   *   The icon path relative to the Backdrop installation root.
+   * @param string $icon_name
+   *   The name of the icon.
+   * @param boolean $immutable
+   *   TRUE to find the original (immutable) icon, or FALSE to find the active
+   *   icon provided by a module or theme.
+   * @param string $message
+   *   The message to display along with the assertion.
+   */
+  protected function assertIconsEqual($expected_path, $icon_name, $immutable = FALSE, $message = NULL) {
+    $this->backdropGet('icon-path/' . $icon_name . '/' . ($immutable ? '1' : '0'));
+    $this->assertEqual($expected_path, $this->content);
+    $this->backdropGet('icon-content/' . $icon_name . '/' . ($immutable ? '1' : '0'));
+    $this->assertIconContentsEqual(file_get_contents($expected_path), $this->content, $message);
+  }
+
+  /**
+   * Compare the contents of two SVG icons for equality.
+   *
+   * This function compares the inner contents of an SVG while ignoring
+   * some differences on the <svg> tag, like the default classes added
+   * by theme_icon() and the aria-hidden="true" added when no alt text is used.
+   *
+   * @param string $svg1
+   *   The first SVG content to compare.
+   * @param string $svg2
+   *   The second SVG contents to compare.
+   * @param string $message
+   *   The message to display along with the assertion.
+   *
+   * @return boolean
+   *   TRUE if the assertion succeeded, FALSE otherwise.
+   */
+  protected function assertIconContentsEqual($svg1, $svg2, $message) {
+    $reset_attributes = array(
+      'alt' => '',
+      'class' => '',
+      'aria-hidden' => '',
+    );
+    $tags = array('svg', 'title', 'use', 'desc', 'defs', 'linearGradient',
+      'stop', 'rect', 'circle', 'path');
+    $svg1 = image_add_svg_attributes($svg1, $reset_attributes);
+    $svg1 = filter_xss($svg1, $tags);
+    $svg2 = image_add_svg_attributes($svg2, $reset_attributes);
+    $svg2 = filter_xss($svg2, $tags);
+
+    return $this->assertEqual($svg1, $svg2, $message);
+  }
+}

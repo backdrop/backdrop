@@ -1,5 +1,6 @@
 type = layout
 name = Rolph
+description = Includes a header, top, four columns, bottom, and footer.
 version = BACKDROP_VERSION
 backdrop = 1.x
 

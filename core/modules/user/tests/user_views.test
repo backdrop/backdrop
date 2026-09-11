@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of UserViewsTestCase.
@@ -16,8 +15,8 @@ class UserViewsTestCase extends ViewsSqlTest {
   var $users = array();
   var $nodes = array();
 
-  protected function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     $this->users[] = $this->backdropCreateUser();
     $this->users[] = user_load(1);
@@ -57,8 +56,8 @@ class UserViewsTestCase extends ViewsSqlTest {
     $view->api_version = '3.0-alpha1';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
     $handler->display->display_options['title'] = 'test_user_relationship';
     $handler->display->display_options['access']['type'] = 'perm';
     $handler->display->display_options['cache']['type'] = 'none';

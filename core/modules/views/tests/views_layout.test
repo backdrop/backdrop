@@ -1,0 +1,131 @@
+<?php
+/**
+ * @file
+ * Tests for Views and Layout context.
+ */
+
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
+
+/**
+ * Tests the interface for adding, removing, and moving blocks.
+ */
+class ViewsLayoutsTest extends BackdropWebTestCase {
+
+  /**
+   * Function that handles the set-up of this test.
+  */
+  protected function setup() {
+    // Loading in required modules.
+    parent::setup(
+      'views', 'views_ui', 'layout', 'block', 'user', 'contextual'
+    );
+  }
+
+  /**
+   * Tests that a contextual filter input can be passed in from a layout.
+   */
+  public function testViewsLayouts() {
+    global $admin_user;
+
+    $permissions = array(
+      'administer site configuration',
+      'administer views',
+      'administer blocks',
+      'bypass node access',
+      'access user profiles',
+      'view revisions',
+      'synchronize configuration',
+      'administer layouts',
+      'administer flexible templates',
+    );
+
+    // Create and login as an admin with views and layouts permissions.
+    $admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($admin_user);
+
+    // Navigate to the form that allows the adding of our view.
+    $this->backdropGet('admin/structure/views/add');
+
+    // Create our layout context view and configure its properties.
+    $layout_context_view = array();
+    $layout_context_view['human_name'] = 'Layout Context Test (User account)';
+    $layout_context_view['name'] = 'layout_context_test_ua';
+    $layout_context_view['show[wizard_key]'] = 'users';
+    $layout_context_view['description'] = 'This view will allow a a layout to reference contextually';
+    $layout_context_view['page[create]'] = FALSE;
+    $layout_context_view['block[create]'] = 1;
+    $layout_context_view['block[title]'] = 'block';
+    $layout_context_view['block[style][row_plugin]'] = 'fields';
+
+    $this->backdropPost('admin/structure/views/add', $layout_context_view, t('Save view'));
+    $this->assertText(t('Your view was saved. You may configure it from the list below.'));
+
+    // Navigate to the configure page of our view and add fields to sort the
+    // page by.
+    $this->backdropGet('admin/structure/views/nojs/add-item/layout_context_test_ua/block/field');
+
+    $fields = array(
+      'name[fields][users.uid]' => 1,
+    );
+
+    $this->backdropPost(NULL, $fields, t('Add and configure fields'));
+    $this->backdropPost(NULL, NULL, t('Apply'));
+
+    // Add Contextual Filter User ID to our view.
+    $this->backdropGet('admin/structure/views/nojs/add-item/layout_context_test_ua/block/argument');
+    $this->backdropPost(NULL, array('name[fields][users.uid]' => 1), t('Add and configure contextual filters'));
+    $this->backdropPost(NULL, NULL, t('Apply'));
+
+    // Navigate to the Edit form of the Contextual filter input of our view.
+    $this->backdropGet('admin/structure/views/nojs/display/layout_context_test_ua/block/argument_input');
+
+    // Configuring the correct data sources.
+    $context = array(
+      'argument_input[uid][type]' => 'layout',
+      'argument_input[uid][layout]' => 'user',
+    );
+
+    $this->backdropPost(NULL, $context, 'Apply');
+
+    // Save our view.
+    $this->backdropPost(NULL, NULL, 'Save');
+
+    // Verify our view was set up properly.
+    $this->pass('View setup has finished');
+
+    // Create a layout based on the view we created.
+    $this->backdropGet('admin/structure/layouts/add');
+
+    $layout = array(
+      'title'           => 'Test_Context_Layout',
+      'name'            => 'test_context_layout',
+      'layout_template' => 'boxton',
+      'path'            => 'test/%',
+    );
+
+    // Checking path before submitting form.
+    $this->backdropPost(NULL, $layout, t('Check path'));
+
+    // Adding context to the form.
+    $edit = array(
+      'context[required][1][plugin]' => 'user',
+    );
+
+    $this->backdropPost(NULL, $edit, t('Check path'));
+    $this->backdropPost(NULL, NULL, 'Create layout');
+
+    // Add the view block to the content.
+    $this->backdropGet('admin/structure/layouts/manage/test_context_layout/add-block/editor/content');
+    $this->clickLink('View: Layout Context Test (User account) (Block)');
+    $this->backdropPost(NULL, array(), 'Add block');
+
+    // Save the layout.
+    $this->backdropPost(NULL, NULL, 'Save layout');
+    $this->pass('Layout setup has finished');
+
+    // Check if the page works for different users.
+    $this->backdropGet('test/' . $admin_user->uid);
+    $this->assertText($admin_user->name);
+    $this->assertRaw('<a href="/accounts/' . strtolower($admin_user->name) . '">' . $admin_user->uid . '</a>');
+  }
+}

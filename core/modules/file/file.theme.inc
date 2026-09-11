@@ -47,6 +47,7 @@ function theme_file_managed_file($variables) {
 function theme_file_link($variables) {
   $file = $variables['file'];
   $icon_directory = $variables['icon_directory'];
+  $attributes = $variables['attributes'];
 
   $url = file_create_url($file->uri);
 
@@ -77,12 +78,14 @@ function theme_file_link($variables) {
     'alt' => !empty($mime_name[$mimetype]) ? $mime_name[$mimetype] : t('File'),
   ));
 
-  // Set options as per anchor format described at
+  // Set "type" attribute per anchor format described at
   // http://microformats.org/wiki/file-format-examples
+  if (!isset($attributes['type'])) {
+    $attributes['type'] = $file->filemime . '; length=' . $file->filesize;
+  }
+
   $options = array(
-    'attributes' => array(
-      'type' => $file->filemime . '; length=' . $file->filesize,
-    ),
+    'attributes' => $attributes,
   );
 
   // Use the description as the link text if available.
@@ -135,9 +138,10 @@ function theme_file_widget($variables) {
 
   // The "form-managed-file" class is required for proper Ajax functionality.
   $output .= '<div class="file-widget form-managed-file clearfix">';
-  if ($element['fid']['#value'] != 0) {
+  if (!empty($element['fid']['#value'])) {
     // Add the file size after the file name.
-    $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
+    $file = reset($element['#files']);
+    $element['file_' . $file->fid]['filename']['#markup'] .= ' <span class="file-size">(' . format_size($file->filesize) . ')</span> ';
   }
   $output .= backdrop_render_children($element);
   $output .= '</div>';
@@ -184,7 +188,7 @@ function theme_file_widget_multiple($variables) {
   $rows = array();
   foreach ($widgets as $key => &$widget) {
     // Save the uploading row for last.
-    if ($widget['#file'] == FALSE) {
+    if (empty($widget['#files'])) {
       $widget['#title'] = $element['#file_upload_title'];
       $widget['#description'] = $element['#file_upload_description'];
       continue;
@@ -264,19 +268,28 @@ function theme_file_widget_multiple($variables) {
  * @ingroup themeable
  */
 function theme_file_upload_help($variables) {
-  $description = $variables['description'];
+  $description = (string) $variables['description'];
   $upload_validators = $variables['upload_validators'];
+  $cardinality = $variables['cardinality'];
 
   $descriptions = array();
 
   if (strlen($description)) {
-    $descriptions[] = $description;
+    $descriptions[] = token_replace($description);
   }
   if (isset($upload_validators['file_validate_size'])) {
     $descriptions[] = t('Files must be less than !size.', array('!size' => '<strong>' . format_size($upload_validators['file_validate_size'][0]) . '</strong>'));
   }
   if (isset($upload_validators['file_validate_extensions'])) {
     $descriptions[] = t('Allowed file types: !extensions.', array('!extensions' => '<strong>' . check_plain($upload_validators['file_validate_extensions'][0]) . '</strong>'));
+  }
+  if (isset($cardinality)) {
+    if ($cardinality == -1) {
+      $descriptions[] = t('Unlimited number of files can be uploaded to this field.');
+    }
+    else {
+      $descriptions[] = format_plural($cardinality, 'This field can store only one file.', 'This field can store at most @count files.');
+    }
   }
   if (isset($upload_validators['file_validate_image_resolution'])) {
     $max = $upload_validators['file_validate_image_resolution'][0];
@@ -351,26 +364,12 @@ function theme_file_type_overview($variables) {
 
 /**
  * Returns HTML for a file display's display order table.
+ *
+ * @deprecated as of 1.32.2. In Backdrop there is no functionality to reorder
+ * file displays.
  */
 function theme_file_display_order($variables) {
-  $element = $variables['element'];
-
-  $rows = array();
-  foreach (element_children($element, TRUE) as $name) {
-    $element[$name]['weight']['#attributes']['class'][] = 'file-display-order-weight';
-    $rows[] = array(
-      'data' => array(
-        backdrop_render($element[$name]['label']),
-        backdrop_render($element[$name]['weight']),
-      ),
-      'class' => array('draggable'),
-    );
-  }
-  $output = backdrop_render_children($element);
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'file-displays-order')));
-  backdrop_add_tabledrag('file-displays-order', 'order', 'sibling', 'file-display-order-weight', NULL, NULL, TRUE);
-
-  return $output;
+  watchdog_deprecated_function('theme', __FUNCTION__);
 }
 
 /**

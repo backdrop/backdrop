@@ -1,6 +1,6 @@
 type = module
-name = Block
-description = Controls the visual building blocks a page is constructed with. Blocks are boxes of content rendered into an area, or region, of a web page.
+name = Reusable Custom Blocks
+description = Allows custom blocks to be reused across different layouts.
 package = Layouts
 tags[] = Blocks
 tags[] = Site Architecture

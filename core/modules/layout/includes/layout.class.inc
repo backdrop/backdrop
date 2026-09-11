@@ -1,8 +1,11 @@
 <?php
-
 /**
  * @file
  * Class for loading, modifying, and executing a layout.
+ */
+
+/**
+ * Class representing a layout.
  */
 class Layout {
   /**
@@ -39,7 +42,7 @@ class Layout {
    * The layout path must match the provided menu item path. Set and get this
    * variable's value with Layout::getPath() and Layout::setPath().
    *
-   * @var string
+   * @var string|null
    */
   private $path;
 
@@ -74,12 +77,28 @@ class Layout {
    * The name of the layout template used by this configuration.
    *
    * Although this property may be retrieved and set directly, if changing a
-   * layout from one value to another, it is best to use Layout::setLayout(),
-   * which will handle the moving of blocks from one region to another.
+   * layout from one value to another, it is best to use
+   * Layout::setLayoutTemplate(), which will handle the moving of blocks from
+   * one region to another.
    *
    * @var string
    */
   var $layout_template;
+
+  /**
+   * The layout template type used by this configuration.
+   *
+   * @var string
+   */
+  public $layout_template_type;
+
+  /**
+   * Whether this layout is a full page layout (for example, with a header and
+   * footer, optional page title) or not.
+   *
+   * @var bool
+   */
+  public $is_full_page = TRUE;
 
   /**
    * Whether this layout is disabled.
@@ -118,6 +137,15 @@ class Layout {
    * @var LayoutMenuItem
    */
   var $menu_item = NULL;
+
+  /**
+   * A array of LayoutMenuItems containing menu properties for this layout's
+   * additional paths.
+   *
+   * @var array
+   * @since 1.33.0
+   */
+  public $additional_menu_items = array();
 
   /**
    * All user-specified settings for this layout.
@@ -162,14 +190,14 @@ class Layout {
    *
    * @var array
    */
-  var $orphaned_blocks = array();
+  public $orphaned_blocks = array();
 
   /**
    * The region where orphaned blocks are placed in new template.
    *
    * @var string
    */
-  var $refuge_region;
+  public $refuge_region;
 
   /**
    * An array of LayoutContext instances used by this menu item.
@@ -192,7 +220,37 @@ class Layout {
    * @see removeBlock()
    * @see layout_layout_presave()
    */
-  var $removed_blocks = array();
+  public $removed_blocks = array();
+
+  /**
+   * An array of additional paths.
+   *
+   * This is being used to to keep track of additional paths in the layout being
+   * edited. If the layout edits are saved, this is used in
+   * layout_layout_presave() in order save the paths.
+   *
+   * @var array
+   * @see layout_settings_form_validate()
+   * @see layout_layout_presave()
+   * @since 1.33.0
+   */
+  public $additional_paths = array();
+
+  /**
+   * @var array
+   * @since 1.33.0
+   */
+  protected $old_additional_paths = array();
+
+  /**
+   * @var bool
+   */
+  public $is_new;
+
+  /**
+   * @var string
+   */
+  public $original_name;
 
   /**
    * Constructor for a Layout class.
@@ -212,6 +270,9 @@ class Layout {
       'title_block' => NULL,
     );
 
+    // Load additional paths.
+    $this->additional_paths = isset($this->settings['additional_paths']) ? $this->settings['additional_paths'] : array();
+
     // Adjust for the renaming of "layout" to "layout_template".
     // See https://github.com/backdrop/backdrop-issues/issues/998
     // @todo: Remove in 2.x.
@@ -219,6 +280,9 @@ class Layout {
       $this->layout_template = $this->layout;
       unset($this->layout);
     }
+
+    $this->layout_template_type = (empty($this->layout_template_type)) ? 'layout' : $this->layout_template_type;
+    _layout_standardize_template_type($this->layout_template_type);
 
     // Set the storage type.
     if (isset($config['module'])) {
@@ -256,6 +320,9 @@ class Layout {
     if (is_null($this->contexts)) {
       $this->contexts = array();
     }
+
+    // Save original additional paths, to track any deletions.
+    $this->old_additional_paths = $this->additional_paths;
   }
 
   /**
@@ -378,6 +445,35 @@ class Layout {
         }
       }
     }
+
+    if (!empty($this->additional_menu_items)) {
+      $all_menu_items = layout_menu_item_load_all();
+      foreach ($this->additional_paths as $path) {
+        if ((layout_provides_path($path) === FALSE) && menu_get_item($path)) {
+          if (isset($this->additional_menu_items[$path])) {
+            $this->additional_menu_items[$path]->delete();
+          }
+        }
+        else {
+          if (isset($this->additional_menu_items[$path])) {
+            if (!isset($all_menu_items[$path])) {
+              $menu_item = $this->additional_menu_items[$path];
+              $menu_item->save();
+            }
+          }
+        }
+      }
+    }
+    // Cleanup menu items that were provided by any deleted additional menu
+    // items.
+    $paths_to_delete = array_diff($this->old_additional_paths, $this->additional_paths);
+    foreach ($paths_to_delete as $path_to_delete) {
+      if ($this->path != $path_to_delete && layout_provides_path($path_to_delete) === TRUE) {
+        $menu_item_to_delete = layout_menu_item_load_multiple_by_path($path_to_delete);
+        $menu_item_to_delete->delete();
+      }
+    }
+
     layout_reset_caches();
 
     $new_this = layout_load($this->name);
@@ -460,7 +556,7 @@ class Layout {
    * @param $hook
    *   One of 'insert', 'update', 'enable', 'disable', 'revert', or 'delete'.
    */
-   protected function invokeHook($hook) {
+  protected function invokeHook($hook) {
     module_invoke_all('layout_' . $hook, $this);
   }
 
@@ -525,7 +621,7 @@ class Layout {
     $this->positions[$region_name][] = $block->uuid;
 
     // Move the block into the correct position.
-    if ($position) {
+    if (is_numeric($position)) {
       $positions = array();
       foreach ($this->positions[$region_name] as $n => $uuid) {
         if ($position == $n) {
@@ -610,7 +706,7 @@ class Layout {
     }
 
     // Add the block to the new region in the correct position.
-    if (isset($region_position)) {
+    if (isset($position)) {
       $new_positions = array();
       foreach (array_values($this->positions[$region_name]) as $region_position => $existing_uuid) {
         if ($region_position === $position) {
@@ -677,9 +773,52 @@ class Layout {
   }
 
   /**
+   * Set additional menu items based on the path provided.
+   */
+  function setAdditionalMenuItems($path) {
+    $item_exists = FALSE;
+    if (empty($this->additional_menu_items)) {
+      $item_exists = FALSE;
+    }
+    else {
+      foreach ($this->additional_menu_items as $item) {
+        if ($item->path === $path) {
+          $item_exists = TRUE;
+        }
+      }
+    }
+    if (!$item_exists) {
+      // Use an existing menu item if one exists at this path.
+      if ($existing_item = layout_menu_item_load_multiple_by_path($path)) {
+        $this->additional_menu_items[$path] = $existing_item;
+      }
+      // If this layout doesn't have a menu item, make one. If the path is
+      // provided by another module, no menu item is necessary.
+      elseif (layout_provides_path($path) === NULL) {
+        if (!isset($this->additional_menu_items[$path])) {
+          $menu_item_settings = array(
+            'path' => $path,
+            'name' => $this->name . '_' . system_transliterate_machine_name($path),
+          );
+          $this->additional_menu_items[$path] = new LayoutMenuItem($menu_item_settings);
+        }
+        else {
+          $this->additional_menu_items[$path]->path = $path;
+        }
+      }
+      else {
+        if (isset($this->additional_menu_items[$path])) {
+          $this->additional_menu_items[$path]->delete();
+          unset($this->additional_menu_items[$path]);
+        }
+      }
+    }
+  }
+
+  /**
    * Return a layout's path based on its assigned menu item.
    *
-   * @return string
+   * @return string|null
    */
   function getPath() {
     if ($this->menu_item) {
@@ -693,30 +832,30 @@ class Layout {
   /**
    * Set the layout template, accommodating moving blocks if necessary.
    *
-   * @param $layout_name
-   *   The new layout name.
-   * @param $region_mapping
+   * @param string $layout_template_name
+   *   The new layout template name.
+   * @param array $region_mapping
    *   An array of region names, each keyed by the old region name and the value
    *   of the new region name. If empty, all known regions will be copied from
    *   one to the other. To discard the contents of a region, set the value
    *   to FALSE.
    */
-  function setLayoutTemplate($layout_name, $region_mapping = array()) {
+  public function setLayoutTemplate($layout_template_name, array $region_mapping = array()) {
     // If not changing anything, return as a no-op.
-    if ($layout_name === $this->layout_template && empty($region_mapping)) {
+    if ($layout_template_name === $this->layout_template && empty($region_mapping)) {
       return;
     }
     // If no layout has yet been set, then we have no copying to do.
     if (!isset($this->layout_template)) {
-      $this->layout_template = $layout_name;
+      $this->layout_template = $layout_template_name;
       return;
     }
 
-    $old_layout_info = layout_get_layout_template_info($this->layout_template);
-    $new_layout_info = layout_get_layout_template_info($layout_name);
+    $old_layout_template_info = layout_get_layout_template_info($this->layout_template, TRUE, $this->layout_template_type);
+    $new_layout_template_info = layout_get_layout_template_info($layout_template_name, TRUE, $this->layout_template_type);
     // Set up the array with region names for the new layout.
     $new_positions = array();
-    $new_regions = array_keys($new_layout_info['regions']);
+    $new_regions = array_keys($new_layout_template_info['regions']);
     foreach ($new_regions as $new_region_name) {
       $new_positions[$new_region_name] = array();
     }
@@ -724,16 +863,16 @@ class Layout {
     // Do the mapping in the order provided (if any).
     if ($region_mapping) {
       $regions = array_keys($region_mapping);
-      $regions = array_unique(array_merge($regions, array_keys($old_layout_info['regions'])));
+      $regions = array_unique(array_merge($regions, array_keys($old_layout_template_info['regions'])));
     }
     else {
-      $regions = array_keys($old_layout_info['regions']);
+      $regions = array_keys($old_layout_template_info['regions']);
     }
     foreach ($regions as $old_region_name) {
       if (isset($region_mapping[$old_region_name])) {
         $new_region_name = $region_mapping[$old_region_name];
       }
-      elseif (array_key_exists($old_region_name, $new_layout_info['regions'])) {
+      elseif (array_key_exists($old_region_name, $new_layout_template_info['regions'])) {
         $new_region_name = $old_region_name;
       }
       else {
@@ -759,15 +898,18 @@ class Layout {
     // exist.
     if (!empty($this->orphaned_blocks)) {
       end($new_positions);
-      $this->refuge_region = !empty($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
+      $this->refuge_region = (!empty($new_layout_template_info['default region'])) ? $new_layout_template_info['default region'] : key($new_positions);
       foreach ($this->orphaned_blocks as $uuid) {
         $new_positions[$this->refuge_region][] = $uuid;
       }
     }
 
-    $this->layout_template = $layout_name;
+    $this->layout_template = $layout_template_name;
     $this->positions = $new_positions;
-    module_invoke_all('layout_template_change', $this, $old_layout_info['name']);
+    if ($this->layout_template_type === 'layout') {
+      module_invoke_all('layout_template_change', $this, $old_layout_template_info['name']);
+    }
+
   }
 
   /**
@@ -788,6 +930,11 @@ class Layout {
    * @return LayoutContext[]
    */
   function getContexts($include_types = LayoutContext::USAGE_TYPE_ALL) {
+    $contexts_cache = &backdrop_static(__METHOD__, array());
+    if ($this->name && isset($contexts_cache[$this->name])) {
+      return $this->getContextsByType($contexts_cache[$this->name], $include_types);
+    }
+
     // Initialize a list of contexts if not defined.
     if (is_null($this->contexts)) {
       $this->contexts = array();
@@ -798,18 +945,21 @@ class Layout {
       if (!isset($context->position) && !is_object($context->data)) {
         $context_info = layout_get_context_info($context->plugin);
         if (isset($context_info['load callback'])) {
-          $context_data = call_user_func_array($context_info['load callback'], $context->settings);
+          $load_arguments = array_values($context->settings);
+          $context_data = call_user_func_array($context_info['load callback'], $load_arguments);
           $context->setData($context_data);
         }
       }
     }
 
-    // Load contexts from paths and menu items.
-    if ($this->menu_item) {
-      $this->contexts += $this->menu_item->getContexts();
-    }
-    elseif ($this->path) {
-      $this->contexts += layout_context_required_by_path($this->path);
+    // Load contexts from paths or menu items if available.
+    if ($this->menu_item || $this->path) {
+      if ($this->menu_item) {
+        $this->contexts += $this->menu_item->getContexts();
+      }
+      else {
+        $this->contexts += layout_context_required_by_path($this->path);
+      }
     }
 
     // Load contexts from relationships.
@@ -830,14 +980,31 @@ class Layout {
       ));
     }
 
+    // When creating or cloning, the name is null.
+    $name_key = $this->name ?? '';
+    $contexts_cache[$name_key] = $this->contexts;
+
+    return $this->getContextsByType($this->contexts, $include_types);
+  }
+
+  /**
+   * Return an array of contexts filtered by types specified.
+   *
+   * @param array $contexts
+   *   The array of contexts to be filtered.
+   * @var int $include_types
+   *   Include a specific list of contexts based on how they are used.
+   * @return LayoutContext[]
+   */
+  private function getContextsByType($contexts, $include_types = LayoutContext::USAGE_TYPE_ALL) {
     // Return all contexts if requested.
     if ($include_types === LayoutContext::USAGE_TYPE_ALL) {
-      return $this->contexts;
+      return $contexts;
     }
 
     // Otherwise filter down the list of contexts to only those requested.
     $return_contexts = array();
-    foreach ($this->contexts as $key => $context) {
+    foreach ($contexts as $key => $context) {
       if ($context->usageType & $include_types) {
         $return_contexts[$key] = $context;
       }
@@ -858,6 +1025,7 @@ class Layout {
    */
   function clearContexts($key) {
     unset($this->contexts[$key]);
+    backdrop_static_reset('Layout::getContexts');
   }
 
   /**
@@ -886,22 +1054,18 @@ class Layout {
    *   TRUE if this layout has all the required contexts, FALSE otherwise.
    */
   function hasContexts($required_contexts) {
-    $all_contexts = $this->getContexts();
-    foreach ($required_contexts as $required_context_name) {
-      $context_missing = TRUE;
-      foreach ($all_contexts as $context) {
-        if ($context->isA($required_context_name)) {
+    $all_available_contexts = $this->getContexts();
+    $context_counts = array_count_values($required_contexts);
+    foreach (array_unique($required_contexts) as $required_context_name) {
+      foreach ($all_available_contexts as $available_context) {
+        if ($available_context->isA($required_context_name)) {
           // Matching context available, continue to the next one.
-          $context_missing = FALSE;
-          break;
+          $context_counts[$required_context_name] = ($context_counts[$required_context_name] > 0) ? $context_counts[$required_context_name] - 1 : 0;
         }
-      }
-      if ($context_missing) {
-        return FALSE;
       }
     }
 
-    return TRUE;
+    return empty(array_filter($context_counts));
   }
 
   /**

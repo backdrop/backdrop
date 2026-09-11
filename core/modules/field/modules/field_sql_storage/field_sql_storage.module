@@ -4,6 +4,9 @@
  * Default implementation of the field storage API.
  */
 
+// Ignore indexname in _field_sql_storage_indexname().
+// cspell:ignore indexname
+
 /**
  * Implements hook_field_storage_info().
  */
@@ -620,7 +623,7 @@ function _field_sql_storage_query_join_entity(SelectQuery $select_query, $entity
  *   The field query object to be processed.
  * @param SelectQuery $select_query
  *   The SelectQuery that should get grouping conditions.
- * @param condtions
+ * @param conditions
  *   The conditions to be added.
  * @param $table_aliases
  *   An associative array of table aliases keyed by field index.

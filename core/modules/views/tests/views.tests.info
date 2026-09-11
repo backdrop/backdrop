@@ -40,6 +40,12 @@ description = Tests pluggable caching for views.
 group = Views Plugins
 file = views_cache.test
 
+[ViewsClickSortTest]
+name = Click sort
+description = Test views table click sort in combination with regular sort.
+group = Views
+file = views_click_sort.test
+
 [ViewsExposedFormTest]
 name = Exposed forms
 description = Test exposed forms functionality.
@@ -53,16 +59,16 @@ group = Views
 file = views_glossary.test
 
 [ViewsQueryGroupByTest]
-name = Groupby
+name = Group by
 description = Tests aggregate functionality of views, for example count.
 group = Views
-file = views_groupby.test
+file = views_group_by.test
 
-[viewsUiGroupbyTestCase]
-name = Groupby UI
+[ViewsUiGroupByTestCase]
+name = Group by UI
 description = Tests UI of aggregate functionality.
 group = Views UI
-file = views_groupby.test
+file = views_group_by.test
 
 [ViewsHandlerAreaTextTest]
 name = Area: Text
@@ -148,6 +154,12 @@ description = Test the core views_handler_field handler.
 group = Views Handlers
 file = handlers/views_handler_field.test
 
+[ViewsHandlerFieldBulkFormTest]
+name = Field: Bulk form
+description = Test the core views_handler_field_bulk_form.
+group = Views Handlers
+file = handlers/views_handler_field_bulk_form.test
+
 [ViewsHandlerFilterMultipleTest]
 name = Filter: Multiple conditions
 description = Tests multiple filters on a single display.
@@ -220,6 +232,12 @@ description = Test abstract handler definitions.
 group = Views
 file = views_handlers.test
 
+[ViewsLayoutsTest]
+name = Layouts and Views context
+description = Test to see if layout context can modify a view.
+group = Views
+file = views_layout.test
+
 [ViewsModuleTest]
 name = Tests views.module
 description = Tests some basic functions of views.module.
@@ -243,6 +261,12 @@ name = Block display tests
 description = Tests overriding options for block displays.
 group = Views Plugins
 file = plugins/views_plugin_display_block.test
+
+[ViewsPluginDisplayEmbedTestCase]
+name = Embed display tests
+description = Tests the embed display plugin and its exposed forms.
+group = Views Plugins
+file = plugins/views_plugin_display_embed.test
 
 [ViewsPluginStyleJumpMenuTest]
 name = Jump menu
@@ -273,6 +297,12 @@ name = Views UI wizard basic functionality
 description = Test creating basic views with the wizard and viewing them on the listing page.
 group = Views UI
 file = views_ui.test
+
+[ViewsTranslatableTest]
+name = Views Translatable Test
+description = Tests the pluggable translations.
+group = Views
+file = views_translatable.test
 
 [ViewsUIWizardDefaultViewsTestCase]
 name = Views UI default views functionality
@@ -324,12 +354,6 @@ file = views_upgrade.test
 
 [ViewsViewTest]
 name = Test the view class
-description = Tests some  functionality of the view class.
+description = Tests some functionality of the view class.
 group = Views
 file = views_view.test
-
-[ViewsTranslatableTest]
-name = 'Views Translatable Test'
-description = 'Tests the pluggable translations'
-group = Views
-file = views_translatable.test

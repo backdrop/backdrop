@@ -1,0 +1,140 @@
+/**
+ * @file
+ * Styles for configuration of CKEditor module.
+ *
+ * Many of these styles are adapted directly from the default CKEditor theme
+ * "moono".
+ */
+.ckeditor5-active-toolbar-configuration,
+[dir="rtl"] .ckeditor5-active-toolbar-configuration {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ckeditor5-toolbar-active {
+  background: white;
+  margin: 5px 0;
+  line-height: 1;
+  font: 12px Arial, Helvetica, Tahoma, Verdana, sans-serif;
+}
+.ckeditor5-toolbar-disabled {
+  margin: 5px 0;
+  line-height: 1;
+  font: 12px Arial, Helvetica, Tahoma, Verdana, sans-serif;
+}
+
+.ckeditor5-buttons,
+.ckeditor5-multiple-buttons {
+  min-height: 32px;
+  min-width: 36px;
+  list-style: none;
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #d1d1d1;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .5), 0 0 2px rgba(255, 255, 255, .15) inset, 0 1px 0 rgba(255, 255, 255, .15) inset;
+}
+[dir="rtl"] .ckeditor5-buttons {
+  padding: 0;
+  margin: 0;
+}
+.ckeditor5-button,
+.ckeditor5-button-placeholder {
+  display: inline-block;
+  height: 20px;
+  padding: 6px 8px;
+  outline: none;
+  cursor: move;
+  border: 0;
+  vertical-align: middle;
+  line-height: 1.6;
+  background: white;
+  position: relative;
+}
+/* Draggable buttons are able to receive keyboard focus. */
+.ckeditor5-button:focus {
+  /* See https://css-tricks.com/copy-the-browsers-native-focus-styles */
+  outline: 5px auto Highlight;
+  outline: 5px auto -webkit-focus-ring-color;
+  z-index: 1;
+}
+.ckeditor5-button img {
+  width: 20px;
+  height: 20px;
+}
+.ckeditor5-buttons .ckeditor5-button-placeholder {
+  background: #333;
+  opacity: 0.3;
+}
+.ckeditor5-buttons a {
+  cursor: move;
+}
+.ckeditor5-multiple-buttons {
+  min-width: auto;
+  margin: 0 1em;
+  list-style: none;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+}
+.ckeditor5-row-controls {
+  float: right; /* LTR */
+  text-align: right; /* LTR */
+  font-size: 18px;
+  width: 40px;
+}
+[dir="rtl"] .ckeditor5-row-controls {
+  float: left;
+  text-align: left;
+}
+.ckeditor5-row-controls a {
+  display: inline-block;
+  padding: 6px 2px;
+  height: 16px;
+  width: 16px;
+  line-height: 0.9;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+.ckeditor5-row-controls a:hover {
+  text-decoration: none;
+}
+.ckeditor5-multiple-label {
+  float: left;
+  padding: 4px;
+}
+.ckeditor5-buttons .ckeditor5-button-separator {
+  width: 4px;
+  height: 22px;
+  text-align: center;
+}
+.ckeditor5-multiple-buttons .ckeditor5-button-separator {
+  width: 10px;
+  min-width: auto;
+  text-align: center;
+}
+.ckeditor5-separator {
+  background-color: silver;
+  background-color: rgba(0, 0, 0, .2);
+  height: 22px;
+  width: 1px;
+  display: inline-block;
+  box-shadow: 1px 0 1px rgba(255, 255, 255, .5)
+}
+.ckeditor5-button-arrow {
+  width: 0;
+  text-align: center;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 3px solid #333;
+  display: inline-block;
+  margin: 0 4px 2px;
+}
+.ckeditor5-row {
+  padding: 2px 0 3px;
+}
+.ckeditor5-row + .ckeditor5-row {
+  margin-top: 0.25em;
+  clear: both;
+}

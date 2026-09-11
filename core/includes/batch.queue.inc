@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Queue handlers used by the Batch API.
@@ -37,7 +36,10 @@ class BatchQueue extends SystemQueue {
   /**
    * Retrieves all remaining items in the queue.
    *
-   * This is specific to Batch API and is not part of the BackdropQueueInterface.
+   * This is specific to Batch API and is not part of the
+   * BackdropQueueInterface.
+   *
+   * @return array
    */
   public function getAllItems() {
     $result = array();
@@ -72,7 +74,10 @@ class BatchMemoryQueue extends MemoryQueue {
   /**
    * Retrieves all remaining items in the queue.
    *
-   * This is specific to Batch API and is not part of the BackdropQueueInterface.
+   * This is specific to Batch API and is not part of the
+   * BackdropQueueInterface.
+   *
+   * @return array
    */
   public function getAllItems() {
     $result = array();

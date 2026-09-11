@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Test date UI.
@@ -22,7 +21,7 @@ class DateUITestCase extends DateFieldBasic {
     $current_year = date('Y');
 
     $field_types = array('date', 'datestamp', 'datetime');
-    $widget_types = array('date_select', 'date_text', 'date_popup');
+    $widget_types = array('date_select', 'date_text', 'date_popup', 'date_html5');
 
     // Test widgets with default settings using every widget and field type.
     foreach ($field_types as $field_type) {
@@ -68,6 +67,10 @@ class DateUITestCase extends DateFieldBasic {
     }
     elseif ($options == 'date_popup') {
       $edit['field_test[und][0][value][date]'] = format_string('10/07/!year', array('!year' => $current_year));
+      $edit['field_test[und][0][value][time]'] = '10:30';
+    }
+    elseif ($options == 'date_html5') {
+      $edit['field_test[und][0][value][date]'] = format_string('!year-10-07', array('!year' => $current_year));
       $edit['field_test[und][0][value][time]'] = '10:30';
     }
     $this->backdropPost('node/add/story', $edit, t('Save'));

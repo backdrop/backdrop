@@ -1,0 +1,8 @@
+name = Entity Caching test module
+description = Provides entity types using to test entity caching.
+package = Testing
+version = BACKDROP_VERSION
+type = module
+backdrop = 1.x
+dependencies[] = entity
+hidden = TRUE

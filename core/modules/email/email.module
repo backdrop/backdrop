@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Module file for the email module, which creates a email address field.
+ * Module file for the email module, which creates an email address field.
  */
 
 /**

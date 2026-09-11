@@ -43,4 +43,6 @@ Backdrop.formatPlural(1, "Context Unquoted plural", "Context Unquoted @count plu
 Backdrop.formatPlural(1, "Context Single Quoted plural", "Context Single Quoted @count plural", {}, {'context': "Context string single quoted"});
 Backdrop.formatPlural(1, "Context Double Quoted plural", "Context Double Quoted @count plural", {}, {"context": "Context string double quoted"});
 
-Backdrop.formatPlural(1, "Context !key Args plural", "Context !key Args @count plural", {'!key': 'value'}, {context: "Context string"});
+Backdrop.formatPlural(1, "Context !key Args plural", "Context !key Args @count plural", { '!key': 'value' }, { context: "Context string" });
+
+Backdrop.formatPlural(1, "No count argument plural - singular", "No count argument plural - plural");

@@ -65,7 +65,7 @@ function user_cancel_user_action($account, &$context) {
   if (REQUEST_TIME - $last_action_time > 60) {
     $_SESSION['user_cancel_action'] = array(
       'timestamp' => REQUEST_TIME,
-      'nids' => array(),
+      'uids' => array(),
     );
   }
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Menu callbacks for CKEditor module.
+ * Menu callbacks for CKEditor 4 module.
  */
 
 /**

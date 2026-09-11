@@ -592,7 +592,7 @@ class views_handler extends views_object {
   function get_join() {
     // get the join from this table that links back to the base table.
     // Determine the primary table to seek
-    if (empty($this->query->relationships[$this->relationship])) {
+    if (empty($this->relationship) || empty($this->query->relationships[$this->relationship])) {
       $base_table = $this->query->base_table;
     }
     else {
@@ -639,6 +639,7 @@ class views_handler extends views_object {
  *            queries.
  *
  */
+#[\AllowDynamicProperties]
 class views_many_to_one_helper {
   /**
    * Contains possible existing placeholders used by the query.
@@ -699,8 +700,8 @@ class views_many_to_one_helper {
     // to create a new relationship to use.
     $relationship = $this->handler->relationship;
 
-    // Determine the primary table to seek
-    if (empty($this->handler->query->relationships[$relationship])) {
+    // Determine the primary table to seek.
+    if (!$relationship || empty($this->handler->query->relationships[$relationship])) {
       $base_table = $this->handler->query->base_table;
     }
     else {
@@ -790,7 +791,7 @@ class views_many_to_one_helper {
             $join->type = 'LEFT';
             // INNER joins are slightly faster; use them when we know it's safe.
             $group = isset($this->handler->options['group']) ? $this->handler->options['group'] : FALSE;
-            $group_type = $this->handler->query->where[$group]['type'];
+            $group_type = !empty($group) ? $this->handler->query->where[$group]['type'] : FALSE;
             $plugin_id = isset($this->handler->options['plugin_id']) ? $this->handler->options['plugin_id'] : FALSE;
             // @todo Figure out why taxonomy_index_tid is being special-cased here.
             // See: https://github.com/backdrop/backdrop-issues/issues/5225
@@ -999,6 +1000,7 @@ class views_many_to_one_helper {
  *   - - numeric: If true, the value will not be surrounded in quotes.
  *   - - extra type: How all the extras will be combined. Either AND or OR. Defaults to AND.
  */
+#[\AllowDynamicProperties]
 class views_join {
   var $table = NULL;
   var $left_table = NULL;

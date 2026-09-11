@@ -164,7 +164,7 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
    *
    * @param $register_errors
    *   Register the errors during the upgrade process as failures.
-   * @return
+   * @return bool
    *   TRUE if the upgrade succeeded, FALSE otherwise.
    */
   protected function performUpgrade($register_errors = TRUE) {
@@ -175,6 +175,15 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
     if (!$this->assertResponse(200)) {
       return FALSE;
     }
+
+    // Confirm the upgrade from D7 state has been set.
+    backdrop_static_reset('states');
+    $d7_upgrade_state = state_get('update_d7_upgrade');
+    $this->assertTrue($d7_upgrade_state, 'The "update_d7_upgrade" state has been set before the update.');
+
+    // When upgrading from Drupal 7, the backup step should not be shown.
+    $this->assertNoRaw('<span class="task-item">Backup</span>');
+    $this->assertRaw('<span class="task-item">Review updates</span>');
 
     // Continue.
     $this->backdropPost(NULL, array(), t('Continue'));
@@ -209,6 +218,11 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
     if (!$this->assertText(t('No pending updates.'), 'No pending updates at the end of the update process.')) {
       return FALSE;
     }
+
+    // Confirm the upgrade from D7 state is now cleared.
+    backdrop_static_reset('states');
+    $d7_upgrade_state = state_get('update_d7_upgrade');
+    $this->assertNull($d7_upgrade_state, 'The "update_d7_upgrade" state has been cleared after the update.');
 
     // Upgrade succeed, rebuild the environment so that we can call the API
     // of the child site directly from this request.

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains a search filter handler.
@@ -88,6 +87,18 @@ class views_handler_filter_search extends views_handler_filter {
     }
 
     $key = $this->options['expose']['identifier'];
+    // No search terms.
+    if (empty($form_state['values'][$key])) {
+      // The 'optional' property means: show all items if no input is set,
+      // 'required' means that no results should be shown if there's no input.
+      // @see views_handler_filter_search::operator_form()
+      if ($this->operator != 'optional' && empty($this->options['expose']['required'])) {
+        $this->view->built = TRUE;
+        $this->view->executed = TRUE;
+        $this->view->result = array();
+        return;
+      }
+    }
     if (!empty($form_state['values'][$key])) {
       $this->query_parse_search_expression($form_state['values'][$key]);
       if (count($this->search_query->words()) == 0) {
@@ -97,7 +108,8 @@ class views_handler_filter_search extends views_handler_filter {
   }
 
   /**
-   * Take sure that parseSearchExpression is runned and everything is set up for it.
+   * Make sure that parseSearchExpression is run and everything is set up for
+   * it.
    *
    * @param $input
    *    The search phrase which was input by the user.
@@ -105,7 +117,7 @@ class views_handler_filter_search extends views_handler_filter {
   function query_parse_search_expression($input) {
     if (!isset($this->search_query)) {
       $this->parsed = TRUE;
-      $this->search_query = db_select('search_index', 'i', array('target' => 'slave'))->extend('viewsSearchQuery');
+      $this->search_query = db_select('search_index', 'i', array('target' => 'replica'))->extend('viewsSearchQuery');
       $this->search_query->searchExpression($input, $this->view->base_table);
       $this->search_query->publicParseSearchExpression();
     }
@@ -114,8 +126,8 @@ class views_handler_filter_search extends views_handler_filter {
   /**
    * Add this filter to the query.
    *
-   * Due to the nature of fapi, the value and the operator have an unintended
-   * level of indirection. You will find them in $this->operator
+   * Due to the nature of Form API, the value and the operator have an
+   * unintended level of indirection. You will find them in $this->operator
    * and $this->value respectively.
    */
   function query() {
@@ -145,7 +157,7 @@ class views_handler_filter_search extends views_handler_filter {
       $search_condition = db_and();
 
       if (!$this->options['remove_score']) {
-        // Create a new join to relate the 'serach_total' table to our current 'search_index' table.
+        // Create a new join to relate the 'search_total' table to our current 'search_index' table.
         $join = new views_join;
         $join->construct('search_total', $search_index, 'word', 'word');
         $search_total = $this->query->add_relationship('search_total', $join, $search_index);
@@ -153,7 +165,7 @@ class views_handler_filter_search extends views_handler_filter {
         $this->search_score = $this->query->add_field('', "$search_index.score * $search_total.count", 'score', array('aggregate' => TRUE, 'function' => 'sum'));
       }
 
-      if (empty($this->query->relationships[$this->relationship])) {
+      if (empty($this->relationship) || empty($this->query->relationships[$this->relationship])) {
         $base_table = $this->query->base_table;
       }
       else {

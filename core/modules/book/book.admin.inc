@@ -50,20 +50,58 @@ function book_admin_overview() {
 function book_admin_settings($form, &$form_state) {
   $types = node_type_get_names();
   $config = config('book.settings');
+  $form['book_admin_allowed_all'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow admins to use all content types in book outlines'),
+    '#default_value' => $config->get('book_admin_allowed_all'),
+    '#description' => t('Overrides the specific content type list and allows all content types for user accounts with the %outline-perm permission.', array('%outline-perm' => t('Administer book outlines'))),
+  );
   $form['book_allowed_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Content types allowed in book outlines'),
     '#default_value' => $config->get('book_allowed_types'),
     '#options' => $types,
-    '#description' => t('Users with the %outline-perm permission can add all content types.', array('%outline-perm' => t('Administer book outlines'))),
+    '#description' => t('Affects users with the %add-content-to-books permission.', array('%add-content-to-books' => t('Add content and child pages to books'))),
     '#required' => TRUE,
   );
   $form['book_child_type'] = array(
-    '#type' => 'radios',
+    '#type' => 'select',
     '#title' => t('Content type for child pages'),
     '#default_value' => $config->get('book_child_type'),
     '#options' => $types,
     '#required' => TRUE,
+  );
+  $form['book_options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Options'),
+  );
+  $form['book_options']['book_navigation'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display default book navigation on book pages'),
+    '#default_value' => $config->get('book_navigation'),
+  );
+  $form['book_options']['book_navigation_options'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Select book navigation options'),
+    '#default_value' => $config->get('book_navigation_options'),
+    '#options' => array(
+      'tree' => t('Table of contents'),
+      'pager' => t('Previous, Next, and Up links'),
+    ),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="book_navigation"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['book_options']['book_links'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Select book links options'),
+    '#default_value' => $config->get('book_links'),
+    '#options' => array(
+      'book_add_child' => t('Add child page'),
+      'book_reorder' => t('Reorder book'),
+    ),
   );
   $form['array_filter'] = array('#type' => 'value', '#value' => TRUE);
   $form['#validate'][] = 'book_admin_settings_validate';
@@ -95,8 +133,12 @@ function book_admin_settings_validate($form, &$form_state) {
  */
 function book_admin_settings_submit($form, &$form_state) {
   config('book.settings')
+    ->set('book_admin_allowed_all', $form_state['values']['book_admin_allowed_all'])
     ->set('book_allowed_types', $form_state['values']['book_allowed_types'])
     ->set('book_child_type', $form_state['values']['book_child_type'])
+    ->set('book_navigation', $form_state['values']['book_navigation'])
+    ->set('book_navigation_options', $form_state['values']['book_navigation_options'])
+    ->set('book_links', $form_state['values']['book_links'])
     ->save();
   backdrop_set_message(t('The configuration options have been saved.'));
 }
@@ -167,7 +209,6 @@ function book_admin_edit_submit($form, &$form_state) {
       // Update the title if changed.
       if ($row['title']['#default_value'] != $values['title']) {
         $node = node_load($values['nid']);
-        $langcode = LANGUAGE_NONE;
         $node->title = $values['title'];
         $node->book['link_title'] = $values['title'];
         $node->revision = 1;
@@ -177,6 +218,12 @@ function book_admin_edit_submit($form, &$form_state) {
         watchdog('content', 'book: updated %title.', array('%title' => $node->title), WATCHDOG_NOTICE, l(t('view'), 'node/' . $node->nid));
       }
     }
+  }
+
+  // Clear the navigation cache for the book.
+  // All items share the same bid so use the last item.
+  if (isset($row['#item']['bid'])) {
+    _book_cache_clear($row['#item']['bid'], TRUE);
   }
 
   backdrop_set_message(t('Updated book %title.', array('%title' => $form['#node']->title)));
@@ -320,6 +367,11 @@ function theme_book_admin_table($variables) {
       $links['delete'] = array(
         'title' => t('Delete'),
         'href' => "node/$nid/delete",
+        'query' => $destination,
+      );
+      $links['remove'] = array(
+        'title' => t('Remove'),
+        'href' => "node/$nid/outline-remove",
         'query' => $destination,
       );
     }

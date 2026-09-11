@@ -14,7 +14,7 @@ class EarlyBootstrapTestCase extends BackdropWebTestCase {
     $paths = array('', 'early_exit');
     foreach ($paths as $path) {
       // Empty the module_implements() caches.
-      module_implements(NULL, FALSE, TRUE);
+      backdrop_static_reset('module_implements');
       // Do a request to the home page, which will call module_implements()
       // during hook_boot().
       $this->backdropGet($path);

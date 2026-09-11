@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Fake an HTTP request, for use during testing.

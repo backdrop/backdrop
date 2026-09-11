@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Default theme implementation for rendering book outlines within a block.

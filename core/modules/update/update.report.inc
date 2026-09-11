@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Code required only when rendering the available updates report.

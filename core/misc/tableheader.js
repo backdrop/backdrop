@@ -79,7 +79,7 @@ $(document).on({
  * TableHeader will make the current table header stick to the top of the page
  * if the table is very long.
  *
- * Fire a custom "topoffsetchange" event to make TableHeader compute the
+ * Fire a custom "offsettopchange" event to make TableHeader compute the
  * new offset value from the "data-offset-top" attributes of relevant elements.
  *
  * @param table
@@ -98,7 +98,7 @@ function TableHeader(table) {
   this.tableOffset = this.$originalTable.offset();
 
   // React to columns change to avoid making checks in the scroll callback.
-  this.$originalTable.bind('columnschange', {tableHeader: this}, function (e, display) {
+  this.$originalTable.on('columnschange', {tableHeader: this}, function (e, display) {
     var tableHeader = e.data.tableHeader;
     if (tableHeader.displayWeight === null || tableHeader.displayWeight !== display) {
       tableHeader.recalculateSticky();
@@ -244,7 +244,7 @@ $.extend(TableHeader.prototype, {
     // Update offset.
     TableHeader.computeOffsetTop();
     this.tableOffset = this.$originalTable.offset();
-    var leftOffset = parseInt(this.$originalTable.offset().left);
+    var leftOffset = parseFloat(this.$originalTable.offset().left);
     this.stickyPosition(TableHeader.offsetTop, leftOffset);
 
     // Update columns width.
@@ -259,7 +259,7 @@ $.extend(TableHeader.prototype, {
       $stickyCell = this.$stickyHeaderCells.eq($that.index());
       display = $that.css('display');
       if (display !== 'none') {
-        $stickyCell.css({'width': $that.width(), 'display': display});
+        $stickyCell.css({'width': $that.outerWidth(), 'display': display, 'box-sizing': 'border-box'});
       }
       else {
         $stickyCell.css('display', 'none');

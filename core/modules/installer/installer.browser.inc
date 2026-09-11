@@ -12,7 +12,7 @@
  * @param string $name
  *   The short name of the project.
  *
- * @return
+ * @return bool
  *   TRUE if the project is enabled, FALSE otherwise.
  */
 function _installer_browser_is_project_enabled($type, $name) {
@@ -231,7 +231,7 @@ function installer_browser_get_queued_releases() {
  * @param array $filters
  *   An associative array of queries to use to filter results.
  *
- * @return
+ * @return array
  *   Returns an array of results.
  */
 function installer_browser_fetch_results($filters) {
@@ -252,8 +252,11 @@ function installer_browser_fetch_results($filters) {
     $results = backdrop_json_decode($response->data);
   }
   else {
-    backdrop_set_message(t("Encountered an error when trying to fetch results from @name. Error @code : @message",
-      array('@name' => $server['name'], '@code' => $response->code, '@message' => $response->error)));
+    backdrop_set_message(t("Encountered an error when trying to fetch results from @name. Error @code : @message", array(
+      '@name' => $server['name'],
+      '@code' => $response->code,
+      '@message' => $response->error,
+    )));
     return array();
   }
 
@@ -268,7 +271,7 @@ function installer_browser_fetch_results($filters) {
  *
  * The installer_browser_fetch_results($filters) call returns an array with the
  * following keys:
- * @return
+ * @return array|null
  *   Returns an array representing the active server with the following keys:
  *     - url: The absolute url to the server without query parameters.
  *     - name: A human-readable name for this server.
@@ -299,7 +302,7 @@ function installer_browser_get_server() {
  */
 function installer_browser_get_project_release_data(array $project) {
   $project['project_type'] = $project['type'];
-  // Build the releases cache for this project
+  // Build the releases cache for this project.
   module_load_include('inc', 'update', 'update.fetch');
   if (_update_process_fetch_task($project)) {
     $data = _update_cache_get('available_releases::' . $project['name']);
@@ -314,9 +317,10 @@ function installer_browser_get_project_release_data(array $project) {
 /**
  * Batch API callback: Installs a single release of a project during batch.
  *
- * @param $release_name
+ * @param string $release_name
  *   The short name of the selected release of the project being installed.
- * @param $project
+ *
+ * @param array $project
  *   Associative array of information about the project to be installed.
  */
 function _installer_browser_batch_install_release($release_name, $project, &$context) {
@@ -366,7 +370,7 @@ function _installer_browser_batch_install_releases_finished($success, $results, 
     if (!empty($results)) {
       if (!empty($results['failures'])) {
         backdrop_set_message(format_plural(count($results['failures']), 'Failed to install one project.', 'Failed to install @count projects.'), 'error');
-        foreach($results['failures'] as $message){
+        foreach ($results['failures'] as $message) {
           backdrop_set_message($message, 'error');
         }
       }
@@ -401,8 +405,6 @@ function installer_browser_get_installed_types() {
   return $types;
 }
 
-
-
 /**
  * Determines the form destination after installed projects.
  */
@@ -413,7 +415,7 @@ function installer_browser_get_destination_after_install() {
   $theme = in_array('theme', $types);
   $module = in_array('module', $types);
 
-  $layout_message = t('Installation finished successfully. All newly-added layout templates have been enabled and are available for use in your layouts. You can manage layout templates on the layouts !link page.', array('!link' => l(t('Templates'), 'admin/structure/layouts/settings')));
+  $layout_message = t('Installation finished successfully. All newly-added layout templates have been enabled and are available for use in your layouts. You can manage them on the <a href="@link">Layout templates</a> page.', array('@link' => url('admin/structure/layouts/settings')));
 
   if ($layout) {
     // Installed a layout and other project(s), continue the wizard. There's no
@@ -501,7 +503,9 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
       '#title' => $title,
       '#href' => 'admin/installer/queue/nojs/' . $op . '/'. $project_name,
       '#options' => array(
-        'query' => backdrop_get_destination(),
+        'query' => backdrop_get_destination() + array(
+          'token' => backdrop_get_token('installer_install_action_access'),
+        ),
       ),
       '#id' => $id_prefix . '-' . $project_name,
       '#ajax' => array(
@@ -512,7 +516,7 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
         ),
       ),
     );
-    
+
   }
 
   return backdrop_render($build);
@@ -523,8 +527,7 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
  */
 function installer_browser_add_remove_queue_dialog_link($form, &$form_state, $project_name, $op, $title) {
   form_load_include($form_state, 'inc', 'installer', 'installer.browser');
-  $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
-  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['#attached']['library'][] = array('layout', 'layout.admin');
 
   if (empty($form_state['project_name'])) {
     $form_state['project_name'] = $project_name;
@@ -588,7 +591,7 @@ function installer_browser_add_remove_queue_dialog_link_submit($form, &$form_sta
 function installer_browser_check_zip_loaded() {
   $zip_loaded = array_key_exists('zip', archiver_get_info());
   if (!$zip_loaded) {
-    backdrop_set_message(t('Sorry, it seems that the PHP .zip extension is not loaded on your server. You will not be able to download any projects using Project Installer until this is fixed. Please contact your website administrator.'), 'warning', FALSE);
+    backdrop_set_message(t('The Zip PHP extension is not loaded on your server. You will not be able to download any projects using Project Installer until this is fixed.'), 'warning', FALSE);
   }
   return $zip_loaded;
 }
