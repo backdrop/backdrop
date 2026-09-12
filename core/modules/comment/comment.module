@@ -1040,11 +1040,17 @@ function comment_links(Comment $comment, Node $node) {
       );
     }
     if (Comment::createAccess()) {
+      $node_type = node_type_get_type($node->type);
       $links['comment-reply'] = array(
         'title' => t('reply'),
         'href'  => "comment/reply/$comment->nid/$comment->cid",
         'html'  => TRUE,
       );
+      // When the comment form is on a separate page, anchor the reply link
+      // to #comment-form so the user lands directly at the form.
+      if ($node_type->settings['comment_form_location'] == COMMENT_FORM_SEPARATE_PAGE) {
+        $links['comment-reply']['fragment'] = 'comment-form';
+      }
     }
     if ($comment->status == COMMENT_NOT_PUBLISHED && $comment->access('approve')) {
       $links['comment-approve'] = array(

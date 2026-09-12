@@ -66,6 +66,8 @@ Backdrop.jsAC.prototype.onkeydown = function (input, e) {
     case 38: // up arrow.
       this.selectUp();
       return false;
+    case 13: // Enter key.
+      return false; // Prevent form submit.
     default: // All other keys.
       return true;
   }

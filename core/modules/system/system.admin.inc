@@ -1671,7 +1671,7 @@ function system_cron_settings($form, &$form_state) {
   );
 
   $status = '<p>' . t('Last run: %cron-last ago.', array(
-    '%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)) . '</p>';
+    '%cron-last' => format_time_diff_since(state_get('cron_last')),)) . '</p>';
   $form['status'] = array(
     '#markup' => $status,
   );
@@ -3016,11 +3016,15 @@ function system_utf8mb4_convert_form_submit($form, &$form_state) {
 
   // Build the list of tables to convert.
   $database = $databases['default']['default'];
-  $like = '';
   if (!empty($database['prefix'])) {
-    $like = ' LIKE "' . $database['prefix'] . '%"';
+    $query = db_query("SHOW TABLES LIKE :prefix", array(
+      ':prefix' => db_like($database['prefix']) . '%',
+    ));
   }
-  $table_names = db_query('SHOW TABLES' . $like)->fetchCol();
+  else {
+    $query = db_query("SHOW TABLES");
+  }
+  $table_names = $query->fetchCol();
 
   $batch = array(
     'operations' => array(

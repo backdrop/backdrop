@@ -50,11 +50,11 @@ class ViewsHandlerFieldDateTest extends ViewsSqlTest {
     }
 
     $intervals = array(
-      'raw time ago' => format_interval(REQUEST_TIME - $time, 2),
-      'time ago' => t('%time ago', array('%time' => format_interval(REQUEST_TIME - $time, 2))),
+      'raw time ago' => format_time_diff_since($time),
+      'time ago' => t('%time ago', array('%time' => format_time_diff_since($time))),
       // TODO write tests for them
-//       'raw time span' => format_interval(REQUEST_TIME - $time, 2),
-//       'time span' => t('%time hence', array('%time' => format_interval(REQUEST_TIME - $time, 2))),
+      // 'raw time span' => format_time_diff_since($time),
+      // 'time span' => t('%time hence', array('%time' => format_time_diff_since($time))),
     );
     $this->assertRenderedDatesEqual($view, $intervals);
   }

@@ -175,6 +175,8 @@ function comment_admin_overview_validate($form, &$form_state) {
  * Executes the chosen 'Update option' on the selected comments, such as
  * publishing, unpublishing or deleting.
  *
+ * The site will stay on the current page after submitting action.
+ *
  * @see comment_admin_overview_validate()
  */
 function comment_admin_overview_submit($form, &$form_state) {
@@ -198,7 +200,6 @@ function comment_admin_overview_submit($form, &$form_state) {
     }
   }
   backdrop_set_message(t('The update has been performed.'));
-  $form_state['redirect'] = 'admin/content/comment';
   cache_clear_all();
 }
 
@@ -252,7 +253,6 @@ function comment_multiple_delete_confirm_submit($form, &$form_state) {
     watchdog('content', 'Deleted @count comments.', array('@count' => $count));
     backdrop_set_message(format_plural($count, 'Deleted 1 comment.', 'Deleted @count comments.'));
   }
-  $form_state['redirect'] = 'admin/content/comment';
 }
 
 /**

@@ -1067,6 +1067,19 @@ class CommentInterfaceTest extends CommentHelperCase {
           }
         }
 
+        // Verify that the per-comment reply link includes #comment-form only
+        // when the form is on a separate page, so the user lands directly at
+        // the comment form rather than the top of the reply page.
+        if ($path == "node/$nid" && $info['comment count'] && $info['access comments']) {
+          $cid = $this->comment->cid;
+          if ($info['form'] == COMMENT_FORM_SEPARATE_PAGE) {
+            $this->assertLinkByHref("comment/reply/$nid/$cid#comment-form", 0, 'Reply link includes #comment-form anchor for separate page form.');
+          }
+          else {
+            $this->assertNoLinkByHref("comment/reply/$nid/$cid#comment-form", 'Reply link does not include #comment-form anchor for inline form.');
+          }
+        }
+
         // Also verify that the comment form appears according to the configured
         // location.
         if ($path == "node/$nid") {
@@ -1722,6 +1735,9 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->backdropPost(NULL, $edit, t('Execute'));
     $this->assertText(t('Unapproved comments (@count)', array('@count' => 0)), 'All comments were approved.');
 
+    // Navigate to published comments page and delete comments.
+    $this->backdropGet('admin/content/comment');
+
     // Delete multiple comments in one operation.
     $edit = array(
       'operation' => 'delete',
@@ -1975,8 +1991,14 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:body]'] = _text_sanitize($instance, LANGUAGE_NONE, $comment->comment_body[LANGUAGE_NONE][0], 'value');
     $tests['[comment:url]'] = url('comment/' . $comment->cid, $url_options + array('fragment' => 'comment-' . $comment->cid));
     $tests['[comment:edit-url]'] = url('comment/' . $comment->cid . '/edit', $url_options);
-    $tests['[comment:created:since]'] = format_interval(REQUEST_TIME - $comment->created, 2, $language->langcode);
-    $tests['[comment:changed:since]'] = format_interval(REQUEST_TIME - $comment->changed, 2, $language->langcode);
+    $tests['[comment:created:since]'] = format_time_diff_since($comment->created, array(
+      'granularity' => 2,
+      'langcode' => $language->langcode,
+    ));
+    $tests['[comment:changed:since]'] = format_time_diff_since($comment->changed, array(
+      'granularity' => 2,
+      'langcode' => $language->langcode,
+    ));
     $tests['[comment:parent:cid]'] = $comment->pid;
     $tests['[comment:parent:title]'] = check_plain($parent_comment->subject);
     $tests['[comment:node:nid]'] = $comment->nid;
