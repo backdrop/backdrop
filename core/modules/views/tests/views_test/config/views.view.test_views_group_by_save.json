@@ -1,12 +1,12 @@
 {
-    "_config_name": "views.view.test_views_groupby_save",
-    "name": "test_views_groupby_save",
+    "_config_name": "views.view.test_views_group_by_save",
+    "name": "test_views_group_by_save",
     "module": "views_test",
     "description": "",
     "tag": "",
     "disabled": false,
     "base_table": "node",
-    "human_name": null,
+    "human_name": "Test Views Group By Save",
     "core": null,
     "display": {
         "default": {

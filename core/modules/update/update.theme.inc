@@ -41,7 +41,7 @@ function theme_update_last_check($variables) {
 
   $output = '<div class="update checked">';
 
-  $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never') . ' ';
+  $output .= $last ? t('Last checked: @time ago', array('@time' => format_time_diff_since($last))) : t('Last checked: never') . ' ';
   if (user_access('administer site configuration')) {
     $output .= l(t('Check manually'), 'admin/reports/updates/check', array('attributes' => array('class' => array('button', 'button-secondary')), 'query' => backdrop_get_destination()));
   }
