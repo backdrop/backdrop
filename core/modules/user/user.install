@@ -22,7 +22,7 @@ function user_schema() {
       ),
       'name' => array(
         'type' => 'varchar',
-        'length' => 60,
+        'length' => 254,
         'not null' => TRUE,
         'default' => '',
         'description' => 'Unique user name.',
@@ -2368,6 +2368,23 @@ function user_update_1026() {
     $config->set('flood_uid_only', '0');
     $config->save();
   }
+}
+
+/**
+ * Change the name field length to the user's mail length.
+ */
+function user_update_1027() {
+  db_drop_unique_key('users', 'name');
+  db_change_field('users', 'name', 'name',
+    array(
+      'type' => 'varchar',
+      'length' => 254,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'Unique user name.',
+    )
+  );
+  db_add_unique_key('users', 'name', array('name'));
 }
 
 /**
