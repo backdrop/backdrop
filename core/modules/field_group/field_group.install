@@ -79,7 +79,8 @@ function _field_group_extra_status() {
         continue;
       }
       $extras_enabled = TRUE;
-      $extra_entities[$config->get('bundle')] = $config->get('bundle');
+      $entity_info = entity_get_info($config->get('entity_type'));
+      $extra_entities[$config->get('bundle')] = $entity_info['bundles'][$config->get('bundle')]['label'];
     }
   }
 
