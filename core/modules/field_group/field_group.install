@@ -13,18 +13,20 @@ function field_group_requirements($phase) {
   $t = get_t();
 
   if ($phase == 'runtime') {
-    list($extras_module, $extras_enabled) = _field_group_extra_status();
-
+    list($extras_module, $extras_enabled, $extra_entities) = _field_group_extra_status();
     if ($extras_enabled && !$extras_module) {
+      $extra_entities = join(", ", $extra_entities);
       if ($extras_module === FALSE) {
         // Module not found.
-        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module %module should be enabled to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
+        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site in the following entities: %entities.<br>The contrib module !module should be enabled to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
           '!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra'),
+          '%entities' => $extra_entities,
         ));
       } elseif (!$extras_module) {
         // Module exists but isn't enabled.
-        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. Enable the contrib module %module to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
+        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site in the following entities: %entities.<br>Enable the contrib module %module to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
           '%module' => 'Field Group Extra',
+          '%entities' => $extra_entities,
         ));
       }
       $requirements['field_group_extra'] = array(
@@ -58,6 +60,7 @@ function _field_group_extra_status() {
 
   $extras_enabled = FALSE;
   $field_groups = config_get_names_with_prefix('field_group.field_group.');
+  $extra_entities = array();
   $extra_types = array(
     // cspell:disable
     'accordion',
@@ -76,13 +79,13 @@ function _field_group_extra_status() {
         continue;
       }
       $extras_enabled = TRUE;
-      break;
+      $extra_entities[$config->get('bundle')] = $config->get('bundle');
     }
   }
 
-  $status = array($extras_module, $extras_enabled);
+  $status = array($extras_module, $extras_enabled, $extra_entities);
 
-  return array($extras_module, $extras_enabled);
+  return array($extras_module, $extras_enabled, $extra_entities);
 }
 
 /**
