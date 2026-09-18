@@ -18,13 +18,13 @@ function field_group_requirements($phase) {
       $extra_entities = join(", ", $extra_entities);
       if ($extras_module === FALSE) {
         // Module not found.
-        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site in the following entities: %entities.<br>The contrib module !module should be enabled to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
+        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site in the following entity types: %entities.<br>The contrib module !module should be enabled to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
           '!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra'),
           '%entities' => $extra_entities,
         ));
       } elseif (!$extras_module) {
         // Module exists but isn't enabled.
-        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site in the following entities: %entities.<br>Enable the contrib module %module to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
+        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site in the following entity types: %entities.<br>Enable the contrib module %module to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
           '%module' => 'Field Group Extra',
           '%entities' => $extra_entities,
         ));
@@ -79,8 +79,9 @@ function _field_group_extra_status() {
         continue;
       }
       $extras_enabled = TRUE;
+      $bundle = $config->get('bundle');
       $entity_info = entity_get_info($config->get('entity_type'));
-      $extra_entities[$config->get('bundle')] = $entity_info['bundles'][$config->get('bundle')]['label'];
+      $extra_entities[$bundle] = $entity_info['bundles'][$bundle]['label'] . ' (' . $bundle . ')';
     }
   }
 
