@@ -418,7 +418,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#weight' => -10,
     '#maxlength' => 2048,
     '#autocomplete_path' => 'path-autocomplete',
-    '#description' => t('Start typing to see a list of suggestions, enter the relative path to another page, enter an element id from the page, or enter an external URL.<br>Examples: <em>About Us</em>, <em>/about</em>, <em>#section-1</em>, or <em>http://backdropcms.org</em>'),
+    '#description' => t('Start typing to see a list of suggestions. Enter the relative path to another page, an element ID from the page, or an external URL.<br>Examples: <em>About Us</em>, <em>/about</em>, <em>#section-1</em>, or <em>http://backdropcms.org</em>'),
   );
 
 
