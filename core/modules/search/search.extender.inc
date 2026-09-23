@@ -259,6 +259,8 @@ class SearchQuery extends SelectQueryExtender {
       $or = FALSE;
     }
 
+    $search_partial_words = config_get('search.settings', 'search_partial_words');
+
     // Convert keywords into SQL statements.
     $this->conditions = db_and();
     $simple_and = FALSE;
@@ -273,7 +275,12 @@ class SearchQuery extends SelectQueryExtender {
         foreach ($key as $or) {
           list($num_new_scores) = $this->parseWord($or);
           $any |= $num_new_scores;
-          $query_or->condition('d.data', "% $or %", 'LIKE');
+          if ($search_partial_words) {
+            $query_or->condition('d.data', "%$or%", 'LIKE');
+          }
+          else {
+            $query_or->condition('d.data', "% $or %", 'LIKE');
+          }
         }
         if (count($query_or)) {
           $this->conditions->condition($query_or);
@@ -285,7 +292,12 @@ class SearchQuery extends SelectQueryExtender {
       else {
         $simple_and = TRUE;
         list($num_new_scores, $num_valid_words) = $this->parseWord($key);
-        $this->conditions->condition('d.data', "% $key %", 'LIKE');
+        if ($search_partial_words) {
+          $this->conditions->condition('d.data', "%$key%", 'LIKE');
+        }
+        else {
+          $this->conditions->condition('d.data', "% $key %", 'LIKE');
+        }
         if (!$num_valid_words) {
           $this->simple = FALSE;
         }
@@ -298,7 +310,12 @@ class SearchQuery extends SelectQueryExtender {
     }
     // Negative matches.
     foreach ($this->keys['negative'] as $key) {
-      $this->conditions->condition('d.data', "% $key %", 'NOT LIKE');
+      if ($search_partial_words) {
+        $this->conditions->condition('d.data', "%$key%", 'NOT LIKE');
+      }
+      else {
+        $this->conditions->condition('d.data', "% $key %", 'NOT LIKE');
+      }
       $this->simple = FALSE;
     }
 
@@ -352,10 +369,17 @@ class SearchQuery extends SelectQueryExtender {
     }
     $this->executedFirstPass = TRUE;
 
+    $search_partial_words = config_get('search.settings', 'search_partial_words');
+
     if (!empty($this->words)) {
       $or = db_or();
       foreach ($this->words as $word) {
-        $or->condition('i.word', $word);
+        if ($search_partial_words) {
+          $or->condition('i.word', "%$word%", 'LIKE');
+        }
+        else {
+          $or->condition('i.word', $word);
+        }
       }
       $this->condition($or);
     }
