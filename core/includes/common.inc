@@ -8494,6 +8494,7 @@ function backdrop_common_theme() {
         'element' => 0,
         'parameters' => array(),
         'quantity' => 9,
+        'fragment' => '',
       ),
     ),
     'pager_first' => array(
@@ -8501,6 +8502,7 @@ function backdrop_common_theme() {
         'text' => NULL,
         'element' => 0,
         'parameters' => array(),
+        'fragment' => '',
       ),
     ),
     'pager_previous' => array(
@@ -8509,6 +8511,7 @@ function backdrop_common_theme() {
         'element' => 0,
         'interval' => 1,
         'parameters' => array(),
+        'fragment' => '',
       ),
     ),
     'pager_next' => array(
@@ -8517,6 +8520,7 @@ function backdrop_common_theme() {
         'element' => 0,
         'interval' => 1,
         'parameters' => array(),
+        'fragment' => '',
       ),
     ),
     'pager_last' => array(
@@ -8524,6 +8528,7 @@ function backdrop_common_theme() {
         'text' => NULL,
         'element' => 0,
         'parameters' => array(),
+        'fragment' => '',
       ),
     ),
     'pager_link' => array(
@@ -8533,6 +8538,7 @@ function backdrop_common_theme() {
         'element' => NULL,
         'parameters' => array(),
         'attributes' => array(),
+        'fragment' => '',
       ),
     ),
     // From menu.inc.
