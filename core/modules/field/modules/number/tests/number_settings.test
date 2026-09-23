@@ -47,7 +47,7 @@ class NumberFieldSettingsTestCase extends BackdropWebTestCase {
   public function testNumberDecimalFieldSettings() {
     // Create a field with settings to validate.
     $field_name = 'field_' . backdrop_strtolower($this->randomName());
-    $precision = 7;
+    $precision = 12;
     $scale = 3;
 
     $this->field = array(
@@ -56,7 +56,6 @@ class NumberFieldSettingsTestCase extends BackdropWebTestCase {
       'settings' => array(
         'precision' => $precision,
         'scale' => $scale,
-        'decimal_separator' => '.',
       ),
     );
     field_create_field($this->field);
@@ -92,7 +91,7 @@ class NumberFieldSettingsTestCase extends BackdropWebTestCase {
     // Maximum and Minimum exceed the field settings for precision and scale.
     $edit = array(
       'instance[settings][min]' => 678.3456,
-      'instance[settings][max]' => 56789.234,
+      'instance[settings][max]' => 8764556789.234,
     );
     $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
     $this->backdropPost(NULL, $edit, t('Save settings'));
@@ -110,7 +109,7 @@ class NumberFieldSettingsTestCase extends BackdropWebTestCase {
     // Proper values should pass.
     $edit = array(
       'instance[settings][min]' => 5678.901,
-      'instance[settings][max]' => 9999,
+      'instance[settings][max]' => 999999999,
     );
     $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
     $this->backdropPost(NULL, $edit, t('Save settings'));
