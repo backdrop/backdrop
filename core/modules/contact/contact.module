@@ -118,6 +118,7 @@ function contact_menu() {
     'page arguments' => array('contact_site_form'),
     'access arguments' => array('access site-wide contact form'),
     'type' => MENU_SUGGESTED_ITEM,
+    'menu_name' => 'main-menu',
     'file' => 'contact.pages.inc',
   );
   $config = config('contact.settings');
