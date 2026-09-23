@@ -35,7 +35,7 @@
         "status_default": 1,
         "scheduling_enabled": 1,
         "promote_enabled": 1,
-        "promote_default": 0,
+        "promote_default": 1,
         "sticky_enabled": 1,
         "sticky_default": 0,
         "revision_enabled": 1,
