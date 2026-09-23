@@ -318,10 +318,10 @@ class views_plugin_pager_full extends views_plugin_pager {
 
     $pager_id = $this->get_pager_id();
     for ($i = 0; $i <= $pager_id || $i < count($pager_page_array); $i++) {
-      $pager_page_array[$i] = empty($page[$i]) ? 0 : $page[$i];
+      $pager_page_array[$i] = empty($page[$i]) ? 0 : (int) $page[$i];
     }
 
-    $this->current_page = intval($pager_page_array[$pager_id]);
+    $this->current_page = $pager_page_array[$pager_id];
 
     if ($this->current_page < 0) {
       $this->current_page = 0;
