@@ -254,6 +254,17 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
     if (!empty($orphans)) {
       taxonomy_term_delete_multiple($orphans);
     }
+
+    // Remove the usages for files referenced by the terms.
+    foreach ($entities as $term) {
+      if (!empty($term->description)) {
+        $fids = filter_parse_file_fids($term->description);
+        foreach ($fids as $fid) {
+          $file = file_load($fid);
+          file_usage_delete($file, 'taxonomy', 'taxonomy_term', $term->tid);
+        }
+      }
+    }
   }
 
   /**
@@ -278,6 +289,18 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
         ));
       }
       $query->execute();
+    }
+
+    // Add file usages for files in the term description.
+    if (!empty($entity->description)) {
+      $fids = filter_parse_file_fids($entity->description);
+      foreach ($fids as $fid) {
+        $file = file_load($fid);
+        $usages = file_usage_list($file);
+        if (empty($usages['taxonomy']['taxonomy_term'][$entity->tid])) {
+          file_usage_add($file, 'taxonomy', 'taxonomy_term', $entity->tid);
+        }
+      }
     }
   }
 
