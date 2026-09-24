@@ -3088,6 +3088,38 @@ class FileUploadSvgTestCase extends FileTestHelper {
         'contents' => $default_open_tag . $default_content . '<a href="data:image/svg+xml,' . $a_tag_svg_href_content . '"></a></svg>',
         'message' => 'could not be uploaded. Dangerous content found.',
       ),
+      'link_safe' => array(
+        'contents' => '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a href="https://example.com/?a=1&amp;b=2"><text>test</text></a><a xlink:href="#test">test</a>' . $default_content . '</svg>',
+        'message' => 'was uploaded.',
+      ),
+      'cdata_style' => array(
+        'contents' => $default_open_tag . '<style><![CDATA[ rect { fill: #93a7ac; } ]]></style>' . $default_content . '</svg>',
+        'message' => 'was uploaded.',
+      ),
+      'embedded_image' => array(
+        'contents' => '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image xlink:href="data:image/png;base64,iVBORw0KGgo=" width="1" height="1"/></svg>',
+        'message' => 'was uploaded.',
+      ),
+      'link_whitespace_script' => array(
+        'contents' => $default_open_tag . $default_content . '<a href="jav&#x09;ascript:alert(1)"><text>test</text></a></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'xlink_nested_namespace_script' => array(
+        'contents' => $default_open_tag . $default_content . '<a xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="javascript:alert(1)"><text>test</text></a></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'xlink_prefix_script' => array(
+        'contents' => '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:foo="http://www.w3.org/1999/xlink"><a foo:href="javascript:alert(1)"><text>test</text></a>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'encoded_comment_script' => array(
+        'contents' => $default_open_tag . $default_content . '<text>&lt;!--</text><script>alert(1)</script><text>--&gt;</text></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'entity_script' => array(
+        'contents' => '<!DOCTYPE svg [<!ENTITY a "javascript:">]>' . $default_open_tag . '<a href="&a;alert(1)"><text>test</text></a></svg>',
+        'message' => 'could not be uploaded. Invalid SVG file.',
+      ),
     );
 
     foreach ($samples as $sample => $settings) {
