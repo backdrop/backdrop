@@ -915,6 +915,49 @@ function system_install() {
 }
 
 /**
+ * Applies themes declared by the installation profile.
+ *
+ * @param array $profile_info
+ *   Information from the installation profile's .info file.
+ */
+function system_install_apply_profile_themes($profile_info) {
+  $themes = system_list('theme');
+
+  // Apply the default theme.
+  $default_theme = !empty($profile_info['default_theme'])
+    ? $profile_info['default_theme']
+    : 'basis';
+
+  if (!isset($themes[$default_theme])) {
+    watchdog('system', 'Installation profile default theme not found: @theme. Using Basis.', array(
+      '@theme' => $default_theme,
+    ), WATCHDOG_WARNING);
+
+    $default_theme = 'basis';
+  }
+
+  theme_enable(array($default_theme));
+  config_set('system.core', 'theme_default', $default_theme);
+
+  // Apply the administration theme.
+  $admin_theme = !empty($profile_info['admin_theme'])
+    ? $profile_info['admin_theme']
+    : 'seven';
+
+  if (!isset($themes[$admin_theme])) {
+    watchdog('system', 'Installation profile administration theme not found: @theme. Using Seven.', array(
+      '@theme' => $admin_theme,
+    ), WATCHDOG_WARNING);
+
+    $admin_theme = 'seven';
+  }
+
+  theme_enable(array($admin_theme));
+  config_set('system.core', 'admin_theme', $admin_theme);
+  config_set('system.core', 'node_admin_theme', '1');
+}
+
+/**
  * Implements hook_schema().
  */
 function system_schema() {
