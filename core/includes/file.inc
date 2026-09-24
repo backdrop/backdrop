@@ -2127,52 +2127,98 @@ function file_validate_svg(File $file) {
 
   if ($file->filemime == 'image/svg+xml') {
     $file_contents = file_get_contents($file->uri);
-    $file_contents = preg_replace('/<!DOCTYPE[^>]*>/i', '', $file_contents);
-    $file_contents = html_entity_decode($file_contents);
-    $file_contents = strtolower($file_contents);
-    libxml_use_internal_errors(TRUE);
-    $xml = simplexml_load_string($file_contents);
-    $errors = libxml_get_errors();
 
-    if (!$xml || !empty($errors)) {
+    // Entity declarations could be used to hide content from the checks below
+    // or to consume excessive memory when expanded, so they are not allowed.
+    if (!strlen($file_contents) || stripos($file_contents, '<!ENTITY') !== FALSE) {
       return array(t('Invalid SVG file.'));
     }
-    else {
-      $errors = array();
-      $namespaces = $xml->getNamespaces();
-      if (!in_array('http://www.w3.org/2000/svg', $namespaces)) {
-        $errors[] = t('Invalid SVG namespace.');
-      }
 
-      $search_patterns = array(
-        // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Element
-        '//svg:foreignobject',
-        '//svg:script',
-        '//html:iframe',
-        '//svg:set',
-        // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
-        '//@*[starts-with(name(), "on")]',
-        '//svg:a[starts-with(normalize-space(@href), "javascript:")]',
-        '//svg:a[starts-with(normalize-space(@xlink:href), "javascript:")]',
-        '//svg:a[starts-with(normalize-space(@href), "data:")]',
-        '//svg:a[starts-with(normalize-space(@xlink:href), "data:")]',
-      );
-
-      $xml->registerXPathNamespace('svg', 'http://www.w3.org/2000/svg');
-      $xml->registerXPathNamespace('html', 'http://www.w3.org/1999/xhtml');
-      foreach ($search_patterns as $search_pattern) {
-        $found = $xml->xpath($search_pattern);
-        if (!empty($found)) {
-          $errors[] = t('Dangerous content found.');
-          break;
-        }
-      }
-    }
+    // Parse the file exactly as it will be delivered to the browser. The
+    // contents must not be modified (such as by decoding entities or changing
+    // case) prior to parsing, as that could cause the parsed structure to
+    // differ from what a browser renders, hiding dangerous content.
+    $previous_use_errors = libxml_use_internal_errors(TRUE);
     libxml_clear_errors();
-    libxml_use_internal_errors(FALSE);
+    $dom = new DOMDocument();
+    $loaded = $dom->loadXML($file_contents, LIBXML_NONET);
+    $libxml_errors = libxml_get_errors();
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous_use_errors);
+
+    if (!$loaded || !empty($libxml_errors) || !$dom->documentElement || ($dom->doctype && strlen((string) $dom->doctype->internalSubset))) {
+      $errors[] = t('Invalid SVG file.');
+    }
+    elseif ($dom->documentElement->namespaceURI !== 'http://www.w3.org/2000/svg') {
+      $errors[] = t('Invalid SVG namespace.');
+    }
+    elseif (_file_validate_svg_dangerous_content($dom)) {
+      $errors[] = t('Dangerous content found.');
+    }
   }
 
   return $errors;
+}
+
+/**
+ * Checks a parsed SVG document for content that may execute scripts.
+ *
+ * Element and attribute names are compared by their local name, regardless of
+ * namespace prefix or case. This prevents namespace tricks such as declaring
+ * the xlink namespace on a nested element or with a different prefix.
+ *
+ * @param DOMDocument $dom
+ *   The parsed SVG document.
+ *
+ * @return bool
+ *   TRUE if dangerous content was found, FALSE otherwise.
+ *
+ * @see file_validate_svg()
+ */
+function _file_validate_svg_dangerous_content(DOMDocument $dom) {
+  // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Element
+  $dangerous_elements = array(
+    'foreignobject',
+    'iframe',
+    'script',
+    'set',
+  );
+
+  foreach ($dom->getElementsByTagName('*') as $element) {
+    $element_name = strtolower($element->localName);
+    if (in_array($element_name, $dangerous_elements)) {
+      return TRUE;
+    }
+    // HTML elements may only be used within <foreignObject>, which is not
+    // allowed.
+    if ($element->namespaceURI === 'http://www.w3.org/1999/xhtml') {
+      return TRUE;
+    }
+
+    // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
+    foreach ($element->attributes as $attribute) {
+      $attribute_name = strtolower($attribute->localName);
+      // Event handlers, such as onload or onclick.
+      if (strpos($attribute_name, 'on') === 0) {
+        return TRUE;
+      }
+      // URLs, such as href, xlink:href, or xml:base.
+      if (in_array($attribute_name, array('href', 'base'))) {
+        // Browsers ignore whitespace and control characters within a URL
+        // protocol. Remove them all before checking the protocol.
+        $url = preg_replace('/[\x00-\x20]+/', '', $attribute->value);
+        // Embedded images are commonly used and do not execute scripts.
+        if (in_array($element_name, array('image', 'feimage')) && stripos($url, 'data:image/') === 0) {
+          continue;
+        }
+        if (backdrop_strip_dangerous_protocols($url) !== $url) {
+          return TRUE;
+        }
+      }
+    }
+  }
+
+  return FALSE;
 }
 
 /**
