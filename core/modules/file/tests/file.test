@@ -3116,6 +3116,14 @@ class FileUploadSvgTestCase extends FileTestHelper {
         'contents' => $default_open_tag . $default_content . '<text>&lt;!--</text><script>alert(1)</script><text>--&gt;</text></svg>',
         'message' => 'could not be uploaded. Dangerous content found.',
       ),
+      'animate_script' => array(
+        'contents' => '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a id="test" xlink:href="#"><text>test</text></a><animate xlink:href="#test" attributeName="href" values="javascript:alert(1)" begin="0s"/>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'animate_transform' => array(
+        'contents' => $default_open_tag . $default_content . '<animateTransform attributeName="transform" type="rotate" from="0" to="360"/></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
       'entity_script' => array(
         'contents' => '<!DOCTYPE svg [<!ENTITY a "javascript:">]>' . $default_open_tag . '<a href="&a;alert(1)"><text>test</text></a></svg>',
         'message' => 'could not be uploaded. Invalid SVG file.',
