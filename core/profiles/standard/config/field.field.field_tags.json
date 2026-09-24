@@ -1,0 +1,26 @@
+{
+    "_config_name": "field.field.field_tags",
+    "field_name": "field_tags",
+    "type": "taxonomy_term_reference",
+    "cardinality": -1,
+    "settings": {
+        "allowed_values": [
+            {
+                "vocabulary": "tags",
+                "parent": 0
+            }
+        ]
+    },
+    "module": "taxonomy",
+    "active": 1,
+    "locked": 0,
+    "translatable": 0,
+    "deleted": 0,
+    "entity_types": [],
+    "storage": {
+        "type": "field_sql_storage",
+        "settings": [],
+        "module": "field_sql_storage",
+        "active": 1
+    }
+}
