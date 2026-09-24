@@ -54,9 +54,10 @@ runs:
         # Set up apache with php-fpm.
         sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
         sudo sed -i -e "s/_PHP_VERSION_/${{ inputs.php-version }}/" /etc/apache2/sites-available/000-default.conf
+        sudo sed -i -e "s#_DOCROOT_#${{ github.workspace }}#g" /etc/apache2/sites-available/000-default.conf
         # Setup php-fpm, this script is intentionally not executable by default.
         chmod 700 .github/misc/setup-php-fpm.sh
         ./.github/misc/setup-php-fpm.sh ${{ inputs.php-version }}
         # This should be a redirect to the installer:
         echo 'Verify webserver setup'
-        curl -sI 'http://localhost/'
+        curl -sfI 'http://localhost/'
