@@ -3124,6 +3124,42 @@ class FileUploadSvgTestCase extends FileTestHelper {
         'contents' => $default_open_tag . $default_content . '<animateTransform attributeName="transform" type="rotate" from="0" to="360"/></svg>',
         'message' => 'could not be uploaded. Dangerous content found.',
       ),
+      'comments_metadata' => array(
+        'contents' => '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><!-- Generator: Test --><title>Test</title><desc>A test image</desc><metadata><rdf:RDF><rdf:Description><dc:title><rdf:Alt><rdf:li>Test</rdf:li></rdf:Alt></dc:title></rdf:Description></rdf:RDF></metadata>' . $default_content . '</svg>',
+        'message' => 'was uploaded.',
+      ),
+      'processing_instruction' => array(
+        'contents' => $default_open_tag . '<?x ><img src onerror=alert(1)><?x?>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'abrupt_comment' => array(
+        'contents' => $default_open_tag . '<!--><img src=x onerror=alert(1)>-->' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'html_breakout' => array(
+        'contents' => $default_open_tag . '<p/><style><![CDATA[</style><img src=x onerror=alert(1)>]]></style>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'desc_element' => array(
+        'contents' => $default_open_tag . '<desc><style><![CDATA[</style><img src=x onerror=alert(1)>]]></style></desc>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'doctype_breakout' => array(
+        'contents' => '<!DOCTYPE svg SYSTEM "><img src=x onerror=alert(1)>">' . $default_open_tag . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'title_cdata' => array(
+        'contents' => $default_open_tag . '<title><![CDATA[</title><script>alert(1)</script>]]></title>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'xml_events' => array(
+        'contents' => '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" id="test"><x xmlns="http://www.w3.org/2001/xml-events" event="load" observer="test" handler="#test"/>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'xinclude' => array(
+        'contents' => '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xi="http://www.w3.org/2001/XInclude"><text><xi:include href="/etc/passwd" parse="text"/></text>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
       'entity_script' => array(
         'contents' => '<!DOCTYPE svg [<!ENTITY a "javascript:">]>' . $default_open_tag . '<a href="&a;alert(1)"><text>test</text></a></svg>',
         'message' => 'could not be uploaded. Invalid SVG file.',
