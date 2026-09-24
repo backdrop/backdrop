@@ -2184,11 +2184,51 @@ function _file_validate_svg_dangerous_content(DOMDocument $dom) {
     'script',
     // Animation elements may change attributes (such as href) at runtime,
     // after the file has been validated.
+    // cspell:ignore animatecolor animatemotion animatetransform
     'animate',
     'animatecolor',
     'animatemotion',
     'animatetransform',
     'set',
+  );
+  $dangerous_namespaces = array(
+    // HTML elements may only be used within <foreignObject>, which is not
+    // allowed.
+    'http://www.w3.org/1999/xhtml',
+    // XML Events may attach script handlers to elements.
+    'http://www.w3.org/2001/xml-events',
+    // XInclude may include local files if processed by an image library.
+    'http://www.w3.org/2001/XInclude',
+  );
+
+  // The following checks prevent content that is harmless within an SVG file,
+  // but that is parsed differently if the SVG is embedded inline in an HTML
+  // page, which could allow markup to escape into the HTML document.
+  $xpath = new DOMXPath($dom);
+  // HTML ends a DOCTYPE at the first ">", even within a quoted identifier.
+  if ($dom->doctype && preg_match('/[<>]/', $dom->doctype->publicId . $dom->doctype->systemId)) {
+    return TRUE;
+  }
+  // HTML parses processing instructions as comments, which end at the first
+  // ">" character rather than at the end of the processing instruction.
+  if ($xpath->query('//processing-instruction()')->length) {
+    return TRUE;
+  }
+  // HTML immediately closes comments that begin with ">" or "->".
+  foreach ($xpath->query('//comment()') as $comment) {
+    if (preg_match('/^-?>/', $comment->data)) {
+      return TRUE;
+    }
+  }
+  // HTML elements that end SVG content, causing all following content to be
+  // parsed as HTML.
+  // @see https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign
+  $html_breakout_elements = array(
+    'b', 'big', 'blockquote', 'body', 'br', 'center', 'code', 'dd', 'div',
+    'dl', 'dt', 'em', 'embed', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head',
+    'hr', 'i', 'img', 'li', 'listing', 'menu', 'meta', 'nobr', 'ol', 'p',
+    'pre', 'ruby', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup',
+    'table', 'tt', 'u', 'ul', 'var',
   );
 
   foreach ($dom->getElementsByTagName('*') as $element) {
@@ -2196,14 +2236,38 @@ function _file_validate_svg_dangerous_content(DOMDocument $dom) {
     if (in_array($element_name, $dangerous_elements)) {
       return TRUE;
     }
-    // HTML elements may only be used within <foreignObject>, which is not
-    // allowed.
-    if ($element->namespaceURI === 'http://www.w3.org/1999/xhtml') {
+
+    // HTML matches elements by their full tag name, including any prefix.
+    $tag_name = strtolower($element->nodeName);
+    if (in_array($tag_name, $html_breakout_elements)) {
+      return TRUE;
+    }
+    if ($tag_name === 'font') {
+      foreach ($element->attributes as $attribute) {
+        $attribute_name = strtolower($attribute->nodeName);
+        if (in_array($attribute_name, array('color', 'face', 'size'))) {
+          return TRUE;
+        }
+      }
+    }
+    // Content within <title> and <desc> is parsed as HTML, so these may only
+    // contain plain text and comments.
+    if (in_array($tag_name, array('title', 'desc'))) {
+      foreach ($element->childNodes as $child) {
+        if (!in_array($child->nodeType, array(XML_TEXT_NODE, XML_COMMENT_NODE))) {
+          return TRUE;
+        }
+      }
+    }
+    if (in_array($element->namespaceURI, $dangerous_namespaces)) {
       return TRUE;
     }
 
     // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
     foreach ($element->attributes as $attribute) {
+      if (in_array($attribute->namespaceURI, $dangerous_namespaces)) {
+        return TRUE;
+      }
       $attribute_name = strtolower($attribute->localName);
       // Event handlers, such as onload or onclick.
       if (strpos($attribute_name, 'on') === 0) {
