@@ -2179,8 +2179,15 @@ function _file_validate_svg_dangerous_content(DOMDocument $dom) {
   // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Element
   $dangerous_elements = array(
     'foreignobject',
+    'handler',
     'iframe',
     'script',
+    // Animation elements may change attributes (such as href) at runtime,
+    // after the file has been validated.
+    'animate',
+    'animatecolor',
+    'animatemotion',
+    'animatetransform',
     'set',
   );
 
