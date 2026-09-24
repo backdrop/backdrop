@@ -616,7 +616,7 @@ function install_tasks($install_state) {
       'type' => 'batch',
     ),
 	  'install_profile_themes' => array(
-    'run' => INSTALL_TASK_RUN_IF_NOT_COMPLETED,
+      'run' => INSTALL_TASK_RUN_IF_NOT_COMPLETED,
     ),	
     'install_import_translations' => array(
       'display_name' => st('Set up translations'),
