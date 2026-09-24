@@ -924,9 +924,7 @@ function system_install_apply_profile_themes($profile_info) {
   $themes = system_list('theme');
 
   // Apply the default theme.
-  $default_theme = !empty($profile_info['default_theme'])
-    ? $profile_info['default_theme']
-    : 'basis';
+  $default_theme = !empty($profile_info['default_theme']) ? $profile_info['default_theme'] : 'basis';
 
   if (!isset($themes[$default_theme])) {
     watchdog('system', 'Installation profile default theme not found: @theme. Using Basis.', array(
@@ -940,9 +938,7 @@ function system_install_apply_profile_themes($profile_info) {
   config_set('system.core', 'theme_default', $default_theme);
 
   // Apply the administration theme.
-  $admin_theme = !empty($profile_info['admin_theme'])
-    ? $profile_info['admin_theme']
-    : 'seven';
+  $admin_theme = !empty($profile_info['admin_theme']) ? $profile_info['admin_theme'] : 'seven';
 
   if (!isset($themes[$admin_theme])) {
     watchdog('system', 'Installation profile administration theme not found: @theme. Using Seven.', array(
