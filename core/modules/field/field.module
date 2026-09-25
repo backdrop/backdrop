@@ -321,14 +321,14 @@ function field_cron() {
 /**
  * Implements hook_system_info_alter().
  *
- * Goes through a list of all modules that provide a field type, and makes them
- * required if there are any active fields of that type.
+ * Goes through a list of all modules that provide a field type, and locks them
+ * if there are any active fields of that type.
  */
 function field_system_info_alter(&$info, $file, $type) {
   if ($type == 'module' && module_hook($file->name, 'field_info')) {
     $fields = field_read_fields(array('module' => $file->name), array('include_deleted' => TRUE));
     if ($fields) {
-      $info['disabled'] = TRUE;
+      $info['locked'] = TRUE;
 
       // Provide an explanation message (only mention pending deletions if there
       // remains no actual, non-deleted fields)
