@@ -150,6 +150,54 @@ class EntityReferenceFormTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Test that the autocomplete widget respects the 'limit' setting.
+   */
+  public function testAutocompleteLimit() {
+    $type_referenced = $this->backdropCreateContentType();
+    $type_referencing = $this->backdropCreateContentType();
+
+    $field_name = 'field_' . $type_referenced->type;
+    $limit = 5;
+    $field = array(
+      'field_name' => $field_name,
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'node',
+        'handler_settings' => array(
+          'target_bundles' => array($type_referenced->type),
+        ),
+      ),
+    );
+    $field_instance = array(
+      'field_name' => $field_name,
+      'bundle' => $type_referencing->type,
+      'widget' => array(
+        'type' => 'entityreference_autocomplete',
+        'settings' => array(
+          'limit' => $limit,
+        ),
+      ),
+    );
+    $this->createEntityReferenceFieldForNode($field, $field_instance);
+
+    // Create more nodes than the limit.
+    $title = $this->randomName();
+    for ($i = 0; $i < $limit + 2; $i++) {
+      $this->backdropCreateNode(array(
+        'type' => $type_referenced->type,
+        'title' => $title . ' ' . $i,
+      ));
+    }
+
+    // Call the autocomplete callback.
+    $path = 'entityreference/autocomplete/single/' . $field_name . '/node/' . $type_referencing->type . '/NULL/' . $title;
+    $result = $this->backdropGet($path);
+    $matches = backdrop_json_decode($result);
+
+    $this->assertEqual(count($matches), $limit, 'The autocomplete results are limited to ' . $limit . ' items.');
+  }
+
+  /**
    * Helper method to create a base field and field instance.
    *
    * @param array $field
