@@ -3,6 +3,7 @@
     "local_action_position": "top",
     "margin_top": 1,
     "position_fixed": 1,
+    "logout_link_location": "sibling",
     "components": [
         "admin_bar.icon",
         "admin_bar.back_to_site_link",
