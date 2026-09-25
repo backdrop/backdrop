@@ -9,7 +9,7 @@
  *
  * Returns the mapping after modules have altered the default mapping.
  *
- * @return
+ * @return array
  *   Array of mimetypes correlated to the extensions that relate to them.
  *
  * @see file_get_mimetype()
@@ -27,7 +27,7 @@ function file_mimetype_mapping() {
 /**
  * Default MIME extension mapping.
  *
- * @return
+ * @return array
  *   Array of mimetypes correlated to the extensions that relate to them.
  *
  * @see file_get_mimetype()

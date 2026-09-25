@@ -158,18 +158,18 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
   /**
    * Returns the MIME type of the resource.
    *
-   * @param $uri
+   * @param string $uri
    *   The URI, path, or filename.
-   * @param $mapping
+   * @param array $mapping
    *   An optional map of extensions to their mimetypes, in the form:
    *    - 'mimetypes': a list of mimetypes, keyed by an identifier,
    *    - 'extensions': the mapping itself, an associative array in which
    *      the key is the extension and the value is the mimetype identifier.
    *
-   * @return
+   * @return string
    *   Returns a string containing the MIME type of the resource.
    */
-  public static function getMimeType($uri, $mapping = NULL);
+  public static function getMimeType($uri, ?array $mapping = NULL);
 
   /**
    * Changes permissions of the resource.
@@ -177,11 +177,11 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    * PHP lacks this functionality and it is not part of the official stream
    * wrapper interface. This is a custom implementation for Backdrop.
    *
-   * @param $mode
+   * @param int $mode
    *   Integer value for the permissions. Consult PHP chmod() documentation
    *   for more information.
    *
-   * @return
+   * @return bool
    *   Returns TRUE on success or FALSE on failure.
    */
   public function chmod($mode);
@@ -306,7 +306,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   /**
    * Base implementation of getMimeType().
    */
-  static function getMimeType($uri, $mapping = NULL) {
+  public static function getMimeType($uri, ?array $mapping = NULL) {
     if (!isset($mapping)) {
       // The default file map, defined in file.mimetypes.inc is quite big.
       // We only load it when necessary.
