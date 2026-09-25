@@ -7,11 +7,11 @@
 /**
  * Loads all the modules that have been enabled in the system table.
  *
- * @param $bootstrap
+ * @param bool|null $bootstrap
  *   Whether to load only the reduced set of modules loaded in "bootstrap mode"
  *   for cached pages. See bootstrap.inc.
  *
- * @return
+ * @return bool
  *   If $bootstrap is NULL, return a boolean indicating whether all modules
  *   have been loaded.
  */
@@ -43,30 +43,30 @@ function module_load_all($bootstrap = FALSE) {
  * All parameters to this function are optional and should generally not be
  * changed from their defaults.
  *
- * @param $refresh
+ * @param bool $refresh
  *   (optional) Whether to force the module list to be regenerated (such as
  *   after the administrator has changed the system settings). Defaults to
  *   FALSE.
- * @param $bootstrap_refresh
+ * @param bool $bootstrap_refresh
  *   (optional) When $refresh is TRUE, setting $bootstrap_refresh to TRUE forces
  *   the module list to be regenerated using the reduced set of modules loaded
  *   in "bootstrap mode" for cached pages. Otherwise, setting $refresh to TRUE
  *   generates the complete list of enabled modules.
- * @param $sort
+ * @param bool $sort
  *   (optional) By default, modules are ordered by weight and module name. Set
  *   this option to TRUE to return a module list ordered only by module name.
- * @param $fixed_list
+ * @param array|null $fixed_list
  *   (optional) If an array of module names is provided, this will override the
  *   module list with the given set of modules. This will persist until the next
  *   call with $refresh set to TRUE or with a new $fixed_list passed in. This
  *   parameter is primarily intended for internal use (e.g., in install.php and
  *   update.php).
  *
- * @return
+ * @return array
  *   An associative array whose keys and values are the names of the modules in
  *   the list.
  */
-function module_list($refresh = FALSE, $bootstrap_refresh = FALSE, $sort = FALSE, $fixed_list = NULL) {
+function module_list($refresh = FALSE, $bootstrap_refresh = FALSE, $sort = FALSE, ?array $fixed_list = NULL) {
   static $list = array(), $sorted_list;
 
   if (empty($list) || $refresh || $fixed_list) {
@@ -111,13 +111,13 @@ function module_list($refresh = FALSE, $bootstrap_refresh = FALSE, $sort = FALSE
 /**
  * Builds a list of bootstrap modules and enabled modules and themes.
  *
- * @param $type
+ * @param string $type
  *   The type of list to return:
  *   - module_enabled: All enabled modules.
  *   - bootstrap: All enabled modules required for bootstrap.
  *   - theme: All themes.
  *
- * @return
+ * @return array
  *   An associative array of modules or themes, keyed by name. For $type
  *   'bootstrap', the array values equal the keys. For $type 'module_enabled'
  *   or 'theme', the array values are objects representing the respective
@@ -182,7 +182,11 @@ function system_list($type) {
         }
         // Build a list of filenames so backdrop_get_filename can use it.
         if ($record->status) {
-          $lists['filepaths'][] = array('type' => $record->type, 'name' => $record->name, 'filepath' => $record->filename);
+          $lists['filepaths'][] = array(
+            'type' => $record->type,
+            'name' => $record->name,
+            'filepath' => $record->filename,
+          );
         }
       }
       foreach ($lists['theme'] as $key => $theme) {
@@ -235,17 +239,17 @@ function system_list_reset() {
 /**
  * Determines which modules require and are required by each module.
  *
- * @param $files
+ * @param array $files
  *   The array of filesystem objects used to rebuild the cache.
  *
- * @return
+ * @return array
  *   The same array with the new keys for each module:
  *   - requires: An array with the keys being the modules that this module
  *     requires.
  *   - required_by: An array with the keys being the modules that will not work
  *     without this module.
  */
-function _module_build_dependencies($files) {
+function _module_build_dependencies(array $files) {
   require_once BACKDROP_ROOT . '/core/includes/graph.inc';
   foreach ($files as $filename => $file) {
     $graph[$file->name]['edges'] = array();
@@ -282,14 +286,14 @@ function module_exists($module) {
 /**
  * Loads a module's installation hooks.
  *
- * @param $module
+ * @param string $module
  *   The name of the module (without the .module extension).
  *
- * @return
+ * @return string|false
  *   The name of the module's install file, if successful; FALSE otherwise.
  */
 function module_load_install($module) {
-  // Make sure the installation API is available
+  // Make sure the installation API is available.
   include_once BACKDROP_ROOT . '/core/includes/install.inc';
 
   return module_load_include('install', $module);
@@ -308,18 +312,21 @@ function module_load_install($module) {
  *
  * Do not use this function to load an install file, use module_load_install()
  * instead. Do not use this function in a global context since it requires
- * Backdrop to be fully bootstrapped, use require_once BACKDROP_ROOT . '/path/file'
+ * Backdrop to be fully bootstrapped, use
+ * @code
+ * require_once BACKDROP_ROOT . '/path/file';
+ * @endcode
  * instead.
  *
- * @param $type
+ * @param string $type
  *   The include file's type (file extension).
- * @param $module
+ * @param string $module
  *   The module to which the include file belongs.
- * @param $name
+ * @param string|null $name
  *   (optional) The base file name (without the $type extension). If omitted,
  *   $module is used; i.e., resulting in "$module.$type" by default.
  *
- * @return
+ * @return string|false
  *   The name of the included file, if successful; FALSE otherwise.
  */
 function module_load_include($type, $module, $name = NULL) {
@@ -350,6 +357,11 @@ function module_load_include($type, $module, $name = NULL) {
 
 /**
  * Loads an include file for each module enabled in the {system} table.
+ *
+ * @param string $type
+ *   The include file's type (file extension).
+ * @param string|null $name
+ *   (Optional) File name to include.
  */
 function module_load_all_includes($type, $name = NULL) {
   $modules = module_list();
@@ -382,7 +394,7 @@ function module_load_all_includes($type, $name = NULL) {
  * @param array $module_list
  *   An array of module names.
  * @param bool $enable_dependencies
- *   (optional)
+ *   (Optional)
  *   - If TRUE, dependency-checking is enabled. This means that any modules the
  *     passed-in module(s) depend on will be automatically added and enabled in
  *     the correct order. If any dependencies are unavailable, the passed-in
@@ -405,7 +417,7 @@ function module_load_all_includes($type, $name = NULL) {
  * @see module_disable()
  * @see backdrop_uninstall_modules()
  */
-function module_enable($module_list, $enable_dependencies = TRUE) {
+function module_enable(array $module_list, $enable_dependencies = TRUE) {
   if ($enable_dependencies) {
     // Get all module data so we can find dependencies and sort.
     $module_data = system_rebuild_module_data();
@@ -498,7 +510,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
         $versions = backdrop_get_schema_versions($module);
         $version = $versions ? end($versions) : SCHEMA_INSTALLED;
 
-        // Copy any default configuration data to the system config directory/
+        // Copy any default configuration data to the system config directory/.
         config_install_default_config($module);
 
         // If the module has no current updates, but has some that were
@@ -554,7 +566,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
  * @param array $module_list
  *   An array of module names.
  * @param bool $disable_dependents
- *   (optional)
+ *   (Optional)
  *   - If TRUE, dependency-checking is enabled. This means that any modules
  *     dependent on the passed-in module(s) will be automatically added and
  *     disabled in the correct order. Note that dependency-checking incurs a
@@ -567,7 +579,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
  * @see backdrop_uninstall_modules()
  * @see module_enable()
  */
-function module_disable($module_list, $disable_dependents = TRUE) {
+function module_disable(array $module_list, $disable_dependents = TRUE) {
   if ($disable_dependents) {
     // Get all module data so we can find dependents and sort.
     $module_data = system_rebuild_module_data();
@@ -705,12 +717,12 @@ function module_disable($module_list, $disable_dependents = TRUE) {
 /**
  * Determines whether a module implements a hook.
  *
- * @param $module
+ * @param string $module
  *   The name of the module (without the .module extension).
- * @param $hook
+ * @param string $hook
  *   The name of the hook (e.g. "help" or "menu").
  *
- * @return
+ * @return bool
  *   TRUE if the module is both installed and enabled, and the hook is
  *   implemented in that module.
  */
@@ -741,8 +753,8 @@ function module_hook($module, $hook) {
  * @param string $hook
  *   The name of the hook (e.g. "help" or "menu").
  * @param bool $sort
- *   By default, modules are ordered by weight and filename, settings this option
- *   to TRUE, module list will be ordered by module name.
+ *   By default, modules are ordered by weight and filename, settings this
+ *   option to TRUE, module list will be ordered by module name.
  *
  * @return string[]|null
  *   An array with the names of the modules which are implementing this hook.
@@ -750,7 +762,8 @@ function module_hook($module, $hook) {
  * @see module_implements_write_cache()
  */
 function module_implements($hook, $sort = FALSE) {
-  // Use the advanced backdrop_static() pattern, since this is called very often.
+  // Use the advanced backdrop_static() pattern, since this is called very
+  // often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
     $backdrop_static_fast['implementations'] = &backdrop_static(__FUNCTION__, array());
@@ -809,7 +822,7 @@ function module_implements($hook, $sort = FALSE) {
         }
       }
     }
-    // Implementations for this hook are now "verified"
+    // Implementations for this hook are now "verified".
     $verified[$hook] = TRUE;
   }
   elseif (!isset($verified[$hook])) {
@@ -863,7 +876,7 @@ function module_implements_reset() {
 /**
  * Retrieves a list of hooks that are declared through hook_hook_info().
  *
- * @return
+ * @return array
  *   An associative array whose keys are hook names and whose values are an
  *   associative array containing a group name. The structure of the array
  *   is the same as the return value of hook_hook_info().
@@ -937,14 +950,14 @@ function module_implements_write_cache() {
  * All arguments are passed by value. Use backdrop_alter() if you need to pass
  * arguments by reference.
  *
- * @param $module
+ * @param string $module
  *   The name of the module (without the .module extension).
- * @param $hook
+ * @param string $hook
  *   The name of the hook to invoke.
  * @param ...
  *   Arguments to pass to the hook implementation.
  *
- * @return mixed|NULL
+ * @return mixed|null
  *   The return value of the hook implementation. NULL if the module does not
  *   implement the given hook.
  *
@@ -967,12 +980,12 @@ function module_invoke($module, $hook) {
  * All arguments are passed by value. Use backdrop_alter() if you need to pass
  * arguments by reference.
  *
- * @param $hook
+ * @param string $hook
  *   The name of the hook to invoke.
  * @param ...
  *   Arguments to pass to the hook.
  *
- * @return
+ * @return array
  *   An array of return values of the hook implementations. If modules return
  *   arrays from their implementations, those are merged into one array
  *   recursively. Note: integer keys in arrays will be lost, as the merge is
@@ -1084,7 +1097,7 @@ function backdrop_required_modules() {
  *   backdrop_alter('my_module_data', $data, $context);
  * @endcode
  *
- * @param $type
+ * @param string $type
  *   A string describing the type of the alterable $data. 'form', 'links',
  *   'node_content', and so on are several examples. Alternatively can be an
  *   array, in which case hook_TYPE_alter() is invoked for each value in the
@@ -1092,22 +1105,23 @@ function backdrop_required_modules() {
  *   values in $type. For example, when Form API is using backdrop_alter() to
  *   execute both hook_form_alter() and hook_form_FORM_ID_alter()
  *   implementations, it passes array('form', 'form_' . $form_id) for $type.
- * @param $data
+ * @param mixed $data
  *   The variable that will be passed to hook_TYPE_alter() implementations to be
  *   altered. The type of this variable depends on the value of the $type
  *   argument. For example, when altering a 'form', $data will be a structured
  *   array. When altering a 'profile', $data will be an object.
- * @param $context1
+ * @param mixed $context1
  *   (optional) An additional variable that is passed by reference.
- * @param $context2
+ * @param mixed $context2
  *   (optional) An additional variable that is passed by reference. If more
  *   context needs to be provided to implementations, then this should be an
  *   associative array as described above.
- * @param $context3
+ * @param mixed $context3
  *   (optional) An additional variable that is passed by reference.
  */
 function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$context3 = NULL) {
-  // Use the advanced backdrop_static() pattern, since this is called very often.
+  // Use the advanced backdrop_static() pattern, since this is called very
+  // often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
     $backdrop_static_fast['functions'] = &backdrop_static(__FUNCTION__);
@@ -1170,9 +1184,9 @@ function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$c
         $implementations = array_fill_keys($modules, FALSE);
         // Let modules adjust the order solely based on the primary hook. This
         // ensures the same module order regardless of whether this if block
-        // runs. Calling backdrop_alter() recursively in this way does not result
-        // in an infinite loop, because this call is for a single $type, so we
-        // won't end up in this code block again.
+        // runs. Calling backdrop_alter() recursively in this way does not
+        // result in an infinite loop, because this call is for a single $type,
+        // so we won't end up in this code block again.
         backdrop_alter('module_implements', $implementations, $hook);
         $modules = array_keys($implementations);
       }
