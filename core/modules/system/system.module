@@ -2495,6 +2495,14 @@ function system_file_presave(File $file) {
     if ($key !== FALSE && isset($_FILES['files']['orig_name'][$key])) {
       $file->filename = $_FILES['files']['orig_name'][$key];
     }
+    else {
+      foreach ($_FILES['files']['name'] as $field_name => $delta) {
+        $key = array_search($file->filename, $_FILES['files']['name'][$field_name]);
+        if ($key !== FALSE && isset($_FILES['files']['name'][$field_name][$key])) {
+          $file->filename = $_FILES['files']['orig_name'][$field_name][$key];
+        }
+      }
+    }
   }
 }
 
