@@ -974,6 +974,10 @@ function entityreference_field_widget_error($element, $error) {
  *   True if user can access this menu item.
  */
 function entityreference_autocomplete_access_callback($type, $field_name, $entity_type, $bundle_name) {
+  if (!backdrop_valid_autocomplete_token()) {
+    return FALSE;
+  }
+
   $field = field_info_field($field_name);
   $instance = field_info_instance($entity_type, $field_name, $bundle_name);
 
@@ -1001,10 +1005,6 @@ function entityreference_autocomplete_access_callback($type, $field_name, $entit
  *   The label of the entity to query by.
  */
 function entityreference_autocomplete_callback($type, $field_name, $entity_type, $bundle_name, $entity_id = '', $string = '') {
-  if (!backdrop_valid_autocomplete_token()) {
-    return MENU_ACCESS_DENIED;
-  }
-
   // If the request has a '/' in the search text, then the menu system will have
   // split it into multiple arguments and $string will only be a partial.
   // Make sure to recover the intended $string.

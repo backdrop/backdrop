@@ -4814,10 +4814,6 @@ function views_ui_edit_display_form_change_theme($form, &$form_state) {
  * Page callback for views tag autocomplete
  */
 function views_ui_autocomplete_tag($string = '') {
-  if (!backdrop_valid_autocomplete_token()) {
-    return MENU_ACCESS_DENIED;
-  }
-
   $matches = array();
   $views = views_get_all_views();
   foreach ($views as $view) {

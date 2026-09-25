@@ -636,8 +636,7 @@ function system_menu() {
   $items['path-autocomplete'] = array(
     'title' => 'Path autocomplete',
     'page callback' => 'path_autocomplete',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'path_autocomplete_access',
     'type' => MENU_CALLBACK,
   );
 
@@ -4395,16 +4394,25 @@ function system_403() {
 }
 
 /**
+ * Access callback for the path autocomplete menu item.
+ *
+ * @return bool
+ *   TRUE if the current user may access content and the request has a valid
+ *   autocomplete token.
+ *
+ * @see backdrop_valid_autocomplete_token()
+ */
+function path_autocomplete_access() {
+  return user_access('access content') && backdrop_valid_autocomplete_token();
+}
+
+/**
  * Menu callback; Autocomplete callback for paths.
  *
  * @param string $string
  *   The string to find matches for.
  */
 function path_autocomplete($string = '') {
-  if (!backdrop_valid_autocomplete_token()) {
-    return MENU_ACCESS_DENIED;
-  }
-
   $matches = array();
   $match_count = 0;
   $range = 10;

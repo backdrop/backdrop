@@ -2608,6 +2608,11 @@ class FormAutocompleteTestCase extends BackdropWebTestCase {
     $this->assertResponse(200, 'Autocomplete request with a valid token is allowed.');
     $this->assertRaw($this->target_user->name, 'User name found in autocomplete results.');
 
+    // Search strings containing a slash are split into multiple path parts,
+    // but the token is still valid.
+    $this->backdropGet('user/autocomplete/' . $search . '/foo', array('query' => array('token' => $user_token)));
+    $this->assertResponse(200, 'Autocomplete request with a slash in the search string is allowed.');
+
     // Requests without a valid token are denied.
     $this->backdropGet('user/autocomplete/' . $search);
     $this->assertResponse(403, 'Autocomplete request without a token is denied.');
@@ -2630,6 +2635,15 @@ class FormAutocompleteTestCase extends BackdropWebTestCase {
     // Anonymous users receive a token that is valid across requests, even
     // though they do not have a persistent session.
     $this->backdropLogout();
+
+    // Autocomplete elements are rendered regardless of access to the
+    // autocomplete path, but requests are still denied without permission.
+    $this->backdropGet('form-test/autocomplete');
+    $anonymous_token = $this->getAutocompleteToken('edit-user-textfield');
+    $this->assertTrue($anonymous_token, 'The autocomplete element is rendered for a user without access to the autocomplete path.');
+    $this->backdropGet('user/autocomplete/' . $search, array('query' => array('token' => $anonymous_token)));
+    $this->assertResponse(403, 'Autocomplete request with a valid token is denied without permission.');
+
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access user profiles'));
     $this->backdropGet('user/autocomplete/' . $search);
     $this->assertResponse(403, 'Anonymous autocomplete request without a token is denied.');

@@ -4366,7 +4366,10 @@ function theme_hidden($variables) {
  */
 function form_process_autocomplete($element) {
   $element['#autocomplete_input'] = array();
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  // Access to the autocomplete path is not checked here. The access callback
+  // for the path is checked on each autocomplete request, along with the token
+  // added below (see backdrop_valid_autocomplete_token()).
+  if ($element['#autocomplete_path']) {
     $element['#autocomplete_input']['#id'] = $element['#id'] .'-autocomplete';
     // Force the script path to 'index.php', in case the server is not
     // configured to find it automatically. Normally it is the responsibility

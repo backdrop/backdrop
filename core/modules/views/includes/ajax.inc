@@ -243,10 +243,6 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
  * Page callback for views user autocomplete
  */
 function views_ajax_autocomplete_user($string = '') {
-  if (!backdrop_valid_autocomplete_token()) {
-    return MENU_ACCESS_DENIED;
-  }
-
   // The user enters a comma-separated list of user name. We only autocomplete the last name.
   $array = backdrop_explode_tags($string);
 
@@ -292,10 +288,6 @@ function views_ajax_autocomplete_user($string = '') {
  * @see taxonomy_autocomplete()
  */
 function views_ajax_autocomplete_taxonomy($vocabulary_name, $tags_typed = '') {
-  if (!backdrop_valid_autocomplete_token()) {
-    return MENU_ACCESS_DENIED;
-  }
-
   // The user enters a comma-separated list of tags. We only autocomplete the last tag.
   $tags_typed = backdrop_explode_tags($tags_typed);
   $tag_last = backdrop_strtolower(array_pop($tags_typed));
