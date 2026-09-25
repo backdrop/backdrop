@@ -83,7 +83,7 @@ class BackdropSessionHandler implements SessionHandlerInterface {
  *
  * This function should not be called directly.
  *
- * @return
+ * @return true
  *   This function will always return TRUE.
  */
 function _backdrop_session_open() {
@@ -99,7 +99,7 @@ function _backdrop_session_open() {
  *
  * This function should not be called directly.
  *
- * @return
+ * @return true
  *   This function will always return TRUE.
  */
 function _backdrop_session_close() {
@@ -121,10 +121,10 @@ function _backdrop_session_close() {
  *
  * @see https://www.php.net/manual/en/reserved.variables.session.php
  *
- * @param $sid
+ * @param int $sid
  *   The session ID of the session to retrieve.
  *
- * @return
+ * @return string
  *   The user's session, or an empty string if no session exists.
  */
 function _backdrop_session_read($sid) {
@@ -153,7 +153,7 @@ function _backdrop_session_read($sid) {
     if (!$user) {
       if (isset($_COOKIE[$insecure_session_name])) {
         $user = db_query("SELECT u.*, s.* FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE s.sid = :sid AND s.uid = 0", array(
-        ':sid' => $_COOKIE[$insecure_session_name]))
+          ':sid' => $_COOKIE[$insecure_session_name]))
         ->fetchObject();
       }
     }
@@ -186,7 +186,8 @@ function _backdrop_session_read($sid) {
     $user->session = '';
   }
 
-  // Store the session that was read for comparison in _backdrop_session_write().
+  // Store the session that was read for comparison in
+  // _backdrop_session_write().
   $last_read = &backdrop_static('backdrop_session_last_read');
   $last_read = array(
     'sid' => $sid,
@@ -208,13 +209,13 @@ function _backdrop_session_read($sid) {
  *
  * @see https://www.php.net/manual/en/reserved.variables.session.php
  *
- * @param $sid
+ * @param int $sid
  *   The session ID of the session to write to.
- * @param $value
+ * @param string $value
  *   Session data to write as a serialized string.
  *
- * @return
- *   Always returns TRUE.
+ * @return bool
+ *   Always returns TRUE, unless there is an exception.
  */
 function _backdrop_session_write($sid, $value) {
   global $user, $is_https;
@@ -273,7 +274,7 @@ function _backdrop_session_write($sid, $value) {
     if ($user->uid && REQUEST_TIME - $user->access > settings_get('session_write_interval', 180)) {
       db_update('users')
         ->fields(array(
-          'access' => REQUEST_TIME
+          'access' => REQUEST_TIME,
         ))
         ->condition('uid', $user->uid)
         ->execute();
@@ -363,6 +364,8 @@ function backdrop_session_start() {
  * Commits the current session, if necessary.
  *
  * If an anonymous user already have an empty session, destroy it.
+ *
+ * @return true
  */
 function backdrop_session_commit() {
   global $user, $is_https;
@@ -399,6 +402,11 @@ function backdrop_session_commit() {
 
 /**
  * Returns whether a session has been started.
+ *
+ * @param true|null $set
+ *   TRUE if the sessions is already started.
+ *
+ * @return true
  */
 function backdrop_session_started($set = NULL) {
   static $session_started = FALSE;
@@ -506,10 +514,10 @@ function _backdrop_session_regenerate_existing() {
  *
  * Cleans up a specific session.
  *
- * @param $sid
+ * @param int $sid
  *   Session ID.
  *
- * @return TRUE
+ * @return true
  *   The session destroy handler must always return TRUE.
  */
 function _backdrop_session_destroy($sid) {
@@ -544,9 +552,9 @@ function _backdrop_session_destroy($sid) {
 /**
  * Deletes the session cookie.
  *
- * @param $name
+ * @param string $name
  *   Name of session cookie to delete.
- * @param boolean $secure
+ * @param bool|null $secure
  *   Force the secure value of the cookie.
  */
 function _backdrop_session_delete_cookie($name, $secure = NULL) {
@@ -564,7 +572,7 @@ function _backdrop_session_delete_cookie($name, $secure = NULL) {
 /**
  * Ends a specific user's session(s).
  *
- * @param $uid
+ * @param int $uid
  *   User ID.
  */
 function backdrop_session_destroy_uid($uid) {
@@ -583,11 +591,11 @@ function backdrop_session_destroy_uid($uid) {
  *
  * Cleans up stalled sessions.
  *
- * @param $lifetime
+ * @param int $lifetime
  *   The value of session.gc_maxlifetime, passed by PHP.
  *   Sessions not updated for more than $lifetime seconds will be removed.
  *
- * @return TRUE
+ * @return true
  *   The garbage collection handler must always return TRUE.
  */
 function _backdrop_session_garbage_collection($lifetime) {
@@ -610,11 +618,11 @@ function _backdrop_session_garbage_collection($lifetime) {
  * dangerous operations, such as manipulating the global $user object.
  * See http://drupal.org/node/218104 for usage.
  *
- * @param $status
+ * @param bool|null $status
  *   Disables writing of session data when FALSE, (re-)enables
  *   writing when TRUE.
  *
- * @return
+ * @return bool
  *   FALSE if writing session data has been disabled. Otherwise, TRUE.
  */
 function backdrop_save_session($status = NULL) {
