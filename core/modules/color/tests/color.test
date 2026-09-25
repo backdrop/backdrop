@@ -156,6 +156,32 @@ class ColorTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Test that rebuilding settings for an unchanged palette is a no-op.
+   */
+  public function testRebuildSettingsUnchangedPalette() {
+    config_set('system.core', 'theme_default', 'bartik');
+    $settings_path = 'admin/appearance/settings/bartik';
+
+    $this->backdropLogin($this->bigUser);
+    $this->backdropGet($settings_path);
+    $edit = array(
+      'scheme' => '',
+      'palette[top]' => '#123456',
+    );
+    $this->backdropPost($settings_path, $edit, t('Save theme settings'));
+
+    $color_config_before = config_get('bartik.settings', 'color');
+
+    // color_rebuild_settings() runs on every cache flush (see
+    // color_flush_caches()). With the same palette still in effect, it
+    // should not generate new files or alter the stored configuration.
+    color_rebuild_settings('bartik');
+
+    $color_config_after = config_get('bartik.settings', 'color');
+    $this->assertEqual($color_config_before, $color_config_after, 'Rebuilding color settings for an unchanged palette does not alter the stored configuration.');
+  }
+
+  /**
    * Test the Bartik legacy color mode.
    */
   public function testBartikLegacy() {
