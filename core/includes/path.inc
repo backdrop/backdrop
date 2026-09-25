@@ -242,10 +242,19 @@ function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
 function backdrop_get_normal_path($path, $langcode = NULL) {
   $original_path = $path;
 
+  // Temporarily remove possible anchor/fragment.
+  $anchor = strstr($path, '#');
+  if (!empty($anchor)) {
+    $path = strstr($path, '#', TRUE);
+  }
+
   // Lookup the URL alias first.
   if ($source = backdrop_lookup_path('source', $path, $langcode)) {
     $path = $source;
   }
+
+  // Add anchor back in.
+  $path .= $anchor;
 
   // Allow other modules to alter the inbound URL. We cannot use backdrop_alter()
   // here because we need to run hook_url_inbound_alter() in the reverse order
