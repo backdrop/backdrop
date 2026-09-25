@@ -55,7 +55,10 @@ class DashboardOverviewContentBlock extends Block {
       return filter_xss($this->settings['admin_description']);
     }
 
-    return t('Displays a summary of content statistics.');
+    $preview = '<p>' . t('Displays a summary of content statistics.') . '</p>';
+    $preview .= $this->getAdminConditionsPreview();
+
+    return $preview;
   }
 
   /**

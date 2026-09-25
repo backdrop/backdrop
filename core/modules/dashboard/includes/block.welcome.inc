@@ -31,7 +31,10 @@ class DashboardWelcomeBlock extends Block {
       return filter_xss($this->settings['admin_description']);
     }
 
-    return t('Welcome message, and links to getting-started tasks.');
+    $preview = '<p>' . t('Welcome message, and links to getting-started tasks.') . '</p>';
+    $preview .= $this->getAdminConditionsPreview();
+
+    return $preview;
   }
 
   /**

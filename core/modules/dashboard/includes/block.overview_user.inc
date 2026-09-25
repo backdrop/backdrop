@@ -53,7 +53,10 @@ class DashboardOverviewUserBlock extends Block {
       return filter_xss($this->settings['admin_description']);
     }
 
-    return t('Displays a summary of user statistics including: number of total users, active users, blocked users, and users in each role.');
+    $preview = '<p>' . t('Displays a summary of user statistics including: number of total users, active users, blocked users, and users in each role.') . '</p>';
+    $preview .= $this->getAdminConditionsPreview();
+
+    return $preview;
   }
 
   /**

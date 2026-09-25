@@ -43,7 +43,10 @@ class DashboardTaxonomyBlock extends Block {
       return filter_xss($this->settings['admin_description']);
     }
 
-    return t('Links to administer taxonomy vocabularies.');
+    $preview = '<p>' . t('Links to administer taxonomy vocabularies.') . '</p>';
+    $preview .= $this->getAdminConditionsPreview();
+
+    return $preview;
   }
 
   /**

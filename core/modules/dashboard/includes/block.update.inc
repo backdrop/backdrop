@@ -48,7 +48,10 @@ class DashboardUpdateBlock extends Block {
       return filter_xss($this->settings['admin_description']);
     }
 
-    return t('Displays available updates for core, modules, themes, and layouts.');
+    $preview = '<p>' . t('Displays available updates for core, modules, themes, and layouts.') . '</p>';
+    $preview .= $this->getAdminConditionsPreview();
+
+    return $preview;
   }
 
   /**
@@ -57,7 +60,7 @@ class DashboardUpdateBlock extends Block {
   function checkAccess() {
     return user_access('access site reports');
   }
-  
+
   /**
    * {@inheritdoc}
    */
