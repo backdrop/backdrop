@@ -153,7 +153,18 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
       '#type' => 'link',
       '#title' => t('Delete'),
       '#href' => 'admin/structure/block/manage/' . $delta . '/delete',
-      '#attributes' => array('class' => array('button', 'button-secondary', 'form-delete')),
+      '#attributes' => array(
+        'class' => array('button', 'button-danger', 'use-ajax'),
+        'data-dialog' => TRUE,
+        'data-dialog-options' => json_encode(array(
+          'width' => 880,
+        )),
+      ),
+      '#attached' => array(
+        'library' => array(
+          array('system', 'backdrop.ajax'),
+        ),
+      ),
     );
   }
   $form['actions']['cancel'] = array(
@@ -275,7 +286,7 @@ function block_custom_block_delete($form, &$form_state, $delta) {
   $form['info'] = array('#type' => 'hidden', '#value' => $custom_block['info']);
   $form['delta'] = array('#type' => 'hidden', '#value' => $delta);
 
-  return confirm_form($form, t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info'])), 'admin/structure/block', '', t('Delete'), t('Cancel'));
+  return confirm_form($form, t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info'])), 'admin/structure/block', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
 }
 
 /**

@@ -460,11 +460,32 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#type' => 'submit',
     '#value' => t('Save redirect'),
   );
+
+  $destination = array();
+  if (isset($_GET['destination'])) {
+    $destination = backdrop_get_destination();
+    unset($_GET['destination']);
+  }
+
   $form['actions']['delete'] = array(
-    '#type' => 'submit',
-    '#value' => t('Delete'),
-    '#submit' => array('redirect_edit_form_delete_submit'),
-    '#limit_validation_errors' => array(array('actions')),
+    '#type' => 'link',
+    '#title' => t('Delete'),
+    '#href' => 'admin/config/urls/redirect/delete/' . $redirect->rid,
+    '#options' => array(
+      'query' => $destination,
+      'attributes' => array(
+        'class' => array('button', 'button-danger', 'use-ajax'),
+        'data-dialog' => TRUE,
+        'data-dialog-options' => json_encode(array(
+          'width' => 880,
+        )),
+      ),
+    ),
+    '#attached' => array(
+      'library' => array(
+        array('system', 'backdrop.ajax'),
+      ),
+    ),
     '#access' => !$redirect->isNew(),
   );
   $form['actions']['cancel'] = array(
@@ -596,18 +617,6 @@ function redirect_edit_form_validate($form, &$form_state) {
 
   redirect_validate($redirect, $form, $form_state);
   $form_state['redirect'] = $redirect;
-}
-
-/**
- * Form submit handler; handle the 'Delete' button on redirect_edit_form().
- */
-function redirect_edit_form_delete_submit($form, &$form_state) {
-  $destination = array();
-  if (isset($_GET['destination'])) {
-    $destination = backdrop_get_destination();
-    unset($_GET['destination']);
-  }
-  $form_state['redirect'] = array('admin/config/urls/redirect/delete/' . $form_state['redirect']->rid, array('query' => $destination));
 }
 
 /**

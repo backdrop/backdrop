@@ -3682,12 +3682,17 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
     '#value' => $yes ? $yes : t('Confirm'),
     '#attributes' => array('class' => array('button-danger')),
   );
-  $form['actions']['cancel'] = array(
-    '#type' => 'link',
-    '#title' => $no ? $no : t('Cancel'),
-    '#href' => $options['path'],
-    '#options' => $options,
-  );
+  // Only display a 'cancel' link when the form is not being rendered in a
+  // dialog, as the action can already be canceled by closing the dialog using
+  // the 'X' icon or the escape key.
+  if (!backdrop_is_dialog()) {
+    $form['actions']['cancel'] = array(
+      '#type' => 'link',
+      '#title' => $no ? $no : t('Cancel'),
+      '#href' => $options['path'],
+      '#options' => $options,
+    );
+  }
   // By default, render the form using theme_confirm_form().
   if (!isset($form['#theme'])) {
     $form['#theme'] = 'confirm_form';

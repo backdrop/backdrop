@@ -394,10 +394,33 @@ function user_profile_form($form, &$form_state, $account) {
     '#type' => 'submit',
     '#value' => t('Save'),
   );
+
+  $destination = array();
+  if (isset($_GET['destination'])) {
+    $destination = backdrop_get_destination();
+    unset($_GET['destination']);
+  }
+
   $form['actions']['cancel'] = array(
-    '#type' => 'submit',
-    '#value' => t('Cancel account'),
-    '#submit' => array('user_edit_cancel_submit'),
+    '#type' => 'link',
+    '#title' => t('Cancel account'),
+    // Note: We redirect from user/uid/edit to user/uid/cancel to make the tabs disappear.
+    '#href' => 'user/' . $account->uid . '/cancel',
+    '#options' => array(
+      'query' => $destination,
+      'attributes' => array(
+        'class' => array('button', 'button-danger', 'use-ajax'),
+        'data-dialog' => TRUE,
+        'data-dialog-options' => json_encode(array(
+          'width' => 880,
+        )),
+      ),
+    ),
+    '#attached' => array(
+      'library' => array(
+        array('system', 'backdrop.ajax'),
+      ),
+    ),
     '#access' => $account->uid > 1 && (($account->uid == $user->uid && user_access('cancel account')) || user_access('administer users')),
   );
   $form['actions']['cancel_form'] = array(
@@ -453,23 +476,9 @@ function user_profile_form_submit($form, &$form_state) {
 }
 
 /**
- * Submit handler for user_edit_cancel().
- */
-function user_edit_cancel_submit($form, &$form_state) {
-  $destination = array();
-  if (isset($_GET['destination'])) {
-    $destination = backdrop_get_destination();
-    unset($_GET['destination']);
-  }
-  // Note: We redirect from user/uid/edit to user/uid/cancel to make the tabs disappear.
-  $form_state['redirect'] = array("user/" . $form['#user']->uid . "/cancel", array('query' => $destination));
-}
-
-/**
  * Form builder; confirm form for canceling user account.
  *
  * @ingroup forms
- * @see user_edit_cancel_submit()
  * @see user_cancel_confirm_form_submit()
  */
 function user_cancel_confirm_form($form, &$form_state, $account) {

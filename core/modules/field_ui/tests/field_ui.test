@@ -438,7 +438,8 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     $this->fieldUIAddExistingField($bundle_path2, $edit2);
 
     // Make sure the Delete Field button works on the content type.
-    $this->backdropPost($bundle_path1 . '/fields/' . $this->field_name, array(), 'Delete field');
+    $this->backdropGet($bundle_path1 . '/fields/' . $this->field_name);
+    $this->clickLink(t('Delete field'));
     $this->assertResponse(200);
 
     // Delete the first instance.
@@ -452,7 +453,8 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     $this->assertNotNull(field_info_field($this->field_name), 'Field was not deleted.');
 
     // Make sure the Delete Field button works on the user entity.
-    $this->backdropPost($bundle_path2 . '/fields/' . $this->field_name, array(), 'Delete field');
+    $this->backdropGet($bundle_path2 . '/fields/' . $this->field_name);
+    $this->clickLink(t('Delete field'));
     $this->assertResponse(200);
 
     // Delete the second instance.

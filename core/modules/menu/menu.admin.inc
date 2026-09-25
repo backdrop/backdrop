@@ -355,10 +355,22 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#autocomplete_path' => 'path-autocomplete',
     );
     $form['actions']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete'),
+      '#type' => 'link',
+      '#title' => t('Delete'),
+      '#href' => 'admin/structure/menu/item/' . $item['mlid'] . '/delete',
+      '#attributes' => array(
+        'class' => array('button', 'button-danger', 'use-ajax'),
+        'data-dialog' => TRUE,
+        'data-dialog-options' => json_encode(array(
+          'width' => 880,
+        )),
+      ),
+      '#attached' => array(
+        'library' => array(
+          array('system', 'backdrop.ajax'),
+        ),
+      ),
       '#access' => $item['mlid'],
-      '#submit' => array('menu_item_delete_submit'),
       '#weight' => 10,
     );
   }
@@ -523,13 +535,6 @@ function menu_edit_item_validate($form, &$form_state) {
 }
 
 /**
- * Submit function for the delete button on the menu item editing form.
- */
-function menu_item_delete_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/menu/item/' . $form_state['values']['mlid'] . '/delete';
-}
-
-/**
  * Process menu and menu item add/edit form submissions.
  */
 function menu_edit_item_submit($form, &$form_state) {
@@ -615,20 +620,25 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
   );
   // Only custom menus may be deleted.
   $form['actions']['delete'] = array(
-    '#type' => 'submit',
-    '#value' => t('Delete'),
+    '#type' => 'link',
+    '#title' => t('Delete'),
+    '#href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/delete',
+    '#attributes' => array(
+      'class' => array('button', 'button-danger', 'use-ajax'),
+      'data-dialog' => TRUE,
+      'data-dialog-options' => json_encode(array(
+        'width' => 880,
+      )),
+    ),
+    '#attached' => array(
+      'library' => array(
+        array('system', 'backdrop.ajax'),
+      ),
+    ),
     '#access' => $type == 'configure' && !isset($system_menus[$menu['menu_name']]),
-    '#submit' => array('menu_custom_delete_submit'),
   );
 
   return $form;
-}
-
-/**
- * Submit function for the 'Delete' button on the menu editing form.
- */
-function menu_custom_delete_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/menu/manage/' . $form_state['values']['menu_name'] . '/delete';
 }
 
 /**

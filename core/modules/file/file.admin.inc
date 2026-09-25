@@ -230,8 +230,21 @@ function file_type_form($form, &$form_state, $type = NULL) {
   );
   if (!empty($type->type)) {
     $form['actions']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete'),
+      '#type' => 'link',
+      '#title' => t('Delete'),
+      '#href' => 'admin/structure/file-types/manage/' . $type->type . '/delete',
+      '#attributes' => array(
+        'class' => array('button', 'button-danger', 'use-ajax'),
+        'data-dialog' => TRUE,
+        'data-dialog-options' => json_encode(array(
+          'width' => 880,
+        )),
+      ),
+      '#attached' => array(
+        'library' => array(
+          array('system', 'backdrop.ajax'),
+        ),
+      ),
     );
   }
 
