@@ -326,7 +326,7 @@ function system_element_info() {
     '#size' => 30,
     '#maxlength' => 128,
     '#autocomplete_path' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('form_process_autocomplete', 'ajax_process_form'),
     '#theme' => 'tel',
     '#theme_wrappers' => array('form_element'),
   );
@@ -335,7 +335,7 @@ function system_element_info() {
     '#size' => 60,
     '#maxlength' => EMAIL_MAX_LENGTH,
     '#autocomplete_path' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('form_process_autocomplete', 'ajax_process_form'),
     '#element_validate' => array('form_validate_email'),
     '#theme' => 'email',
     '#theme_wrappers' => array('form_element'),
@@ -345,7 +345,7 @@ function system_element_info() {
     '#size' => 60,
     '#maxlength' => 255,
     '#autocomplete_path' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('form_process_autocomplete', 'ajax_process_form'),
     '#element_validate' => array('form_validate_url'),
     '#theme' => 'url',
     '#theme_wrappers' => array('form_element'),
@@ -382,7 +382,7 @@ function system_element_info() {
     '#size' => 60,
     '#maxlength' => 128,
     '#autocomplete_path' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('form_process_autocomplete', 'ajax_process_form'),
     '#theme' => 'search',
     '#theme_wrappers' => array('form_element'),
   );
@@ -4401,6 +4401,10 @@ function system_403() {
  *   The string to find matches for.
  */
 function path_autocomplete($string = '') {
+  if (!backdrop_valid_autocomplete_token()) {
+    return MENU_ACCESS_DENIED;
+  }
+
   $matches = array();
   $match_count = 0;
   $range = 10;

@@ -8,6 +8,10 @@
  * Menu callback; retrieve a JSON object containing autocomplete suggestions for existing users.
  */
 function user_autocomplete($string = '') {
+  if (!backdrop_valid_autocomplete_token()) {
+    return MENU_ACCESS_DENIED;
+  }
+
   $matches = array();
   if ($string) {
     $result = db_select('users')->fields('users', array('name'))->condition('name', db_like($string) . '%', 'LIKE')->range(0, 10)->execute();

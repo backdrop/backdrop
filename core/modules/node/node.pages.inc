@@ -1054,6 +1054,10 @@ function node_revision_delete_confirm_submit($form, &$form_state) {
  *   The string that will be searched.
  */
 function node_autocomplete($string = '') {
+  if (!backdrop_valid_autocomplete_token()) {
+    return MENU_ACCESS_DENIED;
+  }
+
   $matches = array();
   if ($string) {
     if (is_numeric($string)) {

@@ -1024,6 +1024,12 @@ description = Tests the form API url element.
 group = Form API
 file = form.test
 
+[FormAutocompleteTestCase]
+name = Form API autocomplete
+description = Tests autocomplete form elements and CSRF tokens for autocomplete callbacks.
+group = Form API
+file = form.test
+
 [FormTextareaTestCase]
 name = Form textarea
 description = Tests form textarea related functions.

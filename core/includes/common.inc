@@ -6518,6 +6518,92 @@ function backdrop_valid_token($token, $value = '', $skip_anonymous = FALSE) {
 }
 
 /**
+ * Generates a token for accessing an autocomplete callback.
+ *
+ * The token is based on the menu router path that handles the autocomplete
+ * requests, so a token generated for one autocomplete callback cannot be used
+ * to access a different autocomplete callback. For authenticated users, the
+ * token is also tied to the user's session. Because anonymous users normally
+ * do not have a session (and pages may be served from the page cache), tokens
+ * for anonymous users are the same for all anonymous users.
+ *
+ * @param string $path
+ *   The internal path used for the autocomplete requests, such as
+ *   'user/autocomplete'. This is usually the value of #autocomplete_path.
+ *
+ * @return string|FALSE
+ *   A URL-safe token, or FALSE if the path does not match any menu item.
+ *
+ * @see backdrop_valid_autocomplete_token()
+ * @see form_process_autocomplete()
+ *
+ * @since 1.35.2 Function added.
+ */
+function backdrop_get_autocomplete_token($path) {
+  $router_item = menu_get_item($path);
+  if (!$router_item) {
+    return FALSE;
+  }
+  return _backdrop_get_autocomplete_token($router_item['path']);
+}
+
+/**
+ * Validates the token provided with the current autocomplete request.
+ *
+ * Autocomplete page callbacks should call this function before returning any
+ * results, and return MENU_ACCESS_DENIED if the token is not valid. This
+ * prevents autocomplete callbacks from being accessed directly without first
+ * visiting a form that contains an autocomplete field for that callback.
+ *
+ * Example usage in a page callback:
+ * @code
+ * function my_module_autocomplete($string = '') {
+ *   if (!backdrop_valid_autocomplete_token()) {
+ *     return MENU_ACCESS_DENIED;
+ *   }
+ *   ...
+ * }
+ * @endcode
+ *
+ * @return bool
+ *   TRUE if the "token" query parameter is valid for the current menu router
+ *   path, FALSE otherwise.
+ *
+ * @see backdrop_get_autocomplete_token()
+ *
+ * @since 1.35.2 Function added.
+ */
+function backdrop_valid_autocomplete_token() {
+  $router_item = menu_get_item();
+  if (!$router_item || !isset($_GET['token']) || !is_string($_GET['token'])) {
+    return FALSE;
+  }
+  return hash_equals(_backdrop_get_autocomplete_token($router_item['path']), $_GET['token']);
+}
+
+/**
+ * Generates an autocomplete token for a menu router path.
+ *
+ * @param string $router_path
+ *   The menu router path, such as 'entityreference/autocomplete/single/%/%/%'.
+ *
+ * @return string
+ *   A URL-safe token.
+ *
+ * @see backdrop_get_autocomplete_token()
+ * @see backdrop_valid_autocomplete_token()
+ */
+function _backdrop_get_autocomplete_token($router_path) {
+  $value = 'autocomplete:' . $router_path;
+  if (user_is_anonymous()) {
+    // Anonymous users usually do not have a persistent session, so the token
+    // cannot be tied to the session ID.
+    return backdrop_hmac_base64($value, backdrop_get_private_key() . backdrop_get_hash_salt());
+  }
+  return backdrop_get_token($value);
+}
+
+/**
  * Full bootstrap
  */
 function _backdrop_bootstrap_full() {
