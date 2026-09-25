@@ -1,0 +1,24 @@
+<?php
+/**
+ * @file
+ * Install, update, and uninstall functions for code_sign_sodium.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function code_sign_sodium_requirements($phase = NULL) {
+  $requirements = array();
+
+  if ($phase == 'runtime') {
+    $sodium_loaded = extension_loaded('sodium');
+    $requirements['code_sign_sodium'] = array(
+      'title' => t('Sodium extension'),
+      'value' => $sodium_loaded ? t('Available') : t('Not available'),
+      'severity' => $sodium_loaded ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+      'description' => t('The Sodium extension is required to sign and verify data with the Sodium Code Sign engine. It has been bundled with PHP since 7.2, and enabled by default since PHP 7.4.'),
+    );
+  }
+
+  return $requirements;
+}

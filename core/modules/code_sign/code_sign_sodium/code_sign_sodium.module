@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ * Signs and verifies downloaded projects using the Sodium signing engine.
+ */
+
+/**
+ * Implements hook_code_sign_info().
+ */
+function code_sign_sodium_code_sign_info() {
+  $signers = array();
+
+  $signers['sodium'] = array(
+    'label' => t('Sodium'),
+    'class' => 'CodeSignSodiumEngine',
+  );
+
+  return $signers;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function code_sign_sodium_autoload_info() {
+  return array(
+    'CodeSignSodiumEngine' => 'code_sign_sodium.engine.inc',
+  );
+}

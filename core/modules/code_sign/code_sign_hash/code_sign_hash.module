@@ -1,0 +1,39 @@
+<?php
+/**
+ * @file
+ * Generates and verifies hash signatures (such as MD5 or SHA1) on downloaded projects.
+ */
+
+/**
+ * Implements hook_code_sign_info().
+ */
+function code_sign_hash_code_sign_info() {
+  $signers = array();
+
+  $signers['hash'] = array(
+    'label' => t('Hash'),
+    'class' => 'CodeSignHashEngine',
+  );
+
+  return $signers;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function code_sign_hash_autoload_info() {
+  return array(
+    'CodeSignHashEngine' => 'code_sign_hash.engine.inc',
+  );
+}
+
+/**
+ * Returns a list of supported hash algorithms suitable for form fields.
+ *
+ * @return array
+ *   An array of supported hash algorithm names, keyed by the same.
+ */
+function code_sign_hash_algorithms() {
+  $algos = hash_algos();
+  return array_combine($algos, $algos);
+}

@@ -1,0 +1,239 @@
+<?php
+/**
+ * @file
+ * Provides a framework for signing and verification of arbitrary data.
+ *
+ * This module works with other modules that provide algorithm-specific
+ * support through signing engine classes. See hook_code_sign_info().
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function code_sign_menu() {
+  $items = array();
+
+  $items['admin/reports/code-sign'] = array(
+    'title' => 'Code Sign',
+    'page callback' => 'code_sign_report_page',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function code_sign_theme() {
+  $items = array();
+
+  // A report on the code signatures for all active modules.
+  $items['code_sign_report'] = array(
+    'variables' => array(),
+    'file' => 'code_sign.theme.inc',
+  );
+
+  // Display the short result of a signature verification check. Signing
+  // modules should implement their own versions of this theme function.
+  $items['code_sign_result'] = array(
+    'variables' => array(
+      'signer' => NULL,
+      'signature' => NULL,
+      'profile' => NULL,
+      'result' => NULL,
+    ),
+    'file' => 'code_sign.theme.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function code_sign_autoload_info() {
+  return array(
+    'CodeSignEngine' => 'code_sign.engine.inc',
+    'CodeSignException' => 'code_sign.engine.inc',
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function code_sign_config_info() {
+  $prefixes['code_sign.profile'] = array(
+    'name_key' => 'name',
+    'label_key' => 'label',
+    'group' => t('Code Sign profiles'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Returns a list of signature modules that implement hook_code_sign_info().
+ *
+ * @return array
+ *   An array of code_sign modules and their signing engine classes. See
+ *   hook_code_sign_info() for more details.
+ *
+ * @see hook_code_sign_info()
+ */
+function code_sign_get_engines() {
+  $all_signers = &backdrop_static(__FUNCTION__);
+
+  if (empty($all_signers)) {
+    $all_signers = module_invoke_all('code_sign_info');
+  }
+
+  return $all_signers;
+}
+
+/**
+ * Returns an instantiated signing engine.
+ *
+ * @param string $signer
+ *   The machine name of the signing engine, as defined by
+ *   hook_code_sign_info().
+ *
+ * @return CodeSignEngine|false
+ *   An instance of the requested signing engine, or FALSE if the engine is
+ *   not defined.
+ */
+function code_sign_get_engine($signer) {
+  $engines = &backdrop_static(__FUNCTION__, array());
+
+  if (!array_key_exists($signer, $engines)) {
+    $all_signers = code_sign_get_engines();
+
+    if (empty($all_signers[$signer]['class'])) {
+      watchdog('code sign', 'Unknown Code Sign engine %signer.', array('%signer' => $signer), WATCHDOG_ERROR);
+      $engines[$signer] = NULL;
+    }
+    else {
+      $class = $all_signers[$signer]['class'];
+      $engines[$signer] = new $class($signer);
+    }
+  }
+
+  return $engines[$signer] ?? FALSE;
+}
+
+/**
+ * Returns a list of code_sign profiles suitable for signing. Typically, this is
+ * a list of private key IDs.
+ *
+ * Each entry includes:
+ *
+ * - engine: The machine name of the Code Sign engine.
+ * - label: A name for the profile, intended for humans.
+ * - name: The unique profile machine name.
+ * - additional keys specific to the engine.
+ *
+ * @return array
+ *   An array of signing profiles, indexed by the profile name.
+ */
+function code_sign_load_all_profiles() {
+  $signing_profiles = &backdrop_static(__FUNCTION__, array());
+
+  if (!$signing_profiles) {
+    $config_names = config_get_names_with_prefix('code_sign.profile.');
+    foreach ($config_names as $config_name) {
+      $config_data = config($config_name)->getData();
+      $signing_profiles[$config_data['name']] = $config_data;
+    }
+  }
+
+  return $signing_profiles;
+}
+
+/**
+ * Loads an individual Code Sign profile.
+ *
+ * @param string $profile_name
+ *   The machine name of the profile to load.
+ */
+function code_sign_load_profile($profile_name) {
+  return config('code_sign.profile.' . $profile_name)->getData();
+}
+
+/**
+ * Generates the Code Sign report page at admin/reports/code-sign.
+ *
+ * @return array
+ *   A renderable array with the report for admin/reports/code-sign.
+ */
+function code_sign_report_page() {
+  $all_signers = code_sign_get_engines();
+  $renderable = array();
+
+  foreach ($all_signers as $key => $info) {
+    $renderable[$key . '_title'] = array(
+      '#type' => 'markup',
+      '#markup' => t('<h2>@label</h2>', array('@label' => $info['label'])),
+    );
+    $engine = code_sign_get_engine($key);
+    $renderable[$key] = $engine->getStatus();
+  }
+
+  if (empty($renderable)) {
+    $renderable['empty'] = array(
+      '#type' => 'markup',
+      '#markup' => t('No algorithm modules have been enabled. Try enabling !code_sign_hash.', array('!code_sign_hash' => l('Hashing Code Sign', 'admin/modules/list'))),
+    );
+  }
+
+  return $renderable;
+}
+
+/**
+ * Signs data using the given signing engine.
+ *
+ * @param string $signer
+ *   The machine name of the crypto engine to use.
+ * @param string $profile
+ *   The profile ID to use.
+ * @param string $data
+ *   The data to be signed.
+ * @param array $options
+ *   Engine-specific options.
+ *
+ * @return string|bool|null
+ *   The signature, or NULL on failure.
+ */
+function code_sign_sign($signer, $profile, $data, $options = array()) {
+  if (empty($data)) {
+    watchdog('code sign', 'Nothing to sign.', array(), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  $engine = code_sign_get_engine($signer);
+  return $engine ? $engine->sign($profile, $data, $options) : NULL;
+}
+
+/**
+ * Verifies a signature using the given signing engine.
+ *
+ * @param string $signer
+ *   The machine name of the crypto engine to use.
+ * @param string $data
+ *   The signed data.
+ * @param string $signature
+ *   The signature to verify.
+ * @param array $options
+ *   Engine-specific options.
+ *
+ * @return bool|null
+ *   TRUE if valid, FALSE if invalid, or NULL on failure.
+ */
+function code_sign_verify($signer, $data, $signature = NULL, $options = array()) {
+  if (empty($data)) {
+    watchdog('code sign', 'Nothing to verify.', array(), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  $engine = code_sign_get_engine($signer);
+  return $engine ? $engine->verify($data, $signature, $options) : NULL;
+}
