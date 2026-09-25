@@ -139,3 +139,9 @@ div.messages.info:before {
   left: 5px;
   right: auto;
 }
+.messages.popover {
+  position: fixed;
+  margin: auto;
+  border: none;
+  box-shadow: 0 0 12px #0003;
+}
