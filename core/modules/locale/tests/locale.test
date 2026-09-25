@@ -2669,7 +2669,6 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
    */
   function testCommentLanguage() {
     backdrop_static_reset('language_list');
-
     // Create two nodes, one for english and one for french, and comment each
     // node using both english and french as content language by changing URL
     // language prefixes. Meanwhile interface language is always French, which
@@ -2697,19 +2696,23 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
         $this->backdropPost("{$prefix}node/{$node->nid}", $edit, t('Save'));
 
         // Check that comment language matches the current content language.
-        $comment = db_select('comment', 'c')
+        $comment_array = db_select('comment', 'c')
           ->fields('c')
           ->condition('nid', $node->nid)
           ->orderBy('cid', 'DESC')
           ->execute()
-          ->fetchObject();
-        $args = array('%node_language' => $node_langcode, '%comment_language' => $comment->langcode, '%langcode' => $langcode);
-        $this->assertEqual($comment->langcode, $langcode, format_string('The comment posted with content language %langcode and belonging to the node with language %node_language has language %comment_language', $args));
+          ->fetchAssoc();
+        $comment = new Comment($comment_array);
+        $args = array(
+          '%node_language' => $node_langcode,
+          '%comment_language' => $comment->langcode(),
+          '%langcode' => $langcode
+        );
+        $this->assertEqual($comment->langcode(), $langcode, format_string('The comment posted with content language %langcode and belonging to the node with language %node_language has language %comment_language', $args));
       }
     }
   }
 }
-
 /**
  * Functional tests for localizing date formats.
  */

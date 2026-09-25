@@ -470,7 +470,7 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
 
   $delta = 0;
   $term_deltas = array();
-  $tree = taxonomy_get_tree($vocabulary->machine_name);
+  $tree = taxonomy_get_tree($vocabulary->machine_name, 0, NULL, TRUE);
   $term = current($tree);
   do {
     // In case this tree is completely empty.
@@ -480,7 +480,8 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
 
     // Skip all terms not in the requested language.
     $tree_langcode = $filter_langcode === LANGUAGE_NONE ? NULL : $filter_langcode;
-    if ($tree_langcode && $term->langcode !== $tree_langcode && $term->langcode !== LANGUAGE_NONE) {
+
+    if ($tree_langcode && $term->langcode() !== $tree_langcode && $term->langcode() !== LANGUAGE_NONE) {
       continue;
     }
 
@@ -589,7 +590,7 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
         '#default_value' => $term->depth,
       );
       // Language
-      $langcode_label = isset($language_options[$term->langcode]) ? $language_options[$term->langcode] : $term->langcode;
+      $langcode_label = isset($language_options[$term->langcode()]) ? $language_options[$term->langcode()] : $term->langcode();
       if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
         $form[$key]['langcode'] = array(
           '#type' => 'markup',
@@ -847,7 +848,7 @@ function taxonomy_form_term($form, &$form_state, ?TaxonomyTerm $term = NULL, ?Ta
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
-      '#default_value' => isset($_GET['langcode_term']) ? $_GET['langcode_term'] : $term->langcode,
+      '#default_value' => isset($_GET['langcode_term']) ? $_GET['langcode_term'] : $term->langcode(),
       '#options' => language_list(TRUE, TRUE),
       '#empty_value' => LANGUAGE_NONE,
       '#empty_option' => t('- All (always shown) -'),
@@ -858,7 +859,7 @@ function taxonomy_form_term($form, &$form_state, ?TaxonomyTerm $term = NULL, ?Ta
     // Maintain langcode settings if Language module is not present.
     $form['langcode'] = array(
       '#type' => 'value',
-      '#value' => $term->langcode,
+      '#value' => $term->langcode(),
     );
   }
 

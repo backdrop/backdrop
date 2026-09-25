@@ -211,14 +211,19 @@ class TranslationTestCase extends BackdropWebTestCase {
     $type = 'block-locale';
     $node = $this->createPage($this->randomName(), $this->randomName(), 'en');
     $this->assertLanguageSwitchLinks($node, $node, TRUE, $type);
-    $this->assertLanguageSwitchLinks($node, $this->emptyNode('es'), TRUE, $type);
-    $this->assertLanguageSwitchLinks($node, $this->emptyNode('it'), TRUE, $type);
+    $empty_node_es = clone $node;
+    $empty_node_es->nid = NULL;
+    $empty_node_es->langcode = 'es';
+    $this->assertLanguageSwitchLinks($node, $empty_node_es, TRUE, $type);
+    $empty_node_it = clone $empty_node_es;
+    $empty_node_it->langcode = 'it';
+    $this->assertLanguageSwitchLinks($node, $empty_node_it, TRUE, $type);
 
     // Create the Spanish translation.
     $translation_es = $this->createTranslation($node, $this->randomName(), $this->randomName(), 'es');
     $this->assertLanguageSwitchLinks($node, $node, TRUE, $type);
     $this->assertLanguageSwitchLinks($node, $translation_es, TRUE, $type);
-    $this->assertLanguageSwitchLinks($node, $this->emptyNode('it'), TRUE, $type);
+    $this->assertLanguageSwitchLinks($node, $empty_node_it, TRUE, $type);
 
     // Create the Italian translation.
     $translation_it = $this->createTranslation($node, $this->randomName(), $this->randomName(), 'it');
@@ -229,9 +234,12 @@ class TranslationTestCase extends BackdropWebTestCase {
     // Create a language neutral node and check that the language switcher is
     // left untouched.
     $node2 = $this->createPage($this->randomName(), $this->randomName(), LANGUAGE_NONE);
-    $node2_en = (object) array('nid' => $node2->nid, 'langcode' => 'en');
-    $node2_es = (object) array('nid' => $node2->nid, 'langcode' => 'es');
-    $node2_it = (object) array('nid' => $node2->nid, 'langcode' => 'it');
+    $node2_en = clone $node2;
+    $node2_en->langcode = 'en';
+    $node2_es = clone $node2;
+    $node2_es->langcode = 'es';
+    $node2_it = clone $node2;
+    $node2_it->langcode = 'it';
     $this->assertLanguageSwitchLinks($node2_en, $node2_en, TRUE, $type);
     $this->assertLanguageSwitchLinks($node2_en, $node2_es, TRUE, $type);
     $this->assertLanguageSwitchLinks($node2_en, $node2_it, TRUE, $type);
@@ -252,11 +260,43 @@ class TranslationTestCase extends BackdropWebTestCase {
     // Check that new nodes with a language assigned do not trigger language
     // switcher alterations when translation support is disabled.
     $node = $this->createPage($this->randomName(), $this->randomName());
-    $node_es = (object) array('nid' => $node->nid, 'langcode' => 'es');
-    $node_it = (object) array('nid' => $node->nid, 'langcode' => 'it');
+    $node_es = clone $node;
+    $node_es->langcode = 'es';
+    $node_it = clone $node;
+    $node_it->langcode = 'it';
     $this->assertLanguageSwitchLinks($node, $node, TRUE, $type);
     $this->assertLanguageSwitchLinks($node, $node_es, TRUE, $type);
     $this->assertLanguageSwitchLinks($node, $node_it, TRUE, $type);
+  }
+
+  /**
+   * Tests entity class 'langcode callback' property
+   */
+  function testLangcodeCallback() {
+    $node_none_default = $this->createPage($this->randomName(), $this->randomName(), LANGUAGE_NONE);
+    $node_none_test = $this->createPage($this->randomName(), $this->randomName(), LANGUAGE_NONE);
+    $node_es_default = $this->createPage($this->randomName(), $this->randomName(), 'es');
+    $node_es_test = $this->createPage($this->randomName(), $this->randomName(), 'es');
+    $this->resetCaches();
+
+    $langcode_alter = &backdrop_static('translation_test_langcode_callback', array());
+
+    $node_none_default = node_load($node_none_default->nid, NULL, TRUE);
+    $this->assertEqual($node_none_default->langcode(), LANGUAGE_NONE, t('Langcode is unaltered and is LANGUAGE_NONE'));
+
+    $target_langcode = 'zh';
+    $langcode_alter[$node_none_test->nid] = $target_langcode;
+    $node_none_test = node_load($node_none_test->nid, NULL, TRUE);
+    $this->assertEqual($node_none_test->langcode(), $target_langcode, t('Langcode is altered by langcode callback and is @langcode', ['@langcode' => $target_langcode]));
+
+
+    $node_es_default = node_load($node_es_default->nid, NULL, TRUE);
+    $this->assertEqual($node_es_default->langcode(), 'es', t('Langcode is unaltered and is @langcode', ['@langcode' => 'es']));
+
+    $target_langcode = 'en';
+    $langcode_alter[$node_es_test->nid] = $target_langcode;
+    $node_es_test = node_load($node_es_test->nid, NULL, TRUE);
+    $this->assertEqual($node_es_test->langcode(), $target_langcode, t('Langcode is altered by langcode callback and is @langcode', ['@langcode' => $target_langcode]));
   }
 
   /**
@@ -266,19 +306,6 @@ class TranslationTestCase extends BackdropWebTestCase {
     backdrop_static_reset('language_list');
     backdrop_static_reset('locale_url_outbound_alter');
     backdrop_static_reset('locale_language_url_rewrite_url');
-  }
-
-  /**
-   * Returns an empty node data structure.
-   *
-   * @param $langcode
-   *   The language code.
-   *
-   * @return
-   *   An empty node data structure.
-   */
-  function emptyNode($langcode) {
-    return (object) array('nid' => NULL, 'langcode' => $langcode);
   }
 
   /**
@@ -437,8 +464,8 @@ class TranslationTestCase extends BackdropWebTestCase {
 
     $result = TRUE;
     $languages = language_list();
-    $node_langcode = $node->langcode === LANGUAGE_NONE ? $language_default : $node->langcode;
-    $translation_langcode = $translation->langcode === LANGUAGE_NONE ? $language_default : $translation->langcode;
+    $node_langcode = $node->langcode() === LANGUAGE_NONE ? $language_default : $node->langcode();
+    $translation_langcode = $translation->langcode() === LANGUAGE_NONE ? $language_default : $translation->langcode();
     $page_language = $languages[$node_langcode];
     $translation_language = $languages[$translation_langcode];
     $url = url("node/$translation->nid", array('language' => $translation_language));

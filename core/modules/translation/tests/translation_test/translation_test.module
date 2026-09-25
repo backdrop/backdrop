@@ -10,3 +10,26 @@
 function translation_test_node_insert(Node $node) {
   backdrop_write_record('node', $node, 'nid');
 }
+
+/**
+ * Langcode callback for testing.
+ */
+function translation_test_langcode_callback($entity_type, $node) {
+  $langcode_test = &backdrop_static(__FUNCTION__, array());
+  if (isset($langcode_test[$node->nid])) {
+    $node->langcode = $langcode_test[$node->nid];
+  }
+  return $node->langcode;
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function translation_test_entity_info() {
+
+  $info['node'] = array(
+    'langcode callback' => 'translation_test_langcode_callback',
+  );
+
+  return $info;
+}

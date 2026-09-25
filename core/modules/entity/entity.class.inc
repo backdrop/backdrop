@@ -56,6 +56,15 @@ interface EntityInterface {
   public function bundle();
 
   /**
+   * Returns the langcode for the entity.
+   *
+   * @return string
+   *   The langcode for the entity or NULL as a default.
+   *
+   */
+  public function langcode();
+
+  /**
    * Returns the label of the entity.
    *
    * @return
@@ -257,6 +266,7 @@ abstract class Entity extends stdClass implements EntityInterface {
     foreach ($values as $key => $value) {
       $this->$key = $value;
     }
+    $this->langcode();
   }
 
   /**
@@ -276,6 +286,24 @@ abstract class Entity extends stdClass implements EntityInterface {
    */
   public function bundle() {
     return $this->entityType();
+  }
+
+  /**
+   * Implements EntityInterface::langcode().
+   *
+   * Entity types that do not support translation return NULL as a default.
+   */
+  public function langcode() {
+    $langcode = NULL;
+    if (isset($this->langcode)) {
+      $langcode = $this->langcode;
+    }
+    $info = entity_get_info($this->entityType());
+    if (isset($info['langcode callback']) && function_exists($info['langcode callback'])) {
+      $langcode = $info['langcode callback']($this->entityType(), $this);
+    }
+    $this->langcode = $langcode;
+    return $langcode;
   }
 
   /**
