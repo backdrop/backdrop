@@ -182,32 +182,7 @@ function config_sync_validate_file($config_name, $config_change_type, $all_chang
     $staging_config = config($config_name, 'staging')->setData($config_data);
   }
 
-  // First check that a module claims this config file. Unclaimed configs cannot
-  // be managed at all, because hooks may need to be fired when performing any
-  // kind of change (e.g. a deleted config might need to remove database
-  // tables).
-  $module_exists_for_config = FALSE;
-  $config_info = config_get_info($config_name);
-  if (!empty($config_info)) {
-    $module_exists_for_config = TRUE;
-  }
-
-  // If creating config AND the dependent module is also being enabled as part of
-  // this config sync, allow the config to be created. The config will be
-  // revalidated after enabling its parent module.
-  if (!$module_exists_for_config && $config_change_type === 'create') {
-    $config_name_parts = explode('.', $config_name);
-    $config_module_name = reset($config_name_parts);
-    if (isset($all_changes['system.extensions']) && $all_changes['system.extensions'] === 'update') {
-      $staging_system_extensions_config = config('system.extensions', 'staging')->load();
-      $staging_module_list = $staging_system_extensions_config->get('modules');
-      if (!empty($staging_module_list[$config_module_name])) {
-        $module_exists_for_config = TRUE;
-      }
-    }
-  }
-
-  if (!$module_exists_for_config) {
+  if (!config_project_exists_for_config($config_name, $config_change_type, $all_changes)) {
     if ($config_change_type === 'delete') {
       $message = t('The configuration "@name" is not owned by any enabled module, so it cannot be deleted. If you have disabled this module, either <a href="!enable">enable the module</a> and try the import again, or <a href="!uninstall">uninstall the module entirely</a> to clean up left-over configuration.', array('@name' => $config_name, '!enable' => url('admin/modules'), '!uninstall' => url('admin/modules/uninstall')));
     }
@@ -232,6 +207,73 @@ function config_sync_validate_file($config_name, $config_change_type, $all_chang
       module_invoke_all('config_delete_validate', $active_config, $all_changes);
       break;
   }
+}
+
+/**
+ * Check to see if there is a module for this config file.
+ *
+ * @param string $config_name
+ *   The name of the config file being synced.
+ * @param string $config_change_type
+ *   The type of change occurring to this config file. Must be one of the
+ *   following values: "create", "update", or "delete".
+ * @param array|NULL $all_changes
+ *   If this file is being changed with a group of other configuration files,
+ *   pass in the complete set of files that are anticipated to be changed during
+ *   the sync. If doing a typical sync between staging and live directories,
+ *   this value can be retrieved from config_get_statuses(). If syncing a single
+ *   configuration file, this value should be NULL.
+ *
+ * @return boolean
+ *   TRUE if there is a project that claims this configuration, FALSE if not.
+ */
+function config_project_exists_for_config($config_name, $config_change_type, $all_changes) {
+
+  // First check that a module claims this config file. Unclaimed configs cannot
+  // be managed at all, because hooks may need to be fired when performing any
+  // kind of change (e.g. a deleted config might need to remove database
+  // tables).
+  $config_info = config_get_info($config_name);
+  if (!empty($config_info)) {
+    return TRUE;
+  }
+
+  // Next check to see if the config file contains the name of it's project.
+  $config = config($config_name);
+  if (isset($config['_config_project_type'])) {
+    switch ($config['_config_project_type']) {
+      case 'module':
+        if (isset($config['_config_module']) && module_exists($config['_config_module'])) {
+          return TRUE;
+        }
+        break;
+      case 'theme':
+        if (isset($config['_config_theme'])) {
+          $enabled_themes = config_get('system.extensions', 'themes');
+          if (!empty($enabled_themes['my_theme_name'])) {
+            return TRUE;
+          }
+        }
+        break;
+    }
+  }
+
+  // If creating config AND the dependent module is also being enabled as part of
+  // this config sync, allow the config to be created. The config will be
+  // revalidated after enabling its parent module.
+  if ($config_change_type === 'create') {
+    $config_name_parts = explode('.', $config_name);
+    $config_module_name = reset($config_name_parts);
+    if (isset($all_changes['system.extensions']) && $all_changes['system.extensions'] === 'update') {
+      $staging_system_extensions_config = config('system.extensions', 'staging')->load();
+      $staging_module_list = $staging_system_extensions_config->get('modules');
+      if (!empty($staging_module_list[$config_module_name])) {
+        return TRUE;
+      }
+    }
+  }
+
+  return FALSE;
 }
 
 /**
