@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => 'poss', 'pong', 'poj', 'poch', 'pok', 'pot', 'pop', 'poh', 'pwa', 'pwag', 'pwakk', 'pwags', 'pwan', 'pwanj', 'pwanh', 'pwad',

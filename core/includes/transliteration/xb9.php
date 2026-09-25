@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => 'luk', 'lut', 'lup', 'luh', 'lwo', 'lwog', 'lwokk', 'lwogs', 'lwon', 'lwonj', 'lwonh', 'lwod', 'lwol', 'lwolg', 'lwolm', 'lwolb',

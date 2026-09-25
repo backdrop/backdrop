@@ -3,6 +3,7 @@
  * @file
  * German language transliteration overrides.
  */
+
 $overrides['de'] = array(
   0xC4 => 'Ae',
   0xD6 => 'Oe',

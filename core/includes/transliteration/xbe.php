@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => 'byum', 'byub', 'byubs', 'byus', 'byuss', 'byung', 'byuj', 'byuch', 'byuk', 'byut', 'byup', 'byuh', 'beu', 'beug', 'beukk', 'beugs',

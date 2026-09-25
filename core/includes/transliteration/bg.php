@@ -3,6 +3,7 @@
  * @file
  * Bulgarian language transliteration overrides.
  */
+
 $overrides['bg'] = array(
   0x0410 => 'A',
   0x0411 => 'B',

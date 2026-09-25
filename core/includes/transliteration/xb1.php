@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => 'nyaess', 'nyaeng', 'nyaej', 'nyaech', 'nyaek', 'nyaet', 'nyaep', 'nyaeh', 'neo', 'neog', 'neokk', 'neogs', 'neon', 'neonj', 'neonh', 'neod',
