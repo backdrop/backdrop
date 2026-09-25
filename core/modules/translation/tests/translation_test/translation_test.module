@@ -10,3 +10,10 @@
 function translation_test_node_insert(Node $node) {
   backdrop_write_record('node', $node, 'nid');
 }
+
+/**
+ * Implementation of hook_node_translation_change().
+ */
+function translation_test_node_translation_change($node) {
+  state_set('translation_change_called', $node->nid);
+}
