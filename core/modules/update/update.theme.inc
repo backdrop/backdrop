@@ -49,7 +49,8 @@ function theme_update_last_check($variables) {
     // Link to the updates installation page from the available updates report
     // (don't add this link to the "Available updates" Dashboard block).
     if ($variables['theme_hook_original'] == 'update_last_check') {
-      $output .= l(t('Install system updates'), 'admin/config/system/updates');
+      $output .= l(t('Install system updates'), 'admin/config/system/updates', array(
+        'attributes' => array('class' => array('button', 'button-secondary'))));
     }
   }
 
