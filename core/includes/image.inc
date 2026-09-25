@@ -43,7 +43,7 @@ define('IMAGE_SVG_DEFAULT_HEIGHT', 200);
 /**
  * Gets a list of available toolkits.
  *
- * @return
+ * @return array
  *   An array with the toolkit names as keys and the descriptions as values.
  */
 function image_get_available_toolkits() {
@@ -64,7 +64,7 @@ function image_get_available_toolkits() {
 /**
  * Gets the name of the currently used toolkit.
  *
- * @return
+ * @return string|false
  *   String containing the name of the selected toolkit, or FALSE on error.
  */
 function image_get_toolkit() {
@@ -92,14 +92,14 @@ function image_get_toolkit() {
 /**
  * Invokes the given method using the currently selected toolkit.
  *
- * @param $method
+ * @param string $method
  *   A string containing the method to invoke.
- * @param $image
+ * @param stdClass $image
  *   An image object returned by image_load().
- * @param $params
+ * @param array $params
  *   An optional array of parameters to pass to the toolkit method.
  *
- * @return
+ * @return mixed
  *   Mixed values (typically Boolean indicating successful operation).
  */
 function image_toolkit_invoke($method, stdClass $image, array $params = array()) {
@@ -108,7 +108,10 @@ function image_toolkit_invoke($method, stdClass $image, array $params = array())
     array_unshift($params, $image);
     return call_user_func_array($function, $params);
   }
-  watchdog('image', 'The selected image handling toolkit %toolkit can not correctly process %function.', array('%toolkit' => $image->toolkit, '%function' => $function), WATCHDOG_ERROR);
+  watchdog('image', 'The selected image handling toolkit %toolkit can not correctly process %function.', array(
+    '%toolkit' => $image->toolkit,
+    '%function' => $function,
+  ), WATCHDOG_ERROR);
   return FALSE;
 }
 
@@ -148,12 +151,12 @@ function image_get_supported_extensions() {
  * toolkit, and may support others, depending on which toolkits are
  * installed.
  *
- * @param $filepath
+ * @param string $filepath
  *   String specifying the path of the image file.
- * @param $toolkit
+ * @param string|false $toolkit
  *   An optional image toolkit name to override the default.
  *
- * @return
+ * @return array|false
  *   FALSE, if the file could not be found or is not an image. Otherwise, a
  *   keyed array containing information about the image:
  *   - "width": Width, in pixels.
@@ -204,16 +207,16 @@ function image_get_info($filepath, $toolkit = FALSE) {
  *
  * The resulting image always has the exact target dimensions.
  *
- * @param $image
+ * @param stdClass $image
  *   An image object returned by image_load().
- * @param $width
+ * @param int $width
  *   The target width, in pixels.
- * @param $height
+ * @param int $height
  *   The target height, in pixels.
- * @param $anchor
+ * @param string $anchor
  *   The anchor to use when cropping.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @since 1.21.0 $anchor parameter added.
@@ -242,20 +245,20 @@ function image_scale_and_crop(stdClass $image, $width, $height, $anchor = 'cente
  *
  * The resulting dimensions can be smaller for one or both target dimensions.
  *
- * @param $dimensions
+ * @param array $dimensions
  *   Dimensions to be modified - an array with components width and height, in
  *   pixels.
- * @param $width
+ * @param int|null $width
  *   The target width, in pixels. If this value is NULL then the scaling will be
  *   based only on the height value.
- * @param $height
+ * @param int|null $height
  *   The target height, in pixels. If this value is NULL then the scaling will
  *   be based only on the width value.
- * @param $upscale
+ * @param bool $upscale
  *   Boolean indicating that images smaller than the target dimensions will be
  *   scaled up. This generally results in a low quality image.
  *
- * @return
+ * @return bool
  *   TRUE if $dimensions was modified, FALSE otherwise.
  *
  * @see image_scale()
@@ -290,19 +293,19 @@ function image_dimensions_scale(array &$dimensions, $width = NULL, $height = NUL
  *
  * The resulting image can be smaller for one or both target dimensions.
  *
- * @param $image
+ * @param stdClass $image
  *   An image object returned by image_load().
- * @param $width
+ * @param int|null $width
  *   The target width, in pixels. If this value is NULL then the scaling will
  *   be based only on the height value.
- * @param $height
+ * @param int|null $height
  *   The target height, in pixels. If this value is NULL then the scaling will
  *   be based only on the width value.
- * @param $upscale
+ * @param bool $upscale
  *   Boolean indicating that files smaller than the dimensions will be scaled
  *   up. This generally results in a low quality image.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_dimensions_scale()
@@ -323,14 +326,14 @@ function image_scale(stdClass $image, $width = NULL, $height = NULL, $upscale = 
 /**
  * Resizes an image to the given dimensions (ignoring aspect ratio).
  *
- * @param $image
+ * @param stdClass $image
  *   An image object returned by image_load().
- * @param $width
+ * @param int $width
  *   The target width, in pixels.
- * @param $height
+ * @param int $height
  *   The target height, in pixels.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -346,18 +349,18 @@ function image_resize(stdClass $image, $width, $height) {
 /**
  * Rotates an image by the given number of degrees.
  *
- * @param $image
+ * @param stdClass $image
  *   An image object returned by image_load().
- * @param $degrees
+ * @param int $degrees
  *   The number of (clockwise) degrees to rotate the image.
- * @param $background
+ * @param string|null $background
  *   An hexadecimal integer specifying the background color to use for the
  *   uncovered area of the image after the rotation. E.g. 0x000000 for black,
  *   0xff00ff for magenta, and 0xffffff for white. For images that support
  *   transparency, this will default to transparent. Otherwise it will
  *   be white.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -391,18 +394,18 @@ function image_rotate(stdClass $image, $degrees, $background = NULL) {
 /**
  * Crops an image to a rectangle specified by the given dimensions.
  *
- * @param $image
+ * @param stdClass $image
  *   An image object returned by image_load().
- * @param $x
+ * @param int $x
  *   The top left coordinate, in pixels, of the crop area (x axis value).
- * @param $y
+ * @param int $y
  *   The top left coordinate, in pixels, of the crop area (y axis value).
- * @param $width
+ * @param int $width
  *   The target width, in pixels.
- * @param $height
+ * @param int $height
  *   The target height, in pixels.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -423,10 +426,10 @@ function image_crop(stdClass $image, $x, $y, $width, $height) {
 /**
  * Converts an image to grayscale.
  *
- * @param $image
+ * @param stdClass $image
  *   An image object returned by image_load().
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -441,12 +444,12 @@ function image_desaturate(stdClass $image) {
  *
  * Any changes to the file are not saved until image_save() is called.
  *
- * @param $file
+ * @param string $file
  *   Path to an image file.
- * @param $toolkit
+ * @param string|false $toolkit
  *   An optional, image toolkit name to override the default.
  *
- * @return
+ * @return stdClass|false
  *   An image object or FALSE if there was a problem loading the file. The
  *   image object has the following properties:
  *    - 'source' - The original file path.
@@ -482,14 +485,14 @@ function image_load($file, $toolkit = FALSE) {
 /**
  * Closes the image and saves the changes to a file.
  *
- * @param $image
+ * @param stdClass $image
  *   An image object returned by image_load(). The object's 'info' property
  *   will be updated if the file is saved successfully.
- * @param $destination
+ * @param string|null $destination
  *   Destination path where the image should be saved. If it is empty the
  *   original image file will be overwritten.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -515,14 +518,15 @@ function image_save(stdClass $image, $destination = NULL) {
  * Converts a hex string to RGBA (red, green, blue, alpha) integer values and
  * tidies up the input hex color string.
  *
- * @param $hex
+ * @param string $hex
  *   A string specifying an RGBA color in the formats: '#RGB', 'RGB', '#RGBA',
  *   'RGBA', '#RRGGBB', 'RRGGBB', '#RRGGBBAA', 'RRGGBBAA' or '0xRRGGBBAA'. The
  *   color is passed by reference to tidy up the string for consistency.
  *
- * @return
- *   An associative array with 'red', 'green', 'blue' and 'alpha' as keys and corresponding
- *   color decimal integer as values or FALSE on an invalid color hex string.
+ * @return array
+ *   An associative array with 'red', 'green', 'blue' and 'alpha' as keys and
+ *   corresponding color decimal integer as values or FALSE on an invalid color
+ *   hex string.
  */
 function image_hex2rgba(&$hex) {
   // Remove the leading '0x', if any (legacy).
