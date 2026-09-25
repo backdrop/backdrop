@@ -1373,7 +1373,7 @@ function filter_process_format($element) {
   );
   $options = array();
   foreach ($formats as $format) {
-    $options[$format->format] = check_plain($format->name);
+    $options[$format->format] = $format->name;
     $element['format']['guidelines'][$format->format] = array(
       '#theme' => 'filter_guidelines',
       '#format' => $format,
