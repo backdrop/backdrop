@@ -139,3 +139,20 @@ div.messages.info:before {
   left: 5px;
   right: auto;
 }
+
+#messages-popover {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  inset-block-start: 3.5rem;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 20px;
+  padding-block-start: 14px;
+  border: 1px solid #a9a9a9;
+  border-radius: 4px;
+  width: 90%;
+  z-index: 998;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
