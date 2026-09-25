@@ -636,7 +636,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
     // Before saving the node, set changed and revision times.
     $node->changed = REQUEST_TIME;
 
-    if ($this->revisionKey && !empty($node->revision)) {
+    if (($this->revisionKey && !empty($node->revision)) || $node->isNew() ) {
       $node->revision_timestamp = REQUEST_TIME;
 
       if (!isset($node->revision_uid)) {
