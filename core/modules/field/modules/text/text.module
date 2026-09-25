@@ -100,11 +100,13 @@ function text_field_instance_settings_form($field, $instance) {
     '#title' => t('Text processing'),
     '#default_value' => $settings['text_processing'],
     '#options' => array(
-      t('Plain text'),
-      t('Filtered text (user selects text format)'),
+      t('Unformatted text'),
+      t('Filtered text'),
     ),
     '#weight' => -2,
   );
+  $form['text_processing'][0]['#description'] = t('No HTML code, line breaks, etc.');
+  $form['text_processing'][1]['#description'] = t('User selects <a href="@text_formats">text format</a>.', array('@text_formats' => url('admin/config/content/formats')));
 
   // An empty array of formats indicates all formats are allowed.
   $allowed_formats = empty($settings['allowed_formats']) ?
