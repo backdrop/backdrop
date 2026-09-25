@@ -2654,7 +2654,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
  *
  * @see format_time_diff()
  * @see format_time_diff_since()
- * 
+ *
  * @since 1.35.0 Function added.
  */
 function format_time_diff_until($timestamp, $options = array()) {
@@ -2686,7 +2686,7 @@ function format_time_diff_until($timestamp, $options = array()) {
  *
  * @see format_time_diff()
  * @see format_time_diff_until()
- * 
+ *
  * @since 1.35.0 Function added.
  */
 function format_time_diff_since($timestamp, $options = array()) {
@@ -2720,7 +2720,7 @@ function format_time_diff_since($timestamp, $options = array()) {
  * @see format_interval()
  * @see format_time_diff_since()
  * @see format_time_diff_until()
- * 
+ *
  * @since 1.35.0 Function added.
  */
 function format_time_diff($from, $to, $options = array()) {
@@ -6553,7 +6553,7 @@ function backdrop_get_autocomplete_token($path) {
  * Validates the token provided with the current autocomplete request.
  *
  * Autocomplete requests are made to the autocomplete path followed by the
- * search string, such as 'user/autocomplete/searchstring'. Because the search
+ * search string, such as 'user/autocomplete/search-string'. Because the search
  * string may itself contain slashes, the token is compared against each
  * leading portion of the current path.
  *

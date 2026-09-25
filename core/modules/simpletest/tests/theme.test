@@ -566,7 +566,9 @@ class ThemeFastTestCase extends BackdropWebTestCase {
     $this->backdropGet('form-test/autocomplete');
     $elements = $this->xpath('//input[@id="edit-user-textfield-autocomplete"]');
     $token = (string) $elements[0]['data-autocomplete-token'];
-    $this->backdropGet('user/autocomplete/' . $this->account->name, array('query' => array('token' => $token)));
+    $this->backdropGet('user/autocomplete/' . $this->account->name, array(
+      'query' => array('token' => $token),
+    ));
     $this->assertText('registry not initialized', 'The registry was not initialized');
   }
 }

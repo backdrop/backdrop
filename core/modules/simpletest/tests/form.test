@@ -363,6 +363,7 @@ class FormsTestCase extends BackdropWebTestCase {
     }
 
     // Tests invalid values are rejected.
+    // cspell:ignore fffffg abcdef22 uaa
     $values = array('#0008', '#1234', '#fffffg', '#abcdef22', '17', '#uaa');
     foreach ($values as $input) {
       $edit = array(
@@ -2572,9 +2573,15 @@ class FormAutocompleteTestCase extends BackdropWebTestCase {
    */
   protected $target_user;
 
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp('form_test');
-    $this->web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
+    $this->web_user = $this->backdropCreateUser(array(
+      'access user profiles',
+      'access content',
+    ));
     $this->target_user = $this->backdropCreateUser();
   }
 
@@ -2592,44 +2599,64 @@ class FormAutocompleteTestCase extends BackdropWebTestCase {
     $user_token = NULL;
     foreach (array('textfield', 'email', 'search', 'tel', 'url') as $type) {
       $token = $this->getAutocompleteToken('edit-user-' . $type);
-      $this->assertTrue($token, format_string('The @type autocomplete element includes a token.', array('@type' => $type)));
+      $this->assertTrue($token, format_string('The @type autocomplete element includes a token.', array(
+        '@type' => $type,
+      )));
       if (!isset($user_token)) {
         $user_token = $token;
       }
-      $this->assertIdentical($token, $user_token, format_string('The @type autocomplete element token matches other elements with the same autocomplete path.', array('@type' => $type)));
-      $this->assertFieldByXPath('//input[@id="edit-user-' . $type . '" and contains(@class, "form-autocomplete")]', NULL, format_string('The @type element has the autocomplete class.', array('@type' => $type)));
+      $this->assertIdentical($token, $user_token, format_string('The @type autocomplete element token matches other elements with the same autocomplete path.', array(
+        '@type' => $type,
+      )));
+      $this->assertFieldByXPath('//input[@id="edit-user-' . $type . '" and contains(@class, "form-autocomplete")]', NULL, format_string('The @type element has the autocomplete class.', array(
+        '@type' => $type,
+      )));
     }
     $node_token = $this->getAutocompleteToken('edit-node-textfield');
     $this->assertTrue($node_token, 'The node autocomplete element includes a token.');
     $this->assertNotEqual($user_token, $node_token, 'Autocomplete tokens are different for different autocomplete paths.');
 
     // The token from the form grants access to the autocomplete callback.
-    $this->backdropGet('user/autocomplete/' . $search, array('query' => array('token' => $user_token)));
+    $this->backdropGet('user/autocomplete/' . $search, array(
+      'query' => array('token' => $user_token),
+    ));
     $this->assertResponse(200, 'Autocomplete request with a valid token is allowed.');
     $this->assertRaw($this->target_user->name, 'User name found in autocomplete results.');
 
     // Search strings containing a slash are split into multiple path parts,
     // but the token is still valid.
-    $this->backdropGet('user/autocomplete/' . $search . '/foo', array('query' => array('token' => $user_token)));
+    $this->backdropGet('user/autocomplete/' . $search . '/foo', array(
+      'query' => array('token' => $user_token),
+    ));
     $this->assertResponse(200, 'Autocomplete request with a slash in the search string is allowed.');
 
     // Requests without a valid token are denied.
     $this->backdropGet('user/autocomplete/' . $search);
     $this->assertResponse(403, 'Autocomplete request without a token is denied.');
     $this->assertNoRaw($this->target_user->name, 'User name not found in autocomplete results.');
-    $this->backdropGet('user/autocomplete/' . $search, array('query' => array('token' => $this->randomName(43))));
+    $this->backdropGet('user/autocomplete/' . $search, array(
+      'query' => array('token' => $this->randomName(43)),
+    ));
     $this->assertResponse(403, 'Autocomplete request with an invalid token is denied.');
-    $this->backdropGet('user/autocomplete/' . $search, array('query' => array('token' => $node_token)));
+    $this->backdropGet('user/autocomplete/' . $search, array(
+      'query' => array('token' => $node_token),
+    ));
     $this->assertResponse(403, 'Autocomplete request with a token for a different autocomplete path is denied.');
-    $this->backdropGet('node/autocomplete/' . $search, array('query' => array('token' => $user_token)));
+    $this->backdropGet('node/autocomplete/' . $search, array(
+      'query' => array('token' => $user_token),
+    ));
     $this->assertResponse(403, 'Node autocomplete request with a user autocomplete token is denied.');
-    $this->backdropGet('node/autocomplete/' . $search, array('query' => array('token' => $node_token)));
+    $this->backdropGet('node/autocomplete/' . $search, array(
+      'query' => array('token' => $node_token),
+    ));
     $this->assertResponse(200, 'Node autocomplete request with a valid token is allowed.');
 
     // Tokens for authenticated users are tied to the session.
     $this->backdropLogout();
     $this->backdropLogin($this->web_user);
-    $this->backdropGet('user/autocomplete/' . $search, array('query' => array('token' => $user_token)));
+    $this->backdropGet('user/autocomplete/' . $search, array(
+      'query' => array('token' => $user_token),
+    ));
     $this->assertResponse(403, 'Autocomplete request with a token from a previous session is denied.');
 
     // Anonymous users receive a token that is valid across requests, even
@@ -2641,20 +2668,28 @@ class FormAutocompleteTestCase extends BackdropWebTestCase {
     $this->backdropGet('form-test/autocomplete');
     $anonymous_token = $this->getAutocompleteToken('edit-user-textfield');
     $this->assertTrue($anonymous_token, 'The autocomplete element is rendered for a user without access to the autocomplete path.');
-    $this->backdropGet('user/autocomplete/' . $search, array('query' => array('token' => $anonymous_token)));
+    $this->backdropGet('user/autocomplete/' . $search, array(
+      'query' => array('token' => $anonymous_token),
+    ));
     $this->assertResponse(403, 'Autocomplete request with a valid token is denied without permission.');
 
-    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access user profiles'));
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array(
+      'access user profiles',
+    ));
     $this->backdropGet('user/autocomplete/' . $search);
     $this->assertResponse(403, 'Anonymous autocomplete request without a token is denied.');
     $this->assertNoRaw($this->target_user->name, 'User name not found in anonymous autocomplete results.');
-    $this->backdropGet('user/autocomplete/' . $search, array('query' => array('token' => $user_token)));
+    $this->backdropGet('user/autocomplete/' . $search, array(
+      'query' => array('token' => $user_token),
+    ));
     $this->assertResponse(403, 'Anonymous autocomplete request with an authenticated user token is denied.');
 
     $this->backdropGet('form-test/autocomplete');
     $anonymous_token = $this->getAutocompleteToken('edit-user-textfield');
     $this->assertTrue($anonymous_token, 'The autocomplete element includes a token for anonymous users.');
-    $this->backdropGet('user/autocomplete/' . $search, array('query' => array('token' => $anonymous_token)));
+    $this->backdropGet('user/autocomplete/' . $search, array(
+      'query' => array('token' => $anonymous_token),
+    ));
     $this->assertResponse(200, 'Anonymous autocomplete request with a valid token is allowed.');
     $this->assertRaw($this->target_user->name, 'User name found in anonymous autocomplete results.');
   }
@@ -2669,7 +2704,9 @@ class FormAutocompleteTestCase extends BackdropWebTestCase {
    *   The token, or FALSE if not found.
    */
   protected function getAutocompleteToken($id) {
-    $elements = $this->xpath('//input[@id=:id and contains(@class, "autocomplete")]', array(':id' => $id . '-autocomplete'));
+    $elements = $this->xpath('//input[@id=:id and contains(@class, "autocomplete")]', array(
+      ':id' => $id . '-autocomplete',
+    ));
     if (empty($elements[0]['data-autocomplete-token'])) {
       return FALSE;
     }
