@@ -40,7 +40,7 @@
     <div class="l-wrapper-inner container container-fluid">
 
       <?php if ($messages): ?>
-        <div class="l-messages" role="status" aria-label="<?php print t('Status messages'); ?>">
+        <div class="l-messages" aria-label="<?php print t('Status messages'); ?>">
           <?php print $messages; ?>
         </div>
       <?php endif; ?>
