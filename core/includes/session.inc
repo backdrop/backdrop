@@ -299,6 +299,20 @@ function _backdrop_session_write($sid, $value) {
 function backdrop_session_initialize() {
   global $user, $is_https;
 
+  // When a stale page has been served from the page cache with background
+  // fetch enabled, the response has already been flushed to the client and
+  // this request continues solely to regenerate the cache entry. Starting a
+  // session here is both impossible and pointless: the headers have already
+  // been sent, so session_set_save_handler() and session_id() would only emit
+  // warnings, and the visitor whose request this was has already received
+  // their response.
+  // @see _backdrop_bootstrap_page_cache()
+  if (backdrop_is_background()) {
+    $user = backdrop_anonymous_user();
+    date_default_timezone_set(backdrop_get_user_timezone());
+    return;
+  }
+
   // Calling session_set_save_handler() multiple times will cause errors on
   // PHP 7.2+.
   if (session_status() === PHP_SESSION_NONE) {
