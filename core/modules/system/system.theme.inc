@@ -645,7 +645,7 @@ function theme_token_tree($variables) {
 /**
  * Prepares variables for Page Component block templates.
  */
-function system_preprocess_page_components(&$variables) {
+function template_preprocess_page_components(&$variables) {
   $settings = $variables['settings'];
   $child_delta = $variables['child_delta'];
   $variables += array(
