@@ -112,24 +112,24 @@ class DateAPITestCase extends BackdropUnitTestCase {
 
     // Test week range with calendar weeks.
     config_set('system.date','first_day', 0);
-    $expected = '2008-01-27 to 2008-02-02';
+    $expected = '2008-01-27 00:00:00 to 2008-02-02 23:59:59';
     $result = date_week_range(5, 2008);
-    $value = $result[0]->format(DATE_FORMAT_DATE) . ' to ' . $result[1]->format(DATE_FORMAT_DATE);
+    $value = $result[0]->format(DATE_FORMAT_DATETIME) . ' to ' . $result[1]->format(DATE_FORMAT_DATETIME);
     $this->assertEqual($expected, $value, "Test calendar date_week_range(5, 2008): should be $expected, found $value.");
-    $expected = '2009-01-25 to 2009-01-31';
+    $expected = '2009-01-25 00:00:00 to 2009-01-31 23:59:59';
     $result = date_week_range(5, 2009);
-    $value = $result[0]->format(DATE_FORMAT_DATE) . ' to ' . $result[1]->format(DATE_FORMAT_DATE);
+    $value = $result[0]->format(DATE_FORMAT_DATETIME) . ' to ' . $result[1]->format(DATE_FORMAT_DATETIME);
     $this->assertEqual($expected, $value, "Test calendar date_week_range(5, 2009): should be $expected, found $value.");
 
     // And now with ISO weeks.
     config_set('system.date','first_day', 1);
-    $expected = '2008-01-28 to 2008-02-03';
+    $expected = '2008-01-28 00:00:00 to 2008-02-03 23:59:59';
     $result = date_week_range(5, 2008);
-    $value = $result[0]->format(DATE_FORMAT_DATE) . ' to ' . $result[1]->format(DATE_FORMAT_DATE);
+    $value = $result[0]->format(DATE_FORMAT_DATETIME) . ' to ' . $result[1]->format(DATE_FORMAT_DATETIME);
     $this->assertEqual($expected, $value, "Test ISO date_week_range(5, 2008): should be $expected, found $value.");
-    $expected = '2009-01-26 to 2009-02-01';
+    $expected = '2009-01-26 00:00:00 to 2009-02-01 23:59:59';
     $result = date_week_range(5, 2009);
-    $value = $result[0]->format(DATE_FORMAT_DATE) . ' to ' . $result[1]->format(DATE_FORMAT_DATE);
+    $value = $result[0]->format(DATE_FORMAT_DATETIME) . ' to ' . $result[1]->format(DATE_FORMAT_DATETIME);
     $this->assertEqual($expected, $value, "Test ISO date_week_range(5, 2009): should be $expected, found $value.");
 
     // Find calendar week for a date.
