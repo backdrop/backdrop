@@ -2489,17 +2489,21 @@ function system_file_presave(File $file) {
   // transliterated version will still be used in the file URI, which is the
   // only place where it matters.)
   $config = config('system.core');
-  if (!empty($_FILES['files']['name']) && $config->get('file_transliterate_uploads') && !$config->get('file_transliterate_uploads_display_name')) {
-    $key = array_search($file->filename, $_FILES['files']['name']);
-    if ($key !== FALSE && isset($_FILES['files']['orig_name'][$key])) {
-      $file->filename = $_FILES['files']['orig_name'][$key];
-    }
-    else {
-      foreach ($_FILES['files']['name'] as $field_name => $delta) {
-        $key = array_search($file->filename, $_FILES['files']['name'][$field_name]);
-        if ($key !== FALSE && isset($_FILES['files']['name'][$field_name][$key])) {
-          $file->filename = $_FILES['files']['orig_name'][$field_name][$key];
+  if ($config->get('file_transliterate_uploads') && !$config->get('file_transliterate_uploads_display_name')) {
+    foreach ($_FILES['files']['name'] as $form_field_name=>$delta) {
+      // Prepare uploaded files info so that single and multiple value uploads can
+      // be handled consistently despite differences in the $_FILES array structure.
+      $uploaded_files = $_FILES;
+      if (!is_array($_FILES['files']['name'][$form_field_name])) {
+        foreach (array('name', 'type', 'tmp_name', 'error', 'size', 'orig_name') as $value) {
+          $uploaded_files['files'][$value][$form_field_name] = array($uploaded_files['files'][$value][$form_field_name]);
         }
+      }
+
+      $key = array_search($file->filename, $uploaded_files['files']['name'][$form_field_name]);
+      if ($key !== FALSE && isset($uploaded_files['files']['orig_name'][$form_field_name][$key])) {
+        $file->filename = $uploaded_files['files']['orig_name'][$form_field_name][$key];
+        return;
       }
     }
   }
