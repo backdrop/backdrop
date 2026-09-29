@@ -2489,7 +2489,7 @@ function system_file_presave(File $file) {
   // transliterated version will still be used in the file URI, which is the
   // only place where it matters.)
   $config = config('system.core');
-  if ($config->get('file_transliterate_uploads') && !$config->get('file_transliterate_uploads_display_name')) {
+  if (!empty($_FILES['files']['name']) && $config->get('file_transliterate_uploads') && !$config->get('file_transliterate_uploads_display_name')) {
     foreach ($_FILES['files']['name'] as $form_field_name=>$delta) {
       // Prepare uploaded files info so that single and multiple value uploads can
       // be handled consistently despite differences in the $_FILES array structure.
