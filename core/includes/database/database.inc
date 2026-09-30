@@ -229,6 +229,13 @@ abstract class DatabaseConnection {
   protected $transactionLayers = array();
 
   /**
+   * Tracks callbacks to call after the current root transaction is processed.
+   *
+   * @var array
+   */
+  protected $rootTransactionEndCallbacks = array();
+
+  /**
    * Index of what driver-specific class to use for various operations.
    *
    * @var array
@@ -1188,6 +1195,10 @@ abstract class DatabaseConnection {
         $rolled_back_other_active_savepoints = TRUE;
       }
     }
+
+    // Allow callbacks to perform their own cleanup.
+    $this->executeRootTransactionEndCallbacks(FALSE);
+
     $this->pdo->rollBack();
     if ($rolled_back_other_active_savepoints) {
       throw new DatabaseTransactionOutOfOrderException();
@@ -1270,13 +1281,67 @@ abstract class DatabaseConnection {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!$this->pdo->commit()) {
-          throw new DatabaseTransactionCommitFailedException();
-        }
+        $this->doCommit();
       }
       else {
         $this->query('RELEASE SAVEPOINT ' . $name);
       }
+    }
+  }
+
+   /**
+   * Add a callback to run after commit or rollback of the current root
+   * transaction.
+   *
+   * These callbacks are invoked immediately after the transaction has been
+   * committed.
+   *
+   * It can for example be used to avoid deadlocks on write-heavy tables that
+   * do not need to be part of the transaction, like cache tag invalidations.
+   *
+   * Another use case is that services using alternative backends like Redis and
+   * Memcache cache implementations can replicate the transaction-behavior of
+   * the database cache backend and avoid race conditions.
+   *
+   * @param callable $callback
+   *   The function to call after ending the transaction.
+   *
+   * @see DatabaseConnection::doCommit()
+   *
+   * @throws \DatabaseTransactionNoActiveException
+   */
+  public function addRootTransactionEndCallback(callable $callback) {
+    if (!$this->inTransaction()) {
+      throw new DatabaseTransactionNoActiveException();
+    }
+    $this->rootTransactionEndCallbacks[] = $callback;
+  }
+
+  /**
+   * Execute callbacks registered while the root transaction has been open.
+   *
+   * @param bool $committed
+   *   Whether the transaction was committed or rolled back.
+   */
+  protected function executeRootTransactionEndCallbacks($committed) {
+    $callbacks = $this->rootTransactionEndCallbacks;
+    $this->rootTransactionEndCallbacks = array();
+    foreach ($callbacks as $func) {
+      call_user_func($func, $committed);
+    }
+  }
+
+  /**
+   * Do the actual commit, invoke post-commit callbacks.
+   *
+   * @internal
+   */
+  protected function doCommit() {
+    $success = $this->pdo->commit();
+    $this->executeRootTransactionEndCallbacks($success);
+
+    if (!$success) {
+      throw new DatabaseTransactionCommitFailedException();
     }
   }
 
