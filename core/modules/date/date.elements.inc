@@ -1878,9 +1878,12 @@ function date_html5_element_validate(array $element, array &$form_state) {
     $field_type = $element['#field_type'];
     $field_label = $element['#field_label'];
 
+    // Get rid of "add more" item and order by weight.
+    unset($items['add_more']);
+    array_multisort(array_column($items, '_weight'), SORT_ASC, $items);
+
     foreach ($items as $delta => $date_values) {
       if (is_string($date_values)) {
-        // "Add another" or something else, unusable.
         continue;
       }
       array_pop($element['#parents']);
