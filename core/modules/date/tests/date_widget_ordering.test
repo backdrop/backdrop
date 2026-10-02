@@ -1,0 +1,74 @@
+<?php
+/**
+ * @file
+ * Date field tests related to field ordering.
+ */
+
+require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
+
+/**
+ * Tests related to field order handled by widget form.
+ */
+class DateWidgetOrderingTestCase extends DateFieldBasic {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp($modules = array()) {
+    parent::setUp(array_merge($modules, array('field', 'field_ui', 'date')));
+
+    $options = array(
+      'field_name' => 'field_date_multivalue',
+      'field_type' => 'datestamp',
+      'widget_type' => 'date_html5',
+      'granularity' => array('year', 'month', 'day'),
+      'repeat' => 1,
+    );
+    $this->createDateField($options);
+
+    $privileged_user = $this->backdropCreateUser(
+      array(
+        'access content',
+        'administer content types',
+        'administer fields',
+        'administer nodes',
+        'bypass node access',
+      ));
+    $this->backdropLogin($privileged_user);
+    return TRUE;
+  }
+
+  /**
+   * Verify that field item order by weight is respected.
+   */
+  protected function testHtmlWidgetFieldOrder() {
+    // Force display to input pattern, for easier comparison without conversion.
+    // Date field display defaults to "long".
+    config_set('system.date', 'formats.long.pattern', 'Y-m-d H:i');
+    $date_1 = '2015-01-15';
+    $date_2 = '2015-05-15';
+
+    $this->backdropGet('node/add/story');
+    $form_values = array(
+      'title' => 'Test node',
+      'field_date_multivalue[und][0][value]' => $date_1,
+    );
+    $this->backdropPost(NULL, $form_values, t('Save'));
+    $this->assertText('Story Test node has been created.');
+    $form_values = array(
+      'title' => 'Test node',
+      'field_date_multivalue[und][0][value]' => $date_2,
+      'field_date_multivalue[und][1][value]' => $date_1,
+    );
+    $this->backdropPost('node/1/edit', $form_values, t('Save'));
+    $this->assertText('Story Test node has been updated.');
+    $this->assertText($date_2 . $date_1, 'Date field items appear in expected order');
+
+    // Switch order by weight, we do not touch other form values.
+    $form_values['field_date_multivalue[und][0][_weight]'] = 1;
+    $form_values['field_date_multivalue[und][1][_weight]'] = 0;
+    $this->backdropPost('node/1/edit', $form_values, t('Save'));
+    $this->assertText($date_1 . $date_2, 'Date field items appear in expected order after changing item weights');
+  }
+
+}

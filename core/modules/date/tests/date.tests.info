@@ -4,6 +4,12 @@ description = Test creation of various date fields and widgets using Field UI
 group = Date
 file = date.test
 
+[DateWidgetOrderingTestCase]
+name = Date Widget Ordering
+description = Test date field item ordering in form and display.
+group = Date
+file = date_widget_ordering.test
+
 [DateFieldTestCase]
 name = Date Field
 description = Test date field settings and Start/End date interaction.
