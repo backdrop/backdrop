@@ -94,13 +94,6 @@ function standard_install() {
   $full_html_format = (object) $full_html_format;
   filter_format_save($full_html_format);
 
-  // Enable Basis theme and set it as default theme instead of Stark.
-  // @see system_install()
-  $default_theme = 'basis';
-  config_set('system.core', 'theme_default', $default_theme);
-  theme_enable(array($default_theme));
-  theme_disable(array('stark'));
-
   // Set home page to "home".
   config_set('system.core', 'site_frontpage', 'home');
   backdrop_flush_all_caches();
@@ -600,15 +593,6 @@ function standard_install() {
 
   // Update the menu router information.
   menu_rebuild();
-
-  // Enable the admin theme.
-  db_update('system')
-    ->fields(array('status' => 1))
-    ->condition('type', 'theme')
-    ->condition('name', 'seven')
-    ->execute();
-  config_set('system.core', 'admin_theme', 'seven');
-  config_set('system.core', 'node_admin_theme', '1');
 
   // Enable the page cache and aggregation.
   config_set('system.core', 'preprocess_css', '1');
