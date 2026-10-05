@@ -386,7 +386,7 @@ function field_group_field_group_format_settings($group) {
   if (isset($formatter['instance_settings']['required_fields']) && $mode == 'form') {
     $form['instance_settings']['required_fields'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Mark group as required if it contains required fields.'),
+      '#title' => t('Mark group as required if it contains required fields'),
       '#default_value' => isset($group->format_settings['instance_settings']['required_fields']) ? $group->format_settings['instance_settings']['required_fields'] : (isset($formatter['instance_settings']['required_fields']) ? $formatter['instance_settings']['required_fields'] : ''),
       '#weight' => 2,
     );
@@ -620,11 +620,14 @@ function field_group_field_group_format_summary($group) {
 
   $group_form = (array) module_invoke_all('field_group_format_settings', $group);
 
+  $field_group_types = field_group_formatter_info();
+  $format_type_label = $field_group_types['form'][$group->format_type]['label'] ?? '';
+
   backdrop_alter('field_group_format_settings', $group_form, $group);
 
   $output = '';
   if (isset($group->format_settings['formatter'])) {
-    $output .= '<strong>' . $group->format_type . '</strong> ' . $group->format_settings['formatter'] . '';
+    $output .= $format_type_label . ': ' . $group->format_settings['formatter'] . '';
   }
   if (isset($group->format_settings['instance_settings'])) {
     $last = end($group->format_settings['instance_settings']);
@@ -634,7 +637,9 @@ function field_group_field_group_format_summary($group) {
         continue;
       }
 
-      $output .= '<strong>' . $key . '</strong> ';
+      $settings_label = $group_form['instance_settings'][$key]['#title'];
+
+      $output .= $settings_label . ': ';
 
       if (isset($group_form['instance_settings'], $group_form['instance_settings'][$key]['#options'])) {
         if (is_array($value)) {
