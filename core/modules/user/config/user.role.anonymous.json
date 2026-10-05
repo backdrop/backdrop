@@ -4,5 +4,9 @@
     "label": "Anonymous",
     "description": "Special role assigned to any site visitor that has not signed into the site.",
     "weight": "0",
-    "permissions": []
+    "permissions": [
+        "access content",
+        "access user profiles",
+        "use text format filtered_html"
+    ]
 }
