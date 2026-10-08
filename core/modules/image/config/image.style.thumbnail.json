@@ -6,11 +6,11 @@
     "name": "thumbnail",
     "effects": [
         {
-            "name": "image_scale",
+            "name": "image_scale_and_crop",
             "data": {
                 "width": "100",
                 "height": "100",
-                "upscale": 1
+                "anchor": "center-top"
             },
             "weight": 1
         }
