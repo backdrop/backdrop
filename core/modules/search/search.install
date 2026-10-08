@@ -18,6 +18,12 @@ function search_schema() {
         'default' => 0,
         'description' => 'Search item ID, e.g. node ID for nodes.',
       ),
+      'langcode' => array(
+        'type' => 'varchar',
+        'length' => '12',
+        'not null' => TRUE,
+        'description' => 'The {languages}.langcode of the item variant.',
+      ),
       'type' => array(
         'type' => 'varchar',
         'length' => 16,
@@ -57,6 +63,12 @@ function search_schema() {
         'not null' => TRUE,
         'default' => 0,
         'description' => 'The {search_dataset}.sid of the searchable item to which the word belongs.',
+      ),
+      'langcode' => array(
+        'type' => 'varchar',
+        'length' => '12',
+        'not null' => TRUE,
+        'description' => 'The {languages}.langcode of the item variant.',
       ),
       'type' => array(
         'type' => 'varchar',
@@ -255,6 +267,43 @@ function search_update_1004() {
       ->condition('menu_name', 'internal')
       ->condition('module', 'system')
       ->condition('link_path', $children, 'IN')
+      ->execute();
+  }
+}
+
+/**
+ * Add a langcode column to search_index and search_dataset tables.
+ */
+function search_update_1005() {
+  $default_language = config('system.core', 'language_default');
+
+  if (!db_field_exists('search_dataset', 'langcode')) {
+    $langcode = array(
+      'type' => 'varchar',
+      'length' => '12',
+      'not null' => TRUE,
+      'description' => 'The {languages}.langcode of the item variant.',
+    );
+
+    db_add_field('search_dataset', 'langcode', $langcode);
+
+    db_update('search_dataset')
+      ->fields(array('langcode' => $default_language))
+      ->execute();
+  }
+
+  if (!db_field_exists('search_index', 'langcode')) {
+    $langcode = array(
+      'type' => 'varchar',
+      'length' => '12',
+      'not null' => TRUE,
+      'description' => 'The {languages}.langcode of the item variant.',
+    );
+
+    db_add_field('search_index', 'langcode', $langcode);
+
+    db_update('search_index')
+      ->fields(array('langcode' => $default_language))
       ->execute();
   }
 }

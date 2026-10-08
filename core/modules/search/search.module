@@ -304,12 +304,12 @@ function search_is_active() {
 /**
  * Returns information about available search modules.
  *
- * @param $all
+ * @param bool $all
  *   If TRUE, information about all enabled modules implementing
  *   hook_search_info() will be returned. If FALSE (default), only modules that
  *   have been set to active on the search settings page will be returned.
  *
- * @return
+ * @return array
  *   Array of hook_search_info() return values, keyed by module name. The
  *   'title' and 'path' array elements will be set to defaults for each module
  *   if not supplied by hook_search_info(), and an additional array element of
@@ -339,7 +339,7 @@ function search_get_info($all = FALSE) {
 /**
  * Returns information about the default search module.
  *
- * @return
+ * @return array
  *    The search_get_info() array element for the default search module, if any.
  */
 function search_get_default_module_info() {
@@ -355,6 +355,9 @@ function search_get_default_module_info() {
 
 /**
  * Access callback for search tabs.
+ *
+ * @param string $name
+ *   Module name.
  */
 function _search_menu_access($name) {
   return user_access('search content') && (!function_exists($name . '_search_access') || module_invoke($name, 'search_access'));
@@ -363,27 +366,38 @@ function _search_menu_access($name) {
 /**
  * Clears a part of or the entire search index.
  *
- * @param $sid
+ * @param int|null $sid
  *   (optional) The ID of the item to remove from the search index. If
  *   specified, $module must also be given. Omit both $sid and $module to clear
  *   the entire search index.
- * @param $module
+ * @param string|null $module
  *   (optional) The machine-readable name of the module for the item to remove
  *   from the search index.
+ * @param bool $reindex
+ *   Reindex if TRUE, FALSE by default.
+ * @param $langcode
+ *   (optional) Language code for the operation. If not provided, all
+ *   index records for the $sid will be deleted.
  */
-function search_reindex($sid = NULL, $module = NULL, $reindex = FALSE) {
+function search_reindex($sid = NULL, $module = NULL, $reindex = FALSE, $langcode = NULL) {
   if ($module == NULL && $sid == NULL) {
     module_invoke_all('search_reset');
   }
   else {
-    db_delete('search_dataset')
+    $query = db_delete('search_dataset')
       ->condition('sid', $sid)
-      ->condition('type', $module)
-      ->execute();
-    db_delete('search_index')
+      ->condition('type', $module);
+    if (!empty($langcode)) {
+      $query->condition('langcode', $langcode);
+    }
+    $query->execute();
+    $query = db_delete('search_index')
       ->condition('sid', $sid)
-      ->condition('type', $module)
-      ->execute();
+      ->condition('type', $module);
+    if (!empty($langcode)) {
+      $query->condition('langcode', $langcode);
+    }
+    $query->execute();
     // Don't remove links if re-indexing.
     if (!$reindex) {
       db_delete('search_node_links')
@@ -399,6 +413,8 @@ function search_reindex($sid = NULL, $module = NULL, $reindex = FALSE) {
  *
  * This is used during indexing (cron). Words that are dirty have outdated
  * total counts in the search_total table, and need to be recounted.
+ *
+ * @param string|null $word
  */
 function search_dirty($word = NULL) {
   $dirty = &backdrop_static(__FUNCTION__, array());
@@ -465,15 +481,16 @@ function search_update_totals() {
 /**
  * Simplifies a string according to indexing rules.
  *
- * @param $text
+ * @param string $text
  *   Text to simplify.
+ * @param string|null $langcode
  *
- * @return
+ * @return string
  *   Simplified text.
  *
  * @see hook_search_preprocess()
  */
-function search_simplify($text) {
+function search_simplify($text, $langcode = NULL) {
   // Decode entities to UTF-8
   $text = decode_entities($text);
 
@@ -485,7 +502,7 @@ function search_simplify($text) {
   $text = transliteration_remove_diacritics($text);
 
   // Call an external processor for word handling.
-  search_invoke_preprocess($text);
+  search_invoke_preprocess($text, $langcode);
 
   // Simple CJK handling
   if (config_get('search.settings', 'search_overlap_cjk')) {
@@ -532,13 +549,13 @@ function search_simplify($text) {
  * is equal to the 'minimum_word_size' variable. This tokenizing is only done if
  * the 'overlap_cjk' variable is TRUE.
  *
- * @param $matches
+ * @param array $matches
  *   This function is a callback for preg_replace_callback(), which is called
  *   from search_simplify(). So, $matches is an array of regular expression
  *   matches, which means that $matches[0] contains the matched text -- a string
  *   of CJK characters to tokenize.
  *
- * @return
+ * @return string
  *   Tokenized text, starting and ending with a space character.
  */
 function search_expand_cjk($matches) {
@@ -569,8 +586,16 @@ function search_expand_cjk($matches) {
 
 /**
  * Simplifies and splits a string into tokens for indexing.
+ *
+ * @param string $text
+ *   The string to split.
+ * @param string|null $langcode
+ *   The language of the text.
+ *
+ * @return array
+ *   An array of words.
  */
-function search_index_split($text) {
+function search_index_split($text, $langcode = NULL) {
   $last = &backdrop_static(__FUNCTION__);
   $lastsplit = &backdrop_static(__FUNCTION__ . ':lastsplit');
 
@@ -578,7 +603,7 @@ function search_index_split($text) {
     return $lastsplit;
   }
   // Process words
-  $text = search_simplify($text);
+  $text = search_simplify($text, $langcode);
   $words = explode(' ', $text);
 
   // Save last keyword result
@@ -590,6 +615,9 @@ function search_index_split($text) {
 
 /**
  * Helper function for array_walk in search_index_split.
+ *
+ * @param string $text
+ *   The string to truncate, passed by reference.
  */
 function _search_index_truncate(&$text) {
   if (is_numeric($text)) {
@@ -601,26 +629,28 @@ function _search_index_truncate(&$text) {
 /**
  * Invokes hook_search_preprocess() in modules.
  */
-function search_invoke_preprocess(&$text) {
+function search_invoke_preprocess(&$text, $langcode = NULL) {
   foreach (module_implements('search_preprocess') as $module) {
-    $text = module_invoke($module, 'search_preprocess', $text);
+    $text = module_invoke($module, 'search_preprocess', $text, $langcode);
   }
 }
 
 /**
  * Update the full-text search index for a particular item.
  *
- * @param $sid
+ * @param int $sid
  *   An ID number identifying this particular item (e.g., node ID).
- * @param $module
+ * @param string $module
  *   The machine-readable name of the module that this item comes from (a module
  *   that implements hook_search_info()).
- * @param $text
+ * @param string $text
  *   The content of this item. Must be a piece of HTML or plain text.
+ * @param string|null $langcode
+ *   Language code for text being indexed.
  *
  * @ingroup search
  */
-function search_index($sid, $module, $text) {
+function search_index($sid, $module, $text, $langcode = NULL) {
   $search_settings_config = config('search.settings');
   $minimum_word_size = $search_settings_config->get('search_minimum_word_size');
 
@@ -713,7 +743,7 @@ function search_index($sid, $module, $text) {
             $value = $linktitle;
           }
         }
-        $words = search_index_split($value);
+        $words = search_index_split($value, $langcode);
         foreach ($words as $word) {
           // Add word to accumulator
           $accum .= $word . ' ';
@@ -750,12 +780,13 @@ function search_index($sid, $module, $text) {
     $tag = !$tag;
   }
 
-  search_reindex($sid, $module, TRUE);
+  search_reindex($sid, $module, TRUE, $langcode);
 
   // Insert cleaned up data into dataset
   db_insert('search_dataset')
     ->fields(array(
       'sid' => $sid,
+      'langcode' => $langcode,
       'type' => $module,
       'data' => $accum,
       'reindex' => 0,
@@ -771,6 +802,7 @@ function search_index($sid, $module, $text) {
       ->key(array(
         'word' => $word,
         'sid' => $sid,
+        'langcode' => $langcode,
         'type' => $module,
       ))
       ->fields(array('score' => $score))
@@ -835,7 +867,7 @@ function search_index($sid, $module, $text) {
 /**
  * Changes a node's changed timestamp to 'now' to force reindexing.
  *
- * @param $nid
+ * @param int $nid
  *   The node ID of the node that needs reindexing.
  */
 function search_touch_node($nid) {
@@ -873,7 +905,7 @@ function search_node_update(Node $node) {
 /**
  * Implements hook_comment_insert().
  */
-function search_comment_insert($comment) {
+function search_comment_insert(Comment $comment) {
   // Reindex the node when comments are added.
   search_touch_node($comment->nid);
 }
@@ -881,7 +913,7 @@ function search_comment_insert($comment) {
 /**
  * Implements hook_comment_update().
  */
-function search_comment_update($comment) {
+function search_comment_update(Comment $comment) {
   // Reindex the node when comments are changed.
   search_touch_node($comment->nid);
 }
@@ -889,7 +921,7 @@ function search_comment_update($comment) {
 /**
  * Implements hook_comment_delete().
  */
-function search_comment_delete($comment) {
+function search_comment_delete(Comment $comment) {
   // Reindex the node when comments are deleted.
   search_touch_node($comment->nid);
 }
@@ -897,7 +929,7 @@ function search_comment_delete($comment) {
 /**
  * Implements hook_comment_publish().
  */
-function search_comment_publish($comment) {
+function search_comment_publish(Comment $comment) {
   // Reindex the node when comments are published.
   search_touch_node($comment->nid);
 }
@@ -905,7 +937,7 @@ function search_comment_publish($comment) {
 /**
  * Implements hook_comment_unpublish().
  */
-function search_comment_unpublish($comment) {
+function search_comment_unpublish(Comment $comment) {
   // Reindex the node when comments are unpublished.
   search_touch_node($comment->nid);
 }
@@ -917,12 +949,12 @@ function search_comment_unpublish($comment) {
  * using search_expression_extract(). They take the form option:value, and
  * are added to the ordinary keywords in the search expression.
  *
- * @param $expression
+ * @param string $expression
  *   The search expression to extract from.
- * @param $option
+ * @param string $option
  *   The name of the option to retrieve from the search expression.
  *
- * @return
+ * @return string
  *   The value previously stored in the search expression for option $option,
  *   if any. Trailing spaces in values will not be included.
  */
@@ -939,11 +971,11 @@ function search_expression_extract($expression, $option) {
  * using search_expression_extract(). They take the form option:value, and
  * are added to the ordinary keywords in the search expression.
  *
- * @param $expression
+ * @param string $expression
  *   The search expression to add to.
- * @param $option
+ * @param string $option
  *   The name of the option to add to the search expression.
- * @param $value
+ * @param string|null $value
  *   The value to add for the option. If present, it will replace any previous
  *   value added for the option. Cannot contain any spaces or | characters, as
  *   these are used as delimiters. If you want to add a blank value $option: to
@@ -997,16 +1029,20 @@ function search_expression_insert($expression, $option, $value = NULL) {
 /**
  * Builds a search form.
  *
- * @param $action
+ * @param array $form
+ *   Form render array.
+ * @param array $form_state
+ *   Form state array.
+ * @param string $action
  *   Form action. Defaults to "search/$path", where $path is the search path
  *   associated with the module in its hook_search_info(). This will be run
  *   through url().
- * @param $keys
+ * @param string $keys
  *   The search string entered by the user, containing keywords for the search.
- * @param $module
+ * @param string|null $module
  *   The search module to render the form for: a module that implements
  *   hook_search_info(). If not supplied, the default search module is used.
- * @param $prompt
+ * @param string|null $prompt
  *   Label for the keywords field. Defaults to t('Enter your keywords') if NULL.
  *   Supply '' to omit.
  *
@@ -1062,6 +1098,13 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
 
 /**
  * Form builder; Output a search form for the search block's search box.
+ *
+ * @param array $form
+ *   The form render array.
+ * @param array $form_state
+ *   The form state array.
+ * @param string $form_id
+ *   The unique form ID.
  *
  * @ingroup forms
  * @see search_box_form_submit()
@@ -1130,14 +1173,14 @@ function search_form_layout_block_configure_form_alter(&$form, &$form_state) {
 /**
  * Performs a search by calling hook_search_execute().
  *
- * @param $keys
+ * @param string $keys
  *   Keyword query to search on.
- * @param $module
+ * @param string $module
  *   Search module to search.
- * @param $conditions
+ * @param array|null $conditions
  *   Optional array of additional search conditions.
  *
- * @return
+ * @return array
  *   Renderable array of search results. No return value if $keys are not
  *   supplied or if the given search module is not active.
  */
@@ -1161,16 +1204,17 @@ function search_data($keys, $module, $conditions = NULL) {
  * Returns snippets from a piece of text, with certain keywords highlighted.
  * Used for formatting search results.
  *
- * @param $keys
+ * @param string $keys
  *   A string containing a search query.
- *
- * @param $text
+ * @param string $text
  *   The text to extract fragments from.
+ * @param string|null $langcode
+ *   The language of the key.
  *
- * @return
+ * @return string
  *   A string containing HTML for the excerpt.
  */
-function search_excerpt($keys, $text) {
+function search_excerpt($keys, $text, $langcode = NULL) {
   // We highlight around non-indexable or CJK characters.
   $boundary = '(?:(?<=[' . PREG_CLASS_UNICODE_WORD_BOUNDARY . PREG_CLASS_CJK . '])|(?=[' . PREG_CLASS_UNICODE_WORD_BOUNDARY . PREG_CLASS_CJK . ']))';
 
@@ -1217,7 +1261,7 @@ function search_excerpt($keys, $text) {
         $p = $match[0][1];
       }
       else {
-        $info = search_simplify_excerpt_match($key, $text, $included[$key], $boundary);
+        $info = search_simplify_excerpt_match($key, $text, $included[$key], $boundary, $langcode);
         if (!empty($info) && $info['where']) {
           $p = $info['where'];
           if ($info['keyword']) {
@@ -1309,6 +1353,9 @@ function search_excerpt($keys, $text) {
 
 /**
  * Helper function for array_walk() in search_excerpt().
+ *
+ * @param string $text
+ *   The string to replace, passed by reference.
  */
 function _search_excerpt_replace(&$text) {
   $text = preg_quote($text, '/');
@@ -1320,24 +1367,26 @@ function _search_excerpt_replace(&$text) {
  * This is called in search_excerpt() if an exact match is not found in the
  * text, so that we can find the derived form that matches.
  *
- * @param $key
+ * @param string $key
  *   The keyword to find.
- * @param $text
+ * @param string $text
  *   The text to search for the keyword.
- * @param $offset
+ * @param int $offset
  *   Offset position in $text to start searching at.
- * @param $boundary
+ * @param string $boundary
  *   Text to include in a regular expression that will match a word boundary.
+ * @param string|null $langcode
+ *   The language of the keyword.
  *
- * @return
+ * @return array|false
  *   FALSE if no match is found. If a match is found, return an associative
  *   array with element 'where' giving the position of the match, and element
  *   'keyword' giving the actual word found in the text at that position.
  */
-function search_simplify_excerpt_match($key, $text, $offset, $boundary) {
+function search_simplify_excerpt_match($key, $text, $offset, $boundary, $langcode = NULL) {
   $pos = NULL;
-  $simplified_key = search_simplify($key);
-  $simplified_text = search_simplify($text);
+  $simplified_key = search_simplify($key, $langcode);
+  $simplified_text = search_simplify($text, $langcode);
 
   // Return immediately if simplified key or text are empty.
   if (!$simplified_key || !$simplified_text) {
@@ -1384,6 +1433,9 @@ function search_simplify_excerpt_match($key, $text, $offset, $boundary) {
 
 /**
  * Helper function for array_filter() in search_search_excerpt_match().
+ *
+ * @param array $var
+ *   Variable to trim.
  */
 function _search_excerpt_match_filter($var) {
   return strlen(trim($var[0]));
