@@ -1,0 +1,7 @@
+name = "Test search entity langcode"
+description = "Support module for search module testing."
+package = Testing
+version = VERSION
+backdrop = 1.x
+type = module
+hidden = TRUE
