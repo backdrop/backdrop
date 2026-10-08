@@ -268,7 +268,7 @@ function hook_search_page($results) {
  *   from between two HTML tags or from the search query. It will not contain
  *   any HTML entities or HTML tags.
  * @param string|null $langcode
- *   The language code of the entitiy that has been found.
+ *   The language code of the text to process.
  *
  * @return string
  *   The text after preprocessing. Note that if your module decides not to alter

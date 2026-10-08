@@ -22,6 +22,9 @@ function template_preprocess_search_results(&$variables) {
   }
   foreach ($variables['results'] as $result) {
     $info = array();
+    if (isset($result['language']) && $result['language'] != $language->langcode && $result['language'] != LANGUAGE_NONE) {
+      $result['attributes']['lang'] = $result['language'];
+    }
     if (empty($result['attributes']))  {
       $attributes = '';
     }
