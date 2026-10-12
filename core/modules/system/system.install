@@ -23,6 +23,13 @@ function system_requirements($phase) {
       'weight' => -10,
     );
 
+    // The version this site has been installed as.
+    $requirements['install_version'] = array(
+      'title' => $t('Backdrop CMS initial version'),
+      'value' => config_get('system.core', 'install_version'),
+      'severity' => REQUIREMENT_INFO,
+    );
+
     // Display the currently active installation profile, if the site is not
     // running the default installation profile.
     $profile = backdrop_get_profile();
