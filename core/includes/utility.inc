@@ -7,12 +7,12 @@
 /**
  * Backdrop-friendly var_export().
  *
- * @param $var
+ * @param mixed $var
  *   The variable to export.
- * @param $prefix
+ * @param string $prefix
  *   A prefix that will be added at the beginning of every lines of the output.
  *
- * @return
+ * @return string
  *   The variable exported in a way compatible to Backdrop's coding standards.
  */
 function backdrop_var_export($var, $prefix = '') {
@@ -38,7 +38,12 @@ function backdrop_var_export($var, $prefix = '') {
       // If the string contains a line break or a single quote, use the
       // double quote export mode. Encode backslash and double quotes and
       // transform some common control characters.
-      $var = str_replace(array('\\', '"', "\n", "\r", "\t"), array('\\\\', '\"', '\n', '\r', '\t'), $var);
+      $var = str_replace(array(
+        '\\', '"', "\n", "\r", "\t",
+      ),
+      array(
+        '\\\\', '\"', '\n', '\r', '\t',
+      ), $var);
       $output = '"' . $var . '"';
     }
     else {
