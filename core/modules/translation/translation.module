@@ -593,7 +593,12 @@ function translation_language_switch_links_alter(array &$links, $type, $path) {
   // Retain query on language switcher links.
   $query = backdrop_get_query_parameters();
   foreach ($links as $langcode => $link) {
-    $links[$langcode]['query'] = $query;
+    if (!empty($links[$langcode]['query'])) {
+      $links[$langcode]['query'] += $query;
+    }
+    else {
+      $links[$langcode]['query'] = $query;
+    }
   }
 
   if ($type == $language_type && preg_match("!^node/(\d+)(/.+|)!", $path, $matches)) {
