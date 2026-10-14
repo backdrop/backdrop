@@ -2654,7 +2654,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
  *
  * @see format_time_diff()
  * @see format_time_diff_since()
- * 
+ *
  * @since 1.35.0 Function added.
  */
 function format_time_diff_until($timestamp, $options = array()) {
@@ -2686,7 +2686,7 @@ function format_time_diff_until($timestamp, $options = array()) {
  *
  * @see format_time_diff()
  * @see format_time_diff_until()
- * 
+ *
  * @since 1.35.0 Function added.
  */
 function format_time_diff_since($timestamp, $options = array()) {
@@ -2720,7 +2720,7 @@ function format_time_diff_since($timestamp, $options = array()) {
  * @see format_interval()
  * @see format_time_diff_since()
  * @see format_time_diff_until()
- * 
+ *
  * @since 1.35.0 Function added.
  */
 function format_time_diff($from, $to, $options = array()) {
@@ -6515,6 +6515,88 @@ function backdrop_get_token($value = '') {
 function backdrop_valid_token($token, $value = '', $skip_anonymous = FALSE) {
   global $user;
   return (($skip_anonymous && $user->uid == 0) || ($token === backdrop_get_token($value)));
+}
+
+/**
+ * Generates a token for accessing an autocomplete callback.
+ *
+ * The token is based on the exact path used for autocomplete requests, so a
+ * token generated for one autocomplete path cannot be used to access a
+ * different autocomplete path. For authenticated users, the token is also tied
+ * to the user's session. Because anonymous users normally do not have a session
+ * (and pages may be served from the page cache), tokens for anonymous users are
+ * the same for all anonymous users.
+ *
+ * @param string $path
+ *   The internal path used for the autocomplete requests, such as
+ *   'user/autocomplete'. This is usually the value of #autocomplete_path.
+ *
+ * @return string
+ *   A URL-safe token.
+ *
+ * @see backdrop_valid_autocomplete_token()
+ * @see form_process_autocomplete()
+ *
+ * @since 1.35.2 Function added.
+ */
+function backdrop_get_autocomplete_token($path) {
+  $value = 'autocomplete:' . trim($path, '/');
+  if (!user_is_logged_in()) {
+    // Anonymous users usually do not have a persistent session, so the token
+    // cannot be tied to the session ID.
+    return backdrop_hmac_base64($value, backdrop_get_private_key() . backdrop_get_hash_salt());
+  }
+  return backdrop_get_token($value);
+}
+
+/**
+ * Validates the token provided with the current autocomplete request.
+ *
+ * Autocomplete requests are made to the autocomplete path followed by the
+ * search string, such as 'user/autocomplete/search-string'. Because the search
+ * string may itself contain slashes, the token is compared against each
+ * leading portion of the current path.
+ *
+ * This function should be called from the access callback of autocomplete
+ * menu items, in addition to any other access checks. This prevents
+ * autocomplete callbacks from being accessed directly without first visiting a
+ * form that contains an autocomplete field for that path. For example:
+ *
+ * @code
+ * function my_module_menu() {
+ *   $items['my_module/autocomplete'] = array(
+ *     'page callback' => 'my_module_autocomplete',
+ *     'access callback' => 'my_module_autocomplete_access',
+ *     'type' => MENU_CALLBACK,
+ *   );
+ *   return $items;
+ * }
+ *
+ * function my_module_autocomplete_access() {
+ *   return user_access('access content') && backdrop_valid_autocomplete_token();
+ * }
+ * @endcode
+ *
+ * @return bool
+ *   TRUE if the "token" query parameter is valid for the current path, FALSE
+ *   otherwise.
+ *
+ * @see backdrop_get_autocomplete_token()
+ *
+ * @since 1.35.2 Function added.
+ */
+function backdrop_valid_autocomplete_token() {
+  if (!isset($_GET['token']) || !is_string($_GET['token']) || !isset($_GET['q'])) {
+    return FALSE;
+  }
+  $parts = explode('/', trim($_GET['q'], '/'));
+  while ($parts) {
+    if (hash_equals(backdrop_get_autocomplete_token(implode('/', $parts)), $_GET['token'])) {
+      return TRUE;
+    }
+    array_pop($parts);
+  }
+  return FALSE;
 }
 
 /**

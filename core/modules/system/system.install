@@ -3940,6 +3940,13 @@ function system_update_1107() {
 }
 
 /**
+ * Rebuild menu router to require tokens on autocomplete callbacks.
+ */
+function system_update_1108() {
+  state_set('menu_rebuild_needed', TRUE);
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

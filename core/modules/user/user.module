@@ -1350,6 +1350,19 @@ function user_format_name($account) {
 }
 
 /**
+ * Access callback for the user autocomplete menu item.
+ *
+ * @return bool
+ *   TRUE if the current user may view user profiles and the request has a
+ *   valid autocomplete token.
+ *
+ * @see backdrop_valid_autocomplete_token()
+ */
+function user_autocomplete_access() {
+  return user_access('access user profiles') && backdrop_valid_autocomplete_token();
+}
+
+/**
  * Determines if the current user is anonymous.
  *
  * @return bool
@@ -1496,8 +1509,7 @@ function user_menu() {
     'title' => 'User autocomplete',
     'page callback' => 'user_autocomplete',
     'delivery callback' => 'backdrop_json_deliver',
-    'access callback' => 'user_access',
-    'access arguments' => array('access user profiles'),
+    'access callback' => 'user_autocomplete_access',
     'type' => MENU_CALLBACK,
     'file' => 'user.pages.inc',
   );
