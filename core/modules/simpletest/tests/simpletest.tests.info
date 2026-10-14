@@ -1419,3 +1419,9 @@ name = File token tests
 description = Test the file tokens.
 group = Token
 file = token.test
+
+[TokenBrowserAccessTestCase]
+name = Token browser access
+description = Test that the token browser tree requires a valid security token.
+group = Token
+file = token.test
