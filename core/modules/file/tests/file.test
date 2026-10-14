@@ -3120,6 +3120,18 @@ class FileUploadSvgTestCase extends FileTestHelper {
         'contents' => '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a id="test" xlink:href="#"><text>test</text></a><animate xlink:href="#test" attributeName="href" values="javascript:alert(1)" begin="0s"/>' . $default_content . '</svg>',
         'message' => 'could not be uploaded. Dangerous content found.',
       ),
+      'animate_child_script' => array(
+        'contents' => $default_open_tag . '<a><animate attributeName="href" dur="10s" begin="0s" fill="freeze" values="javascript:alert(1)"/>' . $default_content . '</a></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'set_script' => array(
+        'contents' => $default_open_tag . '<a><set attributeName="href" begin="0s" to="javascript:alert(1)"/>' . $default_content . '</a></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'xhtml_namespace_script' => array(
+        'contents' => '<?xml version="1.0"?>' . $default_open_tag . '<script xmlns="http://www.w3.org/1999/xhtml">alert(1)</script>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
       'animate_transform' => array(
         'contents' => $default_open_tag . $default_content . '<animateTransform attributeName="transform" type="rotate" from="0" to="360"/></svg>',
         'message' => 'could not be uploaded. Dangerous content found.',
