@@ -8,8 +8,9 @@ Backdrop.behaviors.autocomplete = {
     var acdb = [];
     $('input.autocomplete', context).once('autocomplete', function () {
       var uri = this.value;
+      var token = this.getAttribute('data-autocomplete-token');
       if (!acdb[uri]) {
-        acdb[uri] = new Backdrop.ACDB(uri);
+        acdb[uri] = new Backdrop.ACDB(uri, token);
       }
       var $input = $('#' + this.id.substr(0, this.id.length - 13))
         .attr('autocomplete', 'OFF')
@@ -283,9 +284,15 @@ Backdrop.jsAC.prototype.setStatus = function (status) {
 
 /**
  * An AutoComplete DataBase object.
+ *
+ * @param {string} uri
+ *   The URL of the autocomplete callback.
+ * @param {string} [token]
+ *   The token used to validate requests to the autocomplete callback.
  */
-Backdrop.ACDB = function (uri) {
+Backdrop.ACDB = function (uri, token) {
   this.uri = uri;
+  this.token = token || null;
   this.delay = 300;
   this.cache = {};
 };
@@ -323,6 +330,7 @@ Backdrop.ACDB.prototype.search = function (searchString) {
     $.ajax({
       type: 'GET',
       url: Backdrop.sanitizeAjaxUrl(db.uri + '/' + encodeURIComponent(searchString)),
+      data: db.token ? { token: db.token } : null,
       dataType: 'json',
       jsonp: false,
       success: function (matches) {

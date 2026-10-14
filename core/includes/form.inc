@@ -4366,7 +4366,10 @@ function theme_hidden($variables) {
  */
 function form_process_autocomplete($element) {
   $element['#autocomplete_input'] = array();
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  // Access to the autocomplete path is not checked here. The access callback
+  // for the path is checked on each autocomplete request, along with the token
+  // added below (see backdrop_valid_autocomplete_token()).
+  if ($element['#autocomplete_path']) {
     $element['#autocomplete_input']['#id'] = $element['#id'] .'-autocomplete';
     // Force the script path to 'index.php', in case the server is not
     // configured to find it automatically. Normally it is the responsibility
@@ -4374,6 +4377,9 @@ function form_process_autocomplete($element) {
     // url()) but since this code is forcing non-clean URLs on sites that don't
     // normally use them, it is done here instead.
     $element['#autocomplete_input']['#url_value'] = url($element['#autocomplete_path'], array('absolute' => TRUE, 'clean' => FALSE, 'script' => 'index.php'));
+    // Include a token that is sent with each autocomplete request, so that the
+    // autocomplete callback may verify the request came from this form.
+    $element['#autocomplete_input']['#token'] = backdrop_get_autocomplete_token($element['#autocomplete_path']);
   }
   return $element;
 }
@@ -4404,6 +4410,9 @@ function theme_textfield($variables) {
     $attributes['type'] = 'hidden';
     $attributes['id'] = $element['#autocomplete_input']['#id'];
     $attributes['value'] = $element['#autocomplete_input']['#url_value'];
+    if (!empty($element['#autocomplete_input']['#token'])) {
+      $attributes['data-autocomplete-token'] = $element['#autocomplete_input']['#token'];
+    }
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4432,14 +4441,17 @@ function theme_email($variables) {
   _form_set_class($element, array('form-email'));
 
   $extra = '';
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  if ($element['#autocomplete_path'] && !empty($element['#autocomplete_input'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
     $attributes = array();
     $attributes['type'] = 'hidden';
-    $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['id'] = $element['#autocomplete_input']['#id'];
+    $attributes['value'] = $element['#autocomplete_input']['#url_value'];
+    if (!empty($element['#autocomplete_input']['#token'])) {
+      $attributes['data-autocomplete-token'] = $element['#autocomplete_input']['#token'];
+    }
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4482,14 +4494,17 @@ function theme_search($variables) {
   _form_set_class($element, array('form-search'));
 
   $extra = '';
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  if ($element['#autocomplete_path'] && !empty($element['#autocomplete_input'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
     $attributes = array();
     $attributes['type'] = 'hidden';
-    $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['id'] = $element['#autocomplete_input']['#id'];
+    $attributes['value'] = $element['#autocomplete_input']['#url_value'];
+    if (!empty($element['#autocomplete_input']['#token'])) {
+      $attributes['data-autocomplete-token'] = $element['#autocomplete_input']['#token'];
+    }
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4518,14 +4533,17 @@ function theme_tel($variables) {
   _form_set_class($element, array('form-tel'));
 
   $extra = '';
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  if ($element['#autocomplete_path'] && !empty($element['#autocomplete_input'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
     $attributes = array();
     $attributes['type'] = 'hidden';
-    $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['id'] = $element['#autocomplete_input']['#id'];
+    $attributes['value'] = $element['#autocomplete_input']['#url_value'];
+    if (!empty($element['#autocomplete_input']['#token'])) {
+      $attributes['data-autocomplete-token'] = $element['#autocomplete_input']['#token'];
+    }
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4554,14 +4572,17 @@ function theme_url($variables) {
   _form_set_class($element, array('form-url'));
 
   $extra = '';
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  if ($element['#autocomplete_path'] && !empty($element['#autocomplete_input'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
     $attributes = array();
     $attributes['type'] = 'hidden';
-    $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['id'] = $element['#autocomplete_input']['#id'];
+    $attributes['value'] = $element['#autocomplete_input']['#url_value'];
+    if (!empty($element['#autocomplete_input']['#token'])) {
+      $attributes['data-autocomplete-token'] = $element['#autocomplete_input']['#token'];
+    }
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';

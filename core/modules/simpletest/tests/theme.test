@@ -553,7 +553,7 @@ class ThemeFastTestCase extends BackdropWebTestCase {
   protected $account;
 
   function setUp() {
-    parent::setUp('theme_test');
+    parent::setUp('theme_test', 'form_test');
     $this->account = $this->backdropCreateUser(array('access user profiles'));
   }
 
@@ -562,7 +562,13 @@ class ThemeFastTestCase extends BackdropWebTestCase {
    */
   function testUserAutocomplete() {
     $this->backdropLogin($this->account);
-    $this->backdropGet('user/autocomplete/' . $this->account->name);
+    // Get a valid autocomplete token from a form with a user autocomplete field.
+    $this->backdropGet('form-test/autocomplete');
+    $elements = $this->xpath('//input[@id="edit-user-textfield-autocomplete"]');
+    $token = (string) $elements[0]['data-autocomplete-token'];
+    $this->backdropGet('user/autocomplete/' . $this->account->name, array(
+      'query' => array('token' => $token),
+    ));
     $this->assertText('registry not initialized', 'The registry was not initialized');
   }
 }

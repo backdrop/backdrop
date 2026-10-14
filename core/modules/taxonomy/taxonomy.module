@@ -385,7 +385,7 @@ function taxonomy_menu() {
     'title' => 'Autocomplete taxonomy',
     'page callback' => 'taxonomy_autocomplete',
     'delivery callback' => 'backdrop_json_deliver',
-    'access arguments' => array('access content'),
+    'access callback' => 'taxonomy_autocomplete_access',
     'type' => MENU_CALLBACK,
     'file' => 'taxonomy.pages.inc',
   );
@@ -1875,6 +1875,19 @@ function taxonomy_field_widget_form_alter(&$element, &$form_state, $context) {
       }
     }
   }
+}
+
+/**
+ * Access callback for the taxonomy autocomplete menu item.
+ *
+ * @return bool
+ *   TRUE if the current user may access content and the request has a valid
+ *   autocomplete token.
+ *
+ * @see backdrop_valid_autocomplete_token()
+ */
+function taxonomy_autocomplete_access() {
+  return user_access('access content') && backdrop_valid_autocomplete_token();
 }
 
 /**

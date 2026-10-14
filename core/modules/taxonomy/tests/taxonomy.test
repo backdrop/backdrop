@@ -732,32 +732,45 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $this->assertNoText($term_objects['term1']->name, format_string('The deleted term %name does not appear on the node page.', array('%name' => $term_objects['term1']->name)));
     $this->assertNoText($term_objects['term2']->name, format_string('The deleted term %name does not appear on the node page.', array('%name' => $term_objects['term2']->name)));
 
+    // Autocomplete requests without a valid token are denied.
+    $input = substr($term_objects['term3']->name, 0, 3);
+    $this->backdropGet('taxonomy/autocomplete/taxonomy_' . $this->vocabulary->machine_name . '/' . $input);
+    $this->assertResponse(403, 'Autocomplete request without a token is denied.');
+
+    // Get a valid autocomplete token from the node form.
+    $this->backdropGet('node/' . $node->nid . '/edit');
+    $elements = $this->xpath('//input[contains(@class, "autocomplete") and contains(@value, "taxonomy/autocomplete")]');
+    $autocomplete_token = (string) $elements[0]['data-autocomplete-token'];
+    $this->assertTrue($autocomplete_token, 'Autocomplete token found on the node form.');
+
     // Test autocomplete on term 3, which contains a comma.
     // The term will be quoted, and the " will be encoded in unicode (\u0022).
     $input = substr($term_objects['term3']->name, 0, 3);
-    $this->backdropGet('taxonomy/autocomplete/taxonomy_' . $this->vocabulary->machine_name . '/' . $input);
+    $this->backdropGet('taxonomy/autocomplete/taxonomy_' . $this->vocabulary->machine_name . '/' . $input, array(
+      'query' => array('token' => $autocomplete_token),
+    ));
     $this->assertRaw('{"\u0022' . $term_objects['term3']->name . '\u0022":"' . $term_objects['term3']->name . '"}', format_string('Autocomplete returns term %term_name after typing the first 3 letters.', array('%term_name' => $term_objects['term3']->name)));
 
     // Test autocomplete on term 4 - it is alphanumeric only, so no extra
     // quoting.
     $input = substr($term_objects['term4']->name, 0, 3);
-    $this->backdropGet('taxonomy/autocomplete/taxonomy_' . $this->vocabulary->machine_name . '/' . $input);
+    $this->backdropGet('taxonomy/autocomplete/taxonomy_' . $this->vocabulary->machine_name . '/' . $input, array(
+      'query' => array('token' => $autocomplete_token),
+    ));
     $this->assertRaw('{"' . $term_objects['term4']->name . '":"' . $term_objects['term4']->name . '"}', format_string('Autocomplete returns term %term_name after typing the first 3 letters.', array('%term_name' => $term_objects['term4']->name)));
 
-     // Test taxonomy autocomplete with a nonexistent field.
-     $field_name = $this->randomName();
-     $tag = $this->randomName();
-     $message = t("Taxonomy field @field_name not found.", array('@field_name' => $field_name));
-     $this->assertFalse(field_info_field($field_name), format_string('Field %field_name does not exist.', array('%field_name' => $field_name)));
-     $this->backdropGet('taxonomy/autocomplete/' . $field_name . '/' . $tag);
-     $this->assertRaw($message, 'Autocomplete returns correct error message when the taxonomy field does not exist.');
-
-     // Test the autocomplete path without passing a field_name and terms.
-     // This should not trigger a PHP notice.
-     $field_name = '';
-     $message = t("Taxonomy field @field_name not found.", array('@field_name' => $field_name));
-     $this->backdropGet('taxonomy/autocomplete');
-     $this->assertRaw($message, 'Autocomplete returns correct error message when no taxonomy field is given.');
+    // Autocomplete tokens are only valid for the path they were generated
+    // for, so the token for this field cannot be used for other fields.
+    $field_name = $this->randomName();
+    $tag = $this->randomName();
+    $this->backdropGet('taxonomy/autocomplete/' . $field_name . '/' . $tag, array(
+      'query' => array('token' => $autocomplete_token),
+    ));
+    $this->assertResponse(403, 'Autocomplete token for one field is denied for a different field.');
+    $this->backdropGet('taxonomy/autocomplete', array(
+      'query' => array('token' => $autocomplete_token),
+    ));
+    $this->assertResponse(403, 'Autocomplete token for a field is denied when no field is given.');
   }
 
   /**

@@ -1759,7 +1759,7 @@ class UserAutocompleteTestCase extends BackdropWebTestCase {
   protected $privileged_user;
 
   function setUp() {
-    parent::setUp();
+    parent::setUp('form_test');
 
     // Set up two users with different permissions to test access.
     $this->unprivileged_user = $this->backdropCreateUser();
@@ -1779,6 +1779,20 @@ class UserAutocompleteTestCase extends BackdropWebTestCase {
     $this->backdropLogout();
     $this->backdropLogin($this->privileged_user);
     $this->backdropGet('user/autocomplete/' . $this->unprivileged_user->name[0]);
+    $this->assertResponse(403, 'Autocompletion access denied without a token.');
+    $this->backdropGet('user/autocomplete/' . $this->unprivileged_user->name[0], array(
+      'query' => array('token' => 'invalid'),
+    ));
+    $this->assertResponse(403, 'Autocompletion access denied with an invalid token.');
+
+    // Get a valid autocomplete token from a form with a user autocomplete field.
+    $this->backdropGet('form-test/autocomplete');
+    $elements = $this->xpath('//input[@id="edit-user-textfield-autocomplete"]');
+    $token = (string) $elements[0]['data-autocomplete-token'];
+    $this->assertTrue($token, 'Autocomplete token found on a form with an autocomplete field.');
+    $this->backdropGet('user/autocomplete/' . $this->unprivileged_user->name[0], array(
+      'query' => array('token' => $token),
+    ));
     $this->assertResponse(200, 'Autocompletion access allowed.');
 
     // Using first letter of the user's name, make sure the user's full name is in the results.

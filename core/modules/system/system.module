@@ -326,7 +326,7 @@ function system_element_info() {
     '#size' => 30,
     '#maxlength' => 128,
     '#autocomplete_path' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('form_process_autocomplete', 'ajax_process_form'),
     '#theme' => 'tel',
     '#theme_wrappers' => array('form_element'),
   );
@@ -335,7 +335,7 @@ function system_element_info() {
     '#size' => 60,
     '#maxlength' => EMAIL_MAX_LENGTH,
     '#autocomplete_path' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('form_process_autocomplete', 'ajax_process_form'),
     '#element_validate' => array('form_validate_email'),
     '#theme' => 'email',
     '#theme_wrappers' => array('form_element'),
@@ -345,7 +345,7 @@ function system_element_info() {
     '#size' => 60,
     '#maxlength' => 255,
     '#autocomplete_path' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('form_process_autocomplete', 'ajax_process_form'),
     '#element_validate' => array('form_validate_url'),
     '#theme' => 'url',
     '#theme_wrappers' => array('form_element'),
@@ -382,7 +382,7 @@ function system_element_info() {
     '#size' => 60,
     '#maxlength' => 128,
     '#autocomplete_path' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('form_process_autocomplete', 'ajax_process_form'),
     '#theme' => 'search',
     '#theme_wrappers' => array('form_element'),
   );
@@ -636,8 +636,7 @@ function system_menu() {
   $items['path-autocomplete'] = array(
     'title' => 'Path autocomplete',
     'page callback' => 'path_autocomplete',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'path_autocomplete_access',
     'type' => MENU_CALLBACK,
   );
 
@@ -4392,6 +4391,19 @@ function system_404() {
  */
 function system_403() {
   return '<p>' . t('You are not authorized to access this page.') . '</p>';
+}
+
+/**
+ * Access callback for the path autocomplete menu item.
+ *
+ * @return bool
+ *   TRUE if the current user may access content and the request has a valid
+ *   autocomplete token.
+ *
+ * @see backdrop_valid_autocomplete_token()
+ */
+function path_autocomplete_access() {
+  return user_access('access content') && backdrop_valid_autocomplete_token();
 }
 
 /**
