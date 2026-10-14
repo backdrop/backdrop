@@ -1143,7 +1143,7 @@ function system_menu() {
   // AJAX endpoint for the assembled token tree.
   $items['token/tree'] = array(
     'page callback' => 'system_token_output',
-    'access callback' => TRUE,
+    'access callback' => 'system_token_browser_tree_access',
     'type' => MENU_CALLBACK,
     'file' => 'system.pages.inc',
     'theme callback' => 'ajax_base_page_theme',
