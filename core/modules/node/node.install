@@ -2780,7 +2780,7 @@ function node_update_1024(&$sandbox) {
     $revision_results = $query->execute()->fetchAllAssoc('nid');
 
     // Total node revision records that must be updated.
-    $sandbox['max'] = count(array_keys($revision_results));
+    $sandbox['max'] = count($revision_results);
     // Exit if no node revision records to update.
     if ($sandbox['max'] == 0) {
       return;
@@ -2788,12 +2788,25 @@ function node_update_1024(&$sandbox) {
 
     // Check for these nodes if revisions exist with user ids. If so, retrieve
     // the uid from the earliest revision.
-    $node_revision_query = db_select('node_revision', 'nr')
-      ->fields('nr', array('nid', 'uid'))
+    // First, get the earliest timestamp for each node where uid is not
+    // anonymous.
+    $subquery = db_select('node_revision', 'nr')
+      ->fields('nr', array('nid'))
       ->condition('nid', array_keys($revision_results), 'IN')
       ->condition('uid', 0, '>')
       ->groupBy('nid');
-    $node_revision_query->addExpression('MIN(timestamp)', 'timestamp');
+    $subquery->addExpression('MIN(timestamp)', 'min_timestamp');
+
+    // Then use the subquery to select the exact uid matching that timestamp.
+    $node_revision_query = db_select('node_revision', 'nr')
+      ->fields('nr', array('nid', 'uid', 'timestamp'))
+      ->condition('uid', 0, '>');
+
+    $node_revision_query->join(
+      $subquery,
+      'min_nr',
+      'nr.nid = min_nr.nid AND nr.timestamp = min_nr.min_timestamp'
+    );
     $node_revision_results = $node_revision_query->execute()->fetchAllAssoc('nid');
 
     // Check which node types, if any, allow anonymous users to create content.
