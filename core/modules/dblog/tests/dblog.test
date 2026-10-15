@@ -247,7 +247,7 @@ class DBLogTestCase extends BackdropWebTestCase {
   private function doUser() {
     // Set user variables.
     $name = $this->randomName();
-    $pass = user_password();
+    $pass = user_password(20);
     // Add a user using the form to generate an add user event (which is not
     // triggered by backdropCreateUser).
     $edit = array();
