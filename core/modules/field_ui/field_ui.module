@@ -236,6 +236,13 @@ function field_ui_menu() {
 }
 
 /**
+ * Access callback: Checks the users access and token to enable a display mode.
+ */
+function field_ui_view_mode_enable_access() {
+  return user_access('administer view modes') && backdrop_valid_token($_GET['token'], 'view_mode_enable');
+}
+
+/**
  * Menu loader callback: Loads a field instance based on field and bundle name.
  *
  * @param $field_name

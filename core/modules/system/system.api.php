@@ -647,6 +647,9 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * $jkl will be 'foo'. Note that this automatic passing of optional path
  * arguments applies only to page and theme callback functions.
  *
+ * While the page callback can be located in a different file to the function
+ * implementing this hook, all other callbacks must be in the same file.
+ *
  * @subsection sub_callback_arguments Callback Arguments
  * In addition to optional path arguments, the page callback and other callback
  * functions may specify argument lists as arrays. These argument lists may

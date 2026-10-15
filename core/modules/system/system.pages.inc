@@ -73,15 +73,6 @@ function system_token_browser($type) {
 }
 
 /**
- * Token browser JSON endpoint access callback.
- *
- * @since 1.30.0 Function added.
- */
-function system_token_browser_access() {
-  return isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'token-browser-endpoint');
-}
-
-/**
  * Token browser JSON endpoint delivery callback.
  *
  * @since 1.30.0 Function added.

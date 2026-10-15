@@ -365,23 +365,6 @@ function block_custom_block_translate_list($form, &$form_state, $delta) {
 }
 
 /**
- * Menu access callback for translating a single block.
- */
-function block_custom_block_translate_access($delta, $langcode = NULL) {
-  // If the block does not exist, or does not have translation enabled.
-  $block = block_custom_block_load($delta);
-  if (!$block || $block['default_langcode'] === LANGUAGE_NONE) {
-    return FALSE;
-  }
-  // Check the specified language is enabled.
-  $enabled_languages = language_list(TRUE);
-  if ($langcode && !isset($enabled_languages[$langcode])) {
-    return FALSE;
-  }
-  return user_access('administer blocks');
-}
-
-/**
  * Menu callback function for translating a single block.
  *
  * @param array $form

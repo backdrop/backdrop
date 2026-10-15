@@ -3290,13 +3290,3 @@ function system_transliterate_ajax($string = '') {
   print $string;
   backdrop_exit();
 }
-
-/**
- * Access callback for system/transliterate/%. Validates transliteration token.
- */
-function system_transliterate_ajax_access() {
-  $replace = isset($_GET['replace']) ? $_GET['replace'] : '_';
-  $replace_pattern = isset($_GET['replace_pattern']) ? $_GET['replace_pattern'] : '[^0-9A-Za-z' . $replace . ']+';
-  $replace_token = isset($_GET['replace_token']) ? $_GET['replace_token'] : '';
-  return backdrop_valid_token($replace_token, $replace_pattern);
-}

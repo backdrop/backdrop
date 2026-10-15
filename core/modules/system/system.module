@@ -2269,6 +2269,25 @@ function system_stream_wrappers() {
 }
 
 /**
+ * Access callback for system/transliterate/%. Validates transliteration token.
+ */
+function system_transliterate_ajax_access() {
+  $replace = isset($_GET['replace']) ? $_GET['replace'] : '_';
+  $replace_pattern = isset($_GET['replace_pattern']) ? $_GET['replace_pattern'] : '[^0-9A-Za-z' . $replace . ']+';
+  $replace_token = isset($_GET['replace_token']) ? $_GET['replace_token'] : '';
+  return backdrop_valid_token($replace_token, $replace_pattern);
+}
+
+/**
+ * Token browser JSON endpoint access callback.
+ *
+ * @since 1.30.0 Function added.
+ */
+function system_token_browser_access() {
+  return isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'token-browser-endpoint');
+}
+
+/**
  * Menu item access callback - only admin or enabled themes can be accessed.
  */
 function _system_themes_access($theme) {
