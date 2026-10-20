@@ -2072,7 +2072,7 @@ class CommentActionsTestCase extends CommentHelperCase {
 /**
  * Tests that the comment hostname is set correctly on save.
  */
-class CommentHostnameTestCase extends CommentHelperCase {
+class CommentSaveTestCase extends CommentHelperCase {
   /**
    * Tests that an explicitly set hostname is preserved on save.
    */
