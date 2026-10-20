@@ -320,6 +320,9 @@ class CommentStorageController extends EntityDatabaseStorageController {
       if (empty($comment->changed)) {
         $comment->changed = $comment->created;
       }
+      if (empty($comment->hostname)) {
+        $comment->hostname = ip_address();
+      }
       // We test the value with '===' because we need to modify anonymous
       // users as well.
       if ($comment->uid === $user->uid && isset($user->name)) {
@@ -327,7 +330,6 @@ class CommentStorageController extends EntityDatabaseStorageController {
       }
       // Add the values which aren't passed into the function.
       $comment->thread = $thread;
-      $comment->hostname = ip_address();
     }
   }
 
