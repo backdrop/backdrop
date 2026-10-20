@@ -136,3 +136,7 @@ table.update {
 .update-major-version-warning {
   color: #ff0000;
 }
+
+.system-updates-page-link {
+  display: inline-block;
+}
