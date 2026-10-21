@@ -1217,11 +1217,18 @@ function search_excerpt($keys, $text) {
         $p = $match[0][1];
       }
       else {
-        $info = search_simplify_excerpt_match($key, $text, $included[$key], $boundary);
-        if (!empty($info) && $info['where']) {
-          $p = $info['where'];
-          if ($info['keyword']) {
-            $foundkeys[] = $info['keyword'];
+        // Find words in the original text that matched.
+        // If an exact match is not found in the text, so that we can find the
+        // derived form that matches.
+        foreach (module_implements('simplify_excerpt_match') as $module) {
+          $info = module_invoke($module, 'simplify_excerpt_match',
+            $key, $text, $included[$key], $boundary);
+          if (!empty($info) && $info['where']) {
+            $p = $info['where'];
+            if ($info['keyword']) {
+              $foundkeys[] = $info['keyword'];
+            }
+            break;
           }
         }
       }
@@ -1315,21 +1322,18 @@ function _search_excerpt_replace(&$text) {
 }
 
 /**
- * Find words in the original text that matched via search_simplify().
+ * Implements hook_simplify_excerpt_match().
  *
- * This is called in search_excerpt() if an exact match is not found in the
- * text, so that we can find the derived form that matches.
- *
- * @param $key
+ * @param string $key
  *   The keyword to find.
- * @param $text
+ * @param string $text
  *   The text to search for the keyword.
- * @param $offset
+ * @param int $offset
  *   Offset position in $text to start searching at.
- * @param $boundary
+ * @param string $boundary
  *   Text to include in a regular expression that will match a word boundary.
  *
- * @return
+ * @return array|false
  *   FALSE if no match is found. If a match is found, return an associative
  *   array with element 'where' giving the position of the match, and element
  *   'keyword' giving the actual word found in the text at that position.

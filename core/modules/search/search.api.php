@@ -281,6 +281,53 @@ function hook_search_preprocess($text) {
 }
 
 /**
+ * Find derived forms of keywords for search excerpt.
+ *
+ * This hook is invoked by search_excerpt() to allow stemming
+ * modules to find derived forms of keywords to highlight, when creating
+ * a "snippet" for search results display, if the given keyword is not
+ * found directly in the text.
+ *
+ * @param string $key
+ *   The keyword to find.
+ * @param string $text
+ *   The text to search for the keyword.
+ * @param int $offset
+ *   Offset position in $text to start searching at.
+ * @param string $boundary
+ *   Text to include in a regular expression that will match a word boundary.
+ * @return array|false
+ *   FALSE if no match is found. If a match is found, return an associative
+ *   array with element 'where' giving the position of the match, and
+ *   element 'keyword' giving the actual word found in the text at that
+ *   position.
+ */
+function hook_simplify_excerpt_match($key, $text, $offset, $boundary) {
+  // Find the root form of the keyword -- in this example,
+  // all but the last 3 characters.
+  $key = substr($key, 0, -3);
+  if (strlen($key) < 3) {
+    return FALSE;
+  }
+
+  // Look for this modified key at the start of a word.
+  $match = array();
+  if (!preg_match('/'. $boundary . $key . '/iu', $text, $match, PREG_OFFSET_CAPTURE, $offset)) {
+    // Didn't match our modified key.
+    return FALSE;
+  }
+
+  // If we get here, we have a match. Find the end of the word we
+  // actually matched, so it can be highlighted.
+  $pos = $match[0][1];
+  if (preg_match('/' . $boundary . '/iu', $text, $match, PREG_OFFSET_CAPTURE, $pos + strlen($key))) {
+    $keyfound = substr($text, $pos, $match[0][1] - $pos);
+  }
+
+  return array('where' => $pos, 'keyword' => $keyfound);
+}
+
+/**
  * Update the search index for this module.
  *
  * This hook is called every cron run if search.module is enabled, your
