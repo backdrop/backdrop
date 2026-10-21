@@ -303,29 +303,29 @@ function hook_search_preprocess($text) {
  *   position.
  */
 function hook_simplify_excerpt_match($key, $text, $offset, $boundary) {
-    // Find the root form of the keyword -- in this example,
-    // all but the last 3 characters.
-    $key = substr($key, 0, -3);
-    if (strlen($key) < 3) {
-      return FALSE;
-    }
-
-    // Look for this modified key at the start of a word.
-    $match = array();
-    if (!preg_match('/'. $boundary . $key . '/iu', $text, $match, PREG_OFFSET_CAPTURE, $offset)) {
-      // Didn't match our modified key.
-      return FALSE;
-    }
-
-    // If we get here, we have a match. Find the end of the word we
-    // actually matched, so it can be highlighted.
-    $pos = $match[0][1];
-    if (preg_match('/' . $boundary . '/iu', $text, $match, PREG_OFFSET_CAPTURE, $pos + strlen($key))) {
-      $keyfound = substr($text, $pos, $match[0][1] - $pos);
-    }
-
-    return array('where' => $pos, 'keyword' => $keyfound);
+  // Find the root form of the keyword -- in this example,
+  // all but the last 3 characters.
+  $key = substr($key, 0, -3);
+  if (strlen($key) < 3) {
+    return FALSE;
   }
+
+  // Look for this modified key at the start of a word.
+  $match = array();
+  if (!preg_match('/'. $boundary . $key . '/iu', $text, $match, PREG_OFFSET_CAPTURE, $offset)) {
+    // Didn't match our modified key.
+    return FALSE;
+  }
+
+  // If we get here, we have a match. Find the end of the word we
+  // actually matched, so it can be highlighted.
+  $pos = $match[0][1];
+  if (preg_match('/' . $boundary . '/iu', $text, $match, PREG_OFFSET_CAPTURE, $pos + strlen($key))) {
+    $keyfound = substr($text, $pos, $match[0][1] - $pos);
+  }
+
+  return array('where' => $pos, 'keyword' => $keyfound);
+}
 
 /**
  * Update the search index for this module.
