@@ -3927,26 +3927,23 @@ function backdrop_add_css($data = NULL, $options = NULL) {
     $count = 0;
   }
 
-  // Construct the options, taking the defaults into consideration.
-  if (isset($options)) {
-    if (!is_array($options)) {
-      $options = array('type' => $options);
-    }
-  }
-  else {
-    $options = array();
-  }
-
-  $defaults = backdrop_css_defaults($data);
-  $options += $defaults;
-  $options['attributes'] += $defaults['attributes'];
-
-  // Preprocess can only be set if no attributes are set.
-  $options['preprocess'] = empty($options['attributes']) ? $options['preprocess'] : FALSE;
-
-  // Create an array of CSS files for each media type first, since each type
-  // needs to be served to the browser differently.
   if (isset($data)) {
+    // Construct the options, taking the defaults into consideration.
+    if (isset($options)) {
+      if (!is_array($options)) {
+        $options = array('type' => $options);
+      }
+    }
+    else {
+      $options = array();
+    }
+
+    $defaults = backdrop_css_defaults($data);
+    $options += $defaults;
+    $options['attributes'] += $defaults['attributes'];
+
+    // Preprocess can only be set if no attributes are set.
+    $options['preprocess'] = empty($options['attributes']) ? $options['preprocess'] : FALSE;
     $options['browsers'] += array(
       'IE' => TRUE,
       '!IE' => TRUE,
@@ -3964,7 +3961,8 @@ function backdrop_add_css($data = NULL, $options = NULL) {
     // Add an every page weight for sorting.
     $options['every_page_weight'] = $options['every_page'] ? -1 : 1;
 
-    // Add the data to the CSS array depending on the type.
+    // Create an array of CSS files for each media type first, since each type
+    // needs to be served to the browser differently.
     switch ($options['type']) {
       case 'inline':
         // For inline stylesheets, we don't want to use the $data as the array
