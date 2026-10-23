@@ -152,7 +152,9 @@ function node_form($form, &$form_state, Node $node) {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => filter_xss_admin($node_type->help),
+    '#markup' => filter_xss_admin(t($node_type->help, array(), array(
+      'context' => 'type:' . $node->type . ':help',
+    ))),
     '#access' => !empty($node_type->help),
     '#weight' => -500,
   );
