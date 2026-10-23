@@ -2495,15 +2495,16 @@ function system_get_debug_info() {
   foreach ($text_formats as $format_info) {
     if (!empty($format_info->editor)) {
       $editor = $text_editors[$format_info->editor];
-      $editor_label = $editor['label'];
-      // Add a suffix with the editor version or the editor library version
-      // to the editor label.
       if (!empty($editor['library_version'])) {
-        $editor_label .= ' ' . t('version') . ': ' . $editor['library_version'];
+        $editor_version = $editor['library_version'];
       }
       elseif (isset($modules[$editor['module']]->info['version'])) {
-        $editor_label .= ' ' . t('version') . ': ' . $modules[$editor['module']]->info['version'];
+        $editor_version = $modules[$editor['module']]->info['version'];
       }
+      $editor_label = t('@editor_label version: @editor_version', array(
+        '@editor_label' => $editor['label'],
+        '@editor_version' => $editor_version,
+      ));
       $text_editor_usage[$editor_label][] = $format_info->name;
     }
   }
