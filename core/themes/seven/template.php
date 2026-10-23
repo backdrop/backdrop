@@ -18,8 +18,8 @@ function seven_preprocess_page(&$variables) {
 function seven_preprocess_layout(&$variables) {
   // Don't modify layouts that are being edited.
   if (!$variables['admin']) {
-    // Move the page title and tabs into the "header" area, to fit with Seven's
-    // markup requirements.
+    // Move the page title and primary tabs into the "header" area, to fit with
+    // Seven's markup requirements.
     if (isset($variables['content']['header'])) {
       if ($variables['title']) {
         $title = '<h1 class="page-title">' . $variables['title'] . '</h1>';
@@ -27,9 +27,12 @@ function seven_preprocess_layout(&$variables) {
         $variables['title'] = NULL;
       }
       if ($variables['tabs']) {
-        $tabs = '<div class="tabs">' . $variables['tabs'] . '</div>';
-        $variables['content']['header'] .= $tabs;
-        $variables['tabs'] = NULL;
+        $variables['content']['header'] .= theme('menu_local_tasks', array(
+          'primary' => menu_primary_local_tasks(),
+        ));
+        $variables['tabs'] = theme('menu_local_tasks', array(
+          'secondary' => menu_secondary_local_tasks(),
+        ));
       }
     }
   }
