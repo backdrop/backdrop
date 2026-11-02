@@ -8,6 +8,8 @@
 
 "use strict";
 
+// dummy change - testing ESLint :)
+  
 Backdrop.settings.dialog = {
   // This option will turn off resizable and draggable.
   autoResize: true,
