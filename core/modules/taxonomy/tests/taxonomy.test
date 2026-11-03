@@ -2204,23 +2204,30 @@ class TaxonomyQueryAlterTestCase extends TaxonomyWebTestCase {
  */
 class TaxonomyIndexSchemaTestCase extends BackdropWebTestCase {
 
-  function setUp() {
+  /**
+   * Sets up the taxonomy module.
+   */
+  public function setUp() {
     parent::setUp('taxonomy');
   }
 
   /**
    * Tests that the taxonomy index schema declares the expected primary key.
    */
-  function testTaxonomyIndexSchema() {
+  public function testTaxonomyIndexSchema() {
     $schema = backdrop_get_schema_unprocessed('taxonomy', 'taxonomy_index');
-    $this->assertEqual(array('nid', 'tid'), $schema['primary key'], 'The taxonomy index has a composite primary key on nid and tid.');
+    $this->assertEqual(
+      array('nid', 'tid'),
+      $schema['primary key'],
+      'The taxonomy index has a composite primary key on nid and tid.'
+    );
     $this->assertFalse(isset($schema['indexes']['nid']), 'The redundant nid index is not declared.');
   }
 
   /**
    * Tests that the schema update removes duplicates and adds the primary key.
    */
-  function testTaxonomyIndexPrimaryKeyUpdate() {
+  public function testTaxonomyIndexPrimaryKeyUpdate() {
     // Re-create the previous schema so duplicate relationships can be inserted
     // as they may exist on Drupal 7 and older Backdrop installations.
     db_drop_primary_key('taxonomy_index');
