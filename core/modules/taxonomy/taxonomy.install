@@ -147,9 +147,9 @@ function taxonomy_schema() {
         'default'=> 0,
       ),
     ),
+    'primary key' => array('nid', 'tid'),
     'indexes' => array(
       'term_node' => array('tid', 'sticky', 'created'),
-      'nid' => array('nid'),
     ),
     'foreign keys' => array(
       'tracked_node' => array(
@@ -426,6 +426,64 @@ function taxonomy_update_1010() {
     }
     $config->save();
   }
+}
+
+/**
+ * Add a composite primary key to the taxonomy index table.
+ *
+ * Existing installations, including those upgraded from Drupal 7, may contain
+ * duplicate node/term relationships. Remove these duplicates before adding
+ * the primary key.
+ *
+ * @param array $sandbox
+ *   Batch context information.
+ */
+function taxonomy_update_1011(&$sandbox) {
+  // Process duplicate relationships in batches so large taxonomy index tables
+  // do not need to be loaded into memory all at once. Each pass removes up to
+  // 100 duplicate node/term pairs.
+  $duplicates = db_query_range("SELECT nid, tid, MAX(sticky) AS sticky, MAX(created) AS created
+    FROM {taxonomy_index}
+    GROUP BY nid, tid
+    HAVING COUNT(*) > 1
+    ORDER BY nid, tid", 0, 100, array())->fetchAll();
+
+  foreach ($duplicates as $duplicate) {
+    // The sticky and created values should normally be identical for duplicate
+    // rows. Use their maximum values if legacy data contains inconsistencies.
+    db_delete('taxonomy_index')
+      ->condition('nid', $duplicate->nid)
+      ->condition('tid', $duplicate->tid)
+      ->execute();
+
+    db_insert('taxonomy_index')
+      ->fields(array('nid', 'tid', 'sticky', 'created'))
+      ->values(array(
+        'nid' => $duplicate->nid,
+        'tid' => $duplicate->tid,
+        'sticky' => $duplicate->sticky,
+        'created' => $duplicate->created,
+      ))
+      ->execute();
+  }
+
+  // If a full batch was processed, check for more duplicates on the next pass.
+  if (count($duplicates) == 100) {
+    $sandbox['#finished'] = 0;
+    return;
+  }
+
+  // Add the primary key before dropping the old nid index. This ensures the
+  // table retains a primary key once the new key has been created.
+  db_add_primary_key('taxonomy_index', array('nid', 'tid'));
+
+  // The primary key begins with nid, making the standalone nid index
+  // redundant.
+  if (db_index_exists('taxonomy_index', 'nid')) {
+    db_drop_index('taxonomy_index', 'nid');
+  }
+
+  $sandbox['#finished'] = 1;
 }
 
 /**
