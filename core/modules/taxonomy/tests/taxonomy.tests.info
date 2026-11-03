@@ -100,3 +100,8 @@ description = Tests the taxonomy term on node relationship handler for Views.
 group = Taxonomy
 file = taxonomy_views_handler_relationship_node_term_data.test
 
+[TaxonomyIndexSchemaTestCase]
+name = Taxonomy index primary key
+description = Tests the taxonomy index primary key and database update.
+group = Taxonomy
+file = taxonomy.test

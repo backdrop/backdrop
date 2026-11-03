@@ -2198,3 +2198,112 @@ class TaxonomyQueryAlterTestCase extends TaxonomyWebTestCase {
   }
 
 }
+
+/**
+ * Tests the taxonomy index table schema and update.
+ */
+class TaxonomyIndexSchemaTestCase extends BackdropWebTestCase {
+
+  /**
+   * Sets up the taxonomy module.
+   */
+  public function setUp() {
+    parent::setUp('taxonomy');
+  }
+
+  /**
+   * Tests that the taxonomy index schema declares the expected primary key.
+   */
+  public function testTaxonomyIndexSchema() {
+    $schema = backdrop_get_schema_unprocessed('taxonomy', 'taxonomy_index');
+    $this->assertEqual(
+      array('nid', 'tid'),
+      $schema['primary key'],
+      'The taxonomy index has a composite primary key on nid and tid.'
+    );
+    $this->assertFalse(isset($schema['indexes']['nid']), 'The redundant nid index is not declared.');
+  }
+
+  /**
+   * Tests that the schema update removes duplicates and adds the primary key.
+   */
+  public function testTaxonomyIndexPrimaryKeyUpdate() {
+    // Re-create the previous schema so duplicate relationships can be inserted
+    // as they may exist on Drupal 7 and older Backdrop installations.
+    db_drop_primary_key('taxonomy_index');
+    db_add_index('taxonomy_index', 'nid', array('nid'));
+
+    // Create 101 duplicate node/term pairs (202 rows).
+    $insert = db_insert('taxonomy_index')
+      ->fields(array('nid', 'tid', 'sticky', 'created'));
+
+    for ($i = 0; $i < 101; $i++) {
+      $nid = 987654 + $i;
+      $tid = 987654 + $i;
+
+      $insert->values(array(
+        'nid' => $nid,
+        'tid' => $tid,
+        'sticky' => 0,
+        'created' => 100,
+      ));
+      $insert->values(array(
+        'nid' => $nid,
+        'tid' => $tid,
+        'sticky' => 1,
+        'created' => 200,
+      ));
+    }
+    $insert->execute();
+
+    // The first invocation should process 100 duplicate pairs and request
+    // another pass.
+    $sandbox = array();
+    taxonomy_update_1011($sandbox);
+    $this->assertEqual(0, $sandbox['#finished'], 'The update requests another pass after processing 100 duplicate pairs.');
+
+    // The second invocation processes the remaining pair and completes.
+    taxonomy_update_1011($sandbox);
+    $this->assertEqual(1, $sandbox['#finished'], 'The update marks itself complete after processing the remaining duplicate pair.');
+
+    // Retrying the completed update should not fail when the primary key
+    // already exists.
+    taxonomy_update_1011($sandbox);
+    $this->assertEqual(1, $sandbox['#finished'], 'The update remains complete when retried after adding the primary key.');
+
+    // All 101 pairs should now have exactly one row each.
+    $count = db_query('SELECT COUNT(*) FROM {taxonomy_index} WHERE nid BETWEEN :first AND :last AND tid = nid', array(
+      ':first' => 987654,
+      ':last' => 987754,
+    ))->fetchField();
+    $this->assertEqual(101, $count, 'All 101 duplicate node/term relationships are reduced to one row each.');
+
+    // Verify that the maximum sticky and created values were retained.
+    $row = db_query('SELECT sticky, created FROM {taxonomy_index} WHERE nid = :nid AND tid = :tid', array(
+      ':nid' => 987654,
+      ':tid' => 987654,
+    ))->fetchObject();
+    $this->assertEqual(1, $row->sticky, 'The retained row has the maximum sticky value.');
+    $this->assertEqual(200, $row->created, 'The retained row has the maximum created value.');
+
+    $this->assertFalse(db_index_exists('taxonomy_index', 'nid'), 'The redundant nid index is removed.');
+
+    // A second row with the same relationship must now be rejected.
+    $duplicate_rejected = FALSE;
+    try {
+      db_insert('taxonomy_index')
+        ->fields(array('nid', 'tid', 'sticky', 'created'))
+        ->values(array(
+          'nid' => 987654,
+          'tid' => 987654,
+          'sticky' => 0,
+          'created' => 100,
+        ))
+        ->execute();
+    }
+    catch (Exception $e) {
+      $duplicate_rejected = TRUE;
+    }
+    $this->assertTrue($duplicate_rejected, 'The primary key prevents duplicate node/term relationships.');
+  }
+}
