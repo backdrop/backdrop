@@ -473,9 +473,11 @@ function taxonomy_update_1011(&$sandbox) {
     return;
   }
 
-  // Add the primary key before dropping the old nid index. This ensures the
-  // table retains a primary key once the new key has been created.
-  db_add_primary_key('taxonomy_index', array('nid', 'tid'));
+  // Add the primary key if it does not already exist. This allows the update
+  // to be safely retried if the key was added before the update was recorded.
+  if (!db_index_exists('taxonomy_index', 'PRIMARY')) {
+    db_add_primary_key('taxonomy_index', array('nid', 'tid'));
+  }
 
   // The primary key begins with nid, making the standalone nid index
   // redundant.

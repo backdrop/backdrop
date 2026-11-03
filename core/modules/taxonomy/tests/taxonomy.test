@@ -2266,6 +2266,11 @@ class TaxonomyIndexSchemaTestCase extends BackdropWebTestCase {
     taxonomy_update_1011($sandbox);
     $this->assertEqual(1, $sandbox['#finished'], 'The update marks itself complete after processing the remaining duplicate pair.');
 
+    // Retrying the completed update should not fail when the primary key
+    // already exists.
+    taxonomy_update_1011($sandbox);
+    $this->assertEqual(1, $sandbox['#finished'], 'The update remains complete when retried after adding the primary key.');
+
     // All 101 pairs should now have exactly one row each.
     $count = db_query('SELECT COUNT(*) FROM {taxonomy_index} WHERE nid BETWEEN :first AND :last AND tid = nid', array(
       ':first' => 987654,
