@@ -2288,7 +2288,12 @@ class TaxonomyIndexSchemaTestCase extends BackdropWebTestCase {
     try {
       db_insert('taxonomy_index')
         ->fields(array('nid', 'tid', 'sticky', 'created'))
-        ->values(array('nid' => 987654, 'tid' => 987654, 'sticky' => 0, 'created' => 100))
+        ->values(array(
+          'nid' => 987654,
+          'tid' => 987654,
+          'sticky' => 0,
+          'created' => 100,
+        ))
         ->execute();
     }
     catch (Exception $e) {
