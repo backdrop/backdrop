@@ -134,6 +134,7 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
    * Tests the backup settings form.
    */
   public function testBackupSettingsForm() {
+    config_set('system.core', 'cache', 1);
     // Hit the homepage to ensure a cache entry exists in cache_page.
     $this->backdropGet('<front>');
     $cached_homepage = cache_get(url('<front>', array('absolute' => TRUE)), 'cache_page');
