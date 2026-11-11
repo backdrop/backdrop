@@ -3274,6 +3274,8 @@ function _backdrop_bootstrap_page_cache() {
         backdrop_add_http_header('Connection', 'close');
       }
 
+      backdrop_send_headers();
+
       // End the request and send the response to the browser.
       ob_end_flush();
 
@@ -3302,7 +3304,6 @@ function _backdrop_bootstrap_page_cache() {
       }
       // No new cache entry needed. Exit immediately after serving the page.
       else {
-        backdrop_send_headers();
         exit();
       }
     }
