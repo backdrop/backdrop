@@ -3232,7 +3232,7 @@ function _backdrop_bootstrap_page_cache() {
     $cache = backdrop_page_get_cache(FALSE, $background_fetch_enabled);
     // If there is a cached page, display it.
     if (is_object($cache)) {
-      header('X-Backdrop-Cache: HIT');
+      backdrop_add_http_header('X-Backdrop-Cache', 'HIT');
 
       // Although a cached page was found, it may be expired if background
       // fetch is enabled. So we calculate if it is within the max age based
@@ -3271,8 +3271,10 @@ function _backdrop_bootstrap_page_cache() {
       // cache entry. This allows for background processing without holding up
       // the browser.
       if ($cache_expired) {
-        header('Connection: close');
+        backdrop_add_http_header('Connection', 'close');
       }
+
+      backdrop_send_headers();
 
       // End the request and send the response to the browser.
       ob_end_flush();
@@ -3306,7 +3308,7 @@ function _backdrop_bootstrap_page_cache() {
       }
     }
     else {
-      header('X-Backdrop-Cache: MISS');
+      backdrop_add_http_header('X-Backdrop-Cache', 'MISS');
     }
   }
 }
