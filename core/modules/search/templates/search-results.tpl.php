@@ -47,7 +47,7 @@
     <?php endforeach; ?>
   </ol>
   <?php print $pager; ?>
-<?php else : ?>
+<?php else: ?>
   <h2><?php print t('Your search yielded no results'); ?></h2>
   <ul>
     <li><?php print t('Check if your spelling is correct.'); ?></li>
