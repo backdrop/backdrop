@@ -481,11 +481,14 @@ class views_plugin_display_block extends views_plugin_display {
     return $this->view->override_path;
   }
 
-  function get_url() {
+  /**
+   * {@inheritdoc}
+   */
+  public function get_url() {
     if ($this->get_option('inherit_path')) {
       return $this->get_path();
     }
-    return parent::get_url();
+    return current_path();
   }
 
   /**
