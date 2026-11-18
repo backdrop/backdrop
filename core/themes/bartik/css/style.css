@@ -1730,3 +1730,8 @@ div.admin-panel .description {
     display: none;
   }
 }
+@media screen and (min-width: 721px) {
+  .tableresponsive-toggle-columns {
+    display: none;
+  }
+}

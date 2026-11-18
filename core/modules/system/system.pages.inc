@@ -18,7 +18,7 @@ function system_token_output() {
 
   if (backdrop_is_ajax()) {
     $dialog_options = array(
-      'dialogClass' => 'token-browser-dialog',
+      'classes' => array('ui-dialog' => 'token-browser-dialog'),
       'modal' => FALSE,
       'draggable' => TRUE,
       'resizable' => TRUE,

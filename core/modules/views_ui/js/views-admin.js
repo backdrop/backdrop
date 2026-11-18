@@ -225,7 +225,7 @@ Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
  * Refresh the display of the checked items.
  */
 Backdrop.viewsUi.AddItemForm.prototype.refreshCheckedItems = function () {
-  // Perhaps we should precache the text div, too.
+  // Perhaps we should pre-cache the text div, too.
   this.$selected_div.find('.views-selected-options')
     .html(this.checkedItems.join(', '))
     .trigger('dialogContentResize');

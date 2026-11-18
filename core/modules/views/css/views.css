@@ -51,55 +51,42 @@
 /* Views grid styles */
 
 .views-view-grid {
-  display: -ms-grid;
   display: grid;
 }
 .views-view-grid-cols-1 {
-  -ms-grid-columns: (1fr)[1];
   grid-template-columns: repeat(1, 1fr);
 }
 .views-view-grid-cols-2 {
-  -ms-grid-columns: (1fr)[2];
   grid-template-columns: repeat(2, 1fr);
 }
 .views-view-grid-cols-3 {
-  -ms-grid-columns: (1fr)[3];
   grid-template-columns: repeat(3, 1fr);
 }
 .views-view-grid-cols-4 {
-  -ms-grid-columns: (1fr)[4];
   grid-template-columns: repeat(4, 1fr);
 }
 .views-view-grid-cols-5 {
-  -ms-grid-columns: (1fr)[5];
   grid-template-columns: repeat(5, 1fr);
 }
 .views-view-grid-cols-6 {
-  -ms-grid-columns: (1fr)[6];
   grid-template-columns: repeat(6, 1fr);
 }
 .views-view-grid-cols-7 {
-  -ms-grid-columns: (1fr)[7];
   grid-template-columns: repeat(7, 1fr);
 }
 .views-view-grid-cols-8 {
-  -ms-grid-columns: (1fr)[8];
   grid-template-columns: repeat(8, 1fr);
 }
 .views-view-grid-cols-9 {
-  -ms-grid-columns: (1fr)[9];
   grid-template-columns: repeat(9, 1fr);
 }
 .views-view-grid-cols-10 {
-  -ms-grid-columns: (1fr)[10];
   grid-template-columns: repeat(10, 1fr);
 }
 .views-view-grid-cols-11 {
-  -ms-grid-columns: (1fr)[11];
   grid-template-columns: repeat(11, 1fr);
 }
 .views-view-grid-cols-12 {
-  -ms-grid-columns: (1fr)[12];
   grid-template-columns: repeat(12, 1fr);
 }
 .views-view-grid .views-row, .views-view-grid .views-grid-box {
@@ -113,6 +100,69 @@
   border-top: none;
 }
 
+/* Views responsive grid styles */
+
+.views-view-responsive-grid {
+  --views-responsive-grid--layout-gap: 2rem;
+  /* Will be overridden by an inline style. */
+  --views-responsive-grid--column-count: 4;
+  /* Will be overridden by an inline style. */
+  --views-responsive-grid--cell-min-width: 16rem;
+  /* Will be overridden by an inline style. */
+
+  display: inherit;
+}
+
+.views-view-responsive-grid--horizontal {
+  /* Calculated values. */
+  --views-responsive-grid--gap-count: calc(var(--views-responsive-grid--column-count) - 1);
+  --views-responsive-grid--total-gap-width: calc(var(--views-responsive-grid--gap-count) * var(--views-responsive-grid--layout-gap));
+  --views-responsive-grid-item--max-width: calc((100% - var(--views-responsive-grid--total-gap-width)) / var(--views-responsive-grid--column-count));
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(var(--views-responsive-grid--cell-min-width), var(--views-responsive-grid-item--max-width)), 1fr));
+  gap: var(--views-responsive-grid--layout-gap);
+}
+
+.views-view-responsive-grid--vertical {
+  margin-bottom: calc(var(--views-responsive-grid--layout-gap) * -1); /* Offset the bottom row's padding. */
+  column-width: var(--views-responsive-grid--cell-min-width);
+  column-count: var(--views-responsive-grid--column-count);
+  column-gap: var(--views-responsive-grid--layout-gap);
+}
+
+.views-view-responsive-grid--vertical .views-grid-box>* {
+  padding-bottom: var(--views-responsive-grid--layout-gap);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Fix pager links bouncing around with ajax */
 .view .progress-disabled {
   float: none;
+}
+
+/* Bulk form select all pages */
+.views-select-all-pages--wrapper {
+  display: none;
+}
+
+.views-select-all-pages--row {
+  display: none;
+}
+.views-select-all-pages--row td {
+  text-align: center;
+}
+
+/* Generic bulk form "select all" for non-tables */
+.views-select-all-pages--fieldset {
+  text-align: left;
+  padding: 0.6em 0;
+}
+.views-select-all-pages--fieldset .form-item {
+  margin-bottom: 0;
+}
+.views-select-all-pages--fieldset div {
+  padding: 0;
+  margin: 0;
 }

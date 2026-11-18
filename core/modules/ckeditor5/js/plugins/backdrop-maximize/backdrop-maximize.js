@@ -6,12 +6,12 @@
 
   "use strict";
 
-  class Maximize extends CKEditor5.core.Plugin {
+  class Maximize extends CKEditor5.Plugin {
     init() {
       const editor = this.editor;
 
       editor.ui.componentFactory.add( 'maximize', () => {
-        const button = new CKEditor5.ui.ButtonView();
+        const button = new CKEditor5.ButtonView();
         const activeClass = 'ck-maximize-active';
 
         button.set( {

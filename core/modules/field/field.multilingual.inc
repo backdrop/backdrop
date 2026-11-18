@@ -279,6 +279,8 @@ function field_valid_language($langcode, $default = TRUE) {
 function field_language($entity_type, $entity, $field_name = NULL, $langcode = NULL) {
   $display_languages = &backdrop_static(__FUNCTION__, array());
   list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
+  // It is null for newly created, but we need it as array key.
+  $id = (string) $id;
   $langcode = field_valid_language($langcode, FALSE);
 
   if (!isset($display_languages[$entity_type][$id][$langcode])) {

@@ -473,12 +473,19 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   if ($field['cardinality'] == 1) {
     // If there's only one field, return it as delta 0.
-    if (empty($elements[0]['#default_value']['fid'])) {
-      $elements[0]['#description'] = theme('file_upload_help', array('description' => field_filter_xss($instance['description']), 'upload_validators' => $elements[0]['#upload_validators']));
+    if (empty($elements[0]['#default_value']['fids'])) {
+      $elements[0]['#description'] = theme('file_upload_help', array(
+        'description' => field_filter_xss($instance['description']),
+        'upload_validators' => $elements[0]['#upload_validators'],
+        'cardinality' => $field['cardinality'],
+      ));
     }
   }
   else {
-    $elements['#file_upload_description'] = theme('file_upload_help', array('upload_validators' => $elements[0]['#upload_validators']));
+    $elements['#file_upload_description'] = theme('file_upload_help', array(
+      'upload_validators' => $elements[0]['#upload_validators'],
+      'cardinality' => $field['cardinality'],
+    ));
   }
   return $elements;
 }
@@ -501,10 +508,11 @@ function image_field_widget_process($element, &$form_state, $form) {
   $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/css/image.css';
 
   // Add the image preview.
-  if ($element['#file'] && $widget_settings['preview_image_style']) {
+  if (!empty($element['#files']) && $widget_settings['preview_image_style']) {
+    $file = reset($element['#files']);
     $variables = array(
       'style_name' => $widget_settings['preview_image_style'],
-      'uri' => $element['#file']->uri,
+      'uri' => $file->uri,
     );
 
     // Determine image dimensions.
@@ -513,7 +521,7 @@ function image_field_widget_process($element, &$form_state, $form) {
       $variables['height'] = $element['#value']['height'];
     }
     else {
-      $info = image_get_info($element['#file']->uri);
+      $info = image_get_info($file->uri);
 
       if (is_array($info)) {
         $variables['width'] = $info['width'];

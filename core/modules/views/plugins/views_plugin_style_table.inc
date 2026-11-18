@@ -30,11 +30,16 @@ class views_plugin_style_table extends views_plugin_style {
     $options['default'] = array('default' => '');
     $options['info'] = array('default' => array());
     $options['override'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['append_original_sort'] = array(
+      'default' => FALSE,
+      'bool' => TRUE,
+    );
     $options['sticky'] = array('default' => FALSE, 'bool' => TRUE);
     $options['order'] = array('default' => 'asc');
     $options['caption'] = array('default' => '', 'translatable' => TRUE);
     $options['summary'] = array('default' => '', 'translatable' => TRUE);
     $options['empty_table'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['responsive'] = array('default' => '');
 
     return $options;
   }
@@ -96,6 +101,11 @@ class views_plugin_style_table extends views_plugin_style {
 
     // Tell the field to click sort.
     $this->view->field[$sort]->click_sort($this->order);
+
+    // Combine click sort and default sort criteria.
+    if ($this->options['override'] && $this->options['append_original_sort']) {
+      $this->view->_build('sort');
+    }
   }
 
   /**
@@ -170,6 +180,19 @@ class views_plugin_style_table extends views_plugin_style {
       '#type' => 'checkbox',
       '#title' => t('Override normal sorting if click sorting is used'),
       '#default_value' => !empty($this->options['override']),
+    );
+
+    $form['append_original_sort'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Apply normal sorting criteria after click sorting'),
+      '#default_value' => !empty($this->options['override']) && !empty($this->options['append_original_sort']),
+      '#description' => t('Leave unchecked to discard normal sorting criteria when click sorting is used.'),
+      '#indentation' => 1,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="style_options[override]"]' => array('checked' => TRUE),
+        ),
+      ),
     );
 
     $form['sticky'] = array(
@@ -288,6 +311,21 @@ class views_plugin_style_table extends views_plugin_style {
       $form['info'][$field]['empty_column'] = array(
         '#type' => 'checkbox',
         '#default_value' => isset($this->options['info'][$field]['empty_column']) ? $this->options['info'][$field]['empty_column'] : FALSE,
+        '#states' => array(
+          'visible' => array(
+            $column_selector => array('value' => $field),
+          ),
+        ),
+      );
+
+      $form['info'][$field]['responsive'] = array(
+        '#type' => 'select',
+        '#default_value' => !empty($this->options['info'][$field]['responsive']) ? $this->options['info'][$field]['responsive'] : '',
+        '#options' => array(
+          '' => t('High'),
+          RESPONSIVE_PRIORITY_MEDIUM => t('Medium'),
+          RESPONSIVE_PRIORITY_LOW => t('Low'),
+        ),
         '#states' => array(
           'visible' => array(
             $column_selector => array('value' => $field),

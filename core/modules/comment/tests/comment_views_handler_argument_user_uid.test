@@ -37,11 +37,11 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
    *
    * @param object $node
    *   Node to post comment on.
-   * @param array $comment
+   * @param array $comment_parameters
    *   Comment to save.
    */
-  public function postComment($node, $comment = array()) {
-    $comment += array(
+  public function postComment($node, $comment_parameters = array()) {
+    $comment_parameters += array(
       'uid' => $this->loggedInUser->uid,
       'nid' => $node->nid,
       'cid' => NULL,
@@ -49,7 +49,8 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
       // zero instead of an empty string.
       'pid' => 0,
     );
-    $comment = entity_create('comment', $comment);
+    /** @var Comment $comment */
+    $comment = entity_create('comment', $comment_parameters);
     return comment_save($comment);
   }
 

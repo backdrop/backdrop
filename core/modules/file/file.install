@@ -292,6 +292,10 @@ function file_requirements($phase) {
  * Implements hook_update_dependencies().
  */
 function file_update_dependencies() {
+  // Do not modify permissions until they have been converted to config.
+  $dependencies['file'][1002] = array(
+    'user' => 1007,
+  );
   // Ensure that the text filters have been converted to config prior to
   // updating the "No results" format on the file admin View.
   $dependencies['file'][1009] = array(
@@ -769,6 +773,7 @@ function file_update_1001() {
  * Switch the 'edit files' permission to 'manage files'.
  */
 function file_update_1002() {
+  backdrop_static_reset('user_roles');
   $roles = user_roles(FALSE, 'edit files');
   foreach ($roles as $role_name => $role_label) {
     $config = config('user.role.' . $role_name);
@@ -865,6 +870,7 @@ function file_update_1003() {
   }
 
   // Set permission to view files.
+  backdrop_static_reset('user_roles');
   $roles = user_roles();
   foreach ($roles as $rid => $role) {
     user_role_grant_permissions($rid, array('view files'));
@@ -1285,5 +1291,36 @@ function file_update_1011() {
       '@url' => url('admin/structure/file-types/classify'),
     ));
     return $message;
+  }
+}
+
+/**
+ * Update File Entity Inline settings to core versions and disable contrib
+ * module.
+ */
+function file_update_1012() {
+  $config_names = config_get_names_with_prefix('field.instance.');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    if ($inline_fields_option = $config->get('widget.settings.file_entity_inline')) {
+      $config->set('widget.settings.inline_fields_option', $inline_fields_option);
+      $config->set('widget.settings.inline_fields', $config->get('widget.settings.file_entity_inline_fields'));
+      $config->clear('widget.settings.file_entity_inline');
+      $config->clear('widget.settings.file_entity_inline_fields');
+      $config->save();
+    }
+  }
+
+  // Remove the entry for the file_entity_inline module in the system table.
+  // This will "disable" the module if present. No other configuration was
+  // present for this module.
+  $module = db_query("SELECT name FROM {system} WHERE name = 'file_entity_inline' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'file_entity_inline');
+    db_query("DELETE FROM {system} WHERE name = 'file_entity_inline' AND type = 'module'");
+    backdrop_set_message(t('The contributed module %module has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array(
+      '%module' => 'File Entity Inline',
+      '%path' => BACKDROP_ROOT . '/' . $path,
+    )), 'warning');
   }
 }

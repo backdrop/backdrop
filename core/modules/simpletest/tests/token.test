@@ -30,7 +30,10 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
 
     $target  = check_plain($node->title);
     $target .= check_plain($account->name);
-    $target .= format_interval(REQUEST_TIME - $node->created, 2, $language->langcode);
+    $target .= format_time_diff_since($node->created, array(
+      'granularity' => 2,
+      'langcode' => $language->langcode,
+    ));
     $target .= check_plain($user->name);
     $target .= format_date(REQUEST_TIME, 'short', '', NULL, $language->langcode);
 
@@ -147,7 +150,10 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
     $tests['[date:medium]'] = format_date($date, 'medium', '', NULL, $language->langcode);
     $tests['[date:long]'] = format_date($date, 'long', '', NULL, $language->langcode);
     $tests['[date:custom:m/j/Y]'] = format_date($date, 'custom', 'm/j/Y', NULL, $language->langcode);
-    $tests['[date:since]'] = format_interval((REQUEST_TIME - $date), 2, $language->langcode);
+    $tests['[date:since]'] = format_time_diff_since($date, array(
+      'granularity' => 2,
+      'langcode' => $language->langcode,
+    ));
     $tests['[date:raw]'] = filter_xss($date);
 
     // Test to make sure that we generated something for each token.
@@ -207,7 +213,10 @@ class TokenTestHelper extends BackdropWebTestCase {
     foreach ($tokens as $name => $expected) {
       $token = $input[$name];
       if (!isset($expected)) {
-        $this->assertTrue(!isset($replacements[$token]), t("Token value for @token was not generated.", array('@type' => $type, '@token' => $token)));
+        $this->assertTrue(!isset($replacements[$token]), t("Token value for @token was not generated.", array(
+          '@type' => $type,
+          '@token' => $token,
+        )));
       }
       elseif (!isset($replacements[$token])) {
         $this->fail(t("Token value for @token was not generated.", array('@type' => $type, '@token' => $token)));
@@ -406,9 +415,16 @@ class TokenCommentTestCase extends TokenTestHelper {
   }
 
   function testCommentTokens() {
-    $node = $this->backdropCreateNode(array('comment' => COMMENT_NODE_OPEN));
+    $content_type = $this->backdropCreateContentType(array(
+      'comment_enabled' => TRUE,
+    ));
+    $node = $this->backdropCreateNode(array(
+      'comment' => COMMENT_NODE_OPEN,
+      'type' => $content_type->type,
+    ));
 
-    $parent_comment = new Comment();
+    /** @var Comment $parent_comment */
+    $parent_comment = entity_create('comment', array());
     $parent_comment->nid = $node->nid;
     $parent_comment->pid = 0;
     $parent_comment->cid = NULL;
@@ -430,7 +446,8 @@ class TokenCommentTestCase extends TokenTestHelper {
     );
     $this->assertTokens('comment', array('comment' => $parent_comment), $tokens);
 
-    $comment = new Comment();
+    /** @var Comment $comment */
+    $comment = entity_create('comment', array());
     $comment->nid = $node->nid;
     $comment->pid = $parent_comment->cid;
     $comment->cid = NULL;
@@ -460,7 +477,8 @@ class TokenNodeTestCase extends TokenTestHelper {
     $this->backdropLogin($admin_user);
 
     $files = $this->backdropGetTestFiles('image');
-    $file = new File((array) $files[0]);
+    /** @var File $file */
+    $file = entity_create('file', (array) $files[0]);
     $file->uid = $admin_user->uid;
     $file->save();
     $node_title = $this->randomName();
@@ -709,13 +727,14 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
     return $vocabulary;
   }
 
-  function addTerm(TaxonomyVocabulary $vocabulary, array $term = array()) {
-    $term += array(
+  function addTerm(TaxonomyVocabulary $vocabulary, array $term_parameters = array()) {
+    $term_parameters += array(
       'name' => backdrop_strtolower($this->randomName(5)),
       'vocabulary' => $vocabulary->machine_name,
       'parent' => array(0),
     );
-    $term = new TaxonomyTerm($term);
+    /** @var TaxonomyTerm $term */
+    $term = entity_create('taxonomy_term', $term_parameters);
     taxonomy_term_save($term);
     return $term;
   }
@@ -814,13 +833,14 @@ class TokenEntityTestCase extends TokenTestHelper {
     $this->vocab = $vocabulary;
   }
 
-  function addTerm(TaxonomyVocabulary $vocabulary, array $term = array()) {
-    $term += array(
+  function addTerm(TaxonomyVocabulary $vocabulary, array $term_parameters = array()) {
+    $term_parameters += array(
       'name' => backdrop_strtolower($this->randomName(5)),
       'vocabulary' => $vocabulary->machine_name,
       'parents' => array(0),
     );
-    $term = new TaxonomyTerm($term);
+    /** @var TaxonomyTerm $term */
+    $term = entity_create('taxonomy_term', $term_parameters);
     $term->save();
     return $term;
   }
@@ -969,7 +989,8 @@ class TokenFileTestCase extends TokenTestHelper {
 
   function testFileTokens() {
     // Create a test file object.
-    $file = new File();
+    /** @var File $file */
+    $file = entity_create('file', array());
     $file->fid = 1;
     $file->filename = 'test.png';
     $file->filesize = 100;
@@ -993,5 +1014,97 @@ class TokenFileTestCase extends TokenTestHelper {
       'size-raw' => 100,
     );
     $this->assertTokens('file', array('file' => $file), $tokens);
+  }
+}
+
+/**
+ * Tests access to the token browser tree.
+ */
+class TokenBrowserAccessTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * Tests that the token tree is only accessible with a valid security token.
+   */
+  public function testTokenTreeAccess() {
+    $admin_user = $this->backdropCreateUser(array('administer site configuration'));
+    $this->backdropLogin($admin_user);
+
+    // Following the link provided within a form includes a valid token.
+    $this->backdropGet('admin/config/development/maintenance');
+    $settings = $this->backdropGetSettings();
+    $this->clickLink(t('Browse available tokens.'));
+    $this->assertResponse(200, 'Token tree is accessible with a valid security token.');
+    $this->assertRaw('data-type="site"', 'Token types are listed in the token tree.');
+    $query = backdrop_parse_url($this->getUrl());
+    $query = $query['query'];
+    $this->assertTrue(!empty($query['token']), 'Token tree link contains a security token.');
+
+    // Requests without a token are denied.
+    $this->backdropGet('token/tree');
+    $this->assertResponse(403, 'Token tree is not accessible without a security token.');
+    $this->backdropGet('token/tree', array('query' => array('token_types' => '"all"')));
+    $this->assertResponse(403, 'All token types are not accessible without a security token.');
+    $this->assertNoRaw('data-type="site"', 'Token types are not listed without a security token.');
+
+    // Requests with an invalid token are denied.
+    $invalid_query = array('token' => $this->randomName(43)) + $query;
+    $this->backdropGet('token/tree', array('query' => $invalid_query));
+    $this->assertResponse(403, 'Token tree is not accessible with an invalid security token.');
+
+    // A token meant for the individual token endpoint is not accepted.
+    $invalid_query = array('token' => $settings['tokenBrowser']['token']) + $query;
+    $this->backdropGet('token/tree', array('query' => $invalid_query));
+    $this->assertResponse(403, 'Token tree is not accessible with a security token for a different purpose.');
+
+    // A token is only valid for the session for which it was generated.
+    $this->backdropLogout();
+    $this->backdropGet('token/tree', array('query' => $query));
+    $this->assertResponse(403, 'Token tree is not accessible with a security token from another session.');
+    $this->backdropGet('token/tree', array('query' => array('token_types' => '"all"')));
+    $this->assertResponse(403, 'Token tree is not accessible to anonymous users without a security token.');
+  }
+
+  /**
+   * Tests that individual tokens are only accessible with a security token.
+   */
+  public function testTokenEndpointAccess() {
+    $admin_user = $this->backdropCreateUser(array('administer site configuration'));
+    $this->backdropLogin($admin_user);
+
+    // The page containing the token browser link provides the security token.
+    $this->backdropGet('admin/config/development/maintenance');
+    $settings = $this->backdropGetSettings();
+    $tree_link = $this->xpath('//a[contains(@class, :class)]', array(':class' => 'token-browser-link'));
+    $tree_query = backdrop_parse_url((string) $tree_link[0]['href']);
+    $query = array(
+      'ancestors' => backdrop_json_encode(array('site')),
+      'token' => $settings['tokenBrowser']['token'],
+      'show_restricted' => 'false',
+    );
+    $tokens = backdrop_json_decode($this->backdropGet('token-browser/token/site', array('query' => $query)));
+    $this->assertResponse(200, 'Tokens are accessible with a valid security token.');
+    $this->assertEqual($tokens['name']['raw'], '[site:name]', 'Tokens are listed with a valid security token.');
+
+    // Requests without a token are denied.
+    $this->backdropGet('token-browser/token/site', array('query' => array('token' => NULL) + $query));
+    $this->assertResponse(403, 'Tokens are not accessible without a security token.');
+    $this->assertNoRaw('[site:name]', 'Tokens are not listed without a security token.');
+
+    // Requests with an invalid token are denied.
+    $invalid_query = array('token' => $this->randomName(43)) + $query;
+    $this->backdropGet('token-browser/token/site', array('query' => $invalid_query));
+    $this->assertResponse(403, 'Tokens are not accessible with an invalid security token.');
+
+    // A token meant for the token tree is not accepted.
+    $invalid_query = array('token' => $tree_query['query']['token']) + $query;
+    $this->backdropGet('token-browser/token/site', array('query' => $invalid_query));
+    $this->assertResponse(403, 'Tokens are not accessible with a security token for a different purpose.');
+
+    // A token is only valid for the session for which it was generated.
+    $this->backdropLogout();
+    $this->backdropGet('token-browser/token/site', array('query' => $query));
+    $this->assertResponse(403, 'Tokens are not accessible with a security token from another session.');
+    $this->assertNoRaw('[site:name]', 'Tokens are not listed with a security token from another session.');
   }
 }

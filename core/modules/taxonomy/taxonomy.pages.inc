@@ -48,6 +48,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
     '#prefix' => '<div class="term-listing-heading">',
     '#suffix' => '</div>',
     'term' => taxonomy_term_view($term, 'full'),
+    '#weight' => -1,
   );
 
   if ($nids = taxonomy_select_nodes($term->tid, TRUE, $site_config->get('default_nodes_main'))) {

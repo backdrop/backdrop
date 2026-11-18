@@ -229,6 +229,11 @@ function date_theme($existing, $type, $theme, $path) {
       // Register a pattern so that it can work like all views templates.
       'pattern' => 'date_views_pager__',
       'template' => 'templates/date-views-pager',
+      'attached' => array(
+        'css' => array(
+          backdrop_get_path('module', 'date') . "/css/date-views.css" => array(),
+        ),
+      ),
     ) + $base,
   );
 

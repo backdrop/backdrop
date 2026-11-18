@@ -384,7 +384,7 @@ file = common.test
 
 [CommonFormatDateTestCase]
 name = Format date
-description = Test the format_date() function.
+description = Test the format_date(), format_interval() and format_time_diff() functions.
 group = Common
 file = common.test
 
@@ -1024,6 +1024,12 @@ description = Tests the form API url element.
 group = Form API
 file = form.test
 
+[FormAutocompleteTestCase]
+name = Form API autocomplete
+description = Tests autocomplete form elements and CSRF tokens for autocomplete callbacks.
+group = Form API
+file = form.test
+
 [FormTextareaTestCase]
 name = Form textarea
 description = Tests form textarea related functions.
@@ -1417,5 +1423,11 @@ file = token.test
 [TokenFileTestCase]
 name = File token tests
 description = Test the file tokens.
+group = Token
+file = token.test
+
+[TokenBrowserAccessTestCase]
+name = Token browser access
+description = Test that the token browser tree requires a valid security token.
 group = Token
 file = token.test

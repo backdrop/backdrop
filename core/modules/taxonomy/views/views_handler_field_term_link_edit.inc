@@ -42,7 +42,8 @@ class views_handler_field_term_link_edit extends views_handler_field {
     // Check there is an actual value, as on a relationship there may not be.
     if ($tid = $this->get_value($values, 'tid')) {
       // Mock a term object for taxonomy_term_access().
-      $term = new TaxonomyTerm(array(
+      /** @var TaxonomyTerm $term */
+      $term = entity_create('taxonomy_term', array(
         'tid' => $tid,
         'vocabulary' => $this->get_value($values, 'vocabulary')
       ));

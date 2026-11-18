@@ -122,11 +122,17 @@ function system_menu_block_form($config) {
       ),
     ),
   );
+  if (!isset($config['clickdown']) || !$config['clickdown']) {
+    $config['clickdown'] = 0;
+  }
   $form['clickdown'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Use a click to open, instead of a hover'),
+    '#type' => 'radios',
+    '#title' => t('Dropdown menu trigger'),
+    '#options' => array(
+      0 => t('Open menu with touch or hover'),
+      1 => t('Open menu with touch or click'),
+    ),
     '#default_value' => $config['clickdown'],
-    '#description' => t('Menus that don\'t appear or disappear on hover can be better for usability in some cases.'),
     '#states' => array(
       'visible' => array(
         'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
@@ -299,7 +305,7 @@ function system_menu_block_build(array $config) {
  * Gets the data structure representing a menu tree for the given configuration.
  *
  * @param array $config
- *   See the $config param of menu_tree_build().
+ *   See the $config param of system_menu_block_build().
  *
  * @return array
  */
@@ -364,10 +370,10 @@ function system_menu_tree_block_data(array &$config) {
  *   The menu tree to prune.
  * @param int $level
  *   The level of the original tree that will start the pruned tree.
- * @param array $parent_item
+ * @param array|null $parent_item
  *   The menu item that should be used as the root of the tree.
  */
-function system_menu_tree_prune_tree(array &$tree, $level, array $parent_item = NULL) {
+function system_menu_tree_prune_tree(array &$tree, $level, ?array $parent_item = NULL) {
   if (!empty($parent_item)) {
     // Prune the tree along the path to the menu item.
     for ($i = 1; $i <= MENU_MAX_DEPTH && $parent_item["p$i"] != '0'; $i++) {

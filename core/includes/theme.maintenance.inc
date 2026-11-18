@@ -122,7 +122,7 @@ function theme_task_list($variables) {
   $items = $variables['items'];
   $active = $variables['active'];
 
-  $done = isset($items[$active]) || $active == NULL;
+  $done = $active == NULL || isset($items[$active]);
   $total = count($items);
   $count = 0;
   $current = 0;

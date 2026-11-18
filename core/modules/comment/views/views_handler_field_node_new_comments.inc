@@ -90,9 +90,9 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
 
   function render_link($data, $values) {
     if (!empty($this->options['link_to_comment']) && $data !== NULL && $data !== '') {
-      $node = new Node();
+      /** @var Node $node */
+      $node = entity_create('node', array('type' => $this->get_value($values, 'type')));
       $node->nid = $this->get_value($values, 'nid');
-      $node->type = $this->get_value($values, 'type');
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = 'node/' . $node->nid;
       $this->options['alter']['query'] = comment_new_page_count($this->get_value($values, 'comment_count'), $this->get_value($values), $node);

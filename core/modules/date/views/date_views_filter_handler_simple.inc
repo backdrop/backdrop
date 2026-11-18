@@ -429,7 +429,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         '#type' => 'textfield',
         '#title' => check_plain($relative_label),
         '#default_value' => $relative_value,
-        '#description' => t('Relative dates are computed when the view is displayed. Examples: now, now +1 day, 12AM today, Monday next week. <a href="http://php.net/manual/en/datetime.formats.relative.php">More examples of relative date formats in the PHP documentation</a>.'),
+        '#description' => t('Relative dates are computed when the view is displayed. Examples: now, now +1 day, 12AM today, Monday next week. <a href="https://www.php.net/manual/en/datetime.formats.php#datetime.formats.relative">More examples of relative date formats in the PHP documentation</a>.'),
         '#states' => array(
           'visible' => array(
             ":input.{$prefix}-choose-input-type" => array('value' => 'relative'),

@@ -2226,7 +2226,14 @@ function field_ui_field_edit_form_submit($form, &$form_state) {
   // Retrieve the stored instance settings to merge with the incoming values.
   $instance_source = field_read_instance($instance['entity_type'], $instance['field_name'], $instance['bundle']);
   $instance = array_merge($instance_source, $instance);
-  field_update_instance($instance);
+  // Update the field instance.
+  try {
+    field_update_instance($instance);
+  }
+  catch (Exception $e) {
+    backdrop_set_message(t('Attempt to update field %label failed: %message.', array('%label' => $instance['label'], '%message' => $e->getMessage())), 'error');
+    return;
+  }
 
   backdrop_set_message(t('Saved %label configuration.', array('%label' => $instance['label'])));
 

@@ -46,30 +46,31 @@ function template_preprocess_book_navigation(&$variables) {
   $variables['tree'] = '';
 
   if ($book_link['mlid']) {
-    $navigation_options = config_get('book.settings','book_navigation_options');
+    $navigation = _book_get_cached_navigation($book_link);
+    $navigation_options = config_get('book.settings', 'book_navigation_options');
     if (in_array('tree', $navigation_options, TRUE)) {
-      $variables['tree'] = book_children($book_link);
+      $variables['tree'] = $navigation['tree'];
     }
 
-    if (in_array('pager', $navigation_options, TRUE) && $prev = book_prev($book_link)) {
-      $prev_href = url($prev['href']);
+    if (in_array('pager', $navigation_options, TRUE) && $navigation['prev']) {
+      $prev_href = url($navigation['prev']['href']);
       backdrop_add_html_head_link(array('rel' => 'prev', 'href' => $prev_href));
       $variables['prev_url'] = $prev_href;
-      $variables['prev_title'] = check_plain($prev['title']);
+      $variables['prev_title'] = check_plain($navigation['prev']['title']);
     }
 
-    if (in_array('pager', $navigation_options, TRUE) && $book_link['plid'] && $parent = book_link_load($book_link['plid'])) {
-      $parent_href = url($parent['href']);
+    if (in_array('pager', $navigation_options, TRUE) && $book_link['plid'] && $navigation['parent']) {
+      $parent_href = url($navigation['parent']['href']);
       backdrop_add_html_head_link(array('rel' => 'up', 'href' => $parent_href));
       $variables['parent_url'] = $parent_href;
-      $variables['parent_title'] = check_plain($parent['title']);
+      $variables['parent_title'] = check_plain($navigation['parent']['title']);
     }
 
-    if (in_array('pager', $navigation_options, TRUE) && $next = book_next($book_link)) {
-      $next_href = url($next['href']);
+    if (in_array('pager', $navigation_options, TRUE) && $navigation['next']) {
+      $next_href = url($navigation['next']['href']);
       backdrop_add_html_head_link(array('rel' => 'next', 'href' => $next_href));
       $variables['next_url'] = $next_href;
-      $variables['next_title'] = check_plain($next['title']);
+      $variables['next_title'] = check_plain($navigation['next']['title']);
     }
   }
 

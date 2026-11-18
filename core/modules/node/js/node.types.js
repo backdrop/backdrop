@@ -61,7 +61,7 @@ Backdrop.behaviors.contentTypes = {
         vals.push(Backdrop.checkPlain($(this).text()));
       });
       if (!$('#edit-node-submitted', context).is(':checked')) {
-        vals.unshift(Backdrop.t("Don't display post information"));
+        vals.unshift(Backdrop.t("Don't display author and date information"));
       }
       return vals.join(', ');
     });

@@ -24,6 +24,11 @@ Backdrop.behaviors.commentFieldsetSummaries = {
     $context.find('fieldset.comment-node-type-settings-form').backdropSetSummary(function() {
       var vals = [];
 
+      // Comments disabled.
+      if ($context.find(".form-item-comment-enabled input:checked").length == 0) {
+        return Backdrop.t('Comments disabled');
+      }
+
       // Default comment setting.
       vals.push($context.find(".form-item-comment-default input:checked").parent().find('label').text().replace(/^\s+|\s+$/g, ''));
 

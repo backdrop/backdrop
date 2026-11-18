@@ -145,7 +145,7 @@ function _ckeditor_settings_parse_style_list($style_list_string) {
  * @return string
  *   The string representation of the style list.
  */
-function _ckeditor_settings_stringify_style_list(array $style_list = NULL) {
+function _ckeditor_settings_stringify_style_list(array $style_list = array()) {
   $string = '';
   if ($style_list) {
     foreach ($style_list as $style) {

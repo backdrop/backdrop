@@ -530,6 +530,40 @@ function hook_icon_info_alter(&$icons) {
 }
 
 /**
+/**
+ * Modify the list of icon details.
+ *
+ * @param array $icons
+ *   This parameter is passed by reference. It contains the entire list of
+ *   available icons with details about each icon, keyed by the icon name.
+ *
+ * @see icon_get_all_details()
+ *
+ * @since 1.34.0 Hook added.
+ */
+function hook_icon_get_all_details_alter(&$icons) {
+  foreach ($icons as $icon) {
+    if (strpos($icon['name'], 'my_module') === 0) {
+      $icon['style'] = 'my_module_style';
+    }
+  }
+}
+
+/**
+ * Modify the list of available icon styles.
+ *
+ * @param array $allowed_styles
+ *   This parameter is passed by reference.
+ *
+ * @see icon_allowed_styles()
+ *
+ * @since 1.34.0 Hook added.
+ */
+function hook_icon_allowed_styles_alter(&$allowed_styles) {
+  $allowed_styles['my_module_style'] = t('My module style');
+}
+
+/**
  * Alter the commands that are sent to the user through the Ajax framework.
  *
  * @param $commands
@@ -1225,6 +1259,29 @@ function hook_menu_contextual_links_alter(&$links, $router_item, $root_path) {
 }
 
 /**
+ * Modify a menu structure before it is rendered in a menu block.
+ *
+ * The tree contains an array of menu links in the order they should be
+ * rendered. menu_tree_page_data() explains the data structure in more detail.
+ *
+ * @param array $tree
+ *   An array of menu links.
+ * @param array $config
+ *   The settings for a menu block.
+ *
+ * @see system_menu_tree_block_data()
+ * @see menu_tree_page_data()
+ */
+function hook_menu_block_tree_alter(&$tree, &$config) {
+
+  // Trim to the active path regardless of block settings.
+  system_menu_tree_trim_active_path($tree);
+
+  // Force the style to be a tree.
+  $config['style'] = 'tree';
+}
+
+/**
  * Perform alterations before a form is rendered.
  *
  * One popular use of this hook is to add form elements to the node form. When
@@ -1579,7 +1636,7 @@ function hook_image_toolkits() {
  */
 function hook_mail_alter(&$message) {
   if ($message['id'] == 'modulename_messagekey') {
-    if (!example_notifications_optin($message['to'], $message['id'])) {
+    if (!example_notifications_opt_in($message['to'], $message['id'])) {
       // If the recipient has opted to not receive such messages, cancel
       // sending.
       $message['send'] = FALSE;
@@ -1793,6 +1850,9 @@ function hook_permission() {
  *   - base hook: A string declaring the base theme hook if this theme
  *     implementation is actually implementing a suggestion for another theme
  *     hook.
+ *   - attached: If specified, the designated library, icons, CSS, or JS file
+ *     will be attached to the page when this theme implementation is used. This
+ *     is intended as an alternative to adding these in preprocess functions.
  *   - pattern: A regular expression pattern to be used to allow this theme
  *     implementation to have a dynamic name. The convention is to use __ to
  *     differentiate the dynamic portion of the theme. For example, to allow
@@ -1820,6 +1880,8 @@ function hook_permission() {
  *     module, so that it doesn't need to be looked up.
  *
  * @see hook_theme_registry_alter()
+ *
+ * @since 1.31.0 Added optional "attached" key.
  */
 function hook_theme($existing, $type, $theme, $path) {
   return array(
@@ -1829,6 +1891,24 @@ function hook_theme($existing, $type, $theme, $path) {
     'status_report' => array(
       'render element' => 'requirements',
       'file' => 'system.admin.inc',
+    ),
+    'my_module_item' => array(
+      'template' => 'templates/my-module-item',
+      'file' => 'my_module.theme.inc',
+      'attached' => array(
+        'library' => array(
+          array('my_module', 'library-name'),
+        ),
+        'js' => array(
+          'core/misc/ajax.js' => array(),
+        ),
+        'css' => array(
+          'css/my-module.css' => array(),
+        ),
+        'icons' => array(
+          'acorn-fill' => array(),
+        ),
+      ),
     ),
   );
 }
@@ -2614,7 +2694,7 @@ function hook_requirements($phase) {
     $cron_last = state_get('cron_last');
 
     if (is_numeric($cron_last)) {
-      $requirements['cron']['value'] = $t('Last run !time ago', array('!time' => format_interval(REQUEST_TIME - $cron_last)));
+      $requirements['cron']['value'] = $t('Last run !time ago', array('!time' => format_time_diff_since($cron_last)));
     }
     else {
       $requirements['cron'] = array(
@@ -3537,10 +3617,19 @@ function hook_file_mimetype_mapping_alter(&$mapping) {
  *     through the t() function for translation.
  *   - 'callback': Optional. A function name that will execute the action if the
  *     name of the action differs from the function name.
+ *   - 'access callback': A function name that will return TRUE if the user
+ *     account executing the action has permission to run the action, and FALSE
+ *     if not. If set to TRUE, access to this action is always allowed.
+ *     Defaults to TRUE. In Backdrop 2.x, the default will be changed to
+ *     'user_access'.
+ *   - 'access arguments': Optional. An array of arguments to pass to the
+ *     access callback function. Usually this is an array with a permission name
+ *     within it, which is passed to user_access().
  *   - 'file': Optional. Relative path to a file from the module's directory
  *     that contains the callback function.
  *
  * @see action_get_info()
+ * @since 1.32.3 Added "access callback" and "access arguments".
  *
  * @ingroup actions
  */
@@ -3550,6 +3639,8 @@ function hook_action_info() {
       'type' => 'comment',
       'label' => t('Unpublish comment'),
       'callback' => 'comment_unpublish_action',
+      'access callback' => 'user_access',
+      'access arguments' => array('administer comments'),
     ),
   );
 }

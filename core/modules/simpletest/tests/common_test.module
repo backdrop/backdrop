@@ -63,6 +63,12 @@ function common_test_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['common-test/assets-attached-via-hook-theme'] = array(
+    'title' => 'Tests assets attached via hook_theme().',
+    'page callback' => 'common_test_assets_attached_via_hook_theme',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -257,6 +263,20 @@ function common_test_theme() {
     'common_test_foo' => array(
       'variables' => array('foo' => 'foo', 'bar' => 'bar'),
       'file' => 'common_test.theme.inc',
+      'attached' => array(
+        'js' => array(
+          backdrop_get_path('theme', 'seven') . '/js/script.js',
+        ),
+        'css' => array(
+          backdrop_get_path('theme', 'basis') . '/css/component/maintenance.css',
+        ),
+        'icons' => array(
+          'globe-stand-fill' => array(),
+        ),
+        'library' => array(
+          array('system', 'backdrop.ajax'),
+        ),
+      ),
     ),
   );
 }
@@ -315,4 +335,12 @@ function common_test_js_and_css_querystring() {
  */
 function common_test_cron() {
   throw new Exception(t('Uncaught exception'));
+}
+
+/**
+ * Landing page to test for assets attached via hook_theme().
+ */
+function common_test_assets_attached_via_hook_theme() {
+  $output = theme('common_test_foo', array('foo' => 'foo', 'bar' => 'bar'));
+  return $output;
 }

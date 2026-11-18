@@ -475,6 +475,7 @@ class ImageFileMoveTest extends ImageToolkitTestCase {
    */
   function testNormal() {
     // Pick a file for testing.
+    /** @var File $file */
     $file = entity_create('file', (array) current($this->backdropGetTestFiles('image')));
 
     // Create derivative image.

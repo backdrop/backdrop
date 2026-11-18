@@ -1044,7 +1044,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['#attached']['library'][] = array('system', 'jquery.form');
   // TODO: This should be getting added to the page when an ajax popup calls
   // for it, instead of having to add it manually here.
-  $form['#attached']['js'][] = 'core/misc/tabledrag.js';
+  $form['#attached']['library'][] = array('system', 'backdrop.tabledrag');
 
   $form['#attached']['css'] = views_ui_get_admin_css();
   $module_path = backdrop_get_path('module', 'views_ui');
@@ -1073,7 +1073,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     $form['locked'] = array(
       '#theme_wrappers' => array('container'),
       '#attributes' => array('class' => array('view-locked', 'messages', 'warning')),
-      '#markup' => t('This view is being configured by user !user, and is therefore locked from configuring by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array('!user' => theme('username', array('account' => user_load($view->locked->uid))), '!age' => format_interval(REQUEST_TIME - $view->locked->updated), '!break' => url('admin/structure/views/view/' . $view->name . '/break-lock'))),
+      '#markup' => t('This view is being configured by user !user, and is therefore locked from configuring by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array(
+        '!user' => theme('username', array('account' => user_load($view->locked->uid))),
+        '!age' => format_time_diff_since($view->locked->updated),
+        '!break' => url('admin/structure/views/view/' . $view->name . '/break-lock'),
+      )),
     );
   }
   if (isset($view->vid) && $view->vid == 'new') {
@@ -1724,6 +1728,14 @@ function views_ui_get_display_tab_details($view, $display) {
       '#description' => t('Display name'),
       '#link' => $display->handler->option_link(check_plain($display_title), 'display_title'),
     );
+    $display_type = $display->display_plugin;
+    if ($display_type != strtolower($display_title)) {
+      $build['top']['display_type'] = array(
+        '#theme' => 'views_ui_display_tab_setting',
+        '#description' => t('Display type'),
+        '#link' => '<span class="display-type">' . ucfirst($display_type) . '</span>',
+      );
+    }
   }
 
   $build['columns'] = array();
@@ -2008,7 +2020,7 @@ function views_ui_clone_form_submit($form, &$form_state) {
   $new_view->name = $form_state['values']['name'];
   $new_view->human_name = $form_state['values']['label'];
   $new_view->save();
-  backdrop_set_message(t('The view %old_name as been cloned into %new_name.', array('%old_name' => $form_state['view']->get_human_name(), '%new_name' => $new_view->get_human_name())));
+  backdrop_set_message(t('The view %old_name has been cloned into %new_name.', array('%old_name' => $form_state['view']->get_human_name(), '%new_name' => $new_view->get_human_name())));
   $form_state['redirect'] = 'admin/structure/views/view/' . $new_view->name;
 }
 

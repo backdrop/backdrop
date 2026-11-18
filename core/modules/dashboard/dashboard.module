@@ -214,7 +214,7 @@ function dashboard_user_login(&$edit, $account) {
  * Implements hook_preprocess_layout().
  */
 function dashboard_preprocess_layout(&$variables) {
-  /* @var Layout $layout */
+  /** @var Layout $layout */
   $layout = $variables['layout'];
   if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
     backdrop_add_library('dashboard', 'dashboard');
@@ -226,7 +226,7 @@ function dashboard_preprocess_layout(&$variables) {
  * Implements hook_preprocess_block().
  */
 function dashboard_preprocess_block(&$variables) {
-  /* @var Layout $layout */
+  /** @var Layout $layout */
   $layout = $variables['layout'];
   if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
     $block = $variables['block'];

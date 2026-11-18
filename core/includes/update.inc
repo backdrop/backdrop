@@ -762,6 +762,13 @@ function update_get_update_list() {
         continue;
       }
 
+      // Some modules, like the Book module, never received any update during
+      // Drupal 7. But they might have been installed in Drupal 6.
+      if ($schema_version >= 6000 && $schema_version < 7000) {
+        // If they got installed in Drupal 7, their schema version would be 0.
+        $schema_version = 0;
+      }
+
       // Reduce schema versions by 7000 for legacy updates.
       if ($schema_version >= 7000 && $schema_version < 9000) {
         $schema_version -= 7000;

@@ -1,0 +1,84 @@
+<?php
+/**
+ * @file
+ * Tests for Views functionality.
+ */
+
+/**
+ * Test click sort behavior with tables.
+ */
+class ViewsClickSortTest extends BackdropWebTestCase {
+
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp(array('views_test_sort'));
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    return TRUE;
+  }
+
+  /**
+   * Test click sort by calling views pages.
+   */
+  public function testSortAppend() {
+    // Create some page nodes, one of them unpublished. By intention not in
+    // alphabetical order.
+    $create_order = array('B', 'A', 'D', 'C', 'F', 'E');
+    $settings = array('type' => 'page');
+    foreach ($create_order as $character) {
+      $settings['title'] = $character;
+      if ($character == 'F') {
+        $settings['status'] = NODE_NOT_PUBLISHED;
+      }
+      else {
+        $settings['status'] = NODE_PUBLISHED;
+      }
+      $this->backdropCreateNode($settings);
+    }
+
+    // This view does not use "append_original_sort".
+    $this->backdropGet('test-click-sort');
+    // First check the default order of the view.
+    $sorted = $this->getTitleOrderFromXpath();
+    $alpha_sorted = array('A', 'B', 'C', 'D', 'E', 'F');
+    $this->assertTrue($sorted === $alpha_sorted, 'Values are sorted alphabetically');
+
+    // Use click sort to reorder by state.
+    $this->clickLink(t('Published'));
+    $sorted = $this->getTitleOrderFromXpath();
+    $without_append = array('F', 'B', 'A', 'D', 'C', 'E');
+    // As our simple query contains no JOIN, the default value order is based on
+    // NID (their original order in the database table).
+    $this->assertTrue($sorted === $without_append, 'Unpublished node comes first, the other ones in expected order.');
+
+    // The second view does use "append_original_sort".
+    $this->backdropGet('test-click-sort-appended');
+    $sorted = $this->getTitleOrderFromXpath();
+    $alpha_sorted = array('A', 'B', 'C', 'D', 'E', 'F');
+    $this->assertTrue($sorted === $alpha_sorted, 'Values are sorted alphabetically');
+    // Use click sort to reorder by state.
+    $this->clickLink(t('Published'));
+    $sorted = $this->getTitleOrderFromXpath();
+    $with_append = array('F', 'A', 'B', 'C', 'D', 'E');
+    $this->assertTrue($sorted === $with_append, 'Unpublished node comes first, the other ones alphabetically.');
+  }
+
+  /**
+   * Helper function to get title order.
+   *
+   * @return array
+   */
+  protected function getTitleOrderFromXpath() {
+    $values = array();
+    $elements = $this->xpath('//td[contains(@class,"views-field-title")]');
+    foreach ($elements as $index => $element) {
+      $value = (string) $element;
+      $values[$index] = trim($value);
+    }
+    return $values;
+  }
+
+}

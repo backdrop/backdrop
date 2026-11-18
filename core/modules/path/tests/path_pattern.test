@@ -103,13 +103,14 @@ class PathPatternTestHelper extends BackdropWebTestCase {
     return $vocabulary;
   }
 
-  function addTerm(TaxonomyVocabulary $vocabulary, array $term = array()) {
-    $term += array(
+  function addTerm(TaxonomyVocabulary $vocabulary, array $term_parameters = array()) {
+    $term_parameters += array(
       'name' => backdrop_strtolower($this->randomName(5)),
       'vocabulary' => $vocabulary->machine_name,
       'parent' => array(0),
     );
-    $term = new TaxonomyTerm($term);
+    /** @var TaxonomyTerm $term */
+    $term = entity_create('taxonomy_term', $term_parameters);
     taxonomy_term_save($term);
     return $term;
   }
@@ -832,7 +833,8 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['pass']   = user_password();
     $edit['path'] = array('auto' => TRUE);
     $edit['status'] = 1;
-    $account = new User($edit);
+    /** @var User $account */
+    $account = entity_create('user', $edit);
     $account->save();
     $this->assertEntityAlias('user', $account, 'accounts/test-user');
   }
@@ -975,6 +977,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     foreach ($vocabularies as $vocabulary) {
       // Create 3 terms for each of the 2 vocabularies.
       for ($i = 1; $i <= 3; $i++) {
+        /** @var TaxonomyTerm $term */
         $term = entity_create('taxonomy_term', array(
           'name' => $this->randomName(),
           'vocabulary' => $vocabulary,

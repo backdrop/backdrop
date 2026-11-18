@@ -720,7 +720,7 @@ function image_style_deliver($style, $scheme) {
   $public_schemes = array_merge(array('public'), $additional_public_schemes);
   $is_public = in_array($derivative_scheme, $public_schemes, TRUE);
 
-  if ($scheme == 'private' && file_exists($derivative_uri)) {
+  if (!$is_public && file_exists($derivative_uri)) {
     file_download($scheme, file_uri_target($derivative_uri));
   }
 

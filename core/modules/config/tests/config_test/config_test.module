@@ -23,3 +23,13 @@ function config_test_config_info() {
   );
   return $prefixes;
 }
+
+/**
+ * Implements hook_config_data_validate().
+ */
+function config_test_config_data_validate(Config $config, ?array $config_info) {
+  $fail_validation = $config->get('fail_validation');
+  if ($fail_validation) {
+    throw new ConfigValidateException('Configuration intentionally flagged to fail validation.');
+  }
+}

@@ -72,6 +72,11 @@ class BlockText extends Block {
       '#format' => $this->settings['format'],
       '#editor_uploads' => TRUE,
       '#rows' => 5,
+      '#states' => array(
+        'required' => array(
+          ':input[name="reusable"]' => array('checked' => TRUE),
+        ),
+      ),
     );
 
     if (module_exists('block')) {
@@ -109,6 +114,11 @@ class BlockText extends Block {
       '#title' => t('Admin label'),
       '#description' => t('Used to identify the block on layout pages. Required for reusable blocks.'),
       '#maxlength' => 255,
+      '#states' => array(
+        'required' => array(
+          ':input[name="reusable"]' => array('checked' => TRUE),
+        ),
+      ),
     );
     if (module_exists('block')) {
       $form['admin_label']['delta'] = array(
@@ -117,7 +127,7 @@ class BlockText extends Block {
         '#maxlength' => 64,
         '#machine_name' => array(
           'source' => array('admin_label', 'admin_label'),
-          'exists' => 'block_custom_block_load',
+          'exists' => '_block_custom_block_name_exists',
         ),
         '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
         '#weight' => 3,
@@ -141,9 +151,13 @@ class BlockText extends Block {
     parent::formValidate($form, $form_state);
 
     if (module_exists('block')) {
+      $content = trim($form_state['values']['content']['value']);
       $admin_label = trim($form_state['values']['admin_label']);
       $delta = trim($form_state['values']['delta']);
       if ($form_state['values']['reusable']) {
+        if (empty($content)) {
+          form_error($form['content']['value'], t('Block content is required when making a block reusable.'));
+        }
         if (empty($admin_label)) {
           form_error($form['admin_label']['admin_label'], t('Admin label is required when making a block reusable.'));
         }

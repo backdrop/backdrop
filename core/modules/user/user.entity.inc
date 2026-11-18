@@ -150,13 +150,6 @@ class User extends Entity implements UserInterface {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return user_format_name($this);
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {
@@ -548,7 +541,7 @@ class UserStorageController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($accounts as $account) {
-      /* @var User $account */
+      /** @var User $account */
       // Retrieve all profile fields and attach to $account->content.
       $this->buildContent($account, $view_mode, $langcode);
 

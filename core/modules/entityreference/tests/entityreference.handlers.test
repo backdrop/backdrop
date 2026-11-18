@@ -419,6 +419,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
 
     $comment_labels = array();
     foreach ($build_comments as $key => $settings) {
+      /** @var Comment $comment */
       $comment = entity_create('comment', $settings);
       comment_save($comment);
       $comments[$key] = $comment;

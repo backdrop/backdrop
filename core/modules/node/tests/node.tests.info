@@ -202,6 +202,12 @@ description = Test changing display mode.
 group = Node
 file = node.test
 
+[NodeAccessJoinTest]
+name = Node access joins
+description = Tests that node access checks get applied across left-joined tables.
+group = Node
+file = node.test
+
 [NodePageCacheTest]
 name = Node page cache test
 description = Test cache invalidation of node operations.

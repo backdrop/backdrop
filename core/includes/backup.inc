@@ -63,6 +63,8 @@ function backup_get_handler_name($target) {
 
 /**
  * Get a list of all available backups.
+ *
+ * @return array
  */
 function backup_directory_list() {
   $backups = array();
@@ -136,6 +138,8 @@ function backup_directory_list() {
  *     default configuration location should be shown as checkboxes, allowing
  *     them to not be backed up. If not shown, they are rendered as type =
  *     "hidden" elements. Defaults to FALSE.
+ *
+ * @return array
  *
  * @see update_backup_form()
  * @see backup_test_settings_form()
@@ -366,7 +370,7 @@ function backup_batch_finished($success, array $results, array $operations) {
  *   Any errors that were encountered while preparing for the backup. This
  *   value is modified by reference.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the batch is ready to run, FALSE if errors were encountered.
  */
 function backup_batch_prepare(array &$backup_targets, array $options, array &$errors) {
@@ -415,7 +419,7 @@ function backup_batch_prepare(array &$backup_targets, array $options, array &$er
  *   Any errors that were encountered while preparing for the backup. This
  *   value is modified by reference.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the backup is ready to run, FALSE if errors were encountered.
  */
 function backup_prepare($backup_target_name, $backup_target, array &$backup_settings, array &$errors) {
@@ -630,7 +634,7 @@ function backup_delete($backup_name) {
  *   Any errors that were encountered while preparing for the backup. This
  *   value is modified by reference.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the restore is ready to run, FALSE if errors were encountered.
  */
 function backup_restore_prepare($backup_file, $restore_target, array &$backup_settings, array &$errors) {

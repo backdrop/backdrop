@@ -54,6 +54,10 @@ function layout_test_block_info() {
       'string_value' => 'string',
     ),
   );
+  $blocks['simple_text'] = array(
+    'info' => t('A simple text block'),
+    'description' => t('A simple flat string for the most basic testing.'),
+  );
   return $blocks;
 }
 
@@ -64,6 +68,12 @@ function layout_test_menu() {
   $items['layout-test-path'] = array(
     'title' => 'Layout test title',
     'page callback' => 'layout_test_path',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['custom-layout-type-test-page'] = array(
+    'title' => 'Custom layout type test page',
+    'page callback' => 'layout_test_custom_layout_type_test_page',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -100,6 +110,11 @@ function layout_test_block_view($delta = '', $settings = array(), $contexts = ar
       $block['subject'] = 'Passthrough title';
       $block['content'] = format_string('The page argument is @string', array('@string' => $contexts['string_value']));
       break;
+
+    case 'simple_text':
+      $block['subject'] = 'Simple text';
+      $block['content'] = t('This is a simple text block to test custom layout types.');
+      break;
   }
   return $block;
 }
@@ -128,6 +143,64 @@ function layout_test_block_configure($delta = '', $settings = array()) {
  */
 function layout_test_path() {
   return '<div id="layout-test-page-content">This is the layout test page.</div>';
+}
+
+/**
+ * Menu callback; Display a test page with a custom layout type.
+ */
+function layout_test_custom_layout_type_test_page() {
+  $custom_layout_template = layout_flexible_template_load('default', 'custom_test');
+  $config = array(
+    'name' => 'custom_layout_test',
+    'title' => 'Custom Layout Test',
+    'is_new' => TRUE,
+    'layout_template' => $custom_layout_template->name,
+    'layout_template_type' => 'custom_test',
+    'is_full_page' => FALSE,
+  );
+  $custom_layout = new Layout($config);
+  $custom_layout->addBlock('layout_test', 'simple_text', 'custom-layout-default-template--0');
+  $renderer = layout_create_renderer('standard', $custom_layout);
+  return $renderer->render();
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function layout_test_config_info() {
+  $prefixes['layout.custom_test'] = array(
+    'name_key' => 'name',
+    'label_key' => 'title',
+    'group' => t('Custom Layout Type for Tests'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ *
+ * Ensure the flexible layout template is registered, whether or not it is
+ * being used in core layouts.
+ */
+function layout_test_theme_registry_alter(&$theme_registry) {
+  if (!isset($theme_registry['layout__flexible'])) {
+    $theme_registry['layout__flexible'] = array(
+      'variables' => array(
+        'content' => NULL,
+        'settings' => NULL,
+        'layout' => NULL,
+        'layout_template_info' => NULL,
+        'renderer' => NULL,
+        'attributes' => array(),
+        'admin' => FALSE,
+      ),
+      'template' => 'layout--flexible',
+      'path' => backdrop_get_path('module', 'layout') . '/templates',
+      'theme path' => backdrop_get_path('module', 'layout') . '/templates',
+      'type' => 'module',
+      'base hook' => 'layout',
+    );
+  }
 }
 
 /**

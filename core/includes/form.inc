@@ -3025,7 +3025,11 @@ function theme_radio($variables) {
   $element['#attributes']['type'] = 'radio';
   element_set_attributes($element, array('id', 'name', '#return_value' => 'value'));
 
-  if (isset($element['#return_value']) && $element['#value'] !== FALSE && $element['#value'] == $element['#return_value']) {
+  // Use strcmp() to compare the values so that they both get cast to string. If
+  // the #options keys mixed numeric and string keys, unexpected things can
+  // happen because PHP will try to cast string values to integers if they're
+  // being compared to an integer.
+  if (isset($element['#return_value']) && $element['#value'] !== FALSE && !strcmp($element['#value'], $element['#return_value'])) {
     $element['#attributes']['checked'] = 'checked';
   }
   _form_set_class($element, array('form-radio'));
@@ -3606,7 +3610,7 @@ function form_process_actions($element, &$form_state) {
       $first_button = $key;
     }
     // Record the primary button if found.
-    if (isset($button['#attributes']['class']) && in_array('button-primary', $button['#attributes']['class'])  && in_array('button-danger', $button['#attributes']['class'])) {
+    if (isset($button['#attributes']['class']) && (in_array('button-primary', $button['#attributes']['class']) || in_array('button-danger', $button['#attributes']['class']))) {
       $primary_set = TRUE;
     }
     // Add the secondary button class otherwise.
@@ -4362,7 +4366,10 @@ function theme_hidden($variables) {
  */
 function form_process_autocomplete($element) {
   $element['#autocomplete_input'] = array();
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  // Access to the autocomplete path is not checked here. The access callback
+  // for the path is checked on each autocomplete request, along with the token
+  // added below (see backdrop_valid_autocomplete_token()).
+  if ($element['#autocomplete_path']) {
     $element['#autocomplete_input']['#id'] = $element['#id'] .'-autocomplete';
     // Force the script path to 'index.php', in case the server is not
     // configured to find it automatically. Normally it is the responsibility
@@ -4370,6 +4377,9 @@ function form_process_autocomplete($element) {
     // url()) but since this code is forcing non-clean URLs on sites that don't
     // normally use them, it is done here instead.
     $element['#autocomplete_input']['#url_value'] = url($element['#autocomplete_path'], array('absolute' => TRUE, 'clean' => FALSE, 'script' => 'index.php'));
+    // Include a token that is sent with each autocomplete request, so that the
+    // autocomplete callback may verify the request came from this form.
+    $element['#autocomplete_input']['#token'] = backdrop_get_autocomplete_token($element['#autocomplete_path']);
   }
   return $element;
 }
@@ -4400,6 +4410,9 @@ function theme_textfield($variables) {
     $attributes['type'] = 'hidden';
     $attributes['id'] = $element['#autocomplete_input']['#id'];
     $attributes['value'] = $element['#autocomplete_input']['#url_value'];
+    if (!empty($element['#autocomplete_input']['#token'])) {
+      $attributes['data-autocomplete-token'] = $element['#autocomplete_input']['#token'];
+    }
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4428,14 +4441,17 @@ function theme_email($variables) {
   _form_set_class($element, array('form-email'));
 
   $extra = '';
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  if ($element['#autocomplete_path'] && !empty($element['#autocomplete_input'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
     $attributes = array();
     $attributes['type'] = 'hidden';
-    $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['id'] = $element['#autocomplete_input']['#id'];
+    $attributes['value'] = $element['#autocomplete_input']['#url_value'];
+    if (!empty($element['#autocomplete_input']['#token'])) {
+      $attributes['data-autocomplete-token'] = $element['#autocomplete_input']['#token'];
+    }
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4478,14 +4494,17 @@ function theme_search($variables) {
   _form_set_class($element, array('form-search'));
 
   $extra = '';
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  if ($element['#autocomplete_path'] && !empty($element['#autocomplete_input'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
     $attributes = array();
     $attributes['type'] = 'hidden';
-    $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['id'] = $element['#autocomplete_input']['#id'];
+    $attributes['value'] = $element['#autocomplete_input']['#url_value'];
+    if (!empty($element['#autocomplete_input']['#token'])) {
+      $attributes['data-autocomplete-token'] = $element['#autocomplete_input']['#token'];
+    }
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4514,14 +4533,17 @@ function theme_tel($variables) {
   _form_set_class($element, array('form-tel'));
 
   $extra = '';
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  if ($element['#autocomplete_path'] && !empty($element['#autocomplete_input'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
     $attributes = array();
     $attributes['type'] = 'hidden';
-    $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['id'] = $element['#autocomplete_input']['#id'];
+    $attributes['value'] = $element['#autocomplete_input']['#url_value'];
+    if (!empty($element['#autocomplete_input']['#token'])) {
+      $attributes['data-autocomplete-token'] = $element['#autocomplete_input']['#token'];
+    }
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4550,14 +4572,17 @@ function theme_url($variables) {
   _form_set_class($element, array('form-url'));
 
   $extra = '';
-  if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
+  if ($element['#autocomplete_path'] && !empty($element['#autocomplete_input'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
     $attributes = array();
     $attributes['type'] = 'hidden';
-    $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['id'] = $element['#autocomplete_input']['#id'];
+    $attributes['value'] = $element['#autocomplete_input']['#url_value'];
+    if (!empty($element['#autocomplete_input']['#token'])) {
+      $attributes['data-autocomplete-token'] = $element['#autocomplete_input']['#token'];
+    }
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4666,12 +4691,18 @@ function form_validate_number(&$element, &$form_state) {
 
   // Ensure that the input is greater than the #min property, if set.
   if (isset($element['#min']) && $value < $element['#min']) {
-    form_error($element, t('The value for %name must be greater than or equal to %min.', array('%name' => $name, '%min' => $element['#min'])));
+    form_error($element, t('The value for %name must be greater than or equal to %min.', array(
+      '%name' => $name,
+      '%min' => $element['#min'],
+    )));
   }
 
   // Ensure that the input is less than the #max property, if set.
   if (isset($element['#max']) && $value > $element['#max']) {
-    form_error($element, t('The value for %name must be less than or equal to %max.', array('%name' => $name, '%max' => $element['#max'])));
+    form_error($element, t('The value for %name must be less than or equal to %max.', array(
+      '%name' => $name,
+      '%max' => $element['#max'],
+    )));
   }
 
   if (isset($element['#step']) && strtolower($element['#step']) != 'any') {
@@ -4685,7 +4716,11 @@ function form_validate_number(&$element, &$form_state) {
         form_error($element, t('The value for %name must be a whole number.', array('%name' => $name)));
       }
       else {
-        form_error($element, t('The value for %name must be a whole number of steps of size %step, starting from %offset.', array('%name' => $name, '%step' => $element['#step'], '%offset' => $offset)));
+        form_error($element, t('The value for %name must be a whole number of steps of size %step, starting from %offset.', array(
+          '%name' => $name,
+          '%step' => $element['#step'],
+          '%offset' => $offset,
+        )));
       }
     }
   }
@@ -4850,6 +4885,17 @@ function theme_file($variables) {
   _form_set_class($element, array('form-file'));
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />';
+}
+
+ /**
+ * Processes a file upload element, make use of #multiple if present.
+ */
+function form_process_file($element) {
+  if ($element['#multiple']) {
+    $element['#attributes']['multiple'] = 'multiple';
+    $element['#name'] .= '[]';
+  }
+  return $element;
 }
 
 /**

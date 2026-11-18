@@ -176,10 +176,10 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
  *   - delete
  * @param string $entity_type
  *   The entity type of the entity to check for.
- * @param EntityInterface $entity
+ * @param EntityInterface|null $entity
  *   Optionally an entity to check access for. If no entity is given, it will be
  *   determined whether access is allowed for all entities of the given type.
- * @param User $account
+ * @param User|null $account
  *   The user to check for. Leave it to NULL to check for the global user.
  *
  * @return bool
@@ -188,7 +188,7 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
  *
  * @see entity_type_supports()
  */
-function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $account = NULL) {
+function entity_access($op, $entity_type, ?EntityInterface $entity = NULL, ?User $account = NULL) {
   if (!in_array($op, array('create', 'view', 'update', 'delete'), TRUE)) {
     // If the $op was not one of the supported ones, we return access denied.
     return FALSE;
@@ -222,7 +222,7 @@ function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
  */
-function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full', $langcode = NULL) {
+function entity_build_content(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
   $info = entity_get_info($entity->entityType());
   if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
     entity_get_controller($entity->entityType())->buildContent($entity, $view_mode, $langcode);

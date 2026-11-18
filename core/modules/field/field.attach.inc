@@ -267,6 +267,8 @@ function _field_invoke_multiple($op, $entity_type, $entities, &$a = NULL, &$b = 
   foreach ($entities as $entity) {
     // Determine the list of instances to iterate on.
     list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+    // It is null for newly created, but we need it as array key.
+    $id = (string) $id;
     $instances = _field_invoke_get_instances($entity_type, $bundle, $options);
 
     foreach ($instances as $instance) {

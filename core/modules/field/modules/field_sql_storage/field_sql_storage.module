@@ -4,6 +4,9 @@
  * Default implementation of the field storage API.
  */
 
+// Ignore indexname in _field_sql_storage_indexname().
+// cspell:ignore indexname
+
 /**
  * Implements hook_field_storage_info().
  */

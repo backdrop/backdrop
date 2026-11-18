@@ -111,7 +111,7 @@ if ($options['url']) {
   }
   else {
     print "--url option is invalid. Specify the URL of your site as --url=http://example.com/ or --url=example.com.\n";
-    exit;
+    exit(1);
   }
 }
 unset($options['url']);
@@ -119,7 +119,7 @@ unset($options['url']);
 // Parse the database URL.
 if (empty($options['db-url'])) {
   print "--db-url option is required. Specify one as --db-url=mysql://user:pass@host_name/db_name.\n";
-  exit;
+  exit(1);
 }
 $url = parse_url($options['db-url']);
 
@@ -128,7 +128,7 @@ $url = array_map('urldecode', $url);
 // Check if the driver is set to mysql and report error if it is not.
 if ($url['scheme'] != 'mysql') {
   print "Only mysql connections are supported. Specify one as --db-url=mysql://user:pass@host_name/db_name.\n";
-  exit;
+  exit(1);
 }
 
 $url += array(
@@ -197,7 +197,7 @@ try {
   print "Backdrop installed successfully.\n";
   exit(0);
 }
-catch (Exception $e) {
+catch (Throwable $e) {
   print "An error occurred. Output of installation attempt is as follows:\n";
   print $e->getMessage() . "\n";
   exit(1);

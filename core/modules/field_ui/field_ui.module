@@ -73,11 +73,17 @@ function field_ui_menu() {
 
           // Add the "administer fields" permission on top of the access
           // restriction because the field UI should only be accessible to
-          // trusted users.
+          // trusted users. The bundle argument is passed to
+          // field_ui_admin_access() to allow for substitution.
           if ($access['access callback'] != 'user_access' || $access['access arguments'] != array('administer fields')) {
             $access = array(
               'access callback' => 'field_ui_admin_access',
-              'access arguments' => array($access['access callback'], $access['access arguments']),
+              'access arguments' => array(
+                $access['access callback'],
+                $access['access arguments'],
+                $bundle_position,
+                $bundle_arg
+              ),
             );
           }
 
@@ -429,7 +435,28 @@ function field_ui_form_node_type_form_submit($form, &$form_state) {
  *
  * Only grant access if the user has both the "administer fields" permission and
  * is granted access by the entity specific restrictions.
+ *
+ * @param string $access_callback
+ *   The name of the access callback function to be called.
+ * @param array $access_arguments
+ *   An array of arguments to pass to the access callback.
+ * @param string|null $bundle_position
+ *   The position within the menu path that contains the bundle name. Note this
+ *   is a string value because the menu substitutes integer values.
+ * @param mixed|null $bundle_value
+ *   The substituted value of the bundle after performing any menu auto-loaders.
+ *
+ * @return bool
+ *   TRUE if access to field UI pages is allowed, FALSE otherwise.
  */
-function field_ui_admin_access($access_callback, $access_arguments) {
+function field_ui_admin_access($access_callback, $access_arguments, $bundle_position = NULL, $bundle_value = NULL) {
+  // Perform variable substitution for the bundle. This would normally happen
+  // by the menu system replacing integers with the bundle value, but since the
+  // access callback is wrapped, the substitution needs to be done again before
+  // calling the child access callback.
+  $bundle_access_key = array_search((int) $bundle_position, $access_arguments, TRUE);
+  if ($bundle_access_key !== FALSE) {
+    $access_arguments[$bundle_access_key] = $bundle_value;
+  }
   return user_access('administer fields') && call_user_func_array($access_callback, $access_arguments);
 }

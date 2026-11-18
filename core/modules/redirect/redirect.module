@@ -1232,7 +1232,7 @@ function redirect_parse_url($url) {
 /**
  * Return either a status code or array of possible status codes.
  *
- * @param int $code
+ * @param int|null $code
  *   Optional numeric code, if present as key of $codes value string is returned.
  * @param bool $all_types
  *   Include the less-common redirect types. If set to FALSE, only the 301 and
@@ -1260,7 +1260,7 @@ function redirect_status_code_options($code = NULL, $all_types = TRUE) {
       302 => t('302 - Moved Temporarily'),
     );
   }
-  return isset($codes[$code]) ? $codes[$code] : $codes;
+  return $code && isset($codes[$code]) ? $codes[$code] : $codes;
 }
 
 /**

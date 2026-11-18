@@ -176,6 +176,11 @@ function views_theme($existing, $type, $theme, $path) {
     'file' => 'templates/views.theme.inc',
   );
 
+  $hooks['views_select_all_pages'] = $base + array(
+    'variables' => array('view' => NULL, 'enable_select_all_pages' => TRUE),
+    'file' => 'views.theme.inc',
+  );
+
   // Add theme suggestions which are part of modules.
   foreach (views_get_module_apis() as $info) {
     if (isset($info['template path'])) {
@@ -395,8 +400,7 @@ function views_menu() {
   $items['admin/views/ajax/autocomplete/user'] = array(
     'page callback' => 'views_ajax_autocomplete_user',
     'theme callback' => 'ajax_base_page_theme',
-    'access callback' => 'user_access',
-    'access arguments' => array('access user profiles'),
+    'access callback' => 'user_autocomplete_access',
     'type' => MENU_CALLBACK,
     'file' => 'includes/ajax.inc',
   );
@@ -405,8 +409,7 @@ function views_menu() {
   $items['admin/views/ajax/autocomplete/taxonomy'] = array(
     'page callback' => 'views_ajax_autocomplete_taxonomy',
     'theme callback' => 'ajax_base_page_theme',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'node_autocomplete_access',
     'type' => MENU_CALLBACK,
     'file' => 'includes/ajax.inc',
   );

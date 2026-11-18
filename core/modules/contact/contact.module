@@ -120,16 +120,20 @@ function contact_menu() {
     'type' => MENU_SUGGESTED_ITEM,
     'file' => 'contact.pages.inc',
   );
-  $items['user/%user/contact'] = array(
-    'title' => 'Contact',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('contact_personal_form', 1),
-    'type' => MENU_LOCAL_TASK,
-    'access callback' => '_contact_personal_tab_access',
-    'access arguments' => array(1),
-    'weight' => 2,
-    'file' => 'contact.pages.inc',
-  );
+  $config = config('contact.settings');
+  if ($config->get('personal')) {
+    $items['user/%user/contact'] = array(
+      'title' => 'Contact',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('contact_personal_form', 1),
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => '_contact_personal_tab_access',
+      'access arguments' => array(1),
+      'weight' => 2,
+      'file' => 'contact.pages.inc',
+    );
+  }
+
   return $items;
 }
 
@@ -300,6 +304,10 @@ function contact_mail($key, &$message, $params) {
  */
 function contact_form_user_profile_form_alter(&$form, &$form_state) {
   $config = config('contact.settings');
+  if (!$config->get('personal')) {
+    return;
+  }
+
   $form['contact'] = array(
     '#type' => 'fieldset',
     '#title' => t('Contact form'),
@@ -329,33 +337,10 @@ function contact_user_presave($account) {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
- *
- * Add the default personal contact setting on the user settings page.
- *
- * @see user_admin_settings()
- */
-function contact_form_user_admin_settings_alter(&$form, &$form_state) {
-  $config = config('contact.settings');
-
-  $form['contact'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Contact settings'),
-    '#weight' => 0,
-    '#config' => 'contact.settings',
-  );
-  $form['contact']['contact_default_status'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable the personal contact form by default for new users.'),
-    '#description' => t('Changing this setting will not affect existing users.'),
-    '#default_value' => $config->get('contact_default_status'),
-  );
-}
-
-/**
  * Implements hook_block_info().
  */
 function contact_block_info() {
+  // cspell:ignore sitewide
   $blocks['sitewide'] = array(
     'info' => t('Contact form'),
     'description' => t('Site-wide contact form.'),

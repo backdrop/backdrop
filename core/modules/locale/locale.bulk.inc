@@ -266,6 +266,7 @@ function locale_translate_batch_import($filepath, &$context) {
   // The filename is either {langcode}.po or {prefix}.{langcode}.po, so
   // we can extract the language code to use for the import from the end.
   if (preg_match('!(/|\.)([^\./]+)\.po$!', $filepath, $langcode)) {
+    /** @var File $file */
     $file = entity_create('file', array(
       'filename' => backdrop_basename($filepath),
       'uri' => $filepath,

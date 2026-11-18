@@ -290,6 +290,9 @@ Backdrop.tableDrag.prototype.makeDraggable = function (item) {
 
   // Create the handle.
   var handle = $(Backdrop.theme('tableDragHandle'));
+  if (this.indentEnabled !== true) {
+    handle.addClass('tabledrag-handle-y');
+  }
   // Insert the handle after indentations (if any).
   var $indentationLast = $item.find('td:first .indentation:last');
   if ($indentationLast.length) {

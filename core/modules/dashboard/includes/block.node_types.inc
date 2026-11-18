@@ -78,6 +78,11 @@ class DashboardContentTypesBlock extends Block {
             'href' => 'admin/structure/types/manage/' . $type_url_string . '/display',
             'query' => $options,
           );
+          $links['layouts'] = array(
+            'title' => t('Manage layouts'),
+            'href' => 'admin/structure/types/manage/' . $type_url_string . '/layouts',
+            'query' => $options,
+          );
           $operations = array(
             '#type' => 'dropbutton',
             '#links' => $links,

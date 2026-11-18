@@ -35,7 +35,7 @@ Backdrop.behaviors.layoutConfigure = {
   attach: function(context) {
 
     /**
-     * Toggle handler for the placeholder examples.
+     * Toggle handler for the examples.
      */
     function examples_toggle_handler(e) {
       var $examples = $(this).next().toggle();
@@ -47,9 +47,9 @@ Backdrop.behaviors.layoutConfigure = {
       }
       e.preventDefault();
       e.stopPropagation();
-    };
+    }
 
-    var $form = $('.layout-settings-form').once('layout-settings');
+    var $form = $('.layout-settings-form');
     if ($form.length && Backdrop.ajax) {
       var ajax = Backdrop.ajax['edit-path-update'];
       var updateContexts = function() {
@@ -59,24 +59,22 @@ Backdrop.behaviors.layoutConfigure = {
           ajax.cleanUp(ajax.currentRequests[n]);
         }
         $('input[data-layout-path-update]').triggerHandler('mousedown');
-
-      // (Re)install placeholder examples toggle handler.
-      $('a.layout-placeholder-examples-toggle').on('click', examples_toggle_handler);
-
       };
+
       // Update contexts after a slight typing delay.
       var timer = 0;
-      $('input[name="path"]').on('keyup', function(e) {
+      $('input.data-layout-additional-path, input[name="path"]').once('update-contexts').on('keyup', function(e) {
         clearTimeout(timer);
         timer = setTimeout(updateContexts, 200);
       });
     }
 
-    // Hide the placeholder examples.
-    $form.find('.layout-placeholder-examples').hide();
-
-    // Handle toggling the placeholder examples.
-    $('a.layout-placeholder-examples-toggle').on('click', examples_toggle_handler);
+    // Handle toggling the examples.
+    var $examplesToggle = $('a.layout-placeholder-examples-toggle').once('examples-toggle');
+    if ($examplesToggle.length) {
+      $examplesToggle.on('click', examples_toggle_handler);
+      $form.find('.layout-placeholder-examples').hide();
+    }
 
     // Convert AJAX buttons to links.
     var $linkButtons = $(context).find('.layout-link-button').once('link-button');

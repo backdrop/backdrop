@@ -57,6 +57,7 @@ function simpletest_permission() {
  * Implements hook_theme().
  */
 function simpletest_theme() {
+  $module_path = backdrop_get_path('module', 'simpletest');
   $base = array(
     'file' => 'simpletest.theme.inc',
   );
@@ -64,6 +65,15 @@ function simpletest_theme() {
   return array(
     'simpletest_test_table' => array(
       'render element' => 'table',
+      'attached' => array(
+        'css' => array(
+          $module_path . '/css/simpletest.css' => array(),
+        ),
+        'js' => array(
+          $module_path . '/js/simpletest.js' => array(),
+          'core/misc/tableselect.js' => array(),
+        ),
+      ),
     ) + $base,
     'simpletest_result_summary' => array(
       'render element' => 'form',

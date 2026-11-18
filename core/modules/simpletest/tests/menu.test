@@ -166,9 +166,11 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     $this->assertText('File inheritance test description', 'File inheritance works.');
 
     // Test path containing "exotic" characters.
+    // cspell:disable
     $path = "menu-test/ -._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
       "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
       "éøïвβ中國書۞"; // Characters from various non-ASCII alphabets.
+    // cspell:enable
     $this->backdropGet($path);
     $this->assertRaw('This is menu_test_callback().');
 

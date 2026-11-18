@@ -2035,7 +2035,9 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
     for ($n = 0; $n < $count; $n++) {
       if (gettype(${'handle' . $n}) === 'resource') {
         curl_multi_remove_handle($multi_handle, ${'handle' . $n});
-        curl_close(${'handle' . $n});
+        if (version_compare(PHP_VERSION, '8.0') < 0) {
+          curl_close(${'handle' . $n});
+        }
       }
     }
     curl_multi_close($multi_handle);

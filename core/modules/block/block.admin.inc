@@ -50,7 +50,7 @@ function block_admin_list() {
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
-          'group' => 'Reusable custom blocks',
+          'group' => 'Custom blocks',
           'name' => 'block.custom.' . $delta,
         ),
       );
@@ -93,9 +93,9 @@ function block_admin_list() {
  */
 function block_admin_configure($form, &$form_state, $delta = NULL) {
   if ($delta) {
-    $langcode = isset($form['langcode']) ? $form['langcode']['#value'] : NULL;
+    $langcode = isset($form['langcode']) ? $form['langcode']['#value'] : LANGUAGE_NONE;
     $custom_block = block_custom_block_load($delta, $langcode);
-    if ($langcode) {
+    if ($langcode != LANGUAGE_NONE) {
       $custom_block['langcode'] = $langcode;
     }
 

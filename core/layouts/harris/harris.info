@@ -1,5 +1,6 @@
 type = layout
 name = Harris
+description = Includes a header, top, content, left and right sidebars, bottom, and footer.
 version = BACKDROP_VERSION
 backdrop = 1.x
 

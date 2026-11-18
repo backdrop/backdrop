@@ -549,9 +549,13 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
       }
       $title = token_replace($title, array($entity_token_type => $entity_loaded));
     }
-    $title = filter_xss($title, array('b', 'br', 'code', 'em', 'i', 'img', 'span', 'strong', 'sub', 'sup', 'tt', 'u'));
     $item['html'] = TRUE;
   }
+
+  if ($item['html']) {
+    $title = filter_xss($title, array('b', 'br', 'code', 'em', 'i', 'img', 'span', 'strong', 'sub', 'sup', 'tt', 'u'));
+  }
+
   $item['title'] = empty($title) ? $item['display_url'] : $title;
 
   if (!isset($item['attributes'])) {
@@ -601,11 +605,13 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
       }
       $item['attributes']['title'] = token_replace($item['attributes']['title'], array($entity_token_type => $entity_loaded));
     }
-    $item['attributes']['title'] = filter_xss($item['attributes']['title'], array('b', 'br', 'code', 'em', 'i', 'img', 'span', 'strong', 'sub', 'sup', 'tt', 'u'));
   }
+
+  // Sanitize attributes.
+  $item['attributes'] = filter_xss_attributes($item['attributes']);
+
   // Handle attribute classes.
-  $classes = explode(' ', $item['attributes']['class']);
-  $classes = array_filter($classes);
+  $classes = array_filter($item['attributes']['class']);
   foreach ($classes as $n => $class) {
     $classes[$n] = backdrop_clean_css_identifier($class);
   }

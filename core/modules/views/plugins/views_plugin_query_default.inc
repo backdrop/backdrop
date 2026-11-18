@@ -435,7 +435,7 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function queue_table($table, $relationship = NULL, $join = NULL, $alias = NULL) {
     // If the alias is set, make sure it doesn't already exist.
-    if (isset($this->table_queue[$alias])) {
+    if ($alias && isset($this->table_queue[$alias])) {
       return $alias;
     }
 
@@ -458,7 +458,7 @@ class views_plugin_query_default extends views_plugin_query {
 
     // Check this again to make sure we don't blow up existing aliases for already
     // adjusted joins.
-    if (isset($this->table_queue[$alias])) {
+    if ($alias && isset($this->table_queue[$alias])) {
       return $alias;
     }
 
@@ -814,7 +814,10 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     // Keep track of all aliases used.
-    $this->field_aliases[$table][$field] = $alias;
+    // A formula can't have an alias, only tables can.
+    if ($table) {
+      $this->field_aliases[$table][$field] = $alias;
+    }
 
     return $alias;
   }
@@ -895,8 +898,10 @@ class views_plugin_query_default extends views_plugin_query {
    *   The snippet to check. This can be either a column or a complex expression
    *   like "UPPER(table.field) = 'value'".
    * @param $args
-   *   An associative array of arguments.
+   *   An associative array of arguments. Placeholders must be unique when
+   *   using this method multiple times on a single query.
    *
+   * @see https://www.php.net/manual/en/pdo.prepare.php
    * @see QueryConditionInterface::where()
    */
   function add_where_expression($group, $snippet, $args = array()) {
@@ -976,9 +981,11 @@ class views_plugin_query_default extends views_plugin_query {
    *   The snippet to check. This can be either a column or
    *   a complex expression like "COUNT(table.field) > 3"
    * @param $args
-   *   An associative array of arguments.
+   *   An associative array of arguments. Placeholders must be unique when
+   *   using this method multiple times on a single query.
    *
-   * @see QueryConditionInterface::having()
+   * @see https://www.php.net/manual/en/pdo.prepare.php
+   * @see QueryConditionInterface::where()
    */
   function add_having_expression($group, $snippet, $args = array()) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all

@@ -213,11 +213,11 @@
                         "element_type": "",
                         "element_class": "",
                         "element_label_type": "",
-                        "element_label_class": "priority-low",
+                        "element_label_class": "",
                         "element_label_colon": 1,
                         "element_wrapper_type": "",
                         "element_wrapper_class": "",
-                        "element_default_classes": 0,
+                        "element_default_classes": 1,
                         "empty": "",
                         "hide_empty": 0,
                         "empty_zero": 0,
@@ -267,11 +267,11 @@
                         "element_type": "",
                         "element_class": "",
                         "element_label_type": "",
-                        "element_label_class": "priority-medium",
+                        "element_label_class": "",
                         "element_label_colon": 1,
                         "element_wrapper_type": "",
                         "element_wrapper_class": "",
-                        "element_default_classes": 0,
+                        "element_default_classes": 1,
                         "empty": "",
                         "hide_empty": 0,
                         "empty_zero": 0,
@@ -319,11 +319,11 @@
                         "element_type": "",
                         "element_class": "",
                         "element_label_type": "",
-                        "element_label_class": "priority-low",
+                        "element_label_class": "",
                         "element_label_colon": 1,
                         "element_wrapper_type": "",
                         "element_wrapper_class": "",
-                        "element_default_classes": 0,
+                        "element_default_classes": 1,
                         "empty": "",
                         "hide_empty": 0,
                         "empty_zero": 0,
@@ -425,11 +425,11 @@
                         "element_type": "",
                         "element_class": "",
                         "element_label_type": "",
-                        "element_label_class": "priority-low",
+                        "element_label_class": "",
                         "element_label_colon": 1,
                         "element_wrapper_type": "",
                         "element_wrapper_class": "",
-                        "element_default_classes": 0,
+                        "element_default_classes": 1,
                         "empty": "",
                         "hide_empty": 0,
                         "empty_zero": 0,
@@ -786,6 +786,7 @@
                     "default_row_class": 0,
                     "row_class_special": 1,
                     "override": 1,
+                    "append_original_sort": 0,
                     "sticky": 0,
                     "caption": "",
                     "summary": "",
@@ -805,62 +806,72 @@
                         "bulk_form": {
                             "align": "",
                             "separator": "",
-                            "empty_column": 0
+                            "empty_column": 0,
+                            "responsive": ""
                         },
                         "name": {
                             "sortable": 1,
                             "default_sort_order": "asc",
                             "align": "",
                             "separator": "",
-                            "empty_column": 0
+                            "empty_column": 0,
+                            "responsive": ""
                         },
                         "status": {
                             "sortable": 1,
                             "default_sort_order": "asc",
                             "align": "",
                             "separator": "",
-                            "empty_column": 0
+                            "empty_column": 0,
+                            "responsive": "priority-low"
                         },
                         "role": {
                             "align": "",
                             "separator": "",
-                            "empty_column": 0
+                            "empty_column": 0,
+                            "responsive": "priority-medium"
                         },
                         "created": {
                             "sortable": 1,
                             "default_sort_order": "desc",
                             "align": "",
                             "separator": "",
-                            "empty_column": 0
+                            "empty_column": 0,
+                            "responsive": "priority-low"
                         },
                         "changed": {
                             "sortable": 1,
                             "default_sort_order": "desc",
                             "align": "",
                             "separator": "",
-                            "empty_column": 0
+                            "empty_column": 0,
+                            "responsive": ""
                         },
                         "access": {
                             "sortable": 1,
                             "default_sort_order": "asc",
                             "align": "",
                             "separator": "",
-                            "empty_column": 0
+                            "empty_column": 0,
+                            "responsive": "priority-low"
                         },
                         "edit_node": {
                             "align": "",
                             "separator": "",
-                            "empty_column": 0
+                            "empty_column": 0,
+                            "responsive": ""
                         },
                         "cancel_node": {
                             "align": "",
                             "separator": "",
-                            "empty_column": 0
+                            "empty_column": 0,
+                            "responsive": ""
                         },
                         "dropbutton": {
                             "align": "",
                             "separator": "",
-                            "empty_column": 0
+                            "empty_column": 0,
+                            "responsive": ""
                         }
                     },
                     "default": "created",

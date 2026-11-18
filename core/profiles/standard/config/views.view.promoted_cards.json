@@ -421,7 +421,16 @@
                     "default_row_class": 1,
                     "row_class_special": 1,
                     "columns": "3",
+                    "cell_min_width": {
+                        "width": "16",
+                        "unit": "rem"
+                    },
+                    "grid_gutter": {
+                        "width": "2",
+                        "unit": "rem"
+                    },
                     "alignment": "horizontal",
+                    "unresponsive": 0,
                     "deprecated_table": 0,
                     "fill_single_line": 1,
                     "caption": "",

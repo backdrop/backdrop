@@ -33,3 +33,9 @@ name = Link field custom form tests
 description = Tests link fields being used on custom forms.
 group = Link
 file = link.custom.test
+
+[LinkSanitizeTest]
+name = Link sanitize tests
+description = Tests the _link_sanitize() function by itself, without invoking the field life cycle.
+group = Link
+file = link.sanitize.test

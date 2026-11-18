@@ -596,7 +596,7 @@ function drupal_get_feeds($delimiter = "\n") {
  * @deprecated since 1.0.0
  * @see backdrop_get_query_parameters()
  */
-function drupal_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
+function drupal_get_query_parameters(?array $query = NULL, array $exclude = array('q'), $parent = '') {
   return backdrop_get_query_parameters($query, $exclude, $parent);
 }
 

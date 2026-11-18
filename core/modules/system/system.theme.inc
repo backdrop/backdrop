@@ -430,8 +430,6 @@ function theme_status_report($variables) {
   }
 
   $system_status_report_table['rows'] = $rows;
-  $path = backdrop_get_path('module', 'system');
-  backdrop_add_js($path . '/js/status.js');
 
   return theme_table($system_status_report_table);
 }
@@ -722,6 +720,54 @@ function theme_label_machine_name($variables) {
   if (!empty($variables['machine_name'])) {
     $machine_name = t('Machine name: @machine_name', array('@machine_name' => $variables['machine_name']));
     $output .= '<div class="machine-name">(' . $machine_name . ')</div>';
+  }
+
+  return $output;
+}
+
+/**
+ * Theme hook for the icon browser page.
+ */
+function theme_system_icon_browser_form_icons($variables) {
+  $icons = $variables['icons'];
+
+  $output = '';
+  if ($icons) {
+    $output .= "<div class='icon-browser-list'>";
+    $theme_error_icons = array();
+    foreach ($icons as $icon) {
+      if (!empty($icon['theme_error'])) {
+        $theme_error_icons[$icon['name']] = $icon['theme_error'];
+      }
+
+      $icon_classes = isset($icon['theme_error']) ? 'icon-wrapper error' : 'icon-wrapper';
+      $output .= '<div class="' . $icon_classes . '" data-icon-name="' . $icon['project_icon_key'] . '">';
+      $rendered_icon = theme('icon', array(
+        'name' => $icon['project_icon_key'],
+        'path' => $icon['directory'] . '/' . $icon['name'] . '.svg',
+        'alt' => NULL,
+        'attributes' => array(),
+      ));
+
+      $output .= '<div class="icon">' . $rendered_icon . '</div>';
+      $output .= '<div class="icon-name">' . $icon['name'] . '</div>';
+      $output .= '</div>';
+    }
+    if (!empty($theme_error_icons)) {
+      $themes = list_themes();
+      $theme_error_message = t('One or more icons on this page are provided by another theme:');
+      $error_list = array();
+      foreach ($theme_error_icons as $error_icon => $theme_key) {
+        $theme = $themes[$theme_key];
+        $error_list[] = $error_icon . ' (' . $theme->info['name'] . ')';
+      }
+      $theme_error_message .= theme('item_list', array('items' => $error_list));
+      backdrop_set_message($theme_error_message, 'warning');
+    }
+    $output .= '</div>';
+  }
+  else {
+    $output .= t('No icons match the filter criteria.');
   }
 
   return $output;

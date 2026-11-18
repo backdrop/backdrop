@@ -96,25 +96,42 @@ function theme_date_time_ago($variables) {
   // Uses the same options used by Views format_interval.
   switch ($display) {
     case 'raw time ago':
-      return format_interval($time_diff, $interval);
+      return format_time_diff_since($start, array('granularity' => $interval));
 
     case 'time ago':
-      return t('%time ago', array('%time' => format_interval($time_diff, $interval)));
+      return t('%time ago', array('%time' => format_time_diff_since($start, array(
+        'granularity' => $interval,
+      ))));
 
     case 'raw time hence':
-      return format_interval(-$time_diff, $interval);
+      return format_time_diff_until($start_date, array(
+        'granularity' => $interval,
+      ));
 
     case 'time hence':
-      return t('%time hence', array('%time' => format_interval(-$time_diff, $interval)));
+      return t('%time hence', array('%time' => format_time_diff_until($start_date, array(
+        'granularity' => $interval,
+      ))));
 
     case 'raw time span':
-      return ($time_diff < 0 ? '-' : '') . format_interval(abs($time_diff), $interval);
+      return ($time_diff < 0 ? '-' : '') . format_time_diff($now, $start, array(
+        'granularity' => $interval,
+        'strict' => FALSE,
+      ));
 
     case 'inverse time span':
-      return ($time_diff > 0 ? '-' : '') . format_interval(abs($time_diff), $interval);
+      return ($time_diff > 0 ? '-' : '') . format_time_diff($now, $start, array(
+        'granularity' => $interval,
+        'strict' => FALSE,
+      ));
 
     case 'time span':
-      return t(($time_diff < 0 ? '%time hence' : '%time ago'), array('%time' => format_interval(abs($time_diff), $interval)));
+      return t(($time_diff < 0 ? '%time hence' : '%time ago'), array(
+        '%time' => format_time_diff($now, $start, array(
+          'granularity' => $interval,
+          'strict' => FALSE,
+        ))
+      ));
   }
 
   return '';
@@ -508,8 +525,6 @@ function date_preprocess_views_view(&$variables) {
  * Preprocess function for Date pager template.
  */
 function template_preprocess_date_views_pager(&$variables) {
-  backdrop_add_css(backdrop_get_path('module', 'date') . "/css/date-views.css");
-
   $plugin = $variables['plugin'];
   $input = $variables['input'];
   $view = $plugin->view;

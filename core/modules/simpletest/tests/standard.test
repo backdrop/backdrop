@@ -26,6 +26,7 @@ class StandardInstallTestCase extends BackdropWebTestCase {
     $edit['status'] = 1;
     $edit['roles'] = array('editor');
 
+    /** @var User $editor_account */
     $editor_account = entity_create('user', $edit);
     $editor_account->save();
     $editor_account->pass_raw = $edit['pass'];

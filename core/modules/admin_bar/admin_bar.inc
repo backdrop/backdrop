@@ -960,6 +960,8 @@ function admin_bar_flush_cache($name = NULL) {
     }
   }
   else {
+    // Avoid using NULL as array key.
+    $name = '';
     $caches[$name] = array(
       'title' => t('Every'),
       'callback' => 'backdrop_flush_all_caches',

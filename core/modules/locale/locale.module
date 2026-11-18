@@ -1067,10 +1067,15 @@ function locale_config_update($staging_config, $active_config) {
 /**
  * Get translatable config strings.
  *
- * @param $config
+ * @param Config $config
  *   Configuration object.
  */
 function _locale_get_config_translatables($config) {
+  if (!db_table_exists('semaphore')) {
+    // Without the semaphore table calling locale() would cause a PDOException
+    // when trying to acquire a lock.
+    return;
+  }
   if ($config->get('_config_translatables') !== NULL) {
     foreach ($config->get('_config_translatables') as $translatable) {
       $translation = locale($config->get($translatable), 'config:' . $config->get('_config_name') . ':' . $translatable);

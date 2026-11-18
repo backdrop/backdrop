@@ -209,7 +209,6 @@ function book_admin_edit_submit($form, &$form_state) {
       // Update the title if changed.
       if ($row['title']['#default_value'] != $values['title']) {
         $node = node_load($values['nid']);
-        $langcode = LANGUAGE_NONE;
         $node->title = $values['title'];
         $node->book['link_title'] = $values['title'];
         $node->revision = 1;
@@ -219,6 +218,12 @@ function book_admin_edit_submit($form, &$form_state) {
         watchdog('content', 'book: updated %title.', array('%title' => $node->title), WATCHDOG_NOTICE, l(t('view'), 'node/' . $node->nid));
       }
     }
+  }
+
+  // Clear the navigation cache for the book.
+  // All items share the same bid so use the last item.
+  if (isset($row['#item']['bid'])) {
+    _book_cache_clear($row['#item']['bid'], TRUE);
   }
 
   backdrop_set_message(t('Updated book %title.', array('%title' => $form['#node']->title)));

@@ -199,7 +199,7 @@ CKEDITOR.plugins.add('backdroplink', {
         // loads the JavaScript file instead of Backdrop. Pull translated strings
         // from the plugin settings that are translated server-side.
         var dialogSettings = {
-          dialogClass: 'editor-link-dialog'
+          classes: {'ui-dialog': 'editor-link-dialog'}
         };
 
         // Open the dialog for the edit form.

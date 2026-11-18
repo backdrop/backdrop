@@ -204,11 +204,13 @@
 [dir="rtl"] #edit-display-settings-top .dropbutton-wrapper {
   float: left;
 }
-#edit-display-settings-top .views-ui-display-tab-setting {
+#edit-display-settings-top .views-ui-display-tab-setting,
+#edit-display-settings-top .views-ui-display-tab-type {
   position: relative;
   float: left; /* LTR */
 }
-[dir="rtl"] #edit-display-settings-top .views-ui-display-tab-setting {
+[dir="rtl"] #edit-display-settings-top .views-ui-display-tab-setting,
+[dir="rtl"] #edit-display-settings-top .views-ui-display-tab-type {
   float: right;
 }
 

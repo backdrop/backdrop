@@ -45,6 +45,13 @@
 .vertical-tab-selected .fieldset-wrapper {
   display: block;
 }
+.vertical-tabs-panes button,
+.vertical-tabs-panes input,
+.vertical-tabs-panes optgroup,
+.vertical-tabs-panes select,
+.vertical-tabs-panes textarea {
+  max-width: 100%;
+}
 @media (min-width: 750px) {
   .vertical-tabs-pane {
     display: none;

@@ -147,7 +147,7 @@ function installer_authorize_batch_copy_project($project, $updater_name, $projec
     return;
   }
 
-  /* @var Updater $updater */
+  /** @var Updater $updater */
   $updater = new $updater_name($project_realpath);
 
   try {

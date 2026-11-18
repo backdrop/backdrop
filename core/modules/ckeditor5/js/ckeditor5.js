@@ -43,7 +43,7 @@
           let onEventsPattern = {
             'name': /.*/,
             'attributes': /^on.*/
-          }
+          };
           editorSettings.htmlSupport.disallow.push(onEventsPattern);
         }
         // If filter_html if off, allow all elements and attributes to be used.
@@ -53,18 +53,23 @@
             attributes: true,
             classes: true,
             styles: true
-          }
+          };
           editorSettings.htmlSupport.allow.push(patternAllowAll);
         }
       }
 
-      // Convert the plugin list from strings to variable names. Each CKEditor
-      // plugin is located under "CKEditor5.[packageName].[moduleName]". So
-      // we convert the list of strings to match the expected variable name.
+      // Convert the plugin list from strings to variable names.
       editorSettings.plugins = [];
       editorSettings.pluginList.forEach(function(pluginItem) {
         const [packageName,moduleName] = pluginItem.split('.');
-        if (typeof CKEditor5[packageName] != 'undefined') {
+        // In UMD builds, native plugins are direct children of the global
+        // CKEditor object, this has changed compared to DLL.
+        if (typeof CKEditor5[moduleName] != 'undefined' && CKEditor5[moduleName].hasOwnProperty('pluginName')) {
+          editorSettings.plugins.push(CKEditor5[moduleName]);
+        }
+        // Backwards compatible to how plugins were defined for DLL - and how
+        // existing custom plugins still define it.
+        else if (typeof CKEditor5[packageName] != 'undefined') {
           editorSettings.plugins.push(CKEditor5[packageName][moduleName]);
         }
       });
@@ -74,7 +79,7 @@
       element.ckeditor5Processed = true;
 
       const beforeAttachValue = element.value;
-      CKEditor5.editorClassic.ClassicEditor
+      CKEditor5.ClassicEditor
         .create(element, editorSettings)
         .then(editor => {
           Backdrop.ckeditor5.setEditorOffset(editor);
@@ -82,7 +87,7 @@
           Backdrop.ckeditor5.watchEditorChanges(editor, element);
           Backdrop.ckeditor5.trackActiveEditor(editor);
           element.ckeditor5AttachedEditor = editor;
-          const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData());
+          const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData({ skipListItemIds: true }));
           if (valueModified && !Backdrop.ckeditor5.bypassContentWarning) {
             Backdrop.ckeditor5.detachWithWarning(element, format, beforeAttachValue);
           }
@@ -111,12 +116,16 @@
 
       // CKEditor 5 does not pretty-print HTML source. Format the source
       // before saving it into the source field.
-      let newData = editor.getData();
+      let newData = editor.getData({ skipListItemIds: true });
       newData = Backdrop.ckeditor5.formatHtml(newData);
 
       // Destroy the instance if fully detaching.
       if (trigger !== 'serialize') {
-        editor.destroy();
+        // If submitting the entire form, skip destroying the editor and let it
+        //  be unloaded by the browser leaving the page.
+        if (trigger !== 'submit') {
+          editor.destroy();
+        }
         Backdrop.ckeditor5.instances.delete(editor.id);
         delete element.ckeditor5AttachedEditor;
         delete element.ckeditor5Processed;
@@ -134,7 +143,7 @@
       if (editor) {
         const debouncedCallback = Backdrop.debounce(callback, 400);
         editor.model.document.on('change:data', function() {
-          debouncedCallback(editor.getData());
+          debouncedCallback(editor.getData({ skipListItemIds: true }));
         });
       }
       return !!editor;
@@ -189,9 +198,10 @@
       $toolbar.find('.ckeditor5-dialog-loading').remove();
 
       // Add a consistent dialog class.
-      const classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
+      dialogSettings.classes = dialogSettings.classes || {};
+      var classes = dialogSettings.classes['ui-dialog'] ? dialogSettings.classes['ui-dialog'].split(' ') : [];
       classes.push('editor-dialog');
-      dialogSettings.dialogClass = classes.join(' ');
+      dialogSettings.classes['ui-dialog'] = classes.join(' ');
       dialogSettings.autoResize = true;
       dialogSettings.modal = true;
       dialogSettings.target = '#ckeditor5-modal';
@@ -277,7 +287,7 @@
       // Create a debounced callback that only fires intermittently, since
       // editor changes can happen on every key up.
       const updateValue = Backdrop.debounce(() => {
-        const newData = editor.getData();
+        const newData = editor.getData({ skipListItemIds: true });
         element.value = Backdrop.ckeditor5.formatHtml(newData);
       }, 1000);
       editor.model.document.on('change:data', updateValue);

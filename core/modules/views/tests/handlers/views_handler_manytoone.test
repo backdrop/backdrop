@@ -65,6 +65,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
    *   Term with random properties.
    */
   protected function createTerm($vocabulary) {
+    /** @var TaxonomyTerm $term */
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),

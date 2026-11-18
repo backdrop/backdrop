@@ -78,7 +78,7 @@ class EntityBundleLayoutAccess extends LayoutAccess {
       return FALSE;
     }
 
-    /* @var Entity $entity */
+    /** @var Entity $entity */
     $entity = $this->contexts[$this->entity_type]->data;
     // Make sure we're testing an entity here. Views could override system
     // paths and cause difficulties.
