@@ -945,7 +945,7 @@ class CommonHTMLIdentifierTestCase extends BackdropUnitTestCase {
    */
   function testBackdropCleanCSSIdentifier() {
     // Verify that no valid ASCII characters are stripped from the identifier.
-    $identifier = 'abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789';
+    $identifier = 'abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-./0123456789:@';
     $this->assertIdentical(backdrop_clean_css_identifier($identifier, array()), $identifier, 'Verify valid ASCII characters pass through.');
 
     // Verify that valid UTF-8 characters are not stripped from the identifier.
@@ -953,7 +953,7 @@ class CommonHTMLIdentifierTestCase extends BackdropUnitTestCase {
     $this->assertIdentical(backdrop_clean_css_identifier($identifier, array()), $identifier, 'Verify valid UTF-8 characters pass through.');
 
     // Verify that invalid characters (including non-breaking space) are stripped from the identifier.
-    $this->assertIdentical(backdrop_clean_css_identifier('invalid- !"#$%&\'()*+,./:;<=>?@[\\]^`{|}~ identifier', array()), 'invalid-identifier', 'Strip invalid characters.');
+    $this->assertIdentical(backdrop_clean_css_identifier('invalid- !"#$%&\'()*+,;<=>?[\\]^`{|}~ identifier', array()), 'invalid-identifier', 'Strip invalid characters.');
   }
 
   /**
