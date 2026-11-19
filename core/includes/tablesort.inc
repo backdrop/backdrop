@@ -47,8 +47,12 @@ function tablesort_header($cell, $header, $ts) {
       $image = theme('tablesort_indicator', array('style' => $ts['sort']));
     }
     else {
-      // If the user clicks a different header, we want to sort ascending initially.
-      $ts['sort'] = 'asc';
+      // This determines the sort order when the column gets first clicked by
+      // the user. It is "asc" by default but the sort can be changed if
+      // $cell['initial_click_sort'] is defined. The possible values are "asc"
+      // or "desc".
+      $ts['sort'] = isset($cell['initial_click_sort']) ? $cell['initial_click_sort'] : 'asc';
+
       $image = '';
     }
     $cell['data'] = l($cell['data'] . $image, $_GET['q'], array(
@@ -64,7 +68,7 @@ function tablesort_header($cell, $header, $ts) {
       'html' => TRUE,
     ));
 
-    unset($cell['field'], $cell['sort']);
+    unset($cell['field'], $cell['sort'], $cell['initial_click_sort']);
   }
   return $cell;
 }
@@ -165,8 +169,13 @@ function tablesort_get_sort($headers) {
     // Find out which header is currently being sorted.
     $ts = tablesort_get_order($headers);
     foreach ($headers as $header) {
-      if (is_array($header) && isset($header['data']) && $header['data'] == $ts['name'] && isset($header['sort'])) {
-        return $header['sort'];
+      if (is_array($header) && isset($header['data']) && $header['data'] == $ts['name']) {
+        if (isset($header['sort'])) {
+          return $header['sort'];
+        }
+        if (isset($header['initial_click_sort'])) {
+          return $header['initial_click_sort'];
+        }
       }
     }
   }
