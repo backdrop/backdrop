@@ -54,7 +54,7 @@ function theme_link_formatter_link_default($variables) {
   }
   // If only a title, display the title.
   elseif (!empty($variables['element']['title'])) {
-    $output = $link_options['html'] ? $variables['element']['title'] : check_plain($variables['element']['title']);
+    $output = !empty($link_options['html']) ? $variables['element']['title'] : check_plain($variables['element']['title']);
   }
   elseif (!empty($variables['element']['url'])) {
     $output = l($variables['element']['title'], $variables['element']['url'], $link_options);
