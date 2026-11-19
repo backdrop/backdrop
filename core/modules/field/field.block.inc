@@ -9,7 +9,7 @@ class FieldBlock extends Block {
     parent::__construct($plugin_name, $data);
 
     $this->settings += array(
-      'label' => 'hidden',
+      'label' => 'invisible',
       'formatter' => '',
       'formatter_settings' => array(),
       'delta_offset' => 0,
