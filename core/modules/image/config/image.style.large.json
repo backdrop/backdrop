@@ -6,13 +6,14 @@
     "name": "large",
     "effects": [
         {
-            "name": "image_scale",
+            "name": "image_scale_and_crop",
             "data": {
                 "width": "800",
                 "height": "600",
-                "upscale": 1
+                "anchor": "center-top"
             },
             "weight": 1
         }
-    ]
+    ],
+    "overridden": false
 }
