@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * @file
+ * Confirm path aliases are saved internally as the system path.
+ */
+
+require_once(__DIR__ . '/link.test');
+
+/**
+ * Confirm path aliases are saved internally as the system path.
+ */
+class LinkConvertInternalTestCase extends LinkBaseTestClass {
+
+  /**
+   * {@inheritdoc}
+   */
+  function setUp() {
+    parent::setUp('path');
+  }
+
+  /**
+   * Test the alias handling.
+   */
+  function testInternalPathConversion() {
+    global $base_url;
+
+    // Create 2 fields, one which converts aliases and one which doesn't.
+    $settings = array(
+      'instance[settings][convert_aliases]' => TRUE,
+    );
+    $field_name_converts = $this->createLinkField('page', $settings);
+    $field_name_plain = $this->createLinkField('page');
+
+    // Programatically create a node with an alias to link to.
+    $aliased_node = new Node(array(
+      'type' => 'page',
+      'title' => $this->randomName(),
+      'uid' => 1,
+      'path' => array(
+        'alias' => $this->randomName(),
+      ),
+      // This is needed for path alias to be saved.
+      'language' => LANGUAGE_NONE,
+      'status' => 1,
+    ));
+    node_object_prepare($aliased_node);
+    $aliased_node->save();
+
+    $this->backdropGet($aliased_node->path['alias']);
+    $this->assertText($aliased_node->title, 'Aliased node created.');
+
+    $this->backdropGet('node/add/page');
+
+    $label = $this->randomName();
+    $edit = array(
+      'title' => $label,
+      $field_name_converts . '[und][0][title]' => $label,
+      $field_name_converts . '[und][0][url]' => $aliased_node->path['alias'],
+      $field_name_plain . '[und][0][title]' => $label,
+      $field_name_plain . '[und][0][url]' => $aliased_node->path['alias'],
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertRaw(' has been created.', 'Node created');
+
+    // Load the node that was created.
+    $url = $this->getUrl();
+    $url = str_replace($base_url . '/', '', $url);
+    $normal_path = backdrop_lookup_path('source', $url);
+    $split = explode('/', $normal_path);
+    $nid = array_pop($split);
+
+    $node = node_load($nid);
+
+    $this->assertEqual($node->{$field_name_converts}[LANGUAGE_NONE][0]['url'], "node/{$aliased_node->nid}", "The field value was saved as the internal path for the alias.");
+
+    $this->assertEqual($node->{$field_name_plain}[LANGUAGE_NONE][0]['url'], $aliased_node->path['alias'], "The field value was saved as the given alias.");
+  }
+}
