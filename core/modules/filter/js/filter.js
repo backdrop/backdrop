@@ -90,14 +90,23 @@ Backdrop.behaviors.filterEditors = {
         });
       }
       // Detach any editor when the containing form is submitted.
-      $this.parents('form').on('submit', function (event) {
-        // Do not detach if the event was canceled.
-        if (event.isDefaultPrevented()) {
-          return;
-        }
-        // Detach the editor with "submit" when doing a non-AJAX submit.
-        Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor], 'submit');
-      });
+      var form = $this.closest('form').get(0);
+      if (form) {
+        var onSubmitCapture = function () {
+          // Register the detach handler during the capture phase so it is
+          // appended to the very end of the form's bubble queue, guaranteeing
+          // it runs AFTER all direct form submit listeners (such as CKEditor 5).
+          form.addEventListener('submit', function (event) {
+            if (event.defaultPrevented) {
+              return;
+            }
+            Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor], 'submit');
+          }, { once: true });
+        };
+
+        $this.data('filterEditorsSubmitCapture', onSubmitCapture);
+        form.addEventListener('submit', onSubmitCapture, true);
+      }
     });
   },
   detach: function (context, settings, trigger) {
@@ -108,6 +117,12 @@ Backdrop.behaviors.filterEditors = {
       var field = $this.closest('.text-format-wrapper').find('textarea').get(-1);
       if (trigger !== 'serialize') {
         $this.removeOnce('filterEditors');
+        var onSubmitCapture = $this.data('filterEditorsSubmitCapture');
+        var form = $this.closest('form').get(0);
+        if (onSubmitCapture && form) {
+          form.removeEventListener('submit', onSubmitCapture, true);
+          $this.removeData('filterEditorsSubmitCapture');
+        }
       }
       if (field && Backdrop.settings.filter.formats[activeEditor]) {
         Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor], trigger);
