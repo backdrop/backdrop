@@ -101,11 +101,13 @@ class LayoutStyleDynamic extends LayoutStyle {
   public function formValidate($form, $form_state) {
     parent::formValidate($form, $form_state);
 
-    if ($form_state['values']['style'] != 'dynamic') {
+    $values = $form_state['values'];
+
+    if ($values['style'] != 'dynamic' || !isset($values['style_settings']['wrapper_tag'])) {
       return;
     }
 
-    if ($form_state['values']['style_settings']['wrapper_tag'] == 'details' && $form_state['values']['style_settings']['title_tag'] != 'summary') {
+    if ($values['style_settings']['wrapper_tag'] == 'details' && $values['style_settings']['title_tag'] != 'summary') {
       form_set_error('style_settings[title_tag]', t('The <em>DETAILS (collapsible)</em> tag requires that the <strong>Heading level</strong> use the <em>Details summary</em> tag.'));
     }
   }
