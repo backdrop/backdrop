@@ -1140,7 +1140,7 @@ class views_plugin_display extends views_plugin {
         ),
       ),
       'pager' => array(
-        'title' => t('Pager'),
+        'title' => t('Pager settings'),
         'column' => 'second',
       ),
       'exposed' => array(
@@ -1261,7 +1261,7 @@ class views_plugin_display extends views_plugin {
 
     $options['pager'] = array(
       'category' => 'pager',
-      'title' => t('Use pager'),
+      'title' => NULL,
       'value' => $pager_plugin->plugin_title(),
       'setting' => $pager_str,
       'desc' => t("Change this display's pager setting."),
