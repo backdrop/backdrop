@@ -538,6 +538,7 @@ class views_handler_field extends views_handler {
       '#states' => array(
         'visible' => array(
           ':input[name="options[element_type_enable]"]' => array('checked' => TRUE),
+          ':input[name="options[element_type]"]' => array('notValue' => "0"),
         ),
       ),
       '#default_value' => !empty($this->options['element_class']) || (string) $this->options['element_class'] == '0',
@@ -552,6 +553,7 @@ class views_handler_field extends views_handler {
         'visible' => array(
           ':input[name="options[element_type_enable]"]' => array('checked' => TRUE),
           ':input[name="options[element_class_enable]"]' => array('checked' => TRUE),
+          ':input[name="options[element_type]"]' => array('notValue' => "0"),
         ),
       ),
       '#fieldset' => 'style_settings',
@@ -582,6 +584,7 @@ class views_handler_field extends views_handler {
       '#states' => array(
         'visible' => array(
           ':input[name="options[element_label_type_enable]"]' => array('checked' => TRUE),
+          ':input[name="options[element_label_type]"]' => array('notValue' => "0"),
         ),
       ),
       '#default_value' => !empty($this->options['element_label_class']) || (string) $this->options['element_label_class'] == '0',
@@ -596,6 +599,7 @@ class views_handler_field extends views_handler {
         'visible' => array(
           ':input[name="options[element_label_type_enable]"]' => array('checked' => TRUE),
           ':input[name="options[element_label_class_enable]"]' => array('checked' => TRUE),
+          ':input[name="options[element_label_type]"]' => array('notValue' => "0"),
         ),
       ),
       '#fieldset' => 'style_settings',
@@ -627,6 +631,7 @@ class views_handler_field extends views_handler {
       '#states' => array(
         'visible' => array(
           ':input[name="options[element_wrapper_type_enable]"]' => array('checked' => TRUE),
+          ':input[name="options[element_wrapper_type]"]' => array('notValue' => "0"),
         ),
       ),
       '#default_value' => !empty($this->options['element_wrapper_class']) || (string) $this->options['element_wrapper_class'] == '0',
@@ -641,6 +646,7 @@ class views_handler_field extends views_handler {
         'visible' => array(
           ':input[name="options[element_wrapper_class_enable]"]' => array('checked' => TRUE),
           ':input[name="options[element_wrapper_type_enable]"]' => array('checked' => TRUE),
+          ':input[name="options[element_wrapper_type]"]' => array('notValue' => "0"),
         ),
       ),
       '#fieldset' => 'style_settings',
