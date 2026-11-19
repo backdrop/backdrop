@@ -1,0 +1,7 @@
+name = Devel Generate
+description = Generate dummy users, nodes, and taxonomy terms.
+package = Development
+backdrop = 1.x
+dependencies[] = devel
+configure = devel/generate
+type = module
