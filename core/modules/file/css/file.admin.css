@@ -11,6 +11,57 @@
 .form-managed-file .form-submit {
   margin: 0;
 }
+
+/**
+ * Hide the default browser file upload widget.
+ * - "display: none;"
+ * - "visibility: hidden;" removes the tabindex, which is a UX issue.
+ */
+.form-managed-file .upload-file-label input[type="file"] {
+  /*position:absolute;
+  top: -1000px;*/
+  display: none;
+  /*visibility: hidden;*/
+}
+
+/**
+ * Style the "Upload new file" button the same as the "Select existing file"
+ * one.
+ *
+ * @todo:
+ * - Most of this should be moved/consolidated with what already exists in
+ *   /core.themes/seven/css/style.css.
+ * - This button should also be tweaked accordingly in themes like Basis/Bartik.
+ */
+.form-managed-file .upload-file-label {
+  display: inline-block;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: normal;
+  margin-right: 0.5em;
+  color: #444b53;
+  background: #e5e5e6;
+  line-height: 43px;
+  border: 0;
+  border-radius: 4px;
+  padding: 0 25px;
+}
+.form-managed-file .upload-file-label:hover,
+.form-managed-file .upload-file-label:focus {
+  text-decoration: none;
+  background-color: #CFDE56;
+  border-color: #CFDE56;
+}
+.form-managed-file .upload-file-label:active {
+  /* @todo, decide on an active state */
+  text-decoration: none;
+  background-color: #CFDE56;
+  border-color: #CFDE56;
+  -webkit-box-shadow: 0 0 5px rgb(220, 220, 220);
+  -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
+  box-shadow: 0 0 5px rgb(220, 220, 220);
+}
+
 .form-managed-file .progress-disabled {
   display: inline;
   float: none;
