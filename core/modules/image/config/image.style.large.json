@@ -10,7 +10,7 @@
             "data": {
                 "width": "800",
                 "height": "600",
-                "upscale": 1
+                "upscale": 0
             },
             "weight": 1
         }
