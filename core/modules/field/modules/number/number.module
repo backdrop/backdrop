@@ -187,6 +187,12 @@ function number_field_instance_settings_form_validate($element, &$form_state, $f
  */
 function number_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   foreach ($items as $delta => $item) {
+    if (!is_numeric($item['value'])) {
+      $errors[$field['field_name']][$langcode][$delta][] = array(
+        'error' => 'number',
+        'message' => t('%name: must be a number.', array('%name' => $instance['label'])),
+      );
+    }
     if ($item['value'] != '') {
       if (is_numeric($instance['settings']['min']) && $item['value'] < $instance['settings']['min']) {
         $errors[$field['field_name']][$langcode][$delta][] = array(
