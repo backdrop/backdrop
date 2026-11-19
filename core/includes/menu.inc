@@ -2662,6 +2662,9 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     // Put the selected menu at the front of the list.
     array_unshift($menu_names, $selected_menu);
 
+    global $language;
+    $langcodes = array(LANGUAGE_NONE, $language->langcode);
+
     $query = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC));
     $query->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
     $query->fields('ml');
@@ -2669,6 +2672,7 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     $query->addField('ml', 'weight', 'link_weight');
     $query->fields('m');
     $query->condition('ml.link_path', $path_candidates, 'IN');
+    $query->condition('ml.langcode', $langcodes, 'IN');
     $query->addTag('preferred_menu_links');
 
     // Sort candidates by link path and menu name.
