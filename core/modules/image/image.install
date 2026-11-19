@@ -75,23 +75,113 @@ function image_field_schema($field) {
  */
 function image_requirements($phase) {
   $requirements = array();
+  $problems_detected = FALSE;
 
   if ($phase == 'runtime') {
     // Check for the PHP GD library.
     if (function_exists('imagegd2')) {
       $info = gd_info();
+
       $requirements['image_gd'] = array(
         'value' => $info['GD Version'],
+        'severity' => REQUIREMENT_OK,
       );
 
-      // Check for filter and rotate support.
-      if (function_exists('imagefilter') && function_exists('imagerotate')) {
-        $requirements['image_gd']['severity'] = REQUIREMENT_OK;
+      // Check if toolkit-supported image formats can be processed by the GD
+      // library installed with PHP.
+      $check_formats = array(
+        'GIF' => array(
+          'info' => array('GIF Read Support', 'GIF Create Support'),
+          'read' => 'imagecreatefromgif',
+          'write' => 'imagegif',
+        ),
+        'JPEG' => array(
+          'info' => array('JPEG Support'),
+          'read' => 'imagecreatefromjpeg',
+          'write' => 'imagejpeg',
+        ),
+        'PNG' => array(
+          'info' => array('PNG Support'),
+          'read' => 'imagecreatefrompng',
+          'write' => 'imagepng',
+        ),
+        'WEBP' => array(
+          'info' => ['WebP Support'],
+          'read' => 'imagecreatefromwebp',
+          'write' => 'imagewebp',
+        ),
+      );
+      $fix_info = array();
+      $descriptions = array();
+      $supported_formats = array();
+      $unsupported_formats = array();
+      foreach ($check_formats as $format => $data) {
+        $supported = TRUE;
+        if (!function_exists($data['read']) || !function_exists($data['write'])) {
+          $supported = FALSE;
+        }
+        foreach ($data['info'] as $info_key) {
+          if (!array_key_exists($info_key, $info) || $info[$info_key] === FALSE) {
+            $supported = FALSE;
+          }
+        }
+
+        if ($supported) {
+          $supported_formats[] = $format;
+          $descriptions[] = array(
+            'data' => t('@format image format supported.', array('@format' => $format)),
+            'class' => array('status-ok'),
+          );
+        }
+        else {
+          $unsupported_formats[] = $format;
+          $descriptions[] = array(
+            'data' => t('@format image format not supported.', array('@format' => $format)),
+            'class' => array('status-error'),
+          );
+        }
       }
-      else {
+
+      if (!empty($unsupported_formats)) {
+        $problems_detected = TRUE;
         $requirements['image_gd']['severity'] = REQUIREMENT_WARNING;
-        $requirements['image_gd']['description'] = t('The GD Library for PHP is enabled, but was compiled without support for functions used by the rotate and desaturate effects. It was probably compiled using the official GD libraries from http://www.libgd.org instead of the GD library bundled with PHP. You should recompile PHP --with-gd using the bundled GD library. See <a href="http://www.php.net/manual/book.image.php">the PHP manual</a>.');
+        $fix_info[] = t('If you want to add support for any unsupported image format, check the <a href="@url">PHP GD installation documentation</a>.', array('@url' => 'https://www.php.net/manual/image.installation.php'));
       }
+
+      // Check for support of image effects.
+      $check_effects = array(
+        'Desaturate' => 'imagefilter',
+        'Rotate' => 'imagerotate',
+      );
+      $unsupported_effects = array();
+      foreach ($check_effects as $effect => $function) {
+        if (!function_exists($function)) {
+          $requirements['image_gd']['severity'] = REQUIREMENT_WARNING;
+          $unsupported_effects[] = $effect;
+          $descriptions[] = array(
+            'data' => t('@effect effect not supported.', array('@effect' => $effect)),
+            'class' => array('status-error'),
+          );
+        }
+        else {
+          $descriptions[] = array(
+            'data' => t('@effect effect supported.', array('@effect' => $effect)),
+            'class' => array('status-ok'),
+          );
+        }
+      }
+      if (!empty($unsupported_effects)) {
+        $problems_detected = TRUE;
+        $fix_info[] = t('The GD library was compiled without support for functions required by certain effects. It was probably compiled using the official GD libraries from http://www.libgd.org instead of the GD library bundled with PHP. If you want to add support for these effects, recompile PHP --with-gd using the bundled GD library. See <a href="http://www.php.net/manual/book.image.php">the PHP manual</a>.');
+      }
+
+      $formats_and_effects = theme('item_list', array('items' => $descriptions, 'attributes' => array('class' => array('requirements'))));
+      $fix_info = theme('item_list', array('items' => $fix_info, 'title' => t('Fixing issues')));
+      $requirements['image_gd']['description'] = $formats_and_effects . $fix_info;
+
+      $support_status = $problems_detected ? t('Partial support of image formats and effects') : t('All image formats and effects supported');
+      $requirements['image_gd']['value'] .= ' - ' . $support_status;
+
     }
     else {
       $requirements['image_gd'] = array(
@@ -100,7 +190,7 @@ function image_requirements($phase) {
         'description' => t('The GD library for PHP is missing or outdated. Check the <a href="@url">PHP image documentation</a> for information on how to correct this.', array('@url' => 'http://www.php.net/manual/book.image.php')),
       );
     }
-    $requirements['image_gd']['title'] = t('GD library rotate and desaturate effects');
+    $requirements['image_gd']['title'] = t('GD library');
   }
 
   return $requirements;
