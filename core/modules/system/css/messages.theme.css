@@ -59,7 +59,7 @@
   text-decoration: underline;
 }
 .messages a:hover {
-  text-decoration: none;
+  text-decoration-style: double;
 }
 
 .messages.status {
