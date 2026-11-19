@@ -66,6 +66,8 @@ interface EntityControllerInterface {
    *
    * @return
    *   The renderable array.
+   *
+   * @since 1.21.0 Method added.
    */
   public function buildContent(EntityInterface $entity, $view_mode = 'full', $langcode = NULL);
 
@@ -86,6 +88,8 @@ interface EntityControllerInterface {
    *
    * @return array
    *   The renderable array, keyed by entity type and entity ID.
+   *
+   * @since 1.21.0 Method added.
    */
   public function view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL);
 }
@@ -575,6 +579,8 @@ class DefaultEntityController implements EntityControllerInterface {
 
   /**
    * Implements EntityControllerInterface::buildContent().
+   *
+   * @since 1.21.0 Method added.
    */
   public function buildContent(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
     global $language_content;
@@ -607,6 +613,8 @@ class DefaultEntityController implements EntityControllerInterface {
 
   /**
    * Implements EntityControllerInterface::view().
+   *
+   * @since 1.21.0 Method added.
    */
   public function view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
     global $language_content;
