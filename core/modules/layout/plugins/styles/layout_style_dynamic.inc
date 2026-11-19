@@ -25,19 +25,18 @@ class LayoutStyleDynamic extends LayoutStyle {
     parent::form($form, $form_state);
 
     if (!$this->is_region) {
-      $tag_list = array(
-        'div' => 'DIV',
-        'aside' => 'ASIDE',
-        'section' => 'SECTION',
-        'nav' => 'NAV',
-        'p' => 'P',
-        'details' => 'DETAILS',
-        '' => t('No wrapper'),
-      );
       $form['wrapper_tag'] = array(
         '#title' => t('Wrapper tag'),
         '#type' => 'select',
-        '#options' => $tag_list,
+        '#options' => array(
+          'div' => 'DIV',
+          'aside' => 'ASIDE',
+          'section' => 'SECTION',
+          'nav' => 'NAV',
+          'p' => 'P',
+          'details' => t('DETAILS (collapsible)'),
+          '' => t('No wrapper'),
+        ),
         '#weight' => -1,
         '#default_value' => $this->settings['wrapper_tag'],
       );
@@ -57,7 +56,7 @@ class LayoutStyleDynamic extends LayoutStyle {
           'h6' => 'H6',
           'div' => 'DIV',
           'p' => 'P',
-          'summary' => 'Details summary',
+          'summary' => 'DETAILS summary',
         ),
         '#default_value' => $this->settings['title_tag'],
         '#weight' => 2,
@@ -72,7 +71,14 @@ class LayoutStyleDynamic extends LayoutStyle {
       $form['content_tag'] = array(
         '#title' => t('Content tag'),
         '#type' => 'select',
-        '#options' => $tag_list,
+        '#options' => array(
+          'div' => 'DIV',
+          'aside' => 'ASIDE',
+          'section' => 'SECTION',
+          'nav' => 'NAV',
+          'p' => 'P',
+          '' => t('No wrapper'),
+        ),
         '#default_value' => $this->settings['content_tag'],
         '#weight' => 8,
       );
@@ -86,6 +92,17 @@ class LayoutStyleDynamic extends LayoutStyle {
         ),
         '#weight' => 9,
       );
+    }
+  }
+
+  /**
+   * Validate handler to validate the form settings.
+   */
+  public function formValidate($form, $form_state) {
+    parent::formValidate($form, $form_state);
+
+    if ($form_state['values']['style_settings']['wrapper_tag'] == 'details' && $form_state['values']['style_settings']['title_tag'] != 'summary') {
+      form_set_error('style_settings[title_tag]', t('The <em>DETAILS (collapsible)</em> tag requires that the <strong>Heading level</strong> use the <em>Details summary</em> tag.'));
     }
   }
 }
