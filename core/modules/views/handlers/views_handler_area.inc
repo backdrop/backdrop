@@ -94,6 +94,19 @@ class views_handler_area extends views_handler {
   }
 
   /**
+   * Does that area have nothing to show.
+   *
+   * This method should be overridden by more complex handlers where the output
+   * is not static and maybe itself be empty if it's rendered.
+   *
+   * @return bool
+   *   Return TRUE if the area is empty, else FALSE.
+   */
+  public function is_empty() {
+    return empty($this->options['empty']);
+  }
+
+  /**
    * Area handlers shouldn't have groupby.
    */
   function use_group_by() {

@@ -11,6 +11,13 @@
  */
 class views_handler_area_view extends views_handler_area {
 
+  /**
+   * Stores whether the embedded view is actually empty.
+   *
+   * @var bool
+   */
+  protected $is_empty;
+
   function option_definition() {
     $options = parent::option_definition();
 
@@ -52,13 +59,24 @@ class views_handler_area_view extends views_handler_area {
   function render($empty = FALSE) {
     if ($view = $this->loadView()) {
       if (!empty($this->options['inherit_arguments']) && !empty($this->view->args)) {
-        return $view->preview(NULL, $this->view->args);
+        $output = $view->preview(NULL, $this->view->args);
       }
       else {
-        return $view->preview(NULL);
+        $output = $view->preview(NULL);
       }
+      $this->is_empty = $view->display_handler->output_is_empty();
+      return $output;
     }
     return '';
+  }
+
+  public function is_empty() {
+    if (isset($this->is_empty)) {
+      return $this->is_empty;
+    }
+    else {
+      return parent::is_empty();
+    }
   }
 
   /**
