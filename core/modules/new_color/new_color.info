@@ -1,0 +1,7 @@
+name = New Color
+description = Construct a stylesheet from user entered branding form.
+package = Theme
+version = BACKDROP_VERSION
+type = module
+backdrop = 1.x
+configure = admin/appearance/new-color
