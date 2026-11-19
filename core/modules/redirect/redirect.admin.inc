@@ -322,8 +322,9 @@ function redirect_list_form_operations_confirm_form($form, &$form_state, $operat
 /**
  * Page callback; Redirect to the form for creating a redirect.
  */
-function redirect_add_redirect_page() {
-  backdrop_goto('admin/config/urls/redirect/add');
+function redirect_add_redirect_page(array $source = array()) {
+  $options = array('query' => $source);
+  backdrop_goto('admin/config/urls/redirect/add', $options);
 }
 
 /**
@@ -340,6 +341,11 @@ function redirect_add_redirect_page() {
  * @ingroup forms
  */
 function redirect_edit_form($form, &$form_state, $redirect = NULL) {
+  // If not editing an existing redirect.
+  if (empty($form_state['build_info'][args])) {
+    backdrop_set_title(t('Add redirect'), CHECK_PLAIN);
+  }
+
   if (!isset($redirect)) {
     // backdrop_set_title() used to "manually" change the page title. See:
     // https://github.com/backdrop/backdrop-issues/issues/3315
