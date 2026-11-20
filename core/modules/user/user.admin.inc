@@ -313,19 +313,76 @@ function user_login_settings($form, &$form_state) {
   // User login settings.
   $form['user_login'] = array(
     '#type' => 'fieldset',
-    '#title' => t('User login'),
+    '#title' => t('Authentication'),
     '#weight' => -2,
     '#config' => 'system.core',
   );
   $form['user_login']['user_login_method'] = array(
     '#type' => 'radios',
-    '#title' => t('Users may log in using'),
+    '#title' => t('People may log in using'),
     '#options' => array(
       USER_LOGIN_USERNAME_OR_EMAIL => t('Username or email address'),
-      USER_LOGIN_USERNAME_ONLY => t('Username'),
-      USER_LOGIN_EMAIL_ONLY => t('Email address'),
+      USER_LOGIN_USERNAME_ONLY => t('Username only'),
+      USER_LOGIN_EMAIL_ONLY => t('Email address only'),
     ),
     '#default_value' => $core_config->get('user_login_method'),
+  );
+
+  $form['user_login_page_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Login page display'),
+    '#description' => 'Login pages include "Create new account", "Log in", and "Reset password" pages.',
+  );
+  $complexity_default = 'standard';
+  $user_login_appearance = $core_config->get('user_login_appearance');
+  if ($user_login_appearance == 'simplified') {
+    $complexity_default = 'simplified';
+  }
+  $form['user_login_page_settings']['complexity'] = array(
+    '#title' => t('Regions and branding'),
+    '#type' => 'radios',
+    '#options' => array(
+      'standard' => t('Standard, layout-based login pages'),
+      'simplified' => t('Simplified login pages contain only small forms with site name'),
+    ),
+    '#default_value' => $complexity_default,
+    'simplified' => array(
+      '#description' => t('All layout regions such as header, footer, and sidebar are suppressed.'),
+    ),
+  );
+  $form['user_login_page_settings']['login_admin_theme'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use the administration theme for simplified login pages'),
+    '#default_value' => $core_config->get('login_admin_theme'),
+    '#config' => 'system.core',
+    '#description' => t('When disabled, the default front-end theme will be used.'),
+    '#indentation' => 1,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="complexity"]' => array('value' => 'simplified'),
+      ),
+    ),
+  );
+  $user_login_page_tab_options = array(
+    'links' => t('Links below the form'),
+    'tabs' => t('Tabs above the form'),
+  );
+  $user_login_appearance_default = 'tabs';
+  if ($user_login_appearance == 'links' || $user_login_appearance == 'simplified') {
+    $user_login_appearance_default = 'links';
+  }
+  $form['user_login_page_settings']['user_login_appearance'] = array(
+    '#title' => t('Navigation between standard login pages'),
+    '#type' => 'radios',
+    '#options' => $user_login_page_tab_options,
+    '#default_value' => $user_login_appearance_default,
+    '#config' => 'system.core',
+    '#indentation' => 1,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="complexity"]' => array('value' => 'standard'),
+      ),
+    ),
   );
 
   $form['ip_limit_settings'] = array(
@@ -400,45 +457,6 @@ function user_login_settings($form, &$form_state) {
     ),
   );
 
-  $form['user_login_appearance_setting'] = array(
-    '#type' => 'fieldset',
-    '#title' => '',
-  );
-  $user_login_page_tab_options = array(
-    'tabs' => t('Use tabs'),
-    'links' => t('Use links'),
-    'simplified' => t('Show simplified page'),
-  );
-  $user_login_appearance = $core_config->get('user_login_appearance');
-  $form['user_login_appearance_setting']['user_login_appearance'] = array(
-    '#title' => t('Login page options'),
-    '#type' => 'radios',
-    '#options' => $user_login_page_tab_options,
-    '#default_value' => $user_login_appearance ? $user_login_appearance : 'tabs',
-    '#config' => 'system.core',
-    'tabs' => array(
-      '#description' => t('Show tabs for "Create new account", "Log in", and "Reset password" links.'),
-    ),
-    'links' => array(
-      '#description' => t('Show plain links to these pages.'),
-    ),
-    'simplified' => array(
-      '#description' => t('Show plain links to these pages, and hide all layout regions, such as headers, footers, and sidebars.'),
-    ),
-  );
-  $form['user_login_appearance_setting']['login_admin_theme'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Use the administration theme for simplified login pages'),
-    '#default_value' => $core_config->get('login_admin_theme'),
-    '#config' => 'system.core',
-    '#description' => t('If disabled, the default front-end theme will be used. This setting only has an effect when the "Show simplified page" option is selected.'),
-    '#indentation' => 1,
-    '#states' => array(
-      'visible' => array(
-        ':input[name="user_login_appearance"]' => array('value' => 'simplified'),
-      ),
-    ),
-  );
   $form['flood_log_failed_attempts'] = array(
     '#type' => 'checkbox',
     '#title' => t('Log excessive failed login attempts.'),
@@ -448,10 +466,24 @@ function user_login_settings($form, &$form_state) {
 
   $form = system_settings_form($form);
 
+  $form['#validate'][] = 'user_login_settings_validate';
   // Add another submit handler to flush caches on save, needed to rebuild
   // menus and clear the page cache for anonymous users.
   $form['#submit'][] = 'user_login_settings_submit';
   return $form;
+}
+
+/**
+ * Validation handler for user_login_settings().
+ */
+function user_login_settings_validate($form, &$form_state) {
+  if ($form_state['values']['complexity'] == 'simplified') {
+    $form_state['values']['user_login_appearance'] = 'simplified';
+  }
+  if ($form_state['values']['complexity'] == 'standard') {
+    $form_state['values']['login_admin_theme'] = FALSE;
+  }
+  unset($form_state['values']['complexity']);
 }
 
 /**

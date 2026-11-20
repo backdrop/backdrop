@@ -284,6 +284,7 @@ function system_themes_page() {
  */
 function system_themes_admin_form($form, &$form_state, $theme_options) {
   // Administration theme settings.
+  $config = config('system.core');
   $form['admin_theme'] = array(
     '#type' => 'fieldset',
     '#title' => t('Administration theme'),
@@ -292,8 +293,21 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
     '#type' => 'select',
     '#options' => $theme_options,
     '#title' => t('Administration theme'),
-    '#default_value' => config_get('system.core', 'admin_theme'),
+    '#default_value' => $config->get('admin_theme'),
   );
+  $user_login = $config->get('user_login_appearance');
+  if ($user_login == 'simplified') {
+    $form['admin_theme']['login_admin_theme'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use the administration theme for simplified login pages'),
+      '#default_value' => $config->get('login_admin_theme'),
+      '#weight' => 2,
+    );
+    if (user_access('administer account settings')) {
+      $description = t('Only available when <em>Simplified login pages</em> is selected on the <a href="!url"> Login settings page</a>', array('!url' => url('admin/config/people/login')));
+      $form['admin_theme']['login_admin_theme']['#description'] = $description;
+    }
+  }
   $form['admin_theme']['actions'] = array('#type' => 'actions');
   $form['admin_theme']['actions']['submit'] = array(
     '#type' => 'submit',
@@ -320,6 +334,7 @@ function system_themes_admin_form_submit($form, &$form_state) {
   }
 
   $config->set('admin_theme', $new_admin_theme);
+  $config->set('login_admin_theme', $form_state['values']['login_admin_theme']);
   $config->save();
 }
 
