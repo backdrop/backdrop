@@ -1,0 +1,6 @@
+[CodeSignUiTestCase]
+name = Code Sign UI functionality
+description = Test the administrative interface for managing Code Sign profiles.
+group = Code Sign
+file = code_sign_ui.test
+dependencies[] = code_sign_ui
