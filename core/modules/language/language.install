@@ -97,7 +97,15 @@ function language_update_1000() {
       'default' => '',
       'description' => "Language code, e.g. 'de' or 'en-US'.",
     );
-    db_change_field('language', 'language', 'langcode', $langcode_spec, array('primary key' => array('langcode')));
+    db_change_field('language', 'language', 'langcode', $langcode_spec);
+    // While It is possible to do add indexes in a single step with
+    // db_change_field(), we are doing it separately to avoid issues with older
+    // versions of MariaDB.
+    // @see https://github.com/backdrop/backdrop-issues/issues/5496
+    // @todo: revert this workaround once the minimum version of MySQL/MariaDB
+    // in the Backdrop official system requirements is bumped to a version that
+    // doesn't exhibit this problem.
+    db_add_index('language', 'primary key', array('langcode'));
   }
 
   // Update the 'language_default' system variable, if configured.
