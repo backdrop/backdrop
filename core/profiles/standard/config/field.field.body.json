@@ -1,0 +1,21 @@
+{
+    "_config_name": "field.field.body",
+    "field_name": "body",
+    "type": "text_with_summary",
+    "entity_types": [
+        "node"
+    ],
+    "module": "text",
+    "active": 1,
+    "locked": 0,
+    "cardinality": 1,
+    "translatable": 0,
+    "deleted": 0,
+    "settings": [],
+    "storage": {
+        "type": "field_sql_storage",
+        "settings": [],
+        "module": "field_sql_storage",
+        "active": 1
+    }
+}
