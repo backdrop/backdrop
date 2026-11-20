@@ -1,0 +1,26 @@
+/* Collapsible dashboard blocks */
+.hide {
+  display: none !important;
+}
+
+.toggle-caret {
+  font-size: 0.5em;
+  margin-left: 8px;
+  transition: transform 0.2s;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.block-title[role="button"],
+h3[role="button"] {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  outline: none;
+}
+
+.block-title[role="button"]:focus-visible,
+h3[role="button"]:focus-visible {
+  outline: 2px solid #2274a5;
+  outline-offset: 2px;
+} 
