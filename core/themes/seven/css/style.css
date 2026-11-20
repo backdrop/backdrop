@@ -1591,6 +1591,25 @@ body.maintenance-page #logo {
   margin: 0 auto;
 }
 
+/* Links for the simplified login pages. */
+.user-form-links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.user-form-links li {
+  display: inline;
+  margin: 0.25em 0;
+}
+.user-form-links li:not(:last-child):after {
+  content: "•";
+  margin: 0 1em;
+  color: #666;
+}
+
 ol.task-list {
   margin: 0;
   padding-left: 0; /* LTR */
