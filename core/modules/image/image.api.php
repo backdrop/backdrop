@@ -44,6 +44,7 @@ function hook_image_effect_info() {
     'dimensions callback' => 'my_module_resize_dimensions',
     'form callback' => 'my_module_resize_form',
     'summary theme' => 'my_module_resize_summary',
+    'summary note' => t('Does not apply to SVG images.'),
   );
 
   return $effects;

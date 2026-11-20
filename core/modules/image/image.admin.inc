@@ -38,7 +38,8 @@ function image_style_form($form, &$form_state, $style) {
 
   $form_state['image_style'] = $style;
   $form['#tree'] = TRUE;
-  $form['#attached']['css'][backdrop_get_path('module', 'image') . '/css/image.admin.css'] = array();
+  $css_path = backdrop_get_path('module', 'image') . '/css/image.admin.css';
+  $form['#attached']['css'][$css_path] = array();
 
   // Show the thumbnail preview.
   $form['preview'] = array(
@@ -81,8 +82,17 @@ function image_style_form($form, &$form_state, $style) {
     $form['effects'][$key]['label'] = array(
       '#markup' => $effect['label'],
     );
+
+    $summary = '';
+    if (isset($effect['summary theme'])) {
+      $summary = theme($effect['summary theme'], array('data' => $effect['data']));
+    }
+    if (isset($effect['summary note'])) {
+      $summary .= ' <em>' . $effect['summary note'] . '</em>';
+    }
+
     $form['effects'][$key]['summary'] = array(
-      '#markup' => isset($effect['summary theme']) ? theme($effect['summary theme'], array('data' => $effect['data'])) : '',
+      '#markup' =>  trim($summary),
     );
     $form['effects'][$key]['weight'] = array(
       '#type' => 'weight',

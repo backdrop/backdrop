@@ -16,6 +16,7 @@ function image_image_effect_info() {
       'dimensions callback' => 'image_resize_dimensions',
       'form callback' => 'image_resize_form',
       'summary theme' => 'image_resize_summary',
+      'summary note' => t('Aspect ratio will be retained for SVG images.'),
     ),
     'image_scale' => array(
       'label' => t('Scale'),
@@ -32,6 +33,7 @@ function image_image_effect_info() {
       'dimensions callback' => 'image_resize_dimensions',
       'form callback' => 'image_crop_form',
       'summary theme' => 'image_crop_summary',
+      'summary note' => t('Cropping does not apply to SVG images.'),
     ),
     'image_crop' => array(
       'label' => t('Crop'),
@@ -40,12 +42,14 @@ function image_image_effect_info() {
       'dimensions callback' => 'image_resize_dimensions',
       'form callback' => 'image_crop_form',
       'summary theme' => 'image_crop_summary',
+      'summary note' => t('Does not apply to SVG images.'),
     ),
     'image_desaturate' => array(
       'label' => t('Desaturate'),
       'help' => t('Desaturate converts an image to grayscale.'),
       'effect callback' => 'image_desaturate_effect',
       'dimensions passthrough' => TRUE,
+      'summary note' => t('Does not apply to SVG images.'),
     ),
     'image_rotate' => array(
       'label' => t('Rotate'),
@@ -54,6 +58,7 @@ function image_image_effect_info() {
       'dimensions callback' => 'image_rotate_dimensions',
       'form callback' => 'image_rotate_form',
       'summary theme' => 'image_rotate_summary',
+      'summary note' => t('Does not apply to SVG images.'),
     ),
   );
 
