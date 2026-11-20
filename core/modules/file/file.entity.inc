@@ -299,7 +299,7 @@ class FileStorageController extends EntityDatabaseStorageController {
     }
 
     $entity->filesize = filesize($entity->uri);
-    if (!isset($entity->langcode)) {
+    if (!isset($entity->langcode) || $entity->langcode == NULL) {
       // Default the file's language code to none, because files are language
       // neutral more often than language dependent.
       $entity->langcode = LANGUAGE_NONE;

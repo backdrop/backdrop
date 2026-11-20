@@ -212,7 +212,7 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
           break;
 
         case 'langcode':
-          $replacements[$original] = $sanitize ? check_plain($node->langcode) : $node->langcode;
+          $replacements[$original] = $sanitize ? check_plain($node->langcode()) : $node->langcode();
           break;
 
         case 'url':
