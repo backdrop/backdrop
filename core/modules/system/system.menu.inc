@@ -84,7 +84,10 @@ function system_menu_block_form($config) {
     '#description' => t('The block will be visible only if the current page has its menu item at or below the level set here.'),
     '#states' => array(
       'visible' => array(
-        'select[name="block_settings[style]"]' => array('value' => 'tree'),
+        'select[name="block_settings[style]"]' => array(
+          array('value' => 'tree'),
+          array('value' => 'dropdown'),
+        ),
       ),
     ),
   );
@@ -316,9 +319,6 @@ function system_menu_tree_block_data(array &$config) {
   if ($config['style'] === 'top_only') {
     $config['level'] = 1;
     $config['depth'] = 1;
-  }
-  elseif ($config['style'] === 'dropdown') {
-    $config['level'] = 1;
   }
 
   // Determine the max depth based on level and depth setting.
