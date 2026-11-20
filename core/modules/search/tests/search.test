@@ -2093,3 +2093,123 @@ class SearchSetLocaleTest extends BackdropWebTestCase {
       ->execute();
   }
 }
+
+/**
+ * Test search_simplify() on every Unicode character, and some other cases.
+ */
+class SearchPreprocessLangcodeTest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  private $admin_user;
+
+  /**
+   * @var User
+   */
+  private $web_user;
+
+  public function setUp() {
+    parent::setUp('search', 'language', 'locale', 'translation','search_langcode_test');
+
+    $this->admin_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes', 'administer languages', 'administer content types', 'administer blocks', 'access administration pages', 'translate content'));
+
+    $this->web_user = $this->backdropCreateUser(array(
+      'create page content',
+      'edit own page content',
+      'translate content',
+      'search content',
+      'use advanced search',
+    ));
+
+    $this->backdropLogin($this->admin_user);
+
+    // Set "Page" content type to use multilingual support with
+    // translation.
+    $this->backdropGet('admin/structure/types/manage/page');
+    $edit = array();
+    $edit['language'] = TRANSLATION_ENABLED;
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Page')), 'Page content type has been updated.');
+
+    backdrop_static_reset('language_list');
+    backdrop_static_reset('locale_url_outbound_alter');
+    backdrop_static_reset('locale_language_url_rewrite_url');
+  }
+
+  /**
+   * Tests that hook_search_preprocess() returns the correct langcode.
+   */
+  function testPreprocessLangcode() {
+    $this->backdropLogin($this->web_user);
+
+    // Create a node.
+    $node_title = $this->randomName();
+    $node_body =  $this->randomName();
+    $edit = array();
+    $field_langcode = LANGUAGE_NONE;
+    $edit["title"] = $node_title;
+    $edit["body[$field_langcode][0][value]"] = $node_body;
+    $edit['langcode'] = 'en';
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+    $this->assertRaw(t('Page %title has been created.', array('%title' => $node_title)), 'Page created.');
+
+    // Check to make sure the node was created.
+    $node = $this->backdropGetNodeByTitle($node_title);
+    $this->assertTrue($node, t('Node found in database.'));
+
+    // First update the index. This does the initial processing.
+    node_update_index();
+
+    // Then, run the shutdown function. Testing is a unique case where indexing
+    // and searching has to happen in the same request, so running the shutdown
+    // function manually is needed to finish the indexing process.
+    search_update_totals();
+
+    // Search for the title of the node with a POST query.
+    $edit = array('or' => $node->label());
+    $this->backdropPost('search/node', $edit, t('Advanced search'));
+
+    // Checks if the langcode has been passed by hook_search_preprocess().
+    $this->assertText('Langcode Preprocess Test: en');
+  }
+
+  /**
+   * Tests stemming for hook_search_preprocess().
+   */
+  function testPreprocessStemming() {
+    $this->backdropLogin($this->web_user);
+
+    // Create a node.
+    $node = $this->backdropCreateNode(array(
+      'title' => 'we are testing',
+      'body' => array('en' => array(array())),
+      'langcode' => 'en',
+    ));
+
+    // First update the index. This does the initial processing.
+    node_update_index();
+
+    // Then, run the shutdown function. Testing is a unique case where indexing
+    // and searching has to happen in the same request, so running the shutdown
+    // function manually is needed to finish the indexing process.
+    search_update_totals();
+
+    // Search for the title of the node with a POST query.
+    $edit = array('or' => 'testing');
+    $this->backdropPost('search/node', $edit, t('Advanced search'));
+
+    // Check if the node has been found.
+    $this->assertText('Search results');
+    $this->assertText('we are testing');
+
+    // Search for the same node using a different query.
+    $edit = array('or' => 'test');
+    $this->backdropPost('search/node', $edit, t('Advanced search'));
+
+    // Check if the node has been found.
+    $this->assertText('Search results');
+    $this->assertText('we are testing');
+
+  }
+}
