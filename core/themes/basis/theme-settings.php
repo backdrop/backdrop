@@ -59,6 +59,19 @@ if (module_exists('color')) {
     $form['primary_tabs'][$field] = color_get_color_element($form['theme']['#value'], $field, $form);
   }
 
+  $form['cards'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Cards'),
+    '#collapsible' => TRUE,
+  );
+  $fields = array(
+    'cardsblockbg',
+    'cardimagebg',
+  );
+  foreach ($fields as $field) {
+    $form['cards'][$field] = color_get_color_element($form['theme']['#value'], $field, $form);
+  }
+
   $form['footer'] = array(
     '#type' => 'fieldset',
     '#title' => t('Footer Settings'),
