@@ -17,3 +17,39 @@
 .menu-toggle-state:not(:checked) ~ .menu {
   display: block;
 }
+
+@keyframes hide-dropdowns-until-ready {
+  0% {
+    visibility: hidden;
+    height: 0;
+    opacity: 0;
+  }
+  1% {
+    visibility: visible;
+  }
+  99% {
+    height: 0;
+  }
+  100% {
+    height: auto;
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.menu-dropdown {
+  /* Default hidden state */
+  visibility: hidden;
+  height: 0;
+  opacity: 0;
+  /* Waits for 3 seconds before showing the nav, unless JS loads */
+  animation: hide-dropdowns-until-ready 0.25s 3s 1 forwards;
+}
+
+/* As soon as JS loads show everything */
+.menu-toggles-processed.menu-dropdown {
+  visibility: visible;
+  height: auto;
+  opacity: 1;
+  animation: none;
+}
