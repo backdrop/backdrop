@@ -963,7 +963,7 @@ function date_week_range($week, $year) {
 
   // Move forwards to the last day of the week.
   $max_date = clone($min_date);
-  date_modify($max_date, '+6 days');
+  date_modify($max_date, '+6 days +23 hours +59 minutes +59 seconds');
 
   if (date_format($min_date, 'Y') != $year) {
     $min_date = new BackdropDateTime($year . '-01-01 00:00:00');
@@ -999,7 +999,7 @@ function date_iso_week_range($week, $year) {
 
   // Move forwards to the last day of the week.
   $max_date = clone($min_date);
-  date_modify($max_date, '+6 days');
+  date_modify($max_date, '+6 days +23 hours +59 minutes +59 seconds');
   return array($min_date, $max_date);
 }
 
