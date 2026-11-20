@@ -104,3 +104,21 @@ body.update-1-30 .block-hero-no-image {
     font-size: 2.625em;
   }
 }
+
+/**
+ * Some changes to fix problems with extra white space between blocks in Basis.
+ * Is there a better location?
+ **/
+
+.update-1-30 .block {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+.update-1-30 .container .l-flexible-row {
+  padding-bottom: 2rem;
+}
+
+.update-1-30 .l-header {
+  margin-bottom: 0;
+}
