@@ -103,7 +103,24 @@ html.admin-bar-fixed table.sticky-enabled :target {
   background-color: #45454a;
 }
 #admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail {
+  /* light gray */
   background-color: #9f9f9f;
+}
+/* Level 2 */
+#admin-bar #admin-bar-menu > li > .dropdown .dropdown > li > a.expanded-trail {
+  background-color: #45454a; /* lighter */
+}
+/* Level 3 */
+#admin-bar #admin-bar-menu > li > .dropdown .dropdown .dropdown > li > a.expanded-trail {
+  background-color: #202020; /* darker */
+}
+/* Level 4 */
+#admin-bar #admin-bar-menu > li > .dropdown .dropdown .dropdown .dropdown > li > a.expanded-trail {
+  background-color: #45454a; /* lighter */
+}
+/* Level 5 */
+#admin-bar #admin-bar-menu > li > .dropdown .dropdown .dropdown .dropdown .dropdown > li > a.expanded-trail {
+  background-color: #202020; /* darker */
 }
 
 #admin-bar li {
@@ -122,6 +139,21 @@ html.admin-bar-fixed table.sticky-enabled :target {
   position: static;
   background: #202020;
   vertical-align: top;
+}
+#admin-bar ul .dropdown {
+  background: #45454a;
+}
+#admin-bar ul ul .dropdown {
+  background: #202020;
+}
+#admin-bar ul ul ul .dropdown {
+  background: #45454a;
+}
+#admin-bar ul ul ul ul .dropdown {
+  background: #202020;
+}
+#admin-bar ul ul ul ul ul .dropdown {
+  background: #45454a;
 }
 #admin-bar-wrapper {
   padding: 0 0.5em;
@@ -155,7 +187,15 @@ html.admin-bar-fixed table.sticky-enabled :target {
 }
 #admin-bar a.expanded-trail,
 #admin-bar span.expanded-trail {
-  background-color: #45454a;
+  #background-color: #45454a;
+}
+#admin-bar ul.dropdown a.expanded-trail,
+#admin-bar ul span.expanded-trail {
+  background-color: red;
+}
+#admin-bar ul ul a.expanded-trail,
+#admin-bar ul ul span.expanded-trail {
+  background-color: blue;
 }
 
 #admin-bar .dropdown .admin-bar-tab a {
@@ -196,7 +236,7 @@ html.admin-bar-fixed table.sticky-enabled :target {
   width: 15em; /* Required for Opera. */
 }
 #admin-bar .dropdown li li li {
-  opacity: 1;
+  #opacity: 1;
 }
 
 /* Second-level lists. */
@@ -247,7 +287,7 @@ html.admin-bar-fixed table.sticky-enabled :target {
 
 /* Second-and-more-level hovering. */
 #admin-bar .dropdown li li.expandable > a {
-  background: #45454a;
+  #background: #45454a;
   position: relative;
 }
 #admin-bar .dropdown li li.expandable > a::before {
