@@ -85,6 +85,12 @@
         </div>
       </div><!-- /.l-middle -->
 
+      <?php if (!empty($content['content'])): ?>
+        <main class="l-content" role="main" aria-label="<?php print t('Main content'); ?>">
+          <?php print $content['content']; ?>
+        </main>
+      <?php endif; ?>
+
       <?php if (!empty($content['bottom'])): ?>
         <div class="l-bottom">
           <?php print $content['bottom']; ?>
