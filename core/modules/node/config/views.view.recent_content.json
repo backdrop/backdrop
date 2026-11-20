@@ -3,7 +3,7 @@
     "name": "recent_content",
     "description": "A list of recently published content.",
     "module": "node",
-    "storage": 2,
+    "storage": 4,
     "tag": "",
     "disabled": false,
     "base_table": "node",
