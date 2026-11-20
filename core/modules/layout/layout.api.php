@@ -152,6 +152,96 @@ function hook_layout_context_info() {
 }
 
 /**
+ * Provides information on visibility conditions available to Layout module.
+ *
+ * Access plugins allow site builders to provide visibility conditions for
+ * layouts and blocks.
+ *
+ * Each type of visibility condition requires a class that controls access
+ * to the layout of block. See the LayoutAccess base class for additional
+ * documentation.
+
+ * @return array
+ *   Each item in the returned array of info should have the following keys:
+ *   - title: The human-readable name of the context.
+ *   - description: A description of what the access plugin does.
+ *   - class: The name of a class to handle access. This class should
+ *     extend the LayoutAccess class. The class should be registered in
+ *     hook_autoload_info().
+ *   - required contexts: (optional) An array of contexts required for this
+ *     visibility condition. These contexts are keyed by their internal name
+ *     that this plugin will receive. The value of each item should be the type
+ *     of context, as listed by hook_layout_context_info().
+ *   - required contexts labels: (optional) Provides human-readable labels for
+ *     the required contexts. This is helpful when a plugin needs two or more
+ *     contexts of the same type.
+ *
+ * @see hook_autoload_info()
+ * @see layout_layout_access_info()
+ * @see LayoutAccess
+ */
+function hook_layout_access_info() {
+  $info['user_role'] = array(
+    'title' => t('User account: Role'),
+    'description' => t('Control access by role.'),
+    'class' => 'UserRoleLayoutAccess',
+    // Contexts are specified as context key => context type. The key will be
+    // used in the $contexts array passed to the access class methods. The type
+    // references a context provided by hook_layout_context_info().
+    'required contexts' => array(
+      'user' => 'user',
+    ),
+    // Optional if needing to clarify between contexts of the same type.
+    'required contexts labels' => array(
+      'user' => t('User account'),
+    ),
+  );
+  return $info;
+}
+
+/**
+ * Provides information on relationships available to Layout module.
+ *
+ * Relationship plugins establish bridges between layout or block contexts,
+ * allowing site builders to create visibility conditions or to use contexts
+ * different from the contexts provided by the current layout or block.
+ *
+ * Each type of relationship requires a class that makes other contexts
+ * available to the layout of block. See the LayoutRelationship base class for
+ * additional documentation.
+
+ * @return array
+ *   Each item in the returned array of info should have the following keys:
+ *   - title: The human-readable name of the context.
+ *   - description: A description of what the access plugin does.
+ *   - class: The name of a class to handle access. This class should
+ *     extend the LayoutAccess class. The class should be registered in
+ *     hook_autoload_info().
+ *   - context: The type of context from which this plugin is providing a
+ *     relationship. These contexts are defined by hook_layout_context_info()
+ *   - context_label: (optional) A human-readable label for the context.
+ *
+ * @see hook_autoload_info()
+ * @see layout_layout_relationship_info()
+ * @see LayoutRelationship
+ */
+function hook_layout_relationship_info() {
+  // This plugin provides a relationship to relate the Author (user) from a
+  // piece of content (node).
+  $info['author_from_node'] = array(
+    'title' => t('Author of content'),
+    'class' => 'LayoutRelationshipAuthorFromNode',
+    // This relationship will be available to layouts or blocks that have "node"
+    // as a context.
+    'context' => 'node',
+    'context_label' => t('Content'),
+    'description' => t('Creates a user account context based on the author of content.'),
+  );
+
+  return $info;
+}
+
+/**
  * Provides information on rendering styles that can be used by layouts.
  *
  * This hook provides a list of styles that can be used both by regions and
