@@ -123,3 +123,9 @@ name = Search with numeric locale set
 description = Check that search works with numeric locale settings.
 group  = Search
 file = search.test
+
+[SearchPreprocessLangcodeTest]
+name = Search preprocess langcode
+description = Check that the hook_search_preprocess passes the correct langcode from the entity.
+group  = Search
+file = search.test

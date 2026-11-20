@@ -2435,7 +2435,7 @@ function _node_index_node(Node $node) {
   }
 
   // Update index.
-  search_index($node->nid, 'node', $text);
+  search_index($node->nid, 'node', $text, $node->langcode);
 }
 
 /**

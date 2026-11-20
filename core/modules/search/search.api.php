@@ -27,7 +27,7 @@
  * You can use hook_search_access() to limit access to searching,
  * and hook_search_page() to override how search results are displayed.
  *
- * @return
+ * @return array
  *   Array with optional keys:
  *   - title: Title for the tab on the search page for this module. Title must
  *     be untranslated, but to register it within translation database pass it
@@ -85,7 +85,7 @@ function hook_search_reset() {
  * Implementing modules do not need to check whether they are active when
  * calculating their return values.
  *
- * @return
+ * @return array
  *  An associative array with the key-value pairs:
  *  - 'remaining': The number of items left to index.
  *  - 'total': The total number of items to index.
@@ -101,7 +101,7 @@ function hook_search_status() {
 /**
  * Add elements to the search settings form.
  *
- * @return
+ * @return array
  *   Form array for the Search settings page at admin/config/search/settings.
  *
  * @ingroup search
@@ -150,12 +150,12 @@ function hook_search_admin() {
  * index, and user_search_execute() for an example that doesn't use the search
  * index.
  *
- * @param $keys
+ * @param string $keys
  *   The search keywords as entered by the user.
- * @param $conditions
+ * @param array|null $conditions
  *   An optional array of additional conditions, such as filters.
  *
- * @return
+ * @return array
  *   An array of search results. To use the default search result
  *   display, each item should have the following keys':
  *   - 'link': Required. The URL of the found item.
@@ -220,7 +220,7 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
       'node' => $node,
       'extra' => $extra,
       'score' => $item->calculated_score,
-      'snippet' => search_excerpt($keys, $node->body),
+      'snippet' => search_excerpt($keys, $node->rendered, $item->langcode),
     );
   }
   return $results;
@@ -233,10 +233,10 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
  * implement this hook in order to override the default markup of search
  * results.
  *
- * @param $results
+ * @param array $results
  *   An array of search results.
  *
- * @return
+ * @return array
  *   A renderable array, which will render the formatted search results with a
  *   pager included.
  *
@@ -263,20 +263,30 @@ function hook_search_page($results) {
  *   instance, walk, walked, walking, and walks in searching.
  * - Expanding abbreviations and acronyms that occur in text.
  *
- * @param $text
+ * @param string $text
  *   The text to preprocess. This is a single piece of plain text extracted
  *   from between two HTML tags or from the search query. It will not contain
  *   any HTML entities or HTML tags.
+ * @param string|null $langcode
+ *   The language code of the entitiy that has been found.
  *
- * @return
+ * @return string
  *   The text after preprocessing. Note that if your module decides not to alter
  *   the text, it should return the original text. Also, after preprocessing,
  *   words in the text should be separated by a space.
  *
  * @ingroup search
  */
-function hook_search_preprocess($text) {
+function hook_search_preprocess($text, $langcode = NULL) {
   // Do processing on $text
+
+  // $langcode example:
+  // If the langcode is set and is 'en' then add 'en_text' to each $text. Using
+  // this everything with $langcode 'en' will also be found by 'en_text'.
+  if (isset($langcode) && $langcode == 'en') {
+    $text .= 'en_text';
+  }
+
   return $text;
 }
 
@@ -347,10 +357,10 @@ function hook_update_index() {
  * (i.e. from the query string of the request). The conditions may also be
  * generated internally - for example based on a module's settings.
  *
- * @param $keys
+ * @param string $keys
  *   The search keywords string.
  *
- * @return
+ * @return array
  *   An array of additional conditions, such as filters.
  *
  * @ingroup callbacks
