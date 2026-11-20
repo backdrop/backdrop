@@ -193,10 +193,10 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
 
     $project_name = $file->info['project'];
 
-    // Figure out what project type we're going to use to display this module
-    // or theme. If the project name is 'backdrop', we don't want it to show up
-    // under the usual "Modules" section, we put it at a special "Core"
-    // section at the top of the report.
+    // Figure out what project type we're going to use to display this module,
+    // theme, or layout template. If the project name is 'backdrop', we don't
+    // want it to show up under the usual "Modules"/"Themes"/"Layout templates"
+    // sections; we put it at a special "Core" section at the top of the report.
     if ($project_name == 'backdrop') {
       $project_display_type = 'core';
     }
@@ -221,8 +221,8 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     // The file info arrays for modules and themes have the human-readable name
     // of the project in a 'name' key, whereas layout templates in a 'title'
     // key.
-    // - the 'name' key holds the machine name for layouts
-    // - the 'title' key is not present in modules/themes
+    // - The 'name' key holds the machine name for layouts.
+    // - The 'title' key is not present in modules/themes.
     // @todo: Fix all that in https://github.com/backdrop/backdrop-issues/issues/2548
     $includes_name = isset($file->info['title']) ? $file->info['title'] : $file->info['name'];
     if (!isset($projects[$project_name])) {
@@ -235,7 +235,7 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
         'info' => update_filter_project_info($file->info),
         'datestamp' => $file->info['datestamp'],
         'includes' => array($file->name => $includes_name),
-        'project_type' => $project_name == 'backdrop' ? 'core' : $project_display_type,
+        'project_type' => $project_display_type,
         'project_status' => $status,
         'sub_themes' => $sub_themes,
         'base_themes' => $base_themes,
