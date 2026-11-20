@@ -2558,6 +2558,15 @@ function system_get_date_types($type = NULL) {
   $formats = system_get_date_formats($type);
 
   if ($type) {
+    $formats['type'] = $formats['name'];
+    $formats['title'] = $formats['label'];
+    $formats['locked'] = isset($formats['hidden']) ? $formats['hidden'] : '0';
+    if (!isset($formats['module'])) {
+      $formats['module'] = '';
+    }
+    $formats['is_new'] = FALSE;
+  }
+  else {
     foreach ($formats as &$format) {
       $format['type'] = $format['name'];
       $format['title'] = $format['label'];
@@ -2567,15 +2576,6 @@ function system_get_date_types($type = NULL) {
       }
       $format['is_new'] = FALSE;
     }
-  }
-  else {
-    $formats['type'] = $formats['name'];
-    $formats['title'] = $formats['label'];
-    $formats['locked'] = isset($formats['hidden']) ? $formats['hidden'] : '0';
-    if (!isset($formats['module'])) {
-      $formats['module'] = '';
-    }
-    $formats['is_new'] = FALSE;
   }
 
   return $formats;
