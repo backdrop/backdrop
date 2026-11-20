@@ -14,9 +14,11 @@ class BasisTestCase extends BackdropWebTestCase {
    * {@inheritdoc}
    */
   protected function setUp() {
-    theme_enable(array('basis'));
-    config_set('system.core', 'theme_default', 'basis');
-    parent::setUp();
+	  // Set up the test environment before enabling the theme so the theme
+	  // configuration is applied to the test site's database.
+	  parent::setUp();
+	  theme_enable(array('basis'));
+	  config_set('system.core', 'theme_default', 'basis');
   }
 
   /**

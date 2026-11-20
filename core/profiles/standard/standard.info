@@ -4,6 +4,9 @@ version = BACKDROP_VERSION
 backdrop = 1.x
 type = profile
 
+default_theme = basis
+admin_theme = seven
+
 dependencies[] = node
 dependencies[] = admin_bar
 dependencies[] = block

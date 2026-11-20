@@ -615,6 +615,9 @@ function install_tasks($install_state) {
       'display_name' => count($install_state['profiles']) == 1 ? st('Install site') : st('Install profile'),
       'type' => 'batch',
     ),
+    'install_profile_themes' => array(
+      'run' => INSTALL_TASK_RUN_IF_NOT_COMPLETED,
+    ),
     'install_import_translations' => array(
       'display_name' => st('Set up translations'),
       'display' => $needs_translations,
@@ -679,6 +682,15 @@ function install_tasks($install_state) {
     );
   }
   return $tasks;
+}
+/**
+ * Applies the installation profile's frontend and administration themes.
+ *
+ * @param array $install_state
+ *   An array containing the current installation state.
+ */
+function install_profile_themes(&$install_state) {
+  system_install_apply_profile_themes($install_state['profile_info']);
 }
 
 /**
