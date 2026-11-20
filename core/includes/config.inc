@@ -301,7 +301,13 @@ function config_install_default_config($project, $config_name = NULL) {
       $config = config($default_config_name);
       // We only create new configs, and do not overwrite existing ones.
       if ($config->isNew()) {
-        $config->setData($data);
+        // Add system properties.
+        $system_properties = array(
+          '_config_name' => $default_config_name,
+          '_config_project_type' => $project_type,
+          '_config_' . $project_type => $project,
+        );
+        $config->setData(array_merge($system_properties, $data));
         module_invoke_all('config_create', $config);
         $config->save();
       }
@@ -448,6 +454,20 @@ class Config {
    * @var string
    */
   protected $name;
+
+  /**
+   * The type of project that claims this configuration object.
+   *
+   * @var string
+   */
+  protected $project_type;
+
+  /**
+   * The name of the project that claims this configuration object.
+   *
+   * @var string
+   */
+  protected $project;
 
   /**
    * Whether the configuration object is new or has been saved to the storage.
@@ -1090,8 +1110,16 @@ class Config {
     if (!$this->isLoaded) {
       $this->load();
     }
-    // Ensure config name is saved in the result.
+
+    // Ensure config system properties are saved in the result.
     $this->data['_config_name'] = $this->name;
+    if (!isset($this->data['_config_project_type']) && isset($this->project_type)) {
+      $this->data['_config_project_type'] = $this->project_type;
+      $type_key = '_config_' . $this->project_type;
+      if (!isset($this->data[$type_key]) && isset($this->project)) {
+        $this->data[$type_key] = $this->project;
+      }
+    }
 
     // Ensure all _config_* keys are positioned at the top of the saved data.
     $config_keys = array();
