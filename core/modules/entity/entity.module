@@ -52,7 +52,7 @@ function entity_flush_caches() {
  * @param  string $machine_name
  *   Machine name of display mode.
  *
- * @return FALSE|array
+ * @return false|array
  *   Array representing the loaded display mode, or FALSE if not found.
  */
 function entity_view_mode_load($entity_type, $machine_name) {
@@ -214,7 +214,7 @@ function entity_access($op, $entity_type, ?EntityInterface $entity = NULL, ?User
  * The content built for the entity will vary depending on the $view_mode
  * parameter.
  *
- * @param Entity $entity
+ * @param EntityInterface $entity
  *   An entity object.
  * @param string $view_mode
  *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
@@ -240,7 +240,7 @@ function entity_build_content(EntityInterface $entity, $view_mode = 'full', $lan
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
  *
- * @return
+ * @return array
  *   The renderable array. If there is no information on how to view an entity,
  *   FALSE is returned.
  */
@@ -276,11 +276,11 @@ function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = N
  *   If unset, the page mode will be enabled if the current path is the URI
  *   of the entity, as returned by entity_uri().
  *
- * @return
+ * @return array
  *   The renderable array, keyed by the entity type and by entity ID. If
  *   there is no information on how to view an entity, FALSE is returned.
  */
-function entity_view_multiple($entity_type, $entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+function entity_view_multiple($entity_type, array $entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
   $info = entity_get_info($entity_type);
 
   if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
@@ -306,7 +306,7 @@ function entity_theme() {
 /**
  * Gets the entity info array of an entity type.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type, e.g. node, for which the info shall be returned, or NULL
  *   to return an array with info about all types.
  *
@@ -429,12 +429,12 @@ function entity_info_cache_clear() {
 /**
  * Extracts ID, revision ID, and bundle name from an entity.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type; e.g. 'node' or 'user'.
- * @param $entity
+ * @param Entity $entity
  *   The entity from which to extract values.
  *
- * @return
+ * @return array
  *   A numerically indexed array (not a hash table) containing these
  *   elements:
  *   - 0: Primary ID of the entity.
@@ -475,16 +475,16 @@ function entity_extract_ids($entity_type, $entity) {
  *
  * This function can be seen as reciprocal to entity_extract_ids().
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type; e.g. 'node' or 'user'.
- * @param $ids
+ * @param array $ids
  *   A numerically indexed array, as returned by entity_extract_ids(),
  *   containing these elements:
  *   - 0: Primary ID of the entity.
  *   - 1: Revision ID of the entity, or NULL if $entity_type is not versioned.
  *   - 2: Bundle name of the entity, or NULL if $entity_type has no bundles.
  *
- * @return
+ * @return object
  *   An entity object, initialized with the IDs provided.
  *
  * @deprecated since 1.15.0.
@@ -519,18 +519,18 @@ function entity_create_stub_entity($entity_type, $ids) {
  * extend the DefaultEntityController class. See node_entity_info() and the
  * NodeController in node.module as an example.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type to load, e.g. node or user.
- * @param $ids
+ * @param array $ids
  *   An array of entity IDs, FALSE with no conditions to load all entities of
  *   the requested entity type, or NULL with conditions to load all entities of
  *   the requested entity type that meet the given conditions.
- * @param $conditions
+ * @param array $conditions
  *   (deprecated) An associative array of conditions on the base table, where
  *   the keys are the database fields and the values are the values those
  *   fields must have. Instead, it is preferable to use EntityFieldQuery to
  *   retrieve a list of entity IDs loadable by this function.
- * @param $reset
+ * @param bool $reset
  *   Whether to reset the internal cache for the requested entity type.
  *
  * @return array
@@ -589,12 +589,12 @@ function entity_load($entity_type, $id) {
  * is useful to determine changes by comparing the entity being saved to the
  * stored entity.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type to load, e.g. node or user.
- * @param $id
+ * @param int $id
  *   The ID of the entity to load.
  *
- * @return
+ * @return EntityInterface|bool
  *   The unchanged entity, or FALSE if the entity cannot be loaded.
  */
 function entity_load_unchanged($entity_type, $id) {
@@ -606,9 +606,9 @@ function entity_load_unchanged($entity_type, $id) {
 /**
  * Deletes multiple entities permanently.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The type of the entity.
- * @param $ids
+ * @param array $ids
  *   An array of entity IDs of the entities to delete.
  */
 function entity_delete_multiple($entity_type, $ids) {
@@ -618,9 +618,9 @@ function entity_delete_multiple($entity_type, $ids) {
 /**
  * Constructs a new entity object, without permanently saving it.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The type of the entity.
- * @param $values
+ * @param array $values
  *   An array of values to set, keyed by property name. If the entity type has
  *   bundles the bundle key has to be specified.
  *
@@ -660,9 +660,9 @@ function entity_get_controller($entity_type) {
  * field_attach_prepare_view() to allow entity level hooks to act on content
  * loaded by field API.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The type of entity, i.e. 'node', 'user'.
- * @param $entities
+ * @param array $entities
  *   The entity objects which are being prepared for view, keyed by object ID.
  *
  * @see hook_entity_prepare_view()
@@ -697,16 +697,16 @@ function entity_prepare_view($entity_type, $entities) {
  * field_attach_prepare_view() to ensure that the correct content is loaded by
  * field API.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The type of entity, i.e. 'node', 'user'.
- * @param $entities
+ * @param array $entities
  *   The entity objects which are being prepared for view, keyed by object ID.
- * @param $view_mode
+ * @param string $view_mode
  *   The original display mode e.g. 'full', 'teaser'...
- * @param $langcode
+ * @param string|null $langcode
  *   (optional) A language code to be used for rendering. Defaults to the global
  *   content language of the current request.
- * @return
+ * @return array
  *   An associative array with arrays of entities keyed by display mode.
  *
  * @see hook_entity_view_mode_alter()
@@ -740,14 +740,78 @@ function entity_view_mode_prepare($entity_type, $entities, $view_mode, $langcode
 }
 
 /**
+ * Implements hook_preprocess().
+ *
+ * Add template suggestions for an entity based on view modes if they do not
+ * already exist.
+ *
+ * The eventual order of the entity's theme suggestions are:
+ * - entity-type__bundle (lowest priority = first in the array)
+ * - entity-type__bundle__view-mode
+ * - entity-type__id
+ * - entity-type__id__view-mode (highest priority = last in the array)
+ */
+function entity_preprocess(&$variables, $hook) {
+  if (!empty($variables['elements']['#view_mode'])) {
+
+    // Sometimes a rendered entity is passed into another theme function, in
+    // which case we should not process. But also account that #theme may be a
+    // hook suggestion itself. For example. #theme = 'comment__node_type'
+    // and $hook = 'comment'.
+    if ($variables['elements']['#theme'] != $hook && strpos($variables['elements']['#theme'], $hook . '__') !== 0) {
+      return;
+    }
+
+    $view_mode = $variables['elements']['#view_mode'];
+    foreach ($variables['elements'] as $item) {
+      if (is_a($item, 'Entity')) {
+        $entity = $item;
+      }
+    }
+    $entity_type = $entity->entityType();
+    $bundle = $entity->bundle();
+    $id = $entity->id();
+    $has_bundles = TRUE;
+    if ($entity_type == $bundle) {
+      $info = entity_get_info($entity_type);
+      if (empty($info['entity keys']['bundle'])) {
+        $has_bundles = FALSE;
+      }
+    }
+
+    $suggestions = &$variables['theme_hook_suggestions'];
+
+    // Ensure the base suggestions exist and if not, add them.
+    if ($has_bundles && !in_array("{$entity_type}__{$bundle}", $suggestions)) {
+      // The entity-type__bundle suggestion is typically "first".
+      array_unshift($suggestions, "{$entity_type}__{$bundle}");
+    }
+    if (!in_array("{$entity_type}__{$id}", $suggestions)) {
+      // The entity-type__id suggestion is always "last".
+      array_push($suggestions, "{$entity_type}__{$id}");
+    }
+
+    // Add view mode suggestions based on the location of the base suggestions.
+    if ($has_bundles && !in_array("{$entity_type}__{$bundle}__{$view_mode}", $suggestions)) {
+      $index = array_search("{$entity_type}__{$bundle}", $suggestions);
+      array_splice($suggestions, $index + 1, 0, "{$entity_type}__{$bundle}__{$view_mode}");
+    }
+    if (!in_array("{$entity_type}__{$id}__{$view_mode}", $suggestions)) {
+      $index = array_search("{$entity_type}__{$id}", $suggestions);
+      array_splice($suggestions, $index + 1, 0, "{$entity_type}__{$id}__{$view_mode}");
+    }
+  }
+}
+
+/**
  * Returns the URI elements of an entity.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type; e.g. 'node' or 'user'.
- * @param $entity
+ * @param EntityInterface $entity
  *   The entity for which to generate a path.
  *
- * @return
+ * @return array
  *   An array containing the 'path' and 'options' keys used to build the URI of
  *   the entity, and matching the signature of url(). NULL if the entity has no
  *   URI of its own.
@@ -762,9 +826,9 @@ function entity_uri($entity_type, $entity) {
  * See the 'label callback' component of the hook_entity_info() return value
  * for more information.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type; e.g., 'node' or 'user'.
- * @param $entity
+ * @param EntityInterface $entity
  *   The entity for which to generate the label.
  *
  * @return
