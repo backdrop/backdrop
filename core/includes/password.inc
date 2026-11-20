@@ -17,7 +17,7 @@
  * increase by 1 every Backdrop version in order to counteract increases in the
  * speed and power of computers available to crack the hashes.
  */
-define('BACKDROP_HASH_COUNT', 16);
+define('BACKDROP_HASH_COUNT', 17);
 
 /**
  * The minimum allowed log2 number of iterations for password stretching.
