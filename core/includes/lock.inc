@@ -70,7 +70,9 @@ function lock_initialize() {
 }
 
 /**
- * Helper function to get this request's unique id.
+ * Helper function to get this request's unique ID.
+ *
+ * @return string
  */
 function _lock_id() {
   // Do not use backdrop_static(). This identifier refers to the current
@@ -79,7 +81,7 @@ function _lock_id() {
   static $lock_id;
 
   if (!isset($lock_id)) {
-    // Assign a unique id.
+    // Assign a unique ID.
     $lock_id = uniqid(mt_rand(), TRUE);
     // We only register a shutdown function if a lock is used.
     backdrop_register_shutdown_function('lock_release_all', $lock_id);
@@ -90,12 +92,12 @@ function _lock_id() {
 /**
  * Acquire (or renew) a lock, but do not block if it fails.
  *
- * @param $name
+ * @param string $name
  *   The name of the lock. Limit of name's length is 255 characters.
- * @param $timeout
+ * @param float $timeout
  *   A number of seconds (float) before the lock expires (minimum of 0.001).
  *
- * @return
+ * @return bool
  *   TRUE if the lock was acquired, FALSE if it failed.
  */
 function lock_acquire($name, $timeout = 30.0) {
@@ -156,10 +158,10 @@ function lock_acquire($name, $timeout = 30.0) {
  *
  * If an existing lock has expired, it is removed.
  *
- * @param $name
+ * @param string $name
  *   The name of the lock.
  *
- * @return
+ * @return bool
  *   TRUE if there is no lock or it was removed, FALSE otherwise.
  */
 function lock_may_be_available($name) {
@@ -191,12 +193,12 @@ function lock_may_be_available($name) {
  * that are acquired very frequently, since the lock is likely to be acquired
  * again by a different request while waiting.
  *
- * @param $name
+ * @param string $name
  *   The name of the lock.
- * @param $delay
+ * @param int $delay
  *   The maximum number of seconds to wait, as an integer.
  *
- * @return
+ * @return bool
  *   TRUE if the lock holds, FALSE if it is available.
  */
 function lock_wait($name, $delay = 30) {
@@ -209,7 +211,6 @@ function lock_wait($name, $delay = 30) {
   // concerns, begin waiting for 25ms, then add 25ms to the wait period each
   // time until it reaches 500ms. After this point polling will continue every
   // 500ms until $delay is reached.
-
   // $delay is passed in seconds, but we will be using usleep(), which takes
   // microseconds as a parameter. Multiply it by 1 million so that all
   // further numbers are equivalent.
@@ -240,7 +241,7 @@ function lock_wait($name, $delay = 30) {
  *
  * This will release the named lock if it is still held by the current request.
  *
- * @param $name
+ * @param string $name
  *   The name of the lock.
  */
 function lock_release($name) {
@@ -255,6 +256,11 @@ function lock_release($name) {
 
 /**
  * Release all previously acquired locks.
+ *
+ * @param string|null $lock_id
+ *   Lock unique ID.
+ *
+ * @throws PDOException
  */
 function lock_release_all($lock_id = NULL) {
   global $locks;
