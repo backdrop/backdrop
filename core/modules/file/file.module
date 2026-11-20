@@ -1886,12 +1886,15 @@ function file_managed_file_browser_open($form, $form_state) {
 
   $submit_form = backdrop_get_form('file_managed_file_browser_form');
 
-  $title = t('Select from Image Library');
+  $view_name = config_get_translated('views.view.' . $view_name, 'human_name');
+  $title = t('Select from @view_name', array('@view_name' => $view_name));
+
   $options = array(
     'classes' => array('ui-dialog' => 'file-browser-container'),
     'width' => '90%',
     'modal' => TRUE,
   );
+
   $html = '';
   $html .= theme('status_messages');
   $html .= '<div class="file-browser">';
