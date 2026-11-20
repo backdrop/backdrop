@@ -30,8 +30,8 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
     $options['quantity'] = NULL;
     unset($options['tags']['first']);
     unset($options['tags']['last']);
-    $options['tags']['previous']['default'] = '‹‹';
-    $options['tags']['next']['default'] = '››';
+    $options['tags']['previous']['default'] = '‹';
+    $options['tags']['next']['default'] = '›';
 
     return $options;
   }
