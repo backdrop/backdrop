@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => 'chyess', 'chyeng', 'chyej', 'chyech', 'chyek', 'chyet', 'chyep', 'chyeh', 'cho', 'chog', 'chokk', 'chogs', 'chon', 'chonj', 'chonh', 'chod',

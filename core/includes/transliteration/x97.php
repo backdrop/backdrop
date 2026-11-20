@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => 'xu', 'ji', 'mu', 'chen', 'xiao', 'zha', 'ting', 'zhen', 'pei', 'mei', 'ling', 'qi', 'zhou', 'huo', 'sha', 'fei',

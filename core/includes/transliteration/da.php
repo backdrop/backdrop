@@ -3,6 +3,7 @@
  * @file
  * Danish language transliteration overrides.
  */
+
 $overrides['da'] = array(
   0xC5 => 'Aa',
   0xC6 => 'Ae',

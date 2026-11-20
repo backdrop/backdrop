@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => 'duil', 'duilg', 'duilm', 'duilb', 'duils', 'duilt', 'duilp', 'duilh', 'duim', 'duib', 'duibs', 'duis', 'duiss', 'duing', 'duij', 'duich',

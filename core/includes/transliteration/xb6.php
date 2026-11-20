@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file
+ */
 
 $base = array(
   0x00 => 'ttyels', 'ttyelt', 'ttyelp', 'ttyelh', 'ttyem', 'ttyeb', 'ttyebs', 'ttyes', 'ttyess', 'ttyeng', 'ttyej', 'ttyech', 'ttyek', 'ttyet', 'ttyep', 'ttyeh',

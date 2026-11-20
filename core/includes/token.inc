@@ -72,7 +72,7 @@
  *     check_plain() or other appropriate scrubbing functions before displaying
  *     data to users.
  *
- * @return
+ * @return string
  *   Text with tokens replaced.
  */
 function token_replace($text, array $data = array(), array $options = array()) {
@@ -127,7 +127,7 @@ function token_scan($text) {
 
   // Iterate through the matches, building an associative array containing
   // $tokens grouped by $types, pointing to the version of the token found in
-  // the source text. For example, $results['node']['title'] = '[node:title]';
+  // the source text. For example, $results['node']['title'] = '[node:title]';.
   $results = array();
   for ($i = 0; $i < count($tokens); $i++) {
     $results[$types[$i]][$tokens[$i]] = $matches[0][$i];
@@ -265,14 +265,14 @@ function token_info() {
 /**
  * Retrieve, sort, store token info from the cache.
  *
- * @param string|NULL $token_type
+ * @param string|null $token_type
  *   The optional token type that if specified will return
  *   $info['types'][$token_type].
- * @param string|NULL $token_name
+ * @param string|null $token_name
  *   The optional token name if specified will return
  *   $info['tokens'][$token_type][$token_name].
  *
- * @return array
+ * @return array|null
  *   An array of all token information from hook_token_info(), or the array
  *   of a token type or specific token.
  *
@@ -284,7 +284,8 @@ function token_get_info($token_type = NULL, $token_name = NULL) {
 
   $cache_token = cache('token');
 
-  // Use the advanced backdrop_static() pattern, since this is called very often.
+  // Use the advanced backdrop_static() pattern, since this is called very
+  // often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
     $backdrop_static_fast['token_info'] = &backdrop_static(__FUNCTION__);
@@ -343,7 +344,7 @@ function token_get_info($token_type = NULL, $token_name = NULL) {
  * @param string $token_name
  *   The token name.
  *
- * @return mixed
+ * @return string|null
  *   The module name that provides the token or NULL if the value does not
  *   exist.
  */
@@ -417,7 +418,7 @@ function token_get_token_problems() {
       'label' => t('The following token types are not defined but have tokens:'),
     ),
     'duplicate' => array(
-      'label' => t('The following token or token types are defined by multiple modules:')
+      'label' => t('The following token or token types are defined by multiple modules:'),
     ),
   );
 
@@ -470,8 +471,8 @@ function token_get_token_problems() {
  * @param string $token_type
  *   A token type name.
  *
- * @return array
- *  An array representing the token type. FALSE if no type found.
+ * @return array|false
+ *   An array representing the token type. FALSE if no type found.
  */
 function token_type_load($token_type) {
   $info = token_get_info();
@@ -572,10 +573,11 @@ function token_build_tree($token_type, array $options = array()) {
  *
  * @param array $tree
  *   An array of tokens as returned by token_build_tree().
+ *
  * @return array
  *   The array of tokens as flat array.
  */
-function token_flatten_tree($tree) {
+function token_flatten_tree(array $tree) {
   $result = array();
   foreach ($tree as $token => $token_info) {
     $result[$token] = $token_info;
@@ -589,6 +591,16 @@ function token_flatten_tree($tree) {
 
 /**
  * Recursive helper for token_build_tree().
+ *
+ * @param string $token_type
+ *   The token type being processed.
+ * @param array $options
+ *   The options array passed from token_build_tree().
+ * @param bool $parent_restricted
+ *   Whether the parent token is restricted.
+ *
+ * @return array
+ *   The built token tree.
  */
 function _token_build_tree($token_type, array $options, $parent_restricted = FALSE) {
   $options += array(
@@ -613,7 +625,7 @@ function _token_build_tree($token_type, array $options, $parent_restricted = FAL
       // Prevent duplicate recursive tokens. For example, this will prevent
       // the tree from generating the following tokens or deeper:
       // [comment:parent:parent]
-      // [comment:parent:root:parent]
+      // [comment:parent:root:parent].
       continue;
     }
     elseif (!empty($token_info['restricted']) && !$options['restricted']) {
@@ -673,8 +685,16 @@ function _token_build_tree($token_type, array $options, $parent_restricted = FAL
  *   '#max_tokens' => 10,
  * );
  * @endcode
+ *
+ * @param array &$element
+ *   The form element being validated.
+ * @param array $form_state
+ *   The current form state.
+ *
+ * @return array
+ *   The form element.
  */
-function token_element_validate(&$element, &$form_state) {
+function token_element_validate(array &$element, array &$form_state) {
   $value = isset($element['#value']) ? $element['#value'] : $element['#default_value'];
 
   if (!backdrop_strlen($value)) {
@@ -702,7 +722,10 @@ function token_element_validate(&$element, &$form_state) {
   if (isset($element['#token_types'])) {
     $invalid_tokens = token_get_invalid_tokens_by_context($tokens, $element['#token_types']);
     if ($invalid_tokens) {
-      form_error($element, t('The !element-title is using the following invalid tokens: @invalid-tokens.', array('!element-title' => $title, '@invalid-tokens' => implode(', ', $invalid_tokens))));
+      form_error($element, t('The !element-title is using the following invalid tokens: @invalid-tokens.', array(
+        '!element-title' => $title,
+        '@invalid-tokens' => implode(', ', $invalid_tokens),
+      )));
     }
   }
 
@@ -714,6 +737,7 @@ function token_element_validate(&$element, &$form_state) {
  *
  * @param string $name
  *   The token name to clean.
+ *
  * @return string
  *   The cleaned token name.
  */
@@ -721,7 +745,9 @@ function token_clean_token_name($name) {
   static $names = array();
 
   if (!isset($names[$name])) {
-    $cleaned_name = strtr($name, array(' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => ''));
+    $cleaned_name = strtr($name, array(
+      ' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '',
+    ));
     $cleaned_name = preg_replace('/[^\w\-]/i', '', $cleaned_name);
     $cleaned_name = trim($cleaned_name, '-');
     $names[$name] = $cleaned_name;
@@ -733,12 +759,13 @@ function token_clean_token_name($name) {
 /**
  * Validate an tokens in raw text based on possible contexts.
  *
- * @param string $value
+ * @param string|array $value
  *   A string with the raw text containing the raw tokens, or an array of
  *   tokens from token_scan().
  * @param array $valid_types
  *   An array of token types that will be used when token replacement is
  *   performed.
+ *
  * @return array
  *   An array with the invalid tokens in their original raw forms.
  */
@@ -777,6 +804,7 @@ function token_get_invalid_tokens_by_context($value, array $valid_types = array(
  *   The type of tokens to validate (e.g. 'node', etc.)
  * @param array $tokens
  *   A keyed array of tokens, and their original raw form in the source text.
+ *
  * @return array
  *   An array with the invalid tokens in their original raw forms.
  */
@@ -846,13 +874,13 @@ function token_render_array(array $array, array $options = array()) {
 /**
  * Renders a render array for display as a token.
  *
- * @param string $value
+ * @param string|array $value
  *   Value OR Render array.
  * @param array $options
  *   Array of options for rendering.  Values can include:
  *   - sanitize: Runs check_plain() on the rendered output.
  *
- * @return
+ * @return string
  *   HTML of rendered item.
  *
  * @see token_render_array_value()
