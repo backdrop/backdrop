@@ -337,6 +337,7 @@ function _date_field_widget_settings_form($field, $instance) {
       '#weight' => 5,
       '#fieldset' => 'date_format',
       '#attributes' => array('class' => array('indent')),
+      '#indentation' => 1,
       '#states' => array(
         'visible' => array(
           ':input[name="instance[widget][settings][input_format]"]' => array('value' => 'custom'),
@@ -593,9 +594,10 @@ function _date_field_settings_form($field, $instance, $has_data) {
   );
   $form['enddate_required'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Required'),
+    '#title' => t('Required end date'),
     '#default_value' => ((isset($settings['todate']) && $settings['todate'] === 'required') ? TRUE : FALSE),
     '#disabled' => $has_data,
+    '#indentation' => 1,
     '#states' => array(
       'invisible' => array(
         'input[name="field[settings][enddate_get]"]' => array('checked' => FALSE),

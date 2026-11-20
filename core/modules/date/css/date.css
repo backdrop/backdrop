@@ -146,11 +146,6 @@ div.date-calendar-day span.year {
 }
 
 /* Admin styling */
-.form-item.form-item-instance-widget-settings-input-format-custom,
-.form-item.form-item-field-settings-enddate-required {
-  margin-left: 1.3em;
-}
-
 #edit-field-settings-granularity .form-type-checkbox {
   margin-right: .6em; /* LTR */
 }
