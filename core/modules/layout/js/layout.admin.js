@@ -25,6 +25,19 @@ Backdrop.behaviors.layoutList = {
         $element.addClass('no-flexbox');
       }
     }
+    // Handle toggling the additional path rows.
+    $('a.more-paths-toggle').on('click', function(e) {
+      const $hidden_rows = $(this).closest('.layout-row').nextUntil('.layout-row', '.layout-group.additional');
+      $hidden_rows.toggle();
+      if ($hidden_rows.is(':visible')) {
+        $(this).text(Backdrop.t('Hide additional paths')).append('<span class="arrow close"></span>');
+      }
+      else {
+        $(this).text(Backdrop.t('Show additional paths')).append('<span class="arrow"></span>');
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    });
   }
 };
 
