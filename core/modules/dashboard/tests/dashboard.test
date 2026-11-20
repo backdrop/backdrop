@@ -291,4 +291,54 @@ class DashboardTest extends BackdropWebTestCase {
     $this->backdropGet('admin/dashboard');
     $this->assertResponse(200);
   }
+
+  /**
+   * Test custom dashboard layouts.
+   */
+  function testCustomDashboardLayout() {
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Make a new layout that creates a custom path with wildcards.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_path = 'custom-dashboard';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_path,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+
+    // We should be taken to the layout content page next.
+    $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
+
+    // Check that a block that requires dashboard contexts is not shown.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertNoLink(t('Dashboard - Welcome to Backdrop CMS!'));
+
+    // Test custom context validation.
+    $edit = array();
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Add context'));
+
+    // Add a custom dashboard context to the layout.
+    $edit = array(
+      'context' => 'dashboard',
+    );
+    $this->backdropPost(NULL, $edit, t('Load context'));
+    $edit = array();
+    $this->backdropPost(NULL, $edit, t('Add context'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that a block that requires dashboard contexts is now shown.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('Provides a welcome message, and links to get people started using Backdrop'));
+    $this->clickLink(t('Dashboard - Welcome to Backdrop CMS!'));
+    $edit = array();
+    $this->backdropPost(NULL, $edit, t('Add block'));
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropGet($layout_path);
+    $this->assertText(t('Here are some links to help get you started'));
+  }
 }
