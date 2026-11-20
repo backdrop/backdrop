@@ -479,7 +479,7 @@ Backdrop.ajax.prototype.beforeSend = function (jqXHR, options) {
     if (this.progress.message) {
       $('.throbber', this.progress.element).after('<div class="message">' + this.progress.message + '</div>');
     }
-    $(this.element).after(this.progress.element);
+    $(this.element).append(this.progress.element);
   }
 
   // Register the AJAX request so it can be cancelled if needed.
