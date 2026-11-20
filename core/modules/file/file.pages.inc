@@ -586,7 +586,7 @@ function file_manage_form($form, &$form_state, File $file) {
   // File destination information for administrators.
   $form['destination'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('manage files'),
+    '#access' => user_access('manage files') && file_is_writeable($file),
     '#title' => t('File location'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -719,7 +719,7 @@ function file_manage_form_submit($form, &$form_state) {
   /** @var File $file */
   $file = $form_state['file'];
   /** @var File $temporary_upload */
-  $temporary_upload = $form_state['values']['replace_upload'] ? file_load($form_state['values']['replace_upload']) : NULL;
+  $temporary_upload = isset($form_state['values']['replace_upload']) ? file_load($form_state['values']['replace_upload']) : NULL;
   $orphaned_uri = '';
 
   // Check if a replacement file has been uploaded.
