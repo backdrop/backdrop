@@ -44,7 +44,10 @@ class DashboardMenuBlock extends Block {
       return filter_xss($this->settings['admin_description']);
     }
 
-    return t('Links to manage menus.');
+    $preview = '<p>' . t('Links to manage menus.') . '</p>';
+    $preview .= $this->getAdminConditionsPreview();
+
+    return $preview;
   }
 
   /**

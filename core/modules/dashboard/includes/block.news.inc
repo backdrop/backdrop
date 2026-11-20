@@ -32,7 +32,10 @@ class DashboardNewsBlock extends Block {
       return filter_xss($this->settings['admin_description']);
     }
 
-    return t('Displays a news feed from BackdropCMS.org.');
+    $preview = '<p>' . t('Displays a news feed from BackdropCMS.org.') . '</p>';
+    $preview .= $this->getAdminConditionsPreview();
+
+    return $preview;
   }
 
   /**
