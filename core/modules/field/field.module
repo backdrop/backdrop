@@ -1366,6 +1366,7 @@ function field_block_info() {
 /**
  * Helper function to build a list of fields that have been made available as
  * a block.
+ *
  * @return array
  *   An array with all entity fields with known instances.
  */
