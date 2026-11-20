@@ -31,7 +31,7 @@ interface BackdropHTTPSystemInterface {
    *   An object with the returned data from the request. This object should
    *   match that returned by backdrop_http_request().
    *
-   * @see backdrop_http_request().
+   * @see backdrop_http_request()
    */
   public function request($url, array $options);
 }

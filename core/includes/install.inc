@@ -93,9 +93,9 @@ function backdrop_load_updates() {
  * updates. This is to allow users to upgrade from Drupal 7, where the last
  * installed schema will likely be in the 7xxx range.
  *
- * @param $module
+ * @param string $module
  *   A module name.
- * @return array|FALSE
+ * @return array|false
  *   If the module has updates, an unindexed array of available updates sorted
  *   by the order they should be executed. Otherwise, FALSE.
  */
@@ -183,9 +183,9 @@ function backdrop_get_installed_schema_version($module, $reset = FALSE, $array =
 /**
  * Update the installed version information for a module.
  *
- * @param $module
+ * @param string $module
  *   A module name.
- * @param $version
+ * @param string $version
  *   The new schema version.
  */
 function backdrop_set_installed_schema_version($module, $version) {
@@ -201,7 +201,7 @@ function backdrop_set_installed_schema_version($module, $version) {
 /**
  * Loads the installation profile, extracting its defined distribution name.
  *
- * @return
+ * @return string
  *   The distribution name defined in the profile's .info file. Defaults to
  *   "Backdrop CMS" if none is explicitly provided by the installation profile.
  *
@@ -225,11 +225,11 @@ function backdrop_install_profile_distribution_name() {
 /**
  * Detects the base URL using the PHP $_SERVER variables.
  *
- * @param $file
+ * @param string $file
  *   The name of the file calling this function so we can strip it out of
  *   the URI when generating the base_url.
  *
- * @return
+ * @return string
  *   The auto-detected $base_url that should be configured in settings.php
  */
 function backdrop_detect_baseurl($file = 'core/install.php') {
@@ -245,7 +245,7 @@ function backdrop_detect_baseurl($file = 'core/install.php') {
 /**
  * Returns all supported database installer objects that are compiled into PHP.
  *
- * @return
+ * @return array
  *   An array of database installer objects compiled into PHP.
  */
 function backdrop_load_database_driver() {
@@ -354,6 +354,8 @@ abstract class DatabaseTasks {
 
   /**
    * Ensure the PDO driver is supported by the version of PHP in use.
+   *
+   * @return bool
    */
   protected function hasPdoDriver() {
     return in_array($this->pdoDriver, PDO::getAvailableDrivers());
@@ -361,6 +363,9 @@ abstract class DatabaseTasks {
 
   /**
    * Assert test as failed.
+   *
+   * @param string $message
+   *   The message if query fails.
    */
   protected function fail($message) {
     $this->results[$message] = FALSE;
@@ -368,6 +373,9 @@ abstract class DatabaseTasks {
 
   /**
    * Assert test as a pass.
+   *
+   * @param string $message
+   *   The message if query passes.
    */
   protected function pass($message) {
     $this->results[$message] = TRUE;
@@ -375,6 +383,8 @@ abstract class DatabaseTasks {
 
   /**
    * Check whether Backdrop is installable on the database.
+   *
+   * @return bool
    */
   public function installable() {
     return $this->hasPdoDriver() && empty($this->error);
@@ -388,7 +398,7 @@ abstract class DatabaseTasks {
   /**
    * Return the minimum required version of the engine.
    *
-   * @return
+   * @return string|null
    *   A version string. If not NULL, it will be checked against the version
    *   reported by the Database engine using version_compare().
    */
@@ -545,7 +555,19 @@ abstract class DatabaseTasks {
   }
 
   /**
-   * Run SQL tests to ensure the database can execute commands with the current user.
+   * Run SQL tests to ensure the database can execute commands with the current
+   * user.
+   *
+   * @param string $query
+   *   The prepared statement query to run.
+   * @param string $pass
+   *   The message if query passes.
+   * @param string $fail
+   *   The message if query fails.
+   * @param bool $fatal
+   *   Flag to return. By default, FALSE.
+   *
+   * @return null|bool
    */
   protected function runTestQuery($query, $pass, $fail, $fatal = FALSE) {
     try {
@@ -554,7 +576,11 @@ abstract class DatabaseTasks {
       return NULL;
     }
     catch (Exception $e) {
-      $this->fail(st($fail, array('%query' => $query, '%error' => $e->getMessage(), '%name' => $this->name())));
+      $this->fail(st($fail, array(
+        '%query' => $query,
+        '%error' => $e->getMessage(),
+        '%name' => $this->name(),
+      )));
       return !$fatal;
     }
   }
@@ -564,7 +590,10 @@ abstract class DatabaseTasks {
    */
   protected function checkEngineVersion() {
     if ($this->minimumVersion() && version_compare(Database::getConnection()->version(), $this->minimumVersion(), '<')) {
-      $this->fail(st("The database version %version is less than the minimum required version %minimum_version.", array('%version' => Database::getConnection()->version(), '%minimum_version' => $this->minimumVersion())));
+      $this->fail(st("The database version %version is less than the minimum required version %minimum_version.", array(
+        '%version' => Database::getConnection()->version(),
+        '%minimum_version' => $this->minimumVersion(),
+      )));
     }
   }
 
@@ -587,13 +616,13 @@ abstract class DatabaseTasks {
   /**
    * Return driver specific configuration options.
    *
-   * @param $database
+   * @param array $database
    *   An array of driver specific configuration options.
    *
-   * @return
+   * @return array
    *   The options form array.
    */
-  public function getFormOptions($database) {
+  public function getFormOptions(array $database) {
     $form['database'] = array(
       '#type' => 'textfield',
       '#title' => st('MySQL Database name'),
@@ -671,13 +700,13 @@ abstract class DatabaseTasks {
    * Checks to ensure correct basic database settings and that a proper
    * connection to the database can be established.
    *
-   * @param $database
+   * @param array $database
    *   An array of driver specific configuration options.
    *
-   * @return
+   * @return array
    *   An array of driver configuration errors, keyed by form element name.
    */
-  public function validateDatabaseSettings($database) {
+  public function validateDatabaseSettings(array $database) {
     $errors = array();
 
     // Verify the table prefix.
@@ -704,7 +733,7 @@ class DatabaseTaskException extends Exception {
 /**
  * Replaces values in settings.php with values in the submitted array.
  *
- * @param $settings
+ * @param array $settings
  *   An array of settings that need to be updated.
  *
  * @return bool
@@ -712,7 +741,7 @@ class DatabaseTaskException extends Exception {
  *
  * @throws Exception
  */
-function backdrop_rewrite_settings($settings = array()) {
+function backdrop_rewrite_settings(array $settings = array()) {
   backdrop_static_reset('conf_path');
   include_once BACKDROP_ROOT . '/core/includes/utility.inc';
 
@@ -743,7 +772,9 @@ function backdrop_rewrite_settings($settings = array()) {
             $database_line_count = 5;
           }
           // Write new value to settings.php in the following format:
-          //    $'setting' = 'value'; // 'comment'
+          // @code
+          // $'setting' = 'value'; // 'comment'
+          // @endcode
           $setting = $settings[$variable_name];
           $new_line = '$' . $variable_name . " = " . backdrop_var_export($setting['value']) . ";" . (!empty($setting['comment']) ? ' // ' . $setting['comment'] . "\n" : "\n");
           $buffer .= $new_line;
@@ -940,15 +971,15 @@ make this configuration active, see admin/config/development/configuration/sync.
 /**
  * Verifies an installation profile for installation.
  *
- * @param $install_state
+ * @param array $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   The list of modules to install.
  *
  * @throws Exception
  */
-function backdrop_verify_profile($install_state) {
+function backdrop_verify_profile(array $install_state) {
   include_once BACKDROP_ROOT . '/core/includes/file.inc';
   include_once BACKDROP_ROOT . '/core/includes/common.inc';
 
@@ -1005,7 +1036,10 @@ function backdrop_install_system() {
   $system_versions = backdrop_get_schema_versions('system');
   $system_version = $system_versions ? end($system_versions) : SCHEMA_INSTALLED;
   db_insert('system')
-    ->fields(array('filename', 'name', 'type', 'owner', 'status', 'schema_version', 'bootstrap'))
+    ->fields(array(
+      'filename', 'name', 'type', 'owner', 'status',
+      'schema_version', 'bootstrap',
+    ))
     ->values(array(
       'filename' => $system_path . '/system.module',
       'name' => 'system',
@@ -1027,7 +1061,7 @@ function backdrop_install_system() {
  *   all modules in this list have already been disabled before this function
  *   is called.
  * @param bool $uninstall_dependents
- *   (optional)
+ *   (Optional)
  *   - If TRUE, dependency-checking is enabled. This means that any modules
  *     dependent on the passed-in module(s) are checked to see if they're
  *     already uninstalled, or if they're included in $module_list. If all
@@ -1050,7 +1084,7 @@ function backdrop_install_system() {
  * @see module_disable()
  * @see module_enable()
  */
-function backdrop_uninstall_modules($module_list = array(), $uninstall_dependents = TRUE) {
+function backdrop_uninstall_modules(array $module_list = array(), $uninstall_dependents = TRUE) {
   if ($uninstall_dependents) {
     // Get all module data so we can find dependents and sort.
     $module_data = system_rebuild_module_data();
@@ -1111,14 +1145,14 @@ function backdrop_uninstall_modules($module_list = array(), $uninstall_dependent
 /**
  * Verifies the state of the specified file.
  *
- * @param $file
+ * @param string $file
  *   The file to check for.
- * @param $mask
+ * @param int|null $mask
  *   An optional bitmask created from various FILE_* constants.
- * @param $type
+ * @param string $type
  *   The type of file. Can be file (default), dir, or link.
  *
- * @return
+ * @return bool
  *   TRUE on success or FALSE on failure. A message is set for the latter.
  */
 function backdrop_verify_install_file($file, $mask = NULL, $type = 'file') {
@@ -1137,7 +1171,10 @@ function backdrop_verify_install_file($file, $mask = NULL, $type = 'file') {
 
   // Verify file permissions.
   if (isset($mask)) {
-    $masks = array(FILE_EXIST, FILE_READABLE, FILE_WRITABLE, FILE_EXECUTABLE, FILE_NOT_READABLE, FILE_NOT_WRITABLE, FILE_NOT_EXECUTABLE);
+    $masks = array(
+      FILE_EXIST, FILE_READABLE, FILE_WRITABLE, FILE_EXECUTABLE,
+      FILE_NOT_READABLE, FILE_NOT_WRITABLE, FILE_NOT_EXECUTABLE,
+    );
     foreach ($masks as $current_mask) {
       if ($mask & $current_mask) {
         switch ($current_mask) {
@@ -1191,11 +1228,11 @@ function backdrop_verify_install_file($file, $mask = NULL, $type = 'file') {
 /**
  * Creates a directory with the specified permissions.
  *
- * @param $file
- *   The name of the directory to create;
- * @param $mask
+ * @param string $file
+ *   The name of the directory to create.
+ * @param int $mask
  *   The permissions of the directory to create.
- * @param $message
+ * @param bool $message
  *   (optional) Whether to output messages. Defaults to TRUE.
  *
  * @return bool
@@ -1203,7 +1240,10 @@ function backdrop_verify_install_file($file, $mask = NULL, $type = 'file') {
  */
 function backdrop_install_mkdir($file, $mask, $message = TRUE) {
   $mod = 0;
-  $masks = array(FILE_READABLE, FILE_WRITABLE, FILE_EXECUTABLE, FILE_NOT_READABLE, FILE_NOT_WRITABLE, FILE_NOT_EXECUTABLE);
+  $masks = array(
+    FILE_READABLE, FILE_WRITABLE, FILE_EXECUTABLE, FILE_NOT_READABLE,
+    FILE_NOT_WRITABLE, FILE_NOT_EXECUTABLE,
+  );
   foreach ($masks as $m) {
     if ($mask & $m) {
       switch ($m) {
@@ -1233,7 +1273,7 @@ function backdrop_install_mkdir($file, $mask, $message = TRUE) {
  *
  * This issues an on-site HTTP redirect. Messages (and errors) are erased.
  *
- * @param $path
+ * @param string $path
  *   An installer path.
  */
 function install_goto($path) {
@@ -1259,17 +1299,17 @@ function install_goto($path) {
  * that need to be bypassed), using this function to generate the URL for links
  * to the next steps of the script ensures that the links will work correctly.
  *
- * @param $query
+ * @param array $query
  *   (optional) An array of query parameters to merge in to the existing ones.
  *
- * @return
+ * @return string
  *   The URL of the current script, with query parameters modified by the
  *   passed-in $query. The URL is not sanitized, so it still needs to be run
  *   through check_url() if it will be used as an HTML attribute value.
  *
  * @see backdrop_requirements_url()
  */
-function backdrop_current_script_url($query = array()) {
+function backdrop_current_script_url(array $query = array()) {
   $uri = $_SERVER['SCRIPT_NAME'];
   $query = array_merge(backdrop_get_query_parameters(), $query);
   if (!empty($query)) {
@@ -1285,11 +1325,11 @@ function backdrop_current_script_url($query = array()) {
  * update.php) and returns a URL that can be used to attempt to proceed to the
  * next step of the script.
  *
- * @param $severity
+ * @param int $severity
  *   The severity of the requirements problem, as returned by
  *   backdrop_requirements_severity().
  *
- * @return
+ * @return string
  *   A URL for attempting to proceed to the next step of the script. The URL is
  *   not sanitized, so it still needs to be run through check_url() if it will
  *   be used as an HTML attribute value.
@@ -1316,6 +1356,15 @@ function backdrop_requirements_url($severity) {
  * Use st() if your code will only run during installation and never any other
  * time. Use get_t() if your code could run in either circumstance.
  *
+ * @param string $string
+ *   A string containing the English string to translate.
+ * @param array $args
+ *   An associative array of replacements to make.
+ * @param array $options
+ *   An associative array of additional options.
+ *
+ * @return string
+ *
  * @see t()
  * @see get_t()
  * @ingroup sanitization
@@ -1331,8 +1380,9 @@ function st($string, array $args = array(), array $options = array()) {
   if (!isset($strings)) {
     $strings = array();
     if (isset($install_state['parameters']['langcode'])) {
-      // If the given langcode was selected, there should be at least one .po file
-      // with its name ending in install.{$install_state['parameters']['langcode']}.po
+      // If the given langcode was selected, there should be at least one .po
+      // file with its name ending in:
+      // install.{$install_state['parameters']['langcode']}.po.
       // This might or might not be the entire filename. It is also possible
       // that multiple files end with the same extension, even if unlikely.
       $files = install_find_translation_files($install_state['parameters']['langcode']);
@@ -1368,10 +1418,10 @@ function st($string, array $args = array(), array $options = array()) {
 /**
  * Checks an installation profile's requirements.
  *
- * @param $profile
+ * @param string $profile
  *   Name of installation profile to check.
  *
- * @return
+ * @return array
  *   Array of the installation profile's requirements.
  *
  * @throws Exception
@@ -1402,15 +1452,15 @@ function backdrop_check_profile($profile) {
 /**
  * Extracts the highest severity from the requirements array.
  *
- * @param $requirements
+ * @param array $requirements
  *   An array of requirements as returned by system_get_requirements().
  *
- * @return
+ * @return int
  *   The highest severity in the array.
  *
  * @see system_get_requirements()
  */
-function backdrop_requirements_severity(&$requirements) {
+function backdrop_requirements_severity(array &$requirements) {
   $severity = REQUIREMENT_OK;
   foreach ($requirements as $requirement) {
     if (isset($requirement['severity'])) {
@@ -1423,7 +1473,7 @@ function backdrop_requirements_severity(&$requirements) {
 /**
  * Get run-time requirements and status information.
  *
- * @return
+ * @return array
  *   An array of requirements in the same format as is returned by
  *   hook_requirements().
  */
@@ -1440,10 +1490,10 @@ function system_get_requirements() {
 /**
  * Checks a module's requirements.
  *
- * @param $module
+ * @param string $module
  *   Machine name of module to check.
  *
- * @return
+ * @return bool
  *   TRUE or FALSE, depending on whether the requirements are met.
  */
 function backdrop_check_module($module) {
@@ -1457,7 +1507,10 @@ function backdrop_check_module($module) {
         if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
           $message = $requirement['description'];
           if (isset($requirement['value']) && $requirement['value']) {
-            $message .= ' (' . t('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) . ')';
+            $message .= ' (' . t('Currently using !item !version', array(
+              '!item' => $requirement['title'],
+              '!version' => $requirement['value'],
+            )) . ')';
           }
           backdrop_set_message($message, 'error');
         }
@@ -1502,12 +1555,12 @@ function backdrop_check_module($module) {
  *    dependencies[] = dblog
  * @endcode
  *
- * @param $profile
+ * @param string $profile
  *   Name of profile.
- * @param $langcode
+ * @param string $langcode
  *   Language code (if any).
  *
- * @return
+ * @return array
  *   The info array.
  */
 function install_profile_info($profile, $langcode = 'en') {
@@ -1532,7 +1585,8 @@ function install_profile_info($profile, $langcode = 'en') {
     );
 
     // backdrop_required_modules() includes the current profile as a dependency.
-    // Since a module can't depend on itself we remove that element of the array.
+    // Since a module can't depend on itself we remove that element of the
+    // array.
     array_shift($info['dependencies']);
 
     $cache[$profile] = $info;
@@ -1553,7 +1607,7 @@ function install_profile_info($profile, $langcode = 'en') {
  *   The file type to find based on extension. May be one of the following:
  *   - profile
  *   - install
- *   - info
+ *   - info.
  *
  * @return bool|string
  *   The full path to the profile .install file.
@@ -1584,6 +1638,11 @@ function _install_find_profile_file($profile_name, $file_extension = 'profile') 
  * on a database, that Backdrop needs. Tasks include simple checks like CREATE
  * TABLE to database specific functions like stored procedures and client
  * encoding.
+ *
+ * @param string $driver
+ *   The name of the driver.
+ *
+ * @return true
  */
 function db_run_tasks($driver) {
   db_installer_object($driver)->runTasks();
