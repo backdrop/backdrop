@@ -12,7 +12,7 @@ interface UuidInterface {
   /**
    * Generates a Universally Unique IDentifier (UUID).
    *
-   * @return
+   * @return string
    *   A 32 byte integer represented as a hex string formatted with 4 hyphens.
    */
   public function generate();
@@ -55,10 +55,10 @@ class Uuid {
    * Plugins should not implement validation, since UUIDs should be in a
    * consistent format across all plugins.
    *
-   * @param $uuid
+   * @param string $uuid
    *   The string to test.
    *
-   * @return
+   * @return bool
    *   TRUE if the string is well formed.
    */
   public function isValid($uuid) {
@@ -71,8 +71,8 @@ class Uuid {
    * The selection is made based on the enabled PHP extensions with the
    * most performant available option chosen.
    *
-   * @return
-   *  The class name for the optimal UUID generator.
+   * @return string
+   *   The class name for the optimal UUID generator.
    */
   protected function determinePlugin() {
     static $plugin;
@@ -100,6 +100,10 @@ class Uuid {
  * UUID implementation using the PECL extension.
  */
 class UuidPecl implements UuidInterface {
+
+  /**
+   * {@inheritdoc}
+   */
   public function generate() {
     return uuid_create(UUID_TYPE_DEFAULT);
   }
@@ -111,6 +115,10 @@ class UuidPecl implements UuidInterface {
  * @see http://php.net/com_create_guid
  */
 class UuidCom implements UuidInterface {
+
+  /**
+   * {@inheritdoc}
+   */
   public function generate() {
     // Remove {} wrapper and make lower case to keep result consistent.
     return backdrop_strtolower(trim(com_create_guid(), '{}'));
@@ -125,6 +133,10 @@ class UuidCom implements UuidInterface {
  * @see http://uuidtools.rubyforge.org/api/classes/UUIDTools/UUID.html
  */
 class UuidPhp implements UuidInterface {
+
+  /**
+   * {@inheritdoc}
+   */
   public function generate() {
     $hex = substr(hash('sha256', backdrop_random_bytes(16)), 0, 32);
 

@@ -38,6 +38,13 @@ function update_fix_compatibility() {
 
 /**
  * Tests the compatibility of a module or theme.
+ *
+ * @param string $name
+ *   Name of the module or theme.
+ * @param string $type
+ *   Project type.
+ *
+ * @return bool
  */
 function update_check_incompatibility($name, $type = 'module') {
   static $themes, $modules;
@@ -264,10 +271,10 @@ function update_prepare_language() {
 /**
  * Adds modules to the system table in a Backdrop core update.
  *
- * @param $modules
+ * @param array $modules
  *   Array of module names.
  */
-function update_module_add_to_system($modules = array()) {
+function update_module_add_to_system(array $modules = array()) {
   // Insert module data, so we can enable the module. Calling a full module
   // list rebuild so early is costly and complex, so we just have a stop-gap.
   $info_defaults = array(
@@ -350,7 +357,10 @@ function update_upgrade_enable_dependencies() {
  */
 function update_upgrade_modules_to_enable() {
   // Get list of enabled modules.
-  $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(':type' => 'module', ':status' => 1));
+  $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(
+    ':type' => 'module',
+    ':status' => 1,
+  ));
 
   // Get list of modules to be enabled.
   $enabled_modules = array_keys($result->fetchAllAssoc('name'));
@@ -428,6 +438,9 @@ function update_fix_requirements() {
 
 /**
  * Helper function to install a new module in Backdrop 1.x via hook_update_N().
+ *
+ * @param array $modules
+ *   List of modules.
  */
 function update_module_enable(array $modules) {
   foreach ($modules as $module) {
@@ -467,7 +480,7 @@ function update_module_enable(array $modules) {
  *   The name of the variable.
  * @param mixed $default
  *   The default value of the variable.
- * @return
+ * @return mixed
  *   The value of the variable in the database unserialized, or NULL if not set.
  */
 function update_variable_get($name, $default = NULL) {
@@ -541,20 +554,20 @@ function update_variable_del($name) {
  * and set the #finished property to the percentage completed that it is, as a
  * fraction of 1.
  *
- * @param $module
+ * @param string $module
  *   The module whose update will be run.
- * @param $number
+ * @param int $number
  *   The update number to run.
- * @param $dependency_map
+ * @param array $dependency_map
  *   An array whose keys are the names of all update functions that will be
  *   performed during this batch process, and whose values are arrays of other
  *   update functions that each one depends on.
- * @param $context
+ * @param array $context
  *   The batch context array.
  *
  * @see update_resolve_dependencies()
  */
-function update_do_one($module, $number, $dependency_map, &$context) {
+function update_do_one($module, $number, array $dependency_map, array &$context) {
   $function = $module . '_update_' . $number;
 
   // If this update was aborted in a previous step, or has a dependency that
@@ -577,8 +590,12 @@ function update_do_one($module, $number, $dependency_map, &$context) {
 
       require_once BACKDROP_ROOT . '/core/includes/errors.inc';
       $variables = _backdrop_decode_exception($e);
-      // The exception message is run through check_plain() by _backdrop_decode_exception().
-      $ret['#abort'] = array('success' => FALSE, 'query' => t('%type: !message in %function (line %line of %file).', $variables));
+      // The exception message is run through check_plain() by
+      // _backdrop_decode_exception().
+      $ret['#abort'] = array(
+        'success' => FALSE,
+        'query' => t('%type: !message in %function (line %line of %file).', $variables),
+      );
     }
   }
 
@@ -616,26 +633,26 @@ class BackdropUpdateException extends Exception { }
 /**
  * Starts the site update batch process.
  *
- * @param $start
+ * @param array $start
  *   An array whose keys contain the names of modules to be updated during the
  *   current batch process, and whose values contain the number of the first
  *   requested update for that module. The actual updates that are run (and the
  *   order they are run in) will depend on the results of passing this data
  *   through the update dependency system.
- * @param $redirect
+ * @param string|null $redirect
  *   Path to redirect to when the batch has finished processing.
- * @param $url
+ * @param string|null $url
  *   URL of the batch processing page (should only be used for separate
  *   scripts like update.php).
- * @param $batch
+ * @param array $batch
  *   Optional parameters to pass into the batch API.
- * @param $redirect_callback
+ * @param string $redirect_callback
  *   (optional) Specify a function to be called to redirect to the progressive
  *   processing page.
  *
  * @see update_resolve_dependencies()
  */
-function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $redirect_callback = 'backdrop_goto') {
+function update_batch(array $start, $redirect = NULL, $url = NULL, array $batch = array(), $redirect_callback = 'backdrop_goto') {
   // During the update, bring the site offline so that schema changes do not
   // affect visiting users.
   $_SESSION['maintenance_mode'] = state_get('maintenance_mode', FALSE);
@@ -668,7 +685,14 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
       }
       // Add this update function to the batch.
       $function = $update['module'] . '_update_' . $update['number'];
-      $operations[] = array('update_do_one', array($update['module'], $update['number'], $dependency_map[$function]));
+      $operations[] = array(
+        'update_do_one',
+        array(
+          $update['module'],
+          $update['number'],
+          $dependency_map[$function],
+        ),
+      );
     }
   }
   $batch['operations'] = $operations;
@@ -691,16 +715,16 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
  * page in update.php). Additionally, if the site was off-line, now that the
  * update process is completed, the site is set back online.
  *
- * @param $success
+ * @param bool $success
  *   Indicate that the batch API tasks were all completed successfully.
- * @param $results
+ * @param array $results
  *   An array of all the results that were updated in update_do_one().
- * @param $operations
+ * @param array $operations
  *   A list of all the operations that had not been completed by the batch API.
  *
  * @see update_batch()
  */
-function update_finished($success, $results, $operations) {
+function update_finished($success, array $results, array $operations) {
   // Clear the caches in case the data has been updated.
   backdrop_flush_all_caches();
 
@@ -785,7 +809,9 @@ function update_get_update_list() {
           // The description for an update comes from its Doxygen.
           $func = new ReflectionFunction($module . '_update_' . $update);
           // The order of the items in the replace array is important.
-          $description = preg_replace(array('#^\s*\/\*\*\s*#m', '#^\s*\*\/\s*$#m', '#^\s*\*\s*#m'), '', $func->getDocComment());
+          $description = preg_replace(array(
+            '#^\s*\/\*\*\s*#m', '#^\s*\*\/\s*$#m', '#^\s*\*\s*#m',
+          ), '', $func->getDocComment());
           $ret[$module]['pending'][$update] = $update . ' - ' . trim($description);
           if (!isset($ret[$module]['start'])) {
             $ret[$module]['start'] = $update;
@@ -835,12 +861,12 @@ function update_get_update_count() {
  * dependency chain for each update, as provided by the depth-first search
  * algorithm in backdrop_depth_first_search().
  *
- * @param $starting_updates
+ * @param array $starting_updates
  *   An array whose keys contain the names of modules with updates to be run
  *   and whose values contain the number of the first requested update for that
  *   module.
  *
- * @return
+ * @return array
  *   An array whose keys are the names of all update functions within the
  *   provided modules that would need to be run in order to fulfill the
  *   request, arranged in the order in which the update functions should be
@@ -861,7 +887,7 @@ function update_get_update_count() {
  *
  * @see backdrop_depth_first_search()
  */
-function update_resolve_dependencies($starting_updates) {
+function update_resolve_dependencies(array $starting_updates) {
   // Obtain a dependency graph for the requested update functions.
   $update_functions = update_get_update_function_list($starting_updates);
   $graph = update_build_dependency_graph($update_functions);
@@ -901,11 +927,11 @@ function update_resolve_dependencies($starting_updates) {
 /**
  * Returns an organized list of update functions for a set of modules.
  *
- * @param $starting_updates
+ * @param array $starting_updates
  *   An array whose keys contain the names of modules and whose values contain
  *   the number of the first requested update for that module.
  *
- * @return
+ * @return array
  *   An array containing all the update functions that should be run for each
  *   module, including the provided starting update and all subsequent updates
  *   that are available. The keys of the array contain the module names, and
@@ -914,7 +940,7 @@ function update_resolve_dependencies($starting_updates) {
  *
  * @see update_resolve_dependencies()
  */
-function update_get_update_function_list($starting_updates) {
+function update_get_update_function_list(array $starting_updates) {
   // Go through each module and find all updates that we need (including the
   // first update that was requested and any updates that run after it).
   $update_functions = array();
@@ -955,11 +981,11 @@ function update_get_update_function_list($starting_updates) {
  * modules which implement hook_update_dependencies(), and builds them into the
  * graph as well.
  *
- * @param $update_functions
+ * @param array $update_functions
  *   An organized array of update functions, in the format returned by
  *   update_get_update_function_list().
  *
- * @return
+ * @return array
  *   A multidimensional array representing the dependency graph, suitable for
  *   passing in to backdrop_depth_first_search(), but with extra information
  *   about each update function also included. Each array key contains the name
@@ -975,7 +1001,7 @@ function update_get_update_function_list($starting_updates) {
  * @see backdrop_depth_first_search()
  * @see update_resolve_dependencies()
  */
-function update_build_dependency_graph($update_functions) {
+function update_build_dependency_graph(array $update_functions) {
   // Initialize an array that will define a directed graph representing the
   // dependencies between update functions.
   $graph = array();
@@ -1017,32 +1043,32 @@ function update_build_dependency_graph($update_functions) {
 /**
  * Determines if a module update is missing or unavailable.
  *
- * @param $module
+ * @param string $module
  *   The name of the module.
- * @param $number
+ * @param int $number
  *   The number of the update within that module.
- * @param $update_functions
+ * @param array $update_functions
  *   An organized array of update functions, in the format returned by
  *   update_get_update_function_list(). This should represent all module
  *   updates that are requested to run at the time this function is called.
  *
- * @return
+ * @return bool
  *   TRUE if the provided module update is not installed or is not in the
  *   provided list of updates to run; FALSE otherwise.
  */
-function update_is_missing($module, $number, $update_functions) {
+function update_is_missing($module, $number, array $update_functions) {
   return !isset($update_functions[$module][$number]) || !function_exists($update_functions[$module][$number]);
 }
 
 /**
  * Determines if a module update has already been performed.
  *
- * @param $module
+ * @param string $module
  *   The name of the module.
- * @param $number
+ * @param int $number
  *   The number of the update within that module.
  *
- * @return
+ * @return bool
  *   TRUE if the database schema indicates that the update has already been
  *   performed; FALSE otherwise.
  */
@@ -1052,6 +1078,8 @@ function update_already_performed($module, $number) {
 
 /**
  * Check if backups are enabled during the update.php process.
+ *
+ * @return bool
  */
 function update_backup_enabled() {
   // Backups are disabled when upgrading from Drupal 7, and if the
@@ -1067,7 +1095,7 @@ function update_backup_enabled() {
  * that it be installed. This allows the update system to properly perform
  * updates even on modules that are currently disabled.
  *
- * @return
+ * @return array
  *   An array of return values obtained by merging the results of the
  *   hook_update_dependencies() implementations in all installed modules.
  *
