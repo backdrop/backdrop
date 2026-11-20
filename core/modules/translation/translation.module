@@ -485,11 +485,22 @@ function translation_remove_from_set($node) {
 
     // Determine which nodes to apply the update to.
     $set_nids = db_query('SELECT nid FROM {node} WHERE tnid = :tnid', array(':tnid' => $node->tnid))->fetchCol();
+
+    $node->translation_change = array(
+      'old_tnid' => $node->tnid,
+      'new_tnid' => 0,
+      // Determine the remaining former member of the translation set.
+      // May be needed e.g. to reassign existing data from the tnid to this nid.
+      'remaining_nid' => $set_nids,
+    );
+
     if (count($set_nids) == 1) {
       // There is only one node left in the set: remove the set altogether.
       $query
         ->condition('tnid', $node->tnid)
         ->execute();
+      // Allow other modules to respond to the removal of this translation set.
+      node_invoke($node, 'translation_change');
 
       $flush_set = TRUE;
     }
@@ -502,10 +513,16 @@ function translation_remove_from_set($node) {
       // we pick a new source - preferably one that is up to date.
       if ($node->tnid == $node->nid) {
         $new_tnid = db_query('SELECT nid FROM {node} WHERE tnid = :tnid ORDER BY translate ASC, nid ASC', array(':tnid' => $node->tnid))->fetchField();
+        $node->translation_change = array(
+          'old_tnid' => $node->tnid,
+          'new_tnid' => $new_tnid,
+        );
         db_update('node')
           ->fields(array('tnid' => $new_tnid))
           ->condition('tnid', $node->tnid)
           ->execute();
+        // Allow other modules to respond to the removal of this translation set.
+        node_invoke($node, 'translation_change');
 
         $flush_set = TRUE;
       }
