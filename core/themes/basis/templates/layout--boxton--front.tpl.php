@@ -37,6 +37,12 @@
 
   <div class="l-wrapper">
 
+    <?php if (!empty($content['banner'])): ?>
+      <div class="l-banner">
+        <?php print $content['banner']; ?>
+      </div>
+    <?php endif; ?>
+
     <?php if (!empty($content['top'])): ?>
       <div class="l-top">
         <?php print $content['top']; ?>
