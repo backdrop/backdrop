@@ -10,6 +10,8 @@
  * The error constants are documented at
  * http://php.net/manual/errorfunc.constants.php
  *
+ * @return array
+ *
  * @ingroup logging_severity_levels
  */
 function backdrop_error_levels() {
@@ -41,17 +43,14 @@ function backdrop_error_levels() {
 /**
  * Provides custom PHP error handling.
  *
- * @param $error_level
+ * @param int $error_level
  *   The level of the error raised.
- * @param $message
+ * @param string $message
  *   The error message.
- * @param $filename
+ * @param string $filename
  *   The filename that the error was raised in.
- * @param $line
+ * @param int $line
  *   The line number the error was raised at.
- * @param $context
- *   An array that points to the active symbol table at the point the error
- *   occurred.
  */
 function _backdrop_error_handler_real($error_level, $message, $filename, $line) {
   if ($error_level & error_reporting()) {
@@ -88,7 +87,7 @@ function _backdrop_error_handler_real($error_level, $message, $filename, $line) 
  *   The exception or error object that was thrown. PHP 7 throws Error objects
  *   for PHP errors.
  *
- * @return
+ * @return array
  *   An error in the format expected by _backdrop_log_error().
  */
 function _backdrop_decode_exception($exception) {
@@ -96,14 +95,17 @@ function _backdrop_decode_exception($exception) {
 
   $backtrace = $exception->getTrace();
   // Add the line throwing the exception to the backtrace.
-  array_unshift($backtrace, array('line' => $exception->getLine(), 'file' => $exception->getFile()));
+  array_unshift($backtrace, array(
+    'line' => $exception->getLine(),
+    'file' => $exception->getFile(),
+  ));
 
   // For PDOException errors, we try to return the initial caller,
   // skipping internal functions of the database layer.
   if ($exception instanceof PDOException) {
-    // The first element in the stack is the call, the second element gives us the caller.
-    // We skip calls that occurred in one of the classes of the database layer
-    // or in one of its global functions.
+    // The first element in the stack is the call, the second element gives us
+    // the caller. We skip calls that occurred in one of the classes of the
+    // database layer or in one of its global functions.
     $db_functions = array('db_query',  'db_query_range');
     while (!empty($backtrace[1]) && ($caller = $backtrace[1]) &&
         ((isset($caller['class']) && (strpos($caller['class'], 'Query') !== FALSE || strpos($caller['class'], 'Database') !== FALSE || strpos($caller['class'], 'PDO') !== FALSE)) ||
@@ -132,13 +134,13 @@ function _backdrop_decode_exception($exception) {
 /**
  * Renders an exception error message without further exceptions.
  *
- * @param $exception
+ * @param object $exception
  *   The exception object that was thrown.
  *
- * @return
+ * @return string
  *   An error message.
  */
-function _backdrop_render_exception_safe($exception) {
+function _backdrop_render_exception_safe(object $exception) {
   return check_plain(strtr('%type: !message in %function (line %line of %file).', _backdrop_decode_exception($exception)));
 }
 
@@ -149,17 +151,18 @@ function _backdrop_render_exception_safe($exception) {
  * all errors should be displayed. For ERROR_REPORTING_DISPLAY_SOME, $error
  * will be examined to determine if it should be displayed.
  *
- * @param $error
+ * @param array|null $error
  *   Optional error to examine for ERROR_REPORTING_DISPLAY_SOME.
  *
- * @return
+ * @return bool
  *   TRUE if an error should be displayed.
  */
-function error_displayable($error = NULL) {
+function error_displayable(?array $error = NULL) {
   try {
     $error_level = function_exists('config_get') ? config_get('system.core', 'error_level') : ERROR_REPORTING_DISPLAY_ALL;
   }
-  catch (ConfigException $e) {}
+  catch (ConfigException $e) {
+  }
   if (empty($error_level)) {
     $error_level = ERROR_REPORTING_DISPLAY_ALL;
   }
@@ -175,16 +178,17 @@ function error_displayable($error = NULL) {
 /**
  * Logs a PHP error or exception and displays an error page in fatal cases.
  *
- * @param $error
+ * @param array $error
  *   An array with the following keys: %type, !message, %function, %file, %line
  *   and severity_level. All the parameters are plain-text, with the exception
  *   of !message, which needs to be a safe HTML string.
- * @param $fatal
+ * @param bool $fatal
  *   TRUE if the error is fatal.
  */
-function _backdrop_log_error($error, $fatal = FALSE) {
+function _backdrop_log_error(array $error, $fatal = FALSE) {
   // Initialize a maintenance theme if the bootstrap was not complete.
-  // Do it early because backdrop_set_message() triggers a backdrop_theme_initialize().
+  // Do it early because backdrop_set_message() triggers a
+  // backdrop_theme_initialize().
   if ($fatal && (backdrop_get_bootstrap_phase() != BACKDROP_BOOTSTRAP_FULL)) {
     unset($GLOBALS['theme']);
     if (!defined('MAINTENANCE_MODE')) {
@@ -254,9 +258,9 @@ function _backdrop_log_error($error, $fatal = FALSE) {
 
     if ($fatal) {
       backdrop_set_title(t('Error'));
-      // We fallback to a maintenance page at this point, because the page generation
-      // itself can generate errors. Provide the error message to the end-user
-      // but exclude PHP error information.
+      // We fallback to a maintenance page at this point, because the page
+      // generation itself can generate errors. Provide the error message to the
+      // end-user but exclude PHP error information.
       print theme('maintenance_page', array('content' => $error['!message']));
       exit;
     }
@@ -266,16 +270,20 @@ function _backdrop_log_error($error, $fatal = FALSE) {
 /**
  * Gets the last caller from a backtrace.
  *
- * @param $backtrace
+ * @param array $backtrace
  *   A standard PHP backtrace.
  *
- * @return
+ * @return array
  *   An associative array with keys 'file', 'line' and 'function'.
  */
-function _backdrop_get_last_caller($backtrace) {
+function _backdrop_get_last_caller(array $backtrace) {
   // Errors that occur inside PHP internal functions do not generate
   // information about file and line. Ignore disallowed functions.
-  $denylist = array('debug', '_backdrop_error_handler', '_backdrop_exception_handler');
+  $denylist = array(
+    'debug',
+    '_backdrop_error_handler',
+    '_backdrop_exception_handler',
+  );
   while (($backtrace && !isset($backtrace[0]['line'])) ||
          (isset($backtrace[1]['function']) && in_array($backtrace[1]['function'], $denylist))) {
     array_shift($backtrace);
