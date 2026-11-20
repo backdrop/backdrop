@@ -21,3 +21,10 @@ function admin_bar_install() {
   // other modules in hook_menu_alter().
   module_set_weight('admin_bar', 100);
 }
+
+/**
+ * Set default value for 'logout_link_location' config setting.
+ */
+function admin_bar_update_1330(&$sandbox) {
+  config_set('admin_bar.settings', 'logout_link_location', 'sibling');
+}
