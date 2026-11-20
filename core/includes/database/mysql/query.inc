@@ -51,6 +51,9 @@ class InsertQuery_mysql extends InsertQuery {
     // Create a sanitized comment string to prepend to the query.
     $comments = $this->connection->makeComment($this->comments);
 
+    // Create a hints string to include in the query.
+    $hints = (!empty($this->hints)) ? $this->hints . ' ' : '';
+
     // Default fields are always placed first for consistency.
     $insert_fields = array_merge($this->defaultFields, $this->insertFields);
 
@@ -63,10 +66,10 @@ class InsertQuery_mysql extends InsertQuery {
     // pass it back, as any remaining options are irrelevant.
     if (!empty($this->fromQuery)) {
       $insert_fields_string = $insert_fields ? ' (' . implode(', ', $insert_fields) . ') ' : ' ';
-      return $comments . 'INSERT INTO {' . $this->table . '}' . $insert_fields_string . $this->fromQuery;
+      return $comments . 'INSERT ' . $hints . 'INTO {' . $this->table . '} ' . $insert_fields_string . ' ' . $this->fromQuery;
     }
 
-    $query = $comments . 'INSERT INTO {' . $this->table . '} (' . implode(', ', $insert_fields) . ') VALUES ';
+    $query = $comments . 'INSERT ' . $hints . 'INTO {' . $this->table . '} (' . implode(', ', $insert_fields) . ') VALUES ';
 
     $max_placeholder = 0;
     $values = array();

@@ -1951,8 +1951,11 @@ class SelectQuery extends Query implements SelectQueryInterface {
     // Create a sanitized comment string to prepend to the query.
     $comments = $this->connection->makeComment($this->comments);
 
+    // Create a hints string to include in the query.
+    $hints = (!empty($this->hints)) ? $this->hints . ' ' : '';
+
     // SELECT:
-    $query = $comments . 'SELECT ';
+    $query = $comments . 'SELECT ' . $hints;
     if ($this->distinct) {
       $query .= 'DISTINCT ';
     }
