@@ -355,7 +355,7 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
     case 'text_default':
     case 'text_trimmed':
       foreach ($items as $delta => $item) {
-        if (empty($item['value'])) {
+        if (!isset($item['value']) || $item['value'] === '') {
           continue;
         }
         $output = _text_sanitize($instance, $langcode, $item, 'value');
