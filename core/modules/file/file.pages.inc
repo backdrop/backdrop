@@ -667,6 +667,7 @@ function file_manage_form($form, &$form_state, File $file) {
     '#value' => t('Save'),
     '#weight' => 5,
     '#submit' => array('file_manage_form_submit'),
+    '#attributes' => array('class' => array('button-primary')),
     '#validate' => array('file_manage_form_validate'),
   );
   $form['actions']['delete'] = array(
@@ -674,6 +675,7 @@ function file_manage_form($form, &$form_state, File $file) {
     '#value' => t('Delete'),
     '#weight' => 10,
     '#submit' => array('file_delete_redirect_form'),
+    '#attributes' => array('class' => array('button-danger')),
     '#access' => user_access('delete files'),
   );
 

@@ -770,7 +770,8 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $node = $this->backdropCreateNode(array('uid' => $account->uid));
 
     // Attempt to cancel account.
-    $this->backdropPost('user/' . $account->uid . '/edit', NULL, t('Cancel account'));
+    $this->backdropGet('user/' . $account->uid . '/edit');
+    $this->clickLink(t('Cancel account'));
 
     // Confirm account cancellation.
     $timestamp = time();
@@ -811,7 +812,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Attempt to cancel account.
     $this->backdropGet('user/' . $account->uid . '/edit');
-    $this->backdropPost(NULL, NULL, t('Cancel account'));
+    $this->clickLink(t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
     $this->assertText(t('Your account will be blocked and you will no longer be able to log in. All of your content will remain attributed to your user name.'), 'Informs that all content will be remain as is.');
     $this->assertNoText(t('Select the method to cancel the account above.'), 'Does not allow user to select account cancellation method.');
@@ -851,7 +852,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Attempt to cancel account.
     $this->backdropGet('user/' . $account->uid . '/edit');
-    $this->backdropPost(NULL, NULL, t('Cancel account'));
+    $this->clickLink(t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
     $this->assertText(t('Your account will be blocked and you will no longer be able to log in. All of your content will be hidden from everyone but administrators.'), 'Informs that all content will be unpublished.');
 
@@ -901,7 +902,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Attempt to cancel account.
     $this->backdropGet('user/' . $account->uid . '/edit');
-    $this->backdropPost(NULL, NULL, t('Cancel account'));
+    $this->clickLink(t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
     $this->assertRaw(t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => config_get('system.core', 'anonymous'))), 'Informs that all content will be attributed to anonymous account.');
 
@@ -970,7 +971,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Attempt to cancel account.
     $this->backdropGet('user/' . $account->uid . '/edit');
-    $this->backdropPost(NULL, NULL, t('Cancel account'));
+    $this->clickLink(t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
     $this->assertText(t('Your account will be removed and all account information deleted. All of your content will also be deleted.'), 'Informs that all content will be deleted.');
 
@@ -1008,7 +1009,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Delete regular user.
     $this->backdropGet('user/' . $account->uid . '/edit');
-    $this->backdropPost(NULL, NULL, t('Cancel account'));
+    $this->clickLink(t('Cancel account'));
     $this->assertRaw(t('Are you sure you want to cancel the account %name?', array('%name' => $account->name)), 'Confirmation form to cancel account displayed.');
     $this->assertText(t('Select the method to cancel the account above.'), 'Allows to select account cancellation method.');
 
