@@ -13,18 +13,33 @@ function field_group_requirements($phase) {
   $t = get_t();
 
   if ($phase == 'runtime') {
-    list($extras_module, $extras_enabled) = _field_group_extra_status();
-
+    list($extras_module, $extras_enabled, $extra_entities) = _field_group_extra_status();
     if ($extras_enabled && !$extras_module) {
+
+      // Construct the HTML for our nested list of entity types and the links to
+      // manage them.
+      $extra_entities_list = '<ul>';
+      foreach ($extra_entities as $entity_type_label => $details) {
+        $extra_entities_list .= '<li>' . $entity_type_label;
+        $extra_entities_list .= '<ul>';
+        foreach ($extra_entities[$entity_type_label] as $bundle => $admin_link) {
+          $extra_entities_list .= '<li>' . $admin_link . '</li>';
+        }
+        $extra_entities_list .= '</ul></li>';
+      }
+      $extra_entities_list .= '</ul>';
+
       if ($extras_module === FALSE) {
         // Module not found.
-        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. The contrib module %module should be enabled to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
+        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site in the following entity types: !entities The contrib module !module should be enabled to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
           '!module' => l('Field Group Extra', 'https://backdropcms.org/project/field_group_extra'),
+          '!entities' => $extra_entities_list,
         ));
       } elseif (!$extras_module) {
         // Module exists but isn't enabled.
-        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site. Enable the contrib module %module to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
+        $message = $t('The <em>Accordion</em>, <em>Div</em>, <em>Horizontal tabs</em>, or <em>Multipage</em> field group types are used on this site in the following entity types: !entities Enable the contrib module %module to ensure the existing field groups continue to work properly. Alternatively, update those field groups to use other group types.', array(
           '%module' => 'Field Group Extra',
+          '!entities' => $extra_entities_list,
         ));
       }
       $requirements['field_group_extra'] = array(
@@ -58,6 +73,7 @@ function _field_group_extra_status() {
 
   $extras_enabled = FALSE;
   $field_groups = config_get_names_with_prefix('field_group.field_group.');
+  $extra_entities = array();
   $extra_types = array(
     // cspell:disable
     'accordion',
@@ -76,13 +92,24 @@ function _field_group_extra_status() {
         continue;
       }
       $extras_enabled = TRUE;
-      break;
+      $entity_info = entity_get_info($config->get('entity_type'));
+      $bundle = $config->get('bundle');
+      $label = $entity_info['bundles'][$bundle]['label'];
+      $display_label = $label;
+      // Is there a configuration path for this bundle? If so, display a link instead
+      // of just the name.
+      $admin_path = isset($entity_info['bundles'][$bundle]['admin']['real path']) ? $entity_info['bundles'][$bundle]['admin']['real path'] : $entity_info['bundles'][$bundle]['admin']['path'] ?? '';
+      if ($admin_path) {
+        $display_label = l($label, $admin_path);
+      }
+
+      $extra_entities[$entity_info['label']][$bundle] = $display_label;
     }
   }
 
-  $status = array($extras_module, $extras_enabled);
+  $status = array($extras_module, $extras_enabled, $extra_entities);
 
-  return array($extras_module, $extras_enabled);
+  return array($extras_module, $extras_enabled, $extra_entities);
 }
 
 /**
