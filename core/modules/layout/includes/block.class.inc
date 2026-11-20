@@ -263,7 +263,7 @@ class Block extends LayoutHandler {
     );
     $form['title_display']['title'] = array(
       '#type' => 'textfield',
-      '#default_value' => $this->settings['title'],
+      '#default_value' => isset($this->settings['title']) ? $this->settings['title'] : '',
       '#title' => t('Custom title'),
       '#states' => array(
         'visible' => array(
