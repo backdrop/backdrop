@@ -29,54 +29,6 @@ function language_uninstall() {
 }
 
 /**
- * Implements hook_schema().
- */
-function language_schema() {
-  $schema['language'] = array(
-    'description' => 'List of all available languages in the system.',
-    'fields' => array(
-      'langcode' => array(
-        'type' => 'varchar',
-        'length' => 12,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => "Language code, e.g. 'de' or 'en-US'.",
-      ),
-      'name' => array(
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Language name.',
-      ),
-      'direction' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Direction of language (Left-to-Right = 0, Right-to-Left = 1).',
-      ),
-      'enabled' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Enabled flag (1 = Enabled, 0 = Disabled).',
-      ),
-      'weight' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Weight, used in lists of languages.',
-      ),
-    ),
-    'primary key' => array('langcode'),
-    'indexes' => array(
-      'list' => array('weight', 'name'),
-    ),
-  );
-  return $schema;
-}
-
-/**
  * @addtogroup updates-7.x-to-1.x
  * @{
  */
@@ -195,6 +147,17 @@ function language_update_1003() {
     }
   }
   $config->save();
+}
+
+/**
+ * Remove the unused "language" table if present.
+ */
+function language_update_1004() {
+  // This table was removed in language_update_1002(), but was recreated by
+  // hook_schema(). Remove it again if present.
+  if (db_table_exists('language')) {
+    db_drop_table('language');
+  }
 }
 
 /**
