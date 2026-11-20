@@ -551,7 +551,7 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
         $chunk = $casing($chunk);
       }
       // Format it and apply the current indentation.
-      $output .= backdrop_wrap_mail($chunk, implode('', $indent)) . MAIL_LINE_ENDINGS;
+      $output .= backdrop_wrap_mail($chunk, implode('', $indent)) . settings_get('mail_line_endings', MAIL_LINE_ENDINGS);
       // Remove non-quotation markers from indentation.
       $indent = array_map('_backdrop_html_to_text_clean', $indent);
     }
