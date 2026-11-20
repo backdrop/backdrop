@@ -178,7 +178,14 @@ function list_allowed_values_setting_validate($element, &$form_state) {
   $has_data = $element['#field_has_data'];
   $field_type = $field['type'];
   $generate_keys = ($field_type == 'list_integer' || $field_type == 'list_float') && !$has_data;
-  $values = list_extract_allowed_values($element['#value']['options_text'], $field['type'], $generate_keys);
+  $values = array();
+  if (!empty($element['#value']['options_text'])) {
+    $values = list_extract_allowed_values($element['#value']['options_text'], $field['type'], $generate_keys);
+  }
+  $allowed_values_function = $field['settings']['allowed_values_function'] ?? '';
+  if (function_exists($allowed_values_function)) {
+    $values = $allowed_values_function();
+  }
 
   if (!is_array($values)) {
     form_error($element, t('Allowed values list: invalid input.'));
