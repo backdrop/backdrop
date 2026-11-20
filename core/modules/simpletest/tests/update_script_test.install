@@ -23,10 +23,11 @@ function update_script_test_requirements($phase) {
         );
         break;
       case REQUIREMENT_ERROR:
+        // @see update_script_test_requirements_alter()
         $requirements['update_script_test'] = array(
           'title' => 'Update script test',
           'value' => 'Error',
-          'description' => 'This is a requirements error provided by the update_script_test module.',
+          'description' => 'This is a (buggy description fixed in update_script_test_requirements_alter()) requirements error provided by the update_script_test module.',
           'severity' => REQUIREMENT_ERROR,
         );
         break;

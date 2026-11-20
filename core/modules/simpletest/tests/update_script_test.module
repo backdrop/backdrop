@@ -5,6 +5,18 @@
  */
 
 /**
+ * Implements hook_requirements_alter().
+ */
+function update_script_test_requirements_alter(array &$requirements) {
+  if (isset($requirements['update_script_test']) && $requirements['update_script_test']['severity'] === REQUIREMENT_ERROR) {
+    // Fix the intentionally problematic description in
+    // update_script_test_requirements(, to ensure that
+    // hook_requirements_alter() works.
+    $requirements['update_script_test']['description'] = 'This is a requirements error provided by the update_script_test module.';
+  }
+}
+
+/**
  * Implements hook_flush_caches().
  *
  * This sets a message to confirm that all caches are cleared whenever
