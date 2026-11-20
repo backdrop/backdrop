@@ -246,12 +246,10 @@ function search_admin_settings($form, &$form_state) {
  */
 function search_admin_settings_validate($form, &$form_state) {
   // Check whether we selected a valid default.
-  if ($form_state['triggering_element']['#value'] != t('Reset to defaults')) {
-    $new_modules = array_filter($form_state['values']['search_active_modules']);
-    $default = $form_state['values']['search_default_module'];
-    if (!in_array($default, $new_modules, TRUE)) {
-      form_set_error('search_default_module', t('Your default search module is not selected as an active module.'));
-    }
+  $new_modules = array_filter($form_state['values']['search_active_modules']);
+  $default = $form_state['values']['search_default_module'];
+  if (!in_array($default, $new_modules, TRUE)) {
+    form_set_error('search_default_module', t('Your default search module is not selected as an active module.'));
   }
 }
 
@@ -272,13 +270,7 @@ function search_admin_settings_submit($form, &$form_state) {
   $config->set('search_logging', (bool) $form_state['values']['search_logging']);
   $config->set('search_pager_type', $form_state['values']['search_pager_type']);
 
-  // Check whether we are resetting the values.
-  if ($form_state['triggering_element']['#value'] == t('Reset to defaults')) {
-    $new_modules = array('node', 'user');
-  }
-  else {
-    $new_modules = array_filter($form_state['values']['search_active_modules']);
-  }
+  $new_modules = array_filter($form_state['values']['search_active_modules']);
   if ($config->get('search_active_modules') != $new_modules) {
     $config->set('search_active_modules', $new_modules);
     backdrop_set_message(t('The active search modules have been changed.'));
