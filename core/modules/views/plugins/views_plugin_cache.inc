@@ -353,7 +353,7 @@ class views_plugin_cache extends views_plugin {
         }
       }
     }
-    return md5(serialize($key_data));
+    return hash('sha256', serialize($key_data));
   }
 }
 
