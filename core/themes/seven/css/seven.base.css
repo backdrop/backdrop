@@ -1,6 +1,9 @@
 /**
  * Generic elements.
  */
+@view-transition {
+  navigation: auto;
+}
 body {
   color: #000;
   background: #fafafa;
