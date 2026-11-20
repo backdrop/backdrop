@@ -609,7 +609,7 @@ function _token_build_tree($token_type, array $options, $parent_restricted = FAL
       // parent.
       $token_parents[] = $token_type;
     }
-    elseif (in_array($token, array_slice($token_parents, 1))) {
+    elseif (in_array($token, array_slice($token_parents, 1), TRUE)) {
       // Prevent duplicate recursive tokens. For example, this will prevent
       // the tree from generating the following tokens or deeper:
       // [comment:parent:parent]
