@@ -22,6 +22,17 @@ $database = array(
 );
 
 /**
+ * Database character set:
+ *
+ * Most modern versions of MySQL and MariaDB support the "utf8mb4" character
+ * set, which is needed to save emoji and some Asian characters. This setting
+ * also applies when the database connection is provided some other way, such
+ * as a connection string set by a hosting or local development tool. If the
+ * database does not support utf8mb4, change this to "utf8".
+ */
+$database_charset = 'utf8mb4';
+
+/**
  * Configuration storage
  *
  * By default configuration will be stored in the filesystem, using the
