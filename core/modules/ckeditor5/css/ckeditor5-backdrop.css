@@ -52,3 +52,10 @@
 .ck-editor {
   white-space: normal;
 }
+
+/**
+ * Improve readability of toolbar balloons.
+ */
+.ck.ck-balloon-panel.ck-tooltip .ck-tooltip__text {
+  font-size: .92em;
+}
