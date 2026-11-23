@@ -48,6 +48,16 @@ class LayoutStyleDynamic extends LayoutStyle {
       $form['classes']['#states'] = array(
         'invisible' => array('[name="style_settings[wrapper_tag]"]' => array('value' => '')),
       );
+      // If the wrapper tag is <details> the title tag needs to be set to
+      // <summary> and disabled. See https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/details.
+      $title_tag_disabled = ($this->settings['wrapper_tag'] == 'details');
+      if (isset($form_state['values']['style_settings']['wrapper_tag'])) {
+        $title_tag_disabled = ($form_state['values']['style_settings']['wrapper_tag'] == 'details');
+      }
+      $title_tag = $this->settings['title_tag'];
+      if (isset($form_state['values']['style_settings']['wrapper_tag']) && $form_state['values']['style_settings']['wrapper_tag'] == 'details') {
+        $title_tag = 'summary';
+      }
       $form['title_tag'] = array(
         '#title' => t('Heading level'),
         '#type' => 'select',
@@ -62,9 +72,9 @@ class LayoutStyleDynamic extends LayoutStyle {
           'p' => 'P',
           'summary' => 'DETAILS summary',
         ),
-        '#default_value' => $this->settings['title_tag'],
+        '#default_value' => $title_tag,
+        '#disabled' => $title_tag_disabled,
         '#weight' => 2,
-        '#disabled' => ($form_state['values']['style_settings']['wrapper_tag'] == 'details'),
         '#prefix' => '<div id="title-tag-wrapper"',
         '#suffix' => '</div>',
       );
@@ -105,11 +115,10 @@ class LayoutStyleDynamic extends LayoutStyle {
   /**
    * Form #ajax callback used by LayoutStyleDynamic::form().
    */
-  static function selectTitleTag($form, &$form_state) {
+  public static function selectTitleTag($form, &$form_state) {
     if ($form_state['triggering_element']['#name'] == 'style_settings[wrapper_tag]' && $form_state['triggering_element']['#value']) {
       if ($form_state['triggering_element']['#value'] == 'details') {
         $form['style']['style_settings']['title_tag']['#value'] = 'summary';
-        $form['style']['style_settings']['title_tag']['#disabled'] = TRUE;
         $form_state['values']['style_settings']['title_tag'] = 'summary';
 
         backdrop_set_message(t('The <em>Details summary</em> <strong>Heading level</strong> has been automatically set to match the <em>DETAILS (collapsible)</em> <strong>Wrapper tag</strong>.'));
