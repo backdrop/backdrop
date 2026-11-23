@@ -39,6 +39,10 @@ class LayoutStyleDynamic extends LayoutStyle {
         ),
         '#weight' => -1,
         '#default_value' => $this->settings['wrapper_tag'],
+        '#ajax' => array(
+          'callback' => 'LayoutStyleDynamic::selectTitleTag',
+          'wrapper' => 'title-tag-wrapper'
+        ),
       );
       $form['classes']['#title'] = t('Wrapper classes');
       $form['classes']['#states'] = array(
@@ -60,6 +64,9 @@ class LayoutStyleDynamic extends LayoutStyle {
         ),
         '#default_value' => $this->settings['title_tag'],
         '#weight' => 2,
+        '#disabled' => ($form_state['values']['style_settings']['wrapper_tag'] == 'details'),
+        '#prefix' => '<div id="title-tag-wrapper"',
+        '#suffix' => '</div>',
       );
       $form['title_classes'] = array(
         '#title' => t('Heading classes'),
@@ -96,6 +103,22 @@ class LayoutStyleDynamic extends LayoutStyle {
   }
 
   /**
+   * Form #ajax callback used by LayoutStyleDynamic::form().
+   */
+  static function selectTitleTag($form, &$form_state) {
+    if ($form_state['triggering_element']['#name'] == 'style_settings[wrapper_tag]' && $form_state['triggering_element']['#value']) {
+      if ($form_state['triggering_element']['#value'] == 'details') {
+        $form['style']['style_settings']['title_tag']['#value'] = 'summary';
+        $form['style']['style_settings']['title_tag']['#disabled'] = TRUE;
+        $form_state['values']['style_settings']['title_tag'] = 'summary';
+
+        backdrop_set_message(t('The <em>Details summary</em> <strong>Heading level</strong> has been automatically set to match the <em>DETAILS (collapsible)</em> <strong>Wrapper tag</strong>.'));
+      }
+    }
+    return $form['style']['style_settings']['title_tag'];
+  }
+
+  /**
    * Validate handler to validate the form settings.
    */
   public function formValidate($form, $form_state) {
@@ -108,7 +131,10 @@ class LayoutStyleDynamic extends LayoutStyle {
     }
 
     if ($values['style_settings']['wrapper_tag'] == 'details' && $values['style_settings']['title_tag'] != 'summary') {
-      form_set_error('style_settings[title_tag]', t('The <em>DETAILS (collapsible)</em> tag requires that the <strong>Heading level</strong> use the <em>Details summary</em> tag.'));
+      form_set_error('style_settings[title_tag]', t('The <em>DETAILS (collapsible)</em> <strong>Wrapper tag</strong> requires that the <strong>Heading level</strong> use the <em>Details summary</em> tag.'));
+    }
+    if ($values['style_settings']['wrapper_tag'] != 'details' && $values['style_settings']['title_tag'] == 'summary') {
+      form_set_error('style_settings[title_tag]', t('Only use the use the <em>Details summary</em> tag with the <em>DETAILS (collapsible)</em> <strong>Wrapper tag</strong>.'));
     }
   }
 }
