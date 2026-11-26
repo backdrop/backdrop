@@ -1880,8 +1880,7 @@ function system_jquery_settings() {
 
   $options = array(
     'default' => t('jQuery 3 (recommended)'),
-    'legacy' => t('jQuery 1 (legacy)'),
-    '4.x' => t('jQuery 4 (experimental)'),
+    '4.x' => t('jQuery 4'),
   );
   $form['jquery_version'] = array(
     '#type' => 'radios',
@@ -1890,7 +1889,6 @@ function system_jquery_settings() {
     '#options' => $options,
   );
   $form['jquery_version']['default']['#description'] = t('The default version of jQuery in Backdrop CMS.');
-  $form['jquery_version']['legacy']['#description'] = t('Alternative for sites with modules or themes which are not working properly with the recommended version.');
   $form['jquery_version']['4.x']['#description'] = t('The latest version of jQuery.');
 
   $form['help'] = array(
