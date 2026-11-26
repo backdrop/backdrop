@@ -226,6 +226,9 @@ table.sticky-header {
   margin-top: 0;
   z-index: 9;
 }
+table.sticky-enabled :target {
+  scroll-margin-top: 2.7rem;
+}
 
 /**
  * Progress behavior.

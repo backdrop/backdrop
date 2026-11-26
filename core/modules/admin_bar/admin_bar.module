@@ -251,6 +251,7 @@ function admin_bar_preprocess_page(&$variables) {
   }
   if ($setting = $config->get('position_fixed')) {
     $settings['position_fixed'] = $setting;
+    $variables['html_attributes']['class'][] = 'admin-bar-fixed';
   }
 
   // Send whether this is an admin page to JS for back to site functionality.

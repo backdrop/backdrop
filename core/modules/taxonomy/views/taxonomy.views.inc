@@ -174,7 +174,6 @@ function taxonomy_views_data() {
   );
 
   $data['taxonomy_term_data']['vocabulary_label'] = array(
-    'title' => t('Vocabulary'),
     'real field' => 'vocabulary',
     'title' => t('Vocabulary label'),
     'field' => array(

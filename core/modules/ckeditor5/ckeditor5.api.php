@@ -143,28 +143,26 @@ function hook_ckeditor5_css_alter(array &$css) {
 }
 
 /**
- * Modify the raw CKEditor settings passed to the editor.
+ * Modify the CKEditor settings passed to the editor.
  *
- * This hook can be useful if you have created a CKEditor plugin that needs
- * additional settings passed to it from Backdrop. In particular, because
- * CKEditor loads JavaScript files directly, use of Backdrop.t() in these
- * plugins will not work. You may use this hook to provide translated strings
- * for your plugin.
- *
- * @param array $settings
+ * @param array $config
  *   The array of settings that will be passed to CKEditor.
  * @param object $format
  *   The filter format object containing this editor's settings.
  */
-function hook_ckeditor5_settings_alter(array &$settings, $format) {
-  foreach ($format->editor_settings['toolbar'] as $row) {
-    foreach ($row as $button_group) {
-      // If a particular button is enabled, then add extra settings.
-      if (array_key_exists('MyPlugin', $button_group)) {
-        // Pull settings from the format and pass to the JavaScript settings.
-        $settings['backdrop']['myplugin_settings'] = $format->editor_settings['myplugin_settings'];
-        // Translate a string for use by CKEditor.
-        $settings['backdrop']['myplugin_help'] = t('A translated string example that will be used by CKEditor.');
+function hook_ckeditor5_config_alter(array &$config, $format) {
+  // If the heading.Heading plugin is installed, remove <h6> from the list of
+  // the possible headings.
+  if (!empty($config['heading']['options']) && is_array($config['heading']['options'])) {
+    if (!empty($format->editor_settings['heading_list'])) {
+      $heading_list = $format->editor_settings['heading_list'];
+
+      if (is_array($heading_list) && in_array('h6', $heading_list)) {
+        foreach ($config['heading']['options'] as $index => $possible_heading) {
+          if ($possible_heading['model'] === 'heading6') {
+            unset($config['heading']['options'][$index]);
+          }
+        }
       }
     }
   }

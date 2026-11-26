@@ -522,9 +522,23 @@ class ConfigurationUITest extends BackdropWebTestCase {
     // Get the archived binary file provided to user for download.
     $archive_data = $this->backdropGetContent();
 
+    // Verify the generated archive was removed from the temporary directory
+    // after being sent to the user.
+    $leftover_files = file_scan_directory('temporary://', '/^config.*\.tar\.gz$/', array('recurse' => FALSE));
+    $this->assertTrue(empty($leftover_files), 'Exported archive was removed from the temporary directory after download.');
+
     // Temporarily save the archive file.
     $uri = 'temporary://config.tar.gz';
     file_put_contents($uri, $archive_data);
+
+    // Verify a user with permission may download the archive from the
+    // temporary directory, but anonymous users may not.
+    $this->backdropGet(file_create_url($uri));
+    $this->assertResponse(200, 'User with permission can download config.tar.gz from the temporary directory.');
+    $this->backdropLogout();
+    $this->backdropGet(file_create_url($uri));
+    $this->assertResponse(403, 'Anonymous user cannot download config.tar.gz from the temporary directory.');
+    $this->assertNotEqual($this->backdropGetContent(), $archive_data, 'Archive contents not provided to anonymous user.');
 
     // Extract the archive and verify it's not empty.
     $file_path = file_directory_temp() . '/' . file_uri_target($uri);

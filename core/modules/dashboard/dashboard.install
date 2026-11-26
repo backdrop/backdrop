@@ -12,10 +12,40 @@ function dashboard_install() {
 }
 
 /**
- * Implements hook_uninstall().
+ * Implements hook_enable().
+ */
+function dashboard_enable() {
+  // Enable the Dashboard menu item (if it exists and is disabled).
+  $mlid = db_query("SELECT mlid FROM {menu_links} WHERE router_path = 'admin/dashboard' AND module = 'system' AND hidden = 1")->fetchField();
+  if ($mlid) {
+    $link = menu_link_load($mlid);
+    $link['hidden'] = 0;
+    unset($link['customized']);
+    menu_link_save($link);
+    menu_cache_clear($link['menu_name']);
+  }
+
+  // Enable the Dashboard layout.
+  config_set('layout.layout.dashboard', 'disabled', FALSE);
+  layout_reset_caches();
+}
+
+/**
+ * Implements hook_disable().
  */
 function dashboard_disable() {
-  // Disable the dashboard on module disable.
+  // Disable the Dashboard menu item (if it exists and is enabled).
+  $mlid = db_query("SELECT mlid FROM {menu_links} WHERE router_path = 'admin/dashboard' AND module = 'system' AND hidden = 0")->fetchField();
+  if ($mlid) {
+    $link = menu_link_load($mlid);
+    $link['hidden'] = 1;
+    // This is required, otherwise hiding the menu item won't work.
+    $link['customized'] = 1;
+    menu_link_save($link);
+    menu_cache_clear($link['menu_name']);
+  }
+
+  // Disable the Dashboard layout.
   config_set('layout.layout.dashboard', 'disabled', TRUE);
   layout_reset_caches();
 }

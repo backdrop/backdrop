@@ -92,7 +92,7 @@ function redirect_list_form($form, &$form_state) {
     $row['count'] = $redirect->count;
     if ($redirect->access) {
       $row['access'] = array(
-        'data' => t('!interval ago', array('!interval' => format_interval(REQUEST_TIME - $redirect->access))),
+        'data' => t('!interval ago', array('!interval' => format_time_diff_since($redirect->access))),
         'title' => t('Last accessed on @date', array('@date' => format_date($redirect->access))),
       );
     }
@@ -880,7 +880,7 @@ function redirect_list_table($redirects, $header) {
     $row['data']['count'] = $redirect->count;
     if ($redirect->access) {
       $row['data']['access'] = array(
-        'data' => t('!interval ago', array('!interval' => format_interval(REQUEST_TIME - $redirect->access))),
+        'data' => t('!interval ago', array('!interval' => format_time_diff_since($redirect->access))),
         'title' => t('Last accessed on @date', array('@date' => format_date($redirect->access))),
       );
     }

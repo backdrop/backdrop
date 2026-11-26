@@ -100,7 +100,7 @@ function config_permission() {
 function config_file_download($uri) {
   $scheme = file_uri_scheme($uri);
   $target = file_uri_target($uri);
-  if ($scheme == 'temporary' && $target == 'config.tar.gz') {
+  if ($scheme == 'temporary' && $target == 'config.tar.gz' && user_access('synchronize configuration')) {
     return array(
       'Content-disposition' => 'attachment; filename="config.tar.gz"',
     );

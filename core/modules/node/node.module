@@ -1950,13 +1950,25 @@ function node_menu() {
   $items['node/autocomplete'] = array(
     'title' => 'Node autocomplete',
     'page callback' => 'node_autocomplete',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'node_autocomplete_access',
     'type' => MENU_CALLBACK,
     'file' => 'node.pages.inc',
   );
 
   return $items;
+}
+
+/**
+ * Access callback for the node autocomplete menu item.
+ *
+ * @return bool
+ *   TRUE if the current user may access content and the request has a valid
+ *   autocomplete token.
+ *
+ * @see backdrop_valid_autocomplete_token()
+ */
+function node_autocomplete_access() {
+  return user_access('access content') && backdrop_valid_autocomplete_token();
 }
 
 /**

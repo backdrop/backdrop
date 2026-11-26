@@ -207,8 +207,10 @@ function config_download_full_export() {
     'Content-Disposition' => 'attachment; filename=config.tar.gz',
     'Content-type' => 'application/x-gzip',
   );
+  // file_transfer() exits after sending the file, so the temporary archive
+  // must be removed in a shutdown function to ensure it does not persist.
+  backdrop_register_shutdown_function('file_unmanaged_delete', $file_path);
   file_transfer('temporary://' . $filename, $headers);
-  file_unmanaged_delete($file_path);
 }
 
 /**

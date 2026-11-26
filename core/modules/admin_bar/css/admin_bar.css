@@ -14,6 +14,14 @@
   --admin-bar-height: calc(var(--admin-bar-font-size) * 3.05);
 }
 
+/* Prevent hash link targets from being covered. */
+html.admin-bar-fixed :target {
+  scroll-margin-top: var(--admin-bar-height);
+}
+html.admin-bar-fixed table.sticky-enabled :target {
+  scroll-margin-top: 5rem;
+}
+
 #admin-bar {
   /* Adjusting font size will scale the entire admin menu, including icons. */
   font: normal var(--admin-bar-font-size) "Lucida Grande", Verdana, sans-serif;

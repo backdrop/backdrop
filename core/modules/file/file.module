@@ -1867,8 +1867,16 @@ function file_managed_file_browser_open($form, $form_state) {
       ));
     }
   }
-  $field = field_info_field($element['#field_name']);
-  $field_cardinality = $field['cardinality'];
+  $field_cardinality = 1;
+  if (!empty($element['#field_name'])) {
+    $field = field_info_field($element['#field_name']);
+    if (!empty($field['cardinality'])) {
+      $field_cardinality = $field['cardinality'];
+    }
+  }
+  elseif (!empty($element['#multiple'])) {
+    $field_cardinality = FIELD_CARDINALITY_UNLIMITED;
+  }
 
   // Add JQuery UI selectable to allow drag and drop selection if the field
   // cardinality is set to multiple.
@@ -2806,6 +2814,7 @@ function _file_sort_array_by_weight(&$a) {
  */
 function file_type_determine($fid) {
   if ($file = file_load($fid)) {
+    $file->keepTimestamp = TRUE;
     // The file type will be automatically determined when saving the file.
     file_save($file);
   }
