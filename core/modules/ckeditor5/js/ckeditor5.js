@@ -82,6 +82,22 @@
       CKEditor5.ClassicEditor
         .create(element, editorSettings)
         .then(editor => {
+          // We need to wrap editor.updateSourceElement() to perform
+          // our code after its original code has run. 
+          // Store and bind the original method to the editor instance.
+          const originalUpdateSourceElement = editor.updateSourceElement.bind(editor);
+          // Replace it with a custom wrapper.
+          editor.updateSourceElement = function (data) {
+            // Call the original method (forwarding any optional 'data' argument).
+            const result = originalUpdateSourceElement(data);
+            // Run our code after the original CKE5 code has run.
+            // Only read from editor.getData() if explicit data wasn't passed.
+            let newData = typeof data === 'string' ? data : editor.getData({ skipListItemIds: true });
+            // CKEditor 5 does not pretty-print HTML source. Format the source
+            // before saving it into the source field.
+            element.value = newData ? Backdrop.ckeditor5.formatHtml(newData) : '';
+            return result;
+          };
           Backdrop.ckeditor5.setEditorOffset(editor);
           Backdrop.ckeditor5.instances.set(editor.id, editor);
           Backdrop.ckeditor5.watchEditorChanges(editor, element);
@@ -114,11 +130,6 @@
         return false;
       }
 
-      // CKEditor 5 does not pretty-print HTML source. Format the source
-      // before saving it into the source field.
-      let newData = editor.getData({ skipListItemIds: true });
-      newData = Backdrop.ckeditor5.formatHtml(newData);
-
       // Destroy the instance if fully detaching.
       if (trigger !== 'serialize') {
         // If submitting the entire form, skip destroying the editor and let it
@@ -130,10 +141,6 @@
         delete element.ckeditor5AttachedEditor;
         delete element.ckeditor5Processed;
       }
-
-      // Save formatted value after destroying the editor, which can also
-      // update the element value.
-      element.value = newData;
 
       return !!editor;
     },
