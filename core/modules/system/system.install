@@ -3588,11 +3588,11 @@ function system_update_1090() {
 }
 
 /**
- * Set jQuery to the backwards-compatible, legacy version for existing sites.
+ * Set jQuery to the default version for existing sites.
  */
 function system_update_1091() {
   if (config_get('system.core', 'jquery_version') === NULL) {
-    config_set('system.core', 'jquery_version', 'legacy');
+    config_set('system.core', 'jquery_version', 'default');
   }
 }
 
@@ -3944,6 +3944,15 @@ function system_update_1107() {
  */
 function system_update_1108() {
   state_set('menu_rebuild_needed', TRUE);
+}
+
+/**
+ * Set jQuery version from unsupported legacy to default if necessary.
+ */
+function system_update_1109() {
+  if (config_get('system.core', 'jquery_version') === 'legacy') {
+    config_set('system.core', 'jquery_version', 'default');
+  }
 }
 
 /**
