@@ -93,6 +93,8 @@
             // Run our code after the original CKE5 code has run.
             // Only read from editor.getData() if explicit data wasn't passed.
             let newData = typeof data === 'string' ? data : editor.getData({ skipListItemIds: true });
+            // CKEditor 5 does not pretty-print HTML source. Format the source
+            // before saving it into the source field.
             element.value = newData ? Backdrop.ckeditor5.formatHtml(newData) : '';
             return result;
           };
