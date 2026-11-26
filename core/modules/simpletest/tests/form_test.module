@@ -215,6 +215,12 @@ function form_test_menu() {
     'page arguments' => array('form_test_url'),
     'access callback' => TRUE,
   );
+  $items['form-test/autocomplete'] = array(
+    'title' => 'Autocomplete fields',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_autocomplete'),
+    'access callback' => TRUE,
+  );
 
   $items['form-test/disabled-elements'] = array(
     'title' => t('Form test'),
@@ -1954,6 +1960,31 @@ function form_test_url($form, &$form_state) {
 function form_test_url_submit($form, &$form_state) {
   backdrop_json_output($form_state['values']);
   exit();
+}
+
+/**
+ * Form constructor for testing autocomplete elements.
+ *
+ * @ingroup forms
+ */
+function form_test_autocomplete($form, &$form_state) {
+  foreach (array('textfield', 'email', 'search', 'tel', 'url') as $type) {
+    $form['user_' . $type] = array(
+      '#type' => $type,
+      '#title' => 'User autocomplete ' . $type,
+      '#autocomplete_path' => 'user/autocomplete',
+    );
+  }
+  $form['node_textfield'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Node autocomplete textfield',
+    '#autocomplete_path' => 'node/autocomplete',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  return $form;
 }
 
 /**

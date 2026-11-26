@@ -59,16 +59,16 @@ group = Views
 file = views_glossary.test
 
 [ViewsQueryGroupByTest]
-name = Groupby
+name = Group by
 description = Tests aggregate functionality of views, for example count.
 group = Views
-file = views_groupby.test
+file = views_group_by.test
 
-[viewsUiGroupbyTestCase]
-name = Groupby UI
+[ViewsUiGroupByTestCase]
+name = Group by UI
 description = Tests UI of aggregate functionality.
 group = Views UI
-file = views_groupby.test
+file = views_group_by.test
 
 [ViewsHandlerAreaTextTest]
 name = Area: Text
@@ -261,6 +261,12 @@ name = Block display tests
 description = Tests overriding options for block displays.
 group = Views Plugins
 file = plugins/views_plugin_display_block.test
+
+[ViewsPluginDisplayEmbedTestCase]
+name = Embed display tests
+description = Tests the embed display plugin and its exposed forms.
+group = Views Plugins
+file = plugins/views_plugin_display_embed.test
 
 [ViewsPluginStyleJumpMenuTest]
 name = Jump menu

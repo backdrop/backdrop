@@ -172,6 +172,8 @@ function views_ui_menu() {
   $items['admin/views/ajax/autocomplete/tag'] = array(
     'page callback' => 'views_ui_autocomplete_tag',
     'delivery callback' => 'backdrop_json_deliver',
+    'access callback' => 'views_ui_autocomplete_tag_access',
+    'access arguments' => array(),
     'type' => MENU_CALLBACK,
   ) + $base;
 
@@ -199,6 +201,19 @@ function views_ui_menu() {
   ) + $base;
 
   return $items;
+}
+
+/**
+ * Access callback for the Views UI tag autocomplete menu item.
+ *
+ * @return bool
+ *   TRUE if the current user may administer views and the request has a
+ *   valid autocomplete token.
+ *
+ * @see backdrop_valid_autocomplete_token()
+ */
+function views_ui_autocomplete_tag_access() {
+  return user_access('administer views') && backdrop_valid_autocomplete_token();
 }
 
 /**

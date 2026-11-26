@@ -1030,6 +1030,7 @@ function backdrop_merged_modules() {
     'views_ajax_history', // Backdrop 1.34.0.
     'file_entity_inline', // Backdrop 1.34.0.
     'html5_upload', // Backdrop 1.34.0.
+    'editorimgdimensionsync', // Backdrop 1.35.0.
   );
 }
 

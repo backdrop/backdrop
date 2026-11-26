@@ -974,6 +974,10 @@ function entityreference_field_widget_error($element, $error) {
  *   True if user can access this menu item.
  */
 function entityreference_autocomplete_access_callback($type, $field_name, $entity_type, $bundle_name) {
+  if (!backdrop_valid_autocomplete_token()) {
+    return FALSE;
+  }
+
   $field = field_info_field($field_name);
   $instance = field_info_instance($entity_type, $field_name, $bundle_name);
 

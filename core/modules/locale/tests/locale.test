@@ -1654,7 +1654,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     // Create a user with the admin/people/create form and check if the correct
     // language is set.
     $username = $this->randomName(10);
-    $password = $this->randomName(10);
+    $password = $this->randomName(20);
     $edit = array(
       'name' => $username,
       'mail' => $this->randomName(4) . '@example.com',
@@ -1692,7 +1692,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     $this->assertFieldChecked("edit-language-$langcode", 'Language selector is accessible and correct language is selected.');
 
     // Set pass_raw so we can login the new user.
-    $user->pass_raw = $this->randomName(10);
+    $user->pass_raw = $this->randomName(20);
     $edit = array(
       'pass' => $user->pass_raw,
     );

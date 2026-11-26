@@ -179,6 +179,20 @@
   flex-grow: 0;
   padding-top: 0;
 }
+.image-form-wrapper .image-ratio-icon {
+  position: relative;
+  display: inline-block;
+  width: 1.2em;
+  margin-left: 10px;
+  top: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.image-form-wrapper .image-ratio-reset-original-inactive {
+  opacity: 0.5;
+}
 .editor-image-library {
   padding: 0 0 0 20px; /* LTR */
   min-width: 525px;

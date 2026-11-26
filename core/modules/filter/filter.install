@@ -560,6 +560,27 @@ function filter_update_1004() {
 }
 
 /**
+ * Uninstall the editorimgdimensionsync contrib module, now part of core.
+ */
+function filter_update_1005() {
+  $module = db_query("SELECT name FROM {system} WHERE name = 'editorimgdimensionsync' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'editorimgdimensionsync');
+    backdrop_set_message(t('The contributed module <em>Editor Image Dimension Sync</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the Editor Image Dimension Sync module from the system table.
+    // As this module does not provide any config or settings, there doesn't
+    // seem to be anything else left to clean up or migrate.
+    // While the contrib module remains in the filesystem, this entry will be
+    // recreated, but it will have status 0 (disabled), and schema -1
+    // (uninstalled), so it is safe to remove.
+    db_query("DELETE FROM {system} WHERE name = 'editorimgdimensionsync' AND type = 'module'");
+  }
+  else {
+    return t('<em>Editor Image Dimension Sync</em> not found. Nothing to be done.');
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

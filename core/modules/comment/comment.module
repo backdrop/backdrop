@@ -790,6 +790,7 @@ function comment_node_page_additions(Node $node) {
         comment_prepare_thread($comments);
         $build = comment_view_multiple($comments, $node);
         $build['pager']['#theme'] = 'pager';
+        $build['pager']['#fragment'] = 'comments';
         $additions['comments'] = $build;
       }
       elseif ($node->comment_count > 0) {
@@ -1040,11 +1041,17 @@ function comment_links(Comment $comment, Node $node) {
       );
     }
     if (Comment::createAccess()) {
+      $node_type = node_type_get_type($node->type);
       $links['comment-reply'] = array(
         'title' => t('reply'),
         'href'  => "comment/reply/$comment->nid/$comment->cid",
         'html'  => TRUE,
       );
+      // When the comment form is on a separate page, anchor the reply link
+      // to #comment-form so the user lands directly at the form.
+      if ($node_type->settings['comment_form_location'] == COMMENT_FORM_SEPARATE_PAGE) {
+        $links['comment-reply']['fragment'] = 'comment-form';
+      }
     }
     if ($comment->status == COMMENT_NOT_PUBLISHED && $comment->access('approve')) {
       $links['comment-approve'] = array(
@@ -1916,7 +1923,7 @@ function comment_form($form, &$form_state, $comment) {
       '#type' => 'textfield',
       '#title' => t('Authored by'),
       '#default_value' => $author,
-      '#maxlength' => 60,
+      '#maxlength' => USERNAME_MAX_LENGTH,
       '#size' => 30,
       '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get_translated('system.core', 'anonymous'))),
       '#autocomplete_path' => 'user/autocomplete',
@@ -1939,7 +1946,7 @@ function comment_form($form, &$form_state, $comment) {
       '#title' => t('Your name'),
       '#default_value' => $author,
       '#required' => (!$user->uid && $anonymous_contact == COMMENT_ANONYMOUS_MUST_CONTACT),
-      '#maxlength' => 60,
+      '#maxlength' => USERNAME_MAX_LENGTH,
       '#size' => 30,
     );
   }

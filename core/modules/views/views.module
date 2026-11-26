@@ -400,8 +400,7 @@ function views_menu() {
   $items['admin/views/ajax/autocomplete/user'] = array(
     'page callback' => 'views_ajax_autocomplete_user',
     'theme callback' => 'ajax_base_page_theme',
-    'access callback' => 'user_access',
-    'access arguments' => array('access user profiles'),
+    'access callback' => 'user_autocomplete_access',
     'type' => MENU_CALLBACK,
     'file' => 'includes/ajax.inc',
   );
@@ -410,8 +409,7 @@ function views_menu() {
   $items['admin/views/ajax/autocomplete/taxonomy'] = array(
     'page callback' => 'views_ajax_autocomplete_taxonomy',
     'theme callback' => 'ajax_base_page_theme',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'node_autocomplete_access',
     'type' => MENU_CALLBACK,
     'file' => 'includes/ajax.inc',
   );
