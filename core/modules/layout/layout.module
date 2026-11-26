@@ -2596,6 +2596,9 @@ function layout_layout_presave($layout) {
   if (!empty($layout->additional_paths)) {
     $layout->settings['additional_paths'] = $layout->additional_paths;
   }
+  else {
+    unset($layout->settings['additional_paths']);
+  }
 
   if (!empty($layout->removed_blocks)) {
     foreach ($layout->removed_blocks as $uuid => $block) {
