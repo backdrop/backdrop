@@ -1337,7 +1337,7 @@ function layout_settings_form_update_layout($form, &$form_state) {
     $_SESSION['layout_new_name'] = $layout->name;
   }
   else {
-    if ($form_state['values']['name'] !== $layout->name) {
+    if (isset($form_state['values']['name']) && $form_state['values']['name'] !== $layout->name) {
       $layout->original_name = $form_state['values']['name'];
     }
   }
