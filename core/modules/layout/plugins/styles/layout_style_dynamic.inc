@@ -25,25 +25,39 @@ class LayoutStyleDynamic extends LayoutStyle {
     parent::form($form, $form_state);
 
     if (!$this->is_region) {
-      $tag_list = array(
-        'div' => 'DIV',
-        'aside' => 'ASIDE',
-        'section' => 'SECTION',
-        'nav' => 'NAV',
-        'p' => 'P',
-        '' => t('No wrapper'),
-      );
       $form['wrapper_tag'] = array(
         '#title' => t('Wrapper tag'),
         '#type' => 'select',
-        '#options' => $tag_list,
+        '#options' => array(
+          'div' => 'DIV',
+          'aside' => 'ASIDE',
+          'section' => 'SECTION',
+          'nav' => 'NAV',
+          'p' => 'P',
+          'details' => t('DETAILS'),
+          '' => t('No wrapper'),
+        ),
         '#weight' => -1,
         '#default_value' => $this->settings['wrapper_tag'],
+        '#ajax' => array(
+          'callback' => 'LayoutStyleDynamic::selectTitleTag',
+          'wrapper' => 'title-tag-wrapper'
+        ),
       );
       $form['classes']['#title'] = t('Wrapper classes');
       $form['classes']['#states'] = array(
         'invisible' => array('[name="style_settings[wrapper_tag]"]' => array('value' => '')),
       );
+      // If the wrapper tag is <details> the title tag needs to be set to
+      // <summary> and disabled. See https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/details.
+      $title_tag_disabled = ($this->settings['wrapper_tag'] == 'details');
+      if (isset($form_state['values']['style_settings']['wrapper_tag'])) {
+        $title_tag_disabled = ($form_state['values']['style_settings']['wrapper_tag'] == 'details');
+      }
+      $title_tag = $this->settings['title_tag'];
+      if (isset($form_state['values']['style_settings']['wrapper_tag']) && $form_state['values']['style_settings']['wrapper_tag'] == 'details') {
+        $title_tag = 'summary';
+      }
       $form['title_tag'] = array(
         '#title' => t('Heading level'),
         '#type' => 'select',
@@ -56,9 +70,13 @@ class LayoutStyleDynamic extends LayoutStyle {
           'h6' => 'H6',
           'div' => 'DIV',
           'p' => 'P',
+          'summary' => 'SUMMARY',
         ),
-        '#default_value' => $this->settings['title_tag'],
+        '#default_value' => $title_tag,
+        '#disabled' => $title_tag_disabled,
         '#weight' => 2,
+        '#prefix' => '<div id="title-tag-wrapper"',
+        '#suffix' => '</div>',
       );
       $form['title_classes'] = array(
         '#title' => t('Heading classes'),
@@ -70,7 +88,14 @@ class LayoutStyleDynamic extends LayoutStyle {
       $form['content_tag'] = array(
         '#title' => t('Content tag'),
         '#type' => 'select',
-        '#options' => $tag_list,
+        '#options' => array(
+          'div' => 'DIV',
+          'aside' => 'ASIDE',
+          'section' => 'SECTION',
+          'nav' => 'NAV',
+          'p' => 'P',
+          '' => t('No wrapper'),
+        ),
         '#default_value' => $this->settings['content_tag'],
         '#weight' => 8,
       );
@@ -84,6 +109,41 @@ class LayoutStyleDynamic extends LayoutStyle {
         ),
         '#weight' => 9,
       );
+    }
+  }
+
+  /**
+   * Form #ajax callback used by LayoutStyleDynamic::form().
+   */
+  public static function selectTitleTag($form, &$form_state) {
+    if ($form_state['triggering_element']['#name'] == 'style_settings[wrapper_tag]' && $form_state['triggering_element']['#value']) {
+      if ($form_state['triggering_element']['#value'] == 'details') {
+        $form['style']['style_settings']['title_tag']['#value'] = 'summary';
+        $form_state['values']['style_settings']['title_tag'] = 'summary';
+
+        backdrop_set_message(t('The Heading level has been set to <em>SUMMARY</em> so that it matches the <em>DETAILS</em> Wrapper tag.'));
+      }
+    }
+    return $form['style']['style_settings']['title_tag'];
+  }
+
+  /**
+   * Validate handler to validate the form settings.
+   */
+  public function formValidate($form, $form_state) {
+    parent::formValidate($form, $form_state);
+
+    $values = $form_state['values'];
+
+    if ($values['style'] != 'dynamic' || !isset($values['style_settings']['wrapper_tag'])) {
+      return;
+    }
+
+    if ($values['style_settings']['wrapper_tag'] == 'details' && $values['style_settings']['title_tag'] != 'summary') {
+      form_set_error('style_settings[title_tag]', t('The <em>DETAILS</em> Wrapper tag requires that the Heading level use the <em>SUMMARY</em> Heading level.'));
+    }
+    if ($values['style_settings']['wrapper_tag'] != 'details' && $values['style_settings']['title_tag'] == 'summary') {
+      form_set_error('style_settings[title_tag]', t('Only use the use the <em>SUMMARY</em> Heading level with the <em>DETAILS</em> Wrapper tag.'));
     }
   }
 }
