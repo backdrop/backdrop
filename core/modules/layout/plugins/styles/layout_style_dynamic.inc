@@ -34,7 +34,7 @@ class LayoutStyleDynamic extends LayoutStyle {
           'section' => 'SECTION',
           'nav' => 'NAV',
           'p' => 'P',
-          'details' => t('DETAILS (collapsible)'),
+          'details' => t('DETAILS'),
           '' => t('No wrapper'),
         ),
         '#weight' => -1,
@@ -70,7 +70,7 @@ class LayoutStyleDynamic extends LayoutStyle {
           'h6' => 'H6',
           'div' => 'DIV',
           'p' => 'P',
-          'summary' => 'DETAILS summary',
+          'summary' => 'SUMMARY',
         ),
         '#default_value' => $title_tag,
         '#disabled' => $title_tag_disabled,
@@ -121,7 +121,7 @@ class LayoutStyleDynamic extends LayoutStyle {
         $form['style']['style_settings']['title_tag']['#value'] = 'summary';
         $form_state['values']['style_settings']['title_tag'] = 'summary';
 
-        backdrop_set_message(t('The <em>Details summary</em> <strong>Heading level</strong> has been automatically set to match the <em>DETAILS (collapsible)</em> <strong>Wrapper tag</strong>.'));
+        backdrop_set_message(t('The Heading level has been set to <em>SUMMARY</em> so that it matches the <em>DETAILS</em> Wrapper tag.'));
       }
     }
     return $form['style']['style_settings']['title_tag'];
@@ -140,10 +140,10 @@ class LayoutStyleDynamic extends LayoutStyle {
     }
 
     if ($values['style_settings']['wrapper_tag'] == 'details' && $values['style_settings']['title_tag'] != 'summary') {
-      form_set_error('style_settings[title_tag]', t('The <em>DETAILS (collapsible)</em> <strong>Wrapper tag</strong> requires that the <strong>Heading level</strong> use the <em>Details summary</em> tag.'));
+      form_set_error('style_settings[title_tag]', t('The <em>DETAILS</em> Wrapper tag requires that the Heading level use the <em>SUMMARY</em> Heading level.'));
     }
     if ($values['style_settings']['wrapper_tag'] != 'details' && $values['style_settings']['title_tag'] == 'summary') {
-      form_set_error('style_settings[title_tag]', t('Only use the use the <em>Details summary</em> tag with the <em>DETAILS (collapsible)</em> <strong>Wrapper tag</strong>.'));
+      form_set_error('style_settings[title_tag]', t('Only use the use the <em>SUMMARY</em> Heading level with the <em>DETAILS</em> Wrapper tag.'));
     }
   }
 }
