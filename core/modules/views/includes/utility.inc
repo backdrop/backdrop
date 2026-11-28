@@ -263,13 +263,7 @@ function views_trim_text($alter, $value) {
     $value = backdrop_substr($value, 0, $alter['max_length']);
     if (!empty($alter['word_boundary'])) {
       $regex = "(.*)\b.+";
-      if (function_exists('mb_ereg')) {
-        mb_regex_encoding('UTF-8');
-        $found = mb_ereg($regex, $value, $matches);
-      }
-      else {
-        $found = preg_match("/$regex/us", $value, $matches);
-      }
+      $found = preg_match("/$regex/us", $value, $matches);
       if ($found) {
         $value = $matches[1];
       }

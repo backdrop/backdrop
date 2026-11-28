@@ -49,7 +49,7 @@ function field_tokens($type, $tokens, array $data = array(), array $options = ar
   $langcode = isset($options['language']) ? $options['language']->langcode : NULL;
 
   // Entity tokens.
-  if (!empty($data[$type]) && is_a($data[$type], 'Entity')) {
+  if (!empty($data[$type]) && is_object($data[$type]) && is_a($data[$type], 'Entity')) {
     // The field API does weird stuff to the entity, so let's clone it.
     $entity = clone $data[$type];
     $entity_type = $entity->entityType();

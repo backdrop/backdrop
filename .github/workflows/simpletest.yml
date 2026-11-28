@@ -5,14 +5,14 @@ on:
 jobs:
   simpletest:
     name: Simpletest batches
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Skip this job if the PR title contains "[skip tests]".
     if: ${{ !contains(github.event.pull_request.title, '[skip tests]') }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['7.1', '7.4', '8.5']
+        php-versions: ['7.1', '7.4', '8.6']
         fraction: ['1', '2', '3']
         database-versions: ['mariadb-10.11']
 

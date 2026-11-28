@@ -87,7 +87,7 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
   $language_code = isset($options['language']) ? $options['language']->langcode : NULL;
 
   // Process date fields attached to entities.
-  if (!empty($data[$type]) && is_a($data[$type], 'Entity')) {
+  if (!empty($data[$type]) && is_object($data[$type]) && is_a($data[$type], 'Entity')) {
     $entity = $data[$type];
     $entity_type = $entity->entityType();
     $entity_info = entity_get_info($entity_type);
