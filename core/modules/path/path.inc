@@ -158,14 +158,8 @@ function path_clean_string($string, array $options = array()) {
     $ignore_words = $config->get('ignore_words');
     $ignore_words_regex = preg_replace(array('/^[,\s]+|[,\s]+$/', '/[,\s]+/'), array('', '\b|\b'), $ignore_words);
     if ($ignore_words_regex) {
-      $cache['ignore_words_regex'] = '\b' . $ignore_words_regex . '\b';
-      if (function_exists('mb_eregi_replace')) {
-        $cache['ignore_words_callback'] = 'mb_eregi_replace';
-      }
-      else {
-        $cache['ignore_words_callback'] = 'preg_replace';
-        $cache['ignore_words_regex'] = '/' . $cache['ignore_words_regex'] . '/i';
-      }
+      $cache['ignore_words_callback'] = 'preg_replace';
+      $cache['ignore_words_regex'] = '/\b' . $ignore_words_regex . '\b/iu';
     }
 
     // Remove to prevent any unintentional use of $config outside of the cache.
