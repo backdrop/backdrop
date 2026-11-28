@@ -25,6 +25,27 @@
  * in this file for backwards-compatibility.
  */
 class BackdropSessionHandler implements SessionHandlerInterface {
+
+  /**
+   * Implements SessionIdInterface::create_sid()
+   *
+   * Required with session.use_strict_mode enabled, which is the default as of
+   * PHP 8.6.
+   */
+  public function create_sid() {
+    return session_create_id();
+  }
+
+  /**
+   * Implements SessionUpdateTimestampHandlerInterface::validateId()
+   *
+   * Required with session.use_strict_mode enabled, which is the default as of
+   * PHP 8.6.
+   */
+  public function validateId($sessionId) {
+    return TRUE;
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -166,7 +187,7 @@ function _backdrop_session_read($sid) {
   // active user.
   if ($user && $user->uid > 0 && $user->status == 1) {
     // This is done to unserialize the data member of $user.
-    $user->data = unserialize((string) $user->data);
+    $user->data = is_string($user->data) ? unserialize($user->data) : '';
 
     // Add roles element to $user.
     $user->roles = db_query("SELECT role FROM {users_roles} WHERE uid = :uid", array(':uid' => $user->uid))->fetchCol();

@@ -48,7 +48,7 @@ function entity_token_info_alter(&$info) {
 function entity_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $sanitize = !empty($options['sanitize']);
   $replacements = array();
-  if (!empty($data[$type]) && is_a($data[$type], 'Entity')) {
+  if (!empty($data[$type]) && is_object($data[$type]) && is_a($data[$type], 'Entity')) {
     $entity = $data[$type];
 
     foreach ($tokens as $name => $original) {
